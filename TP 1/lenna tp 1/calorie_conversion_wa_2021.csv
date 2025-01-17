@@ -1,0 +1,178 @@
+codpr,prodlab,refuse,cal
+1,Riz local type 1,0,353
+2,Riz local type 2,0,353
+3,Riz importé 1,0,353
+4,Riz importé 2,0,353
+5,Maïs en épi,45,351
+6,Maïs en grain,0,351
+7,Mil,0,356
+8,Sorgho,0,349
+9,Blé,0,351
+10,Fonio,0,349
+11,Autres céréales,0,343
+12,Farine de maïs,0,358
+13,Semoule de mais,0,358
+14,Farine de mil,0,355
+15,Semoule de mil,0,355
+16,Farine de blé local ou importé,0,351
+17,Semoule de blé,0,351
+18,Autres farines de céréales,0,358
+19,Autres semoules de céréales,0,358
+20,Pâtes alimentaires,0,359
+21,Pain moderne,0,250
+22,Pain traditionnel,0,250
+23,Croissants,0,406
+24,Biscuits,0,325
+25,Gâteaux,0,365
+26,"Beignets, galettes",0,365
+27,Viande de boeuf,20,212
+28,Viande de chameau,19,133
+29,Viande de mouton,18,257
+30,Viande de chèvre,26,165
+31,"Abats et tripes rouges (foie, rognon, etc.)",0,113
+32,Viande de porc,20,332
+33,Poulet sur pied,0,100
+34,Viande de poulet,41,164
+35,Viande autres volailles domestiques,41,164
+36,"Charcuterie (jambon, saucisson), conserves de viandes",0,227
+37,Viande séchée,0,178
+38,Gibiers,50,112
+39,Autres viandes n.d.a.,0,255
+40,Poisson frais type 1,0,61
+41,Poisson frais type 2,0,61
+42,Poisson frais type 3,0,61
+43,Poisson frais type 4,0,61
+44,Poisson fumé type 1,0,158
+45,Poisson fumé type 2,0,158
+46,Poisson séché,0,158
+47,Crabes,0,86
+48,Crevettes fraiches,0,71
+49,Crevettes séchées,0,77
+50,Autres fruits de mer,0,86
+51,Conserves de poisson,0,212
+52,Lait frais,0,51
+53,"Lait caillé, yaourt",0,73
+54,Lait concentré sucré,0,328
+55,Lait concentré non-sucré,0,135
+56,Lait en poudre,0,427
+57,Fromage,0,340
+58,Lait et farines pour bébé,0,496
+59,Autres produits laitiers,0,264
+60,Oeufs,13,139
+61,Beurre,0,720
+62,Beurre de karité,0,900
+63,Huile de palme rouge,0,900
+64,Huile d'arachide raffinée,0,900
+65,Huile d'arachide segal,0,900
+66,Huile de soja,0,900
+67,Huile de coton,0,900
+68,Huile de palme raffinée,0,900
+69,Noix de palme,60,527
+70,"Autres huiles n.d.a. (maïs, palmiste, etc.)",0,900
+71,Mangue,29,64
+72,Ananas,49,54
+73,Orange,27,45
+74,Citrons,36,36
+75,Autres agrumes,0,26
+76,Banane douce,36,103
+77,Avocats,26,154
+78,Pastèque,45,29
+79,Melon,0,13
+80,Dattes,0,221
+81,Noix de coco,0,233
+82,Canne à sucre,55,27
+83,Pommes,0,48
+84,Papaye,0,22
+85,Fruit de baobab (bouye),0,85
+86,Néré,0,303
+87,"Autres fruits (raisin, etc.)",0,70
+88,Salade (laitue),30,18
+89,Choux,20,28
+90,Carotte,11,35
+91,Haricot vert,17,40
+92,Concombre,19,15
+93,"Aubergine, Courge/Courgette",0,22
+94,Courge/Courgette,0,22
+95,Poivron frais,0,24
+96,Tomate fraîche,9,22
+97,Tomate séchée,0,258
+98,Gombo frais,14,33
+99,Gombo sec,0,253
+100,Oignon frais,9,37
+101,Ail,13,135
+102,Feuilles d'oseille (bissap),0,43
+103,Feuilles de baobab (laalo),0,43
+104,Feuilles de haricot (niébé),0,43
+105,Feuilles nébédaye (moringa),0,43
+106,Autres légumes en feuilles,24,55
+107,Autre légumes frais n.d.a.,0,37
+108,Concentré de tomate,0,89
+109,Petits pois,0,81
+110,Petit pois secs,0,359
+111,Autres légumes secs n.d.a.,0,285
+112,Niébé/Haricots secs,0,318
+113,Arachides fraîches en coques,0,567
+114,Arachides séchées en coques,35,578
+115,Arachides décortiquées,0,578
+116,Arachides pilées,0,594
+117,Arachide grillée,4,578
+118,Pâte d'arachide,0,594
+119,Fromage à base de soja,0,152
+120,Sésame,0,577
+121,Noix de cajou,0,585
+122,Noix de karité,28,586
+123,Manioc,16,153
+124,Igname,19,128
+125,Plantain,0,112
+126,Pomme de terre,16,80
+127,"Taro, macabo",14,92
+128,Patate douce,16,114
+129,Autres tubercules n.d.a.,19,127
+130,Farines de manioc,0,335
+131,"Gari, tapioca",0,161
+132,Attiéke,0,161
+133,Fruit de Kapokier,0,72
+134,Sucre en poudre,0,400
+135,Sucre en morceaux,0,400
+136,Miel,0,326
+137,"Chocolat à croquer, pâte à tartiner",0,523
+138,"Caramel, bonbons, confiseries, etc.",0,384
+139,Sel,0,0
+140,Piment seché,0,324
+141,Piment frais,27,45
+142,Gingembre frais,7,82
+143,Gingembre moulu,0,332
+144,"Cube alimentaire (Maggi, Jumbo, )",0,170
+145,"Arôme (Maggi, Jumbo, etc.)",0,170
+146,Soumbala (moutarde africaine),0,333
+147,Mayonnaise,0,680
+148,Vinaigre de citron,0,86
+149,Autres vinaigres,0,86
+150,Moutarde,0,167
+151,Poivre,0,348
+152,"Autres condiments (poireau, etc.)",0,61
+153,Noix de cola,84,161
+154,Autres produits alimentaires,0,0
+155,Café en poudre,0,2
+156,Café soluble,0,2
+157,Thé (Ataya),0,0
+158,Chocolat en poudre,0,350
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",0,0
+160,"Jus de fruits (orange, bissap, gingembre, jus de cajou,etc.)",0,43
+161,Eau minérale/ filtrée,0,0
+162,"Boissons gazeuses (coca, etc.)",0,42
+163,Jus en poudre,0,376
+164,"Bières et vins traditionnels (dolo, vin de palme, vin de raphia, etc.)",0,38
+165,Bières industrielles,0,35
+169,Céréales de petit déjeuner,0,375
+170,Abats/tripe blancs,0,100
+171,Autre volaille sur pied,28,181
+172,Con fumé,0,158
+173,Escargots,0,70
+174,Lait frais non industriel,0,65
+175,Huile de karité,0,900
+176,Goyave,0,44
+177,Champignon frais,0,22
+178,Pâte de manioc,0,349
+179,Poisson séché en condiment,0,158
+180,Thé soluble ou infusion,0,0
