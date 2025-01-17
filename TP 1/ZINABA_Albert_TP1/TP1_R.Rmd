@@ -1,0 +1,63 @@
+---
+title: "TP1_R"
+output:
+  word_document: 
+    toc: true
+    toc_depth: 2
+  html_document: default
+  pdf_document: 
+    toc: true
+    toc_depth: 2
+    number_sections: true
+date: "2025-01-16"
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I-CONTEXE ET MISE EN OUEVRE DE L'EHCVM
+
+Dans le but d'améliorer la disponibilité, la qualité et la comparabilité des indicateurs de suivi de la pauvreté et des conditions de vie des ménages dans ses Etats membre, la Banque mondiale a travers le Programme d’Harmonisation et de Modernisation des Enquêtes sur les Conditions de Vie des Ménages (PHMECV), apporte un appui à la Commission de l’UEMOA. Le PHMECV consiste notamment à réaliser une série de deux enquêtes dénommées « Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM) » et utilisant des outils de collecte modernes, harmonisés et respectant les normes et standards internationaux.
+
+La première enquête harmonisée sur les conditions de vie des ménages (EHCVM), dont la collecte des données a été organisée en deux vagues comptant chacune la moitié de l’échantillon, s’est déroulée simultanément dans les huit Etats membres de l’Union sur la période de septembre à décembre 2018 pour la première vague et d’avril à juillet 2019 pour la seconde.
+
+La particularité de l’EHCVM est marquée par,des outils de collecte, notamment les questionnaires, les concepts et une méthodologie harmonisés. Un échantillon représentatif (variant de 5 300 à 13 000 ménages selon les pays) permettant d’assurer la significativité des indicateurs au niveau national et désagrégés au niveau du découpage administratif le plus élevé en dessous du niveau national.
+
+Il faut noté egalement l’utilisation de la technologie de collecte des "données assistée par ordinateur, le traitement des données sur la base de méthodologies communes dans un processus inclusif regroupant en atelier les Experts de tous les Instituts Nationaux de la Statistique (INS).
+
+# II-Importation de quelques bases de données
+
+```{r}
+#Dans le cadre de cet exercice nous avons imporeter trois bases de données #issues de l'EHVM 2021 DU Burkina Faso. Il s'agit de la base consommation, individu et menage.
+
+
+```
+
+```{r}
+Cons <- read.csv("ehcvm_conso_bfa2021.csv")
+Cons
+#La syntaxe ci-dessus permet a travers la fonction 'read.csv()', utiliser #pour lire les fichiers sous format csv, de charger le fichier #'ehcvm_conso_bfa2021.csv' dans un objet 'Cons' sous forme de dataframe #manipulable dans R.
+#Cette base de donné contient 452O83 observation avec 12 variables dont 5 #variables discretes et 7 variables continues
+```
+
+```{r}
+Individu<- read.csv("ehcvm_individu_bfa2021.csv")
+Individu
+
+#La syntaxe ci-dessus permet a travers la fonction 'read.csv()' de charger #le fichier 'ehcvm_individu_bfa2021.csv' dans un objet 'Individu' sous #forme de dataframe manipulable dans R.
+
+#cette base de donnée contient 47090 observations avec 57 variables, dont #44 variables discrètes et 13 variabes continues. De plus il ya 195091 #valeurs manquantes.
+
+```
+
+```{r}
+Menage<- read.csv("ehcvm_menage_bfa2021.csv")
+Menage
+
+
+#Comme les deux precedentes syntaxes celle-ci aussi permet de charger le #fichier 'ehcvm_menage_bfa2021.csv' dans un objet 'Menage' sous forme de #dataframe #manipulable dans R.
+
+#Cette base contient 7176 observations avec un total de 39 variables dont #28 variables discretes et 11 variables continues. De plus il ya 2817 #observations manquantes.
+
+```
