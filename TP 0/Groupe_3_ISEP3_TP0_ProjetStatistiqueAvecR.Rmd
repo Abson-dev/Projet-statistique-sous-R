@@ -1,0 +1,403 @@
+---
+title: "Cours sur R Markdown"
+author: "Awa Diaw, Alioune Abdou Salm Kane, Ange Emilson Rayan Raherinasolo, Khadidiatou Diakhaté"
+date: "21/01/2025"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# ![Image de présentation](https://www.r-project.org/Rlogo.png) Présentation de Rmardown
+
+### Plan du Cours
+
+1.  Introduction à R Markdown\
+2.  Installation et configuration\
+3.  Écrire un document R Markdown\
+4.  Création de tableaux, graphiques, et équations\
+5.  Insertion d'images\
+6.  Exercice pratique\
+7.  Références bibliographiques
+
+------------------------------------------------------------------------
+
+## 1. Introduction à R Markdown
+
+R Markdown est un outil puissant permettant de combiner texte, code R,
+et résultats d’analyse dans un document unique. Il offre une manière
+simplifiée et efficace de produire des rapports d’analyse détaillés et
+reproductibles, intégrant des graphiques, des tableaux, des équations
+mathématiques et plus encore.
+
+Basé sur Markdown, un langage de balisage léger similaire à HTML, R
+Markdown permet de baliser du texte à l’aide de symboles simples pour
+générer des documents enrichis contenant des titres, des paragraphes, ou
+encore des listes. Contrairement aux éditeurs classiques comme MS Word,
+ce système privilégie des éditeurs adaptés et intègre une structure
+claire pour chaque élément du document.
+
+### Fonctionnalités principales
+
+R Markdown permet de créer des documents dynamiques et flexibles grâce à
+ses nombreuses fonctionnalités :
+
+-   Rapports reproductibles : Génération de documents en formats PDF,
+    Word, HTML, ou autres.
+
+-   Création de tableaux et graphiques : Intégration directe des
+    visualisations générées par R.
+
+-   Équations mathématiques : Support des formules LaTeX pour des
+    présentations académiques.
+
+-   Extensions avancées : Création de livres, présentations
+    interactives, et même de blogs.
+
+### Pourquoi utiliser R Markdown ?
+
+R Markdown est devenu un standard incontournable pour les analystes et
+chercheurs grâce à ses nombreux avantages :
+
+-   Portabilité entre plusieurs formats : Permet de générer le même
+    contenu sous différents formats (PDF, HTML, Word, etc.) sans
+    réécriture.
+
+-   Reproductibilité des résultats : Assure la transparence et la
+    fiabilité des analyses, en permettant de recréer exactement les
+    mêmes résultats.
+
+## 2. Installation et configuration
+
+### Installation des packages nécessaires
+
+install.packages("rmarkdown") install.packages("knitr")
+install.packages("bookdown") \# Pour les livres
+install.packages("tinytex") \# Pour les fichiers PDF
+
+### Lancer un document R Markdown
+
+1.  Avec un code
+
+```{r eval = FALSE}
+rmarkdown::draft("mon_premier_document.Rmd", template = "default", package = "rmarkdown")
+
+```
+
+2.  Manuellement
+
+File - New file - Rmarkdown
+
+### Attention !
+
+Pour générer un PDF, il est indispensable d'installer *LaTeX* avec
+notamment :
+
+```{r eval=FALSE}
+tinytex::install_tinytex()
+```
+
+## 3. Écrire un Document R Markdown
+
+### Structure de base d'un document R Markdown
+
+```{r document, eval = FALSE}
+# Structure de base d'un document R Markdown
+---
+title: "Titre du document"
+author: "Auteur"
+date: "`r Sys.Date()`"
+output: html_document
+---```
+```
+
+### Comment insérer les codes dans Rmarkdown ?
+
+#### Qu'est-ce qu'un chunk de code ?
+
+Un **chunk de code** est une section dans R Markdown où vous pouvez
+écrire et exécuter des instructions R ou Python. Ces chunks sont
+encadrés par des délimiteurs spécifiques :
+
+```{r nom_du_chunk_R, option}
+# Code R ici
+```
+
+#### Options des chunks : Contrôle de l'affichage et de l'exécution
+
+On peut personnaliser le comportement de chaque chunk à l’aide des
+**options de `knitr`**. Voici les plus importantes :
+
+1.  ***Afficher ou masquer le code***
+
+    -   **Afficher le code :** Par défaut, le code est visible.
+
+    -   **Masquer le code :** Utilisez `echo = FALSE` pour ne pas
+        afficher le code, mais uniquement les résultats.
+
+        ```{r, echo = FALSE}
+        # Le code ne sera pas affiché, mais les résultats le seront.
+        summary(mtcars)
+        ```
+
+2.  ***Empêcher l'exécution du chunk***
+
+    On utilise `eval = FALSE` pour empêcher l’exécution du code :
+
+    ```{r, eval = FALSE}
+    # Le code sera affiché, mais ne sera pas exécuté.
+    summary(mtcars)
+    ```
+
+3.  ***Masquer les résultats***
+
+    On utilise `results = "hide"` pour exécuter le code sans afficher
+    les résultats.
+
+    ```{r, results = "hide"}
+    # Le code s’exécute mais les résultats ne s’affichent pas.
+    summary(mtcars)
+    ```
+
+4.  ***Masquer les messages et avertissements***
+
+    On utilise `message = FALSE` ou `warning = FALSE` pour cacher
+    respectivement les messages et les avertissements générés par le
+    code.
+
+    ```{r, message = FALSE, warning = FALSE}
+    # Pas de messages ni d’avertissements affichés
+    library(ggplot2)
+    ```
+
+5.  ***Contrôler l'affichage des graphiques***
+
+    ```{r,fig.align = "center", fig.width = 8, fig.height = 5}
+    plot(mtcars$mpg, mtcars$hp)
+    ```
+
+### Ajouter des Sections
+
+R Markdown permet de structurer un document en sections hiérarchisées à
+l’aide du symbole `#`. Le nombre de `#` détermine le niveau du titre :
+
+-   `# Grand Titre` produit un titre principal (niveau 1).
+-   `## Sous-Titre` produit un sous-titre (niveau 2).
+-   `### Sous-Sous-Titre` produit un sous-sous-titre (niveau 3).
+
+**Exemple** :
+
+# Grand Titre
+
+## Sous-Titre
+
+### Sous-Sous-Titre
+
+### Ajouter des listes
+
+-   Élément 1\
+-   Élément 2
+
+D'autres mises en forme dépendent de la manière dont on veut exporter le
+document. Par exemple pour souligner un texte :
+
+### Soulignement en HTML
+
+<u>Voici un texte souligné avec HTML.</u>
+
+### Soulignement en LaTeX (PDF)
+
+\underline{Voici un texte souligné pour un PDF.}
+
+### Soulignement avancé en HTML avec du css
+
+[Voici un texte souligné en
+rouge.]{style="text-decoration: underline; color: red;"}
+
+## 4. Création de Tableaux, Graphiques, et Équations
+
+### Tableaux
+
+#### Tableaux simples avec kable
+
+Le package knitr permet de générer des tableaux simples avec kable.
+Exemple :
+
+`{r table, eval=FALSE} library(knitr) kable( head(tableau1, 5), caption = "Tableau des premieres lignes de 'tableau1'" )`
+
+#### Tableaux avancés avec xtable Pour des tableaux plus complexes (par
+
+exemple, résumés de modèles), utilisez xtable.
+
+Exemple :
+
+```{r}
+n <- 100
+x <- rnorm(n)
+y <- 2 * x + rnorm(n)
+out <- lm(y ~ x)
+
+library(xtable)
+tab <- xtable(summary(out)$coef, digits = c(0, 2, 2, 1, 2))
+print(tab)
+
+```
+
+### Graphiques
+
+Les graphiques peuvent être générés directement dans R Markdown à l'aide
+de ggplot2 ou d'autres packages.
+
+```{r}
+library(ggplot2)
+ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  labs(title = "Relation entre poids et consommation",
+       x = "Poids du véhicule",
+       y = "Consommation (mpg)")
+
+```
+
+### Outils Mathématiques
+
+{r equations, eval = FALSE} \# Exemple de calcul d'intégrale \#
+Intégrale simple de x\^2 de 0 à 1 $$ \int_0^1 x^2 \, dx = \frac{1}{3} $$
+
+#### Puissance et exponentiation
+
+$$ a^b = e^{b \ln(a)} $$
+
+#### Somme infinie (série)
+
+$$ \sum_{n=0}^{\infty} r^n = \frac{1}{1 - r}, \text{pour } |r| < 1 $$
+
+#### Produit d'une série infinie
+
+$$ \prod_{n=1}^{\infty} \left(1 + \frac{1}{n^2} \right) = \frac{\sinh(\pi)}{\pi} $$
+
+#### Produit scalaire entre deux vecteurs
+
+$$ \vec{a} \cdot \vec{b} = \sum_{i=1}^{n} a_i b_i $$
+
+#### Une formule pour la somme des premiers entiers
+
+$$ \sum_{k=1}^{n} k = \frac{n(n+1)}{2} $$
+
+#### Formule de la dérivée
+
+$$ \frac{d}{dx} \sin(x) = \cos(x) $$
+
+#### Equation de la relativité restreinte
+
+$$ E = mc^2 $$
+
+#### Equations de l'algèbre linéaire
+
+$$ \det(A) = \sum_{i=1}^{n} (-1)^{i+j} a_{ij} \det(A_{ij}) $$
+
+------------------------------------------------------------------------
+
+## 5. Insertion d'image
+
+Pour insérer une image externe, utilisez la syntaxe suivante. Supposons
+que le fichier image s’appelle `fichier.png` :
+
+`![Image de présentation](https://www.r-project.org/Rlogo.png)` ![Image
+de présentation](https://www.r-project.org/Rlogo.png)
+
+## 6. Exercice Pratique
+
+### Énoncé
+
+# Création d'un jeu de données fictif sur les étudiants
+
+```{r}
+
+students_data <- data.frame( Student_ID = 1:10, Name = c("Awa",
+"Mame Balla", "KC", "Célina", "Sarah", "PAN", "Samba", "Niass", "Ian",
+"Jack"), Age = c(22, 23, 21, 24, 22, 23, 21, 24, 25, 22), GPA = c(3.8,
+3.4, 3.6, 3.2, 3.9, 3.5, 3.7, 3.4, 3.1, 3.8), Major = c("Mathematics",
+"Physics", "Engineering", "Chemistry", "Biology", "Physics",
+"Mathematics", "Engineering", "Chemistry", "Biology") )
+
+# Deuxième tableau : données de notes
+
+grades_data <- data.frame( Student_ID = 1:10, Math_Grade = c(95, 87,
+93, 80, 88, 85, 90, 92, 78, 85), Science_Grade = c(88, 85, 90, 80, 94,
+89, 91, 87, 76, 82), History_Grade = c(85, 80, 88, 92, 89, 90, 86, 91,
+84, 80) )
+```
+
+# Exemples de manipulations
+
+```{r,echo=TRUE, results='markup'}
+```
+
+# Charger les bibliothèques nécessaires
+
+```{r}
+library(knitr) 
+library(ggplot2)
+```
+
+# Créer un tableau avec les premières lignes de 'students_data'
+
+```{r}
+kable(head(students_data, 5), caption = "5 Premières lignes de
+students_data")
+```
+
+# Créer un deuxième tableau pour les notes
+
+```{r}
+kable(head(grades_data, 7), caption = " 7 Premières lignes de
+grades_data")
+```
+
+```{r,echo=TRUE, results='markup'}
+# Créer un graphique de GPA en fonctionde l'âge 
+ggplot(data = students_data, aes(x = Age, y = GPA, color =
+Major)) + geom_point() + labs(title = "GPA en fonction de l'Âge des
+étudiants", x = "Âge", y = "GPA")
+```
+
+## Exemple d'équations mathématiques
+
+### Intégrale
+
+$$
+\int_0^2 x^2 \, dx = \frac{8}{3}
+$$
+
+### Puissance
+
+$$
+3^4 = 81
+$$
+
+### Somme
+
+$$
+\sum_{k=1}^{10} k = 55
+$$
+
+### Produit scalaire
+
+$$
+\vec{a} \cdot \vec{b} = 1*3 + 2*4 = 11
+$$
+
+### Dérivée
+
+$$
+\frac{d}{dx} \sin(x) = \cos(x)
+$$
+
+## 7. Références Bibliographiques
+
+-   [State of the
+    R](https://stateofther.github.io/finistR2017/bookdown.html)
+-   [R Markdown
+    Cookbook](https://bookdown.org/yihui/rmarkdown-cookbook/)
