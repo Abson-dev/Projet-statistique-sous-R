@@ -35,4 +35,20 @@ utils::str(individu)
 base_merge<-dplyr::left_join(individu,menage,by="hhid")
 
 ```
+Logement
+
+```{r}
+
+result <-  base_merge %>% 
+            select(pid,logem)
+result
+
+```
+
+
+```{r}
+
+```
+
+
 
