@@ -6,6 +6,8 @@ Le cours de Projet Statistique sous R et Python est dispense par Mr Hema Aboubac
 
 ### TP 1
 
+**Important**: Il ne faut pas importer les donnees dans le compte github.
+
 ### TP 2
 
 ### TP 3
