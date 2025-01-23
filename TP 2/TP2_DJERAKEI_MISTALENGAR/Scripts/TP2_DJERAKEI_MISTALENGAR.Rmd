@@ -1,0 +1,199 @@
+---
+title: "TP2"
+author: "DJERAKEI MISTALENGAR"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Liste des packages à installer et charger
+
+
+```{r}
+
+# Vérifier et installer chaque package si nécessaire
+
+if (!require(readr)) install.packages("readr")
+if (!require(utils)) install.packages("utils")
+if (!require(dplyr)) install.packages("dplyr")
+
+# Charger les packages
+library(readr)
+library(utils)
+library(dplyr)
+
+
+```
+
+# IMPORTATION DES DONNEES DES BASES
+
+```{r}
+#  Ménage
+
+men <- utils::read.csv("../Données/ehcvm_individu_sen2021.csv")  
+
+# Individu
+
+ind <- utils::read.csv("../Données/ehcvm_individu_sen2021.csv")  
+
+```
+
+# STRUCURE DES BASES DE DONNEES
+
+```{r}
+# Base ménage
+
+utils::str(men)
+
+
+```
+```{r}
+# Base individu
+
+utils::str(ind)
+
+```
+
+# VISUALISATION DES BASES
+
+```{r}
+
+# View(men)
+# View(ind)
+
+# Affichage des premières lignes des bases
+
+head(men)
+
+head(ind)
+
+```
+
+
+# Fusion
+
+# Types de Merge
+<!-- 
+inner_join() : Conserve uniquement les lignes ayant des correspondances dans les deux tables.
+
+right_join() : Conserve toutes les lignes de la table de droite et ajoute les correspondances de la table de gauche. Les valeurs manquantes sont remplies par NA.
+
+left_join() : Conserve toutes les lignes de la table de gauche et ajoute les correspondances de la table de droite. Les valeurs manquantes sont remplies par NA.
+
+full_join() : Conserve toutes les lignes des deux tables, qu'il y ait ou non correspondance. Les valeurs manquantes sont remplies par NA.
+
+
+
+Objectif de la fusion : Associer chaque individu à son ménage correspondant en utilisant un left_join(). -->
+
+
+```{r}
+# Fusion des bases individu et ménage en utilisant left_join()
+
+men_ind <- dplyr::left_join(ind, men, by = "hhid")
+
+# Afficher la base fusionnée
+head(men_ind)
+
+variable.names(men_ind)
+
+# Nombre de valeurs manquantes pour chaque variable
+colSums(is.na(men_ind))
+
+
+```
+
+```{r}
+
+
+
+# Proportion des ménages par milieu de résidence
+milieu_men <- men_ind %>% 
+  
+  select(hhid, milieu.x) %>% # Sélectionne l'ID du ménage et le milieu 
+  
+  group_by(milieu.x) %>%    # Regroupe les données par milieu
+  
+  summarize(count_men1 = n()) %>% # Compte le nombre de ménages dans chaque catégorie
+ 
+   mutate(prct = count_men1 / sum(count_men1) * 100) %>% # Calcule le pourcentage de ménages par milieu
+  ungroup()                                # Désactive le regroupement
+
+# Affichage du résultat
+View(milieu_men)
+
+```
+
+```{r}
+# Proportion des ménages par milieu de region
+region_men <- men_ind %>% 
+  
+  select(hhid, region.x) %>%  
+  
+  group_by(region.x) %>%
+  
+  summarize(count_men2 = n()) %>% 
+ 
+   mutate(prct2 = count_men2 / sum(count_men2) * 100) %>% 
+  
+  ungroup() 
+
+View(region_men)
+
+```
+
+
+# selection des menages suivant le sexe du chef de menage
+
+# On filtrer d'abord suivant le lien avec le chef de menage
+```{r}
+
+cm <- ind %>% filter(lien=="1") %>%  select(hhid,sexe)
+
+cm
+
+```
+
+# on fusion pour avoir une base des chefs de menage
+
+```{r}
+cm_base <- dplyr::left_join(ind,cm,by="hhid")
+cm_base
+```
+
+# sexe du chef
+```{r}
+
+cm_sexe <- cm_base %>% dplyr::select(numind,sexe.y)
+cm_sexe
+
+```
+
+```{r}
+# Calculer la proportion des individus par sexe dans la base "chef de menage"
+sexe_dist <- cm_base %>%
+  group_by(sexe.y) %>%
+  summarize(count = n()) %>%
+  mutate(prct_sexe = count / sum(count) * 100)
+
+# Afficher les résultats
+sexe_dist
+
+```
+```{r}
+# Distribution du niveau de diplôme
+dplom_dist <- cm_base %>%
+  group_by(diplome) %>%
+  summarize(count_diplome = n()) %>%
+  mutate(prct_diplome = count_diplome / sum(count_diplome) * 100)
+
+
+dplom_dist
+
+```
+
+
