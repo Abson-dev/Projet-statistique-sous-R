@@ -1,0 +1,127 @@
+---
+title: "TP2"
+author: "Samba"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+*Chargeons les packages*
+
+```{r}
+mes_pack <- c("readr", "tidyverse", "dplyr", "utils")
+installed.packages(mes_pack)
+#View(installed.packages())
+```
+
+# Importons les bases individu et menage
+```{r}
+individu <- readr::read_csv("C:/Users/ANSD/Desktop/ISE-2024-2025/Logiciel R Hema/Projet_R/Données/ehcvm_individu_sen2021.csv")
+```
+
+#La base menage
+```{r}
+menage <- readr::read_csv("C:/Users/ANSD/Desktop/ISE-2024-2025/Logiciel R Hema/Projet_R/Données/ehcvm_menage_sen2021.csv")
+```
+
+#Informations sur les bases 
+
+```{r}
+dim(individu)
+variable.names(individu)
+```
+
+
+```{r}
+dim(menage)
+variable.names(menage)
+```
+
+
+2. Effectuons des merges
+Nous allons utiliser les fonctions de dplyr pour effectuer les jointures. 
+
+*Left join*
+Conserver tous les individus, même si certains n'ont pas de correspondance dans la base des ménages :
+
+
+```{r}
+#library(dplyr)
+left_merge <- individu %>%
+  left_join(menage, by = "hhid")
+```
+
+
+*Caractéristiques du Chef de Ménage à partir de la base mergée*
+
+**Distribution par ethnie**
+
+```{r}
+par_ethnie <- left_merge %>%
+  group_by(hhid) %>%                
+  summarize(nb_chefs = n()) %>%      
+  ungroup()                          
+print(par_ethnie)
+
+```
+
+
+
+**Evaluons la distribution des ménages par miliue de résidence**
+```{r}
+men_mil <- left_merge %>% 
+  select(hhid, milieu) %>%      
+  group_by(milieu) %>%              
+  summarize(nb_menages = n()) %>%    # Compte le nombre de ménages par catégorie
+  mutate(pourcentage = nb_menages / sum(nb_menages) * 100) %>% 
+  ungroup()                          
+
+print(men_mil)
+```
+
+La répartition des ménages entre les deux milieux est quasi équilibrée, avec le milieu rural représentant 50,61% des ménages tandis que le milieu urbain regroupe 49,39% des ménages.
+
+**Trouvons l age moyen des chefs de menage selon leur ethnie**
+
+```{r}
+age_ethnie <- left_merge %>% 
+  group_by(ethnie) %>%                            
+  summarize(
+    age_moyen = mean(age, na.rm = TRUE),        
+     ) %>% 
+print(age_ethnie)
+
+```
+
+
+*Autres types de jointures*
+
+*Inner join*
+Conserve uniquement les individus qui ont une correspondance dans la base des ménages :
+
+```{r}
+
+#inner_merge <- individu %>%
+ # inner_join(menage, by = "hhid")
+```
+
+*Full join*
+Combine toutes les observations, qu'elles aient ou non une correspondance :
+
+```{r}
+#full_merge <- individu %>%
+ # full_join(menage, by = "hhid")
+```
+
+*Right join*
+Conserve tous les ménages (menages), même si certains n'ont pas de correspondance dans la base des individus :
+
+```{r}
+
+#right_merge <- individu %>%
+ # right_join(menage, by = "hhid")
+```
+
+
+
