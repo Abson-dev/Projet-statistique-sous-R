@@ -1,0 +1,61 @@
+---
+title: "TP2"
+author: "BERETE Mamady I"
+date: "2025-01-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+chargement des packages
+```{r}
+library(utils)
+library(dplyr)
+```
+
+
+chargement des bases 
+```{r}
+menage <- utils::read.csv("../Données/ehcvm_menage_bfa2021.csv")
+individu <- utils::read.csv("../Données/ehcvm_individu_bfa2021.csv")
+
+```
+
+Structure de la base ménage 
+```{r}
+utils::str(menage)
+
+```
+
+Structure de la base individu 
+```{r}
+utils::str(individu)
+```
+
+
+
+Filtrage des Chefs de ménage dans la base individu
+```{r}
+resultats <- individu %>% 
+  dplyr::filter(lien=="Chef de ménage") %>% 
+  dplyr::select(hhid,sexe)
+              
+resultats  
+          
+```
+
+
+Fusion des deux bases : cette partie donnne l'identifiant du ménage (hhid), le sexe du chef de ménage (sexe.y), l'indenfiant (pid)  et son son sexe (sexe.x) de l'individu.
+```{r}
+base_fusion <- dplyr::left_join(individu,resultats,by ="hhid")
+base_fusion
+
+resultats1 <- base_fusion %>% 
+  dplyr::select(hhid,sexe.y, pid, sexe.x)
+              
+resultats1
+
+```
+

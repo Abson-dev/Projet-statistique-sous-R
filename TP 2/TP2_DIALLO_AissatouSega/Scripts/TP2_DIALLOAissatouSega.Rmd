@@ -1,0 +1,82 @@
+---
+title: "TP2_DIALLOAissatouSega"
+author: "Aissatou Sega DIALLO"
+date: "2025-01-22"
+output: pdf_document
+---
+
+```{r}
+# Chargement de package
+library(dplyr)
+library(haven)
+library(base)
+
+# Importation des bases
+Menage <- read.csv("C:/Formation ISE/ISE 1/Logiciel R/Projet-statistique-sous-R/TP 2/TP2_DIALLO_AissatouSega/Données/ehcvm_menage_SEN2021.csv")
+Individus <- read.csv("C:/Formation ISE/ISE 1/Logiciel R/Projet-statistique-sous-R/TP 2/TP2_DIALLO_AissatouSega/Données/ehcvm_individu_SEN2021.csv")
+```
+
+```{r}
+#Voir la structure des bases 
+str(Individus)
+str(Menage)
+
+#Voir les bases 
+View(Individus)
+View(Menage)
+```
+
+```{r}
+#Merger les bases pour pouvoir avoir des informations sur les chefs de ménage
+Base_merge <- Individus %>%
+  left_join(Menage, by = "hhid")
+View(Base_merge)
+```
+
+```{r}
+#Filtrer pour n'avoir que les chefs de ménage
+chefs_menage <- dplyr::filter(Base_merge, lien == 1)
+summary(chefs_menage)
+```
+
+```{r}
+####Avoir des informations sur les chefs de ménage
+#Répartition selon le sexe
+base::table(chefs_menage$sexe)
+
+#Répartition selon le niveau d'instruction
+table(chefs_menage$educ_hi)
+
+#Répartition selon l'ethnie
+table(chefs_menage$ethnie)
+```
+
+
+Les ménages ayant des chefs de ménage de sexe masculin sont doublement supérieurs à ceux ayant comme chefs de ménage des femmes.
+De plus, dans cette base, les ménages dirigés par des chefs de ménage ayant aucun niveau d'instruction et ceux ayant un niveau d'instruction primaire incomplet représentent plus de 80%.
+
+```{r}
+####Information sur le ménage 
+#Accès à l'électricité selon le sexe du chef de ménage
+Elec_selon_sexe <- chefs_menage %>%
+  dplyr::group_by(sexe, elec_ac) %>%
+  dplyr::summarise(effectif = n(), .groups = "drop") %>%
+  dplyr::mutate(pourcentage = effectif / sum(effectif) * 100)
+Elec_selon_sexe
+
+#Possession d'objets des ménages
+chefs_menage %>%
+  summarise(
+    tv = mean(tv, na.rm = TRUE),
+    frigo = mean(frigo, na.rm = TRUE),
+    voiture = mean(car, na.rm = TRUE)
+  )
+```
+Qu'importe le sexe, il y a plus de ménages ayant accès à l'electricité que de ménages n'ayant pas accès.
+
+
+
+
+
+
+
