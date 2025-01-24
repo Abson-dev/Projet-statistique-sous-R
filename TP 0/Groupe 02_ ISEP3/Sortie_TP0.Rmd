@@ -1,0 +1,390 @@
+---
+title: "TP0"
+author: "Groupe 2"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I. Introduction et prise en main
+
+## Qu’est-ce que R Markdown ?
+
+### Définition :
+
+R Markdown est un format de document dynamique qui permet d’intégrer du code R avec du texte explicatif dans un même fichier. Il est basé sur la syntaxe Markdown, une syntaxe légère pour le formatage de texte, et il utilise des outils comme knitr et pandoc pour générer des rapports, des présentations, et même des sites web.
+
+### Avantages de R Markdown :
+
+-Reproductibilité: Générer des rapports automatiques et reproductibles. -Formats variés: Peut être converti en HTML, PDF, Word, etc. -Intégration de code: Permet d’exécuter du code R directement dans le document. -Automatisation: Idéal pour les rapports récurrents. -Clarté: Séparation du code et du texte explicatif.
+
+# II. Les bases de R Markdown
+
+## 1. Syntaxe Markdown
+
+R Markdown repose sur Markdown, qui permet d’écrire du texte en utilisant une syntaxe simple pour la mise en forme.
+
+### a) Mise en forme inline (italique, gras, liens, etc.)
+
+Voici quelques exemples de mise en forme :
+
+-Italique:
+
+```{r echo=TRUE}
+cat("*Texte en italique* ou _Texte en italique_")
+```
+
+*Texte en italique* ou *Texte en italique*
+
+-Gras :
+
+```{r echo=TRUE}
+cat("**Texte en gras** ou __Texte en gras__")
+```
+
+**Texte en gras** ou **Texte en gras**
+
+-Lien :
+
+```{r echo=TRUE}
+cat("[Nom du lien](https://www.example.com)")
+```
+
+[Nom du lien](https://www.example.com)
+
+### b) Éléments de niveau bloc (titres, listes, citations…)
+
+-Titres:
+
+```{r echo=TRUE}
+cat("# Titre de niveau 1\n## Titre de niveau 2\n### Titre de niveau 3")
+```
+
+# Titre de niveau 1
+
+## Titre de niveau 2
+
+### Titre de niveau 3
+
+-Listes à puces:
+
+```{r echo=TRUE, results="asis"}
+cat("- Élément 1\n- Élément 2\n  - Sous-élément 2.1")
+```
+
+-Listes numérotées:
+
+```{r echo=TRUE, results="asis"}
+cat("1. Premier point\n2. Deuxième point")
+```
+
+Citations:
+
+```{r echo=TRUE, results="asis"}
+cat("> Ceci est une citation")
+```
+
+### c) Expressions mathématiques
+
+R Markdown permet d'intégrer des équations LaTeX pour les formules mathématiques :
+
+```{r echo=TRUE, results="asis"}
+cat("$E = mc^2$")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r cars, results = "markup", echo=FALSE, warning = FALSE, message=FALSE}
+
+summary(mtcars)
+
+```
+
+
+Echo : Cette option contrôle si le script R (le code) est visible ou non dans la sortie générée.
+
+results : l'option results contrôle comment les résultats du code R sont affichés dans le document final. Elle peut être utilisée pour afficher les résultats normalement, les cacher, ou les afficher sous une forme brute ("markup", "hide", "asis").
+
+warning : 
+
+```{r}
+log(-1)
+```
+
+Ne pas afficher le warning
+
+```{r, warning=FALSE}
+log(-1)
+```
+
+
+
+```{r Mbb, echo=FALSE, warning = FALSE, message=FALSE}
+library(dplyr)
+library(expss)
+library(kableExtra)
+
+set.seed(123)
+
+# Création du dataframe (correction des probabilités)
+df_lab1 <- data.frame(
+  mois_an_nais_now = sample(
+    c("Oui", "Non"),
+    1000,
+    replace = TRUE,
+    prob = c(0.6, 0.4)  # Correction des probabilités pour 2 modalités
+  ),
+  B06 = sample(
+    c("Homme", "Femme"),
+    1000,
+    replace = TRUE,
+    prob = c(0.48, 0.52)
+  )
+)
+
+# Application des labels pour expss
+df_lab1 = apply_labels(df_lab1,
+    mois_an_nais_now = " ",
+    B06 = "Sexe"
+)
+
+
+# Création du tableau
+tab <- df_lab1 %>%
+  tab_cells(mois_an_nais_now) %>% 
+  tab_cols(B06, total(label = "Total")) %>%
+  tab_stat_cases(label = "n", total_statistic = "u_cases") %>%
+  tab_total_row_position("below") %>%
+  tab_stat_cpct(label = "%" , total_statistic = "u_cpct") %>% 
+  tab_pivot(stat_position = "inside_columns")
+
+colnames(tab) <- rep("", ncol(tab))
+
+kable_table <-kable(tab, format = "pipe", align = "c", escape = FALSE, digits = 2) %>%
+  column_spec(1:ncol(tab), extra_css = "border: 1px solid black;") %>%
+  add_header_above(c("Connait mois et année de naissance" = 1, "Effectif" = 1, "%" = 1, "Effectif" = 1,
+                     "%" = 1, "Effectif" = 1, "%" = 1), font_size = 10, bold = TRUE,
+                   ,line_sep = 1, extra_css = "border: 1px solid black;") %>%
+  add_header_above(c(" " = 1, "Homme" = 2, "Femme" = 2, "Total" = 2), font_size = 12, bold = TRUE,
+                   ,line_sep = 2, extra_css = "border: 1px solid black;") %>%
+  add_header_above(c(" " = 1, "Sexe du déclarant" = 6), font_size = 14, bold = TRUE,
+                   ,line_sep = 10, extra_css = "border: 1px solid black;") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+kable_table
+
+```
+
+
+
+
+
+## Including Plots
+
+```{r multiple-plots, echo=FALSE, warning = FALSE, message=FALSE, fig.width = 8, fig.height = 4}
+# Diviser la zone graphique en 1 ligne et 2 colonnes
+#par(mfrow = c(1, 2))
+
+# Premier graphique : hp vs mpg
+plot(mtcars$hp, mtcars$mpg, 
+     main = "Relation entre hp et mpg", 
+     xlab = "Puissance (hp)", 
+     ylab = "Consommation (mpg)", 
+     col = "blue", 
+     pch = 19)
+
+# Deuxième graphique : wt vs mpg
+plot(mtcars$wt, mtcars$mpg, 
+     main = "Relation entre wt et mpg", 
+     xlab = "Poids (wt)", 
+     ylab = "Consommation (mpg)", 
+     col = "red", 
+     pch = 19)
+
+```
+
+# III. Formats de sortie courants
+
+La version originale de Markdown a été inventée principalement pour écrire plus facilement du contenu HTML. Par exemple, vous pouvez écrire une puce avec `- text` au lieu du code HTML détaillé `<ul><li>text</li></ul>`, ou une citation avec `> text` au lieu de `<blockquote>text</blockquote>`.
+
+La syntaxe de Markdown a été considérablement étendue par Pandoc. De plus, Pandoc permet de convertir un document Markdown en une grande variété de formats de sortie. Dans cette partie, nous présenterons les fonctionnalités de divers formats de sortie de document.
+
+## 1. Document HTML
+
+Comme nous venons de le mentionner, Markdown a été conçu à l'origine pour la sortie HTML, il n'est donc pas surprenant que le format HTML possède les fonctionnalités les plus riches parmi tous les formats de sortie.
+
+Pour créer un document HTML à partir de R Markdown, vous spécifiez le `html_document` format de sortie dans les métadonnées YAML de votre document :
+
+```{yaml}
+---
+title: "Titre du document"
+author: Auteur
+date: la date
+output: html_document
+---
+```
+
+### 1.1 Table des matières
+
+Vous pouvez ajouter une table des matières (TOC) à l'aide de l' `toc` option et spécifier la profondeur des en-têtes à appliquer à l'aide de l' `toc_depth` option. Par exemple :
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+```
+
+Si la profondeur de la table des matières n'est pas explicitement spécifiée, la valeur par défaut est 3 (ce qui signifie que tous les en-têtes de niveau 1, 2 et 3 seront inclus dans la table des matières).
+
+### 1.2 Numérotation des sections
+
+Vous pouvez ajouter une numérotation de section aux en-têtes à l'aide de l' `number_sections` option :
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+```
+
+Notez que si vous choisissez d'utiliser cette `number_sections` option, vous souhaiterez probablement également utiliser `#` des en-têtes (H1) dans votre document, car `##` les en-têtes (H2) incluront un point décimal, car sans en-têtes H1, vos en-têtes H2 seront numérotés avec 0.1, 0.2, etc.
+
+### 1.3 Apparence et style
+
+Il existe plusieurs options qui contrôlent l'apparence des documents HTML :
+
+-   `theme` spécifie le thème Bootstrap à utiliser pour la page (les thèmes sont tirés de la bibliothèque de thèmes Bootswatch ). Les thèmes valides incluent default, bootstrap, cerulean, cosmo, darkly, flatly, journal, lumen, paper, readable, sandstone, simplex, spacelab, united et yeti. Ne passez `null` aucun thème (dans ce cas, vous pouvez utiliser le cssparamètre pour ajouter vos propres styles).
+
+-   `highlight` spécifie le style de mise en surbrillance de la syntaxe. Les styles pris en charge incluent default, tango, pygments, kate, monochrome, espresso, zenburn, haddock, breezedark, et textmate. Passez nullpour empêcher la mise en surbrillance de la syntaxe.
+
+-   `smart` indique si une sortie typographiquement correcte doit être produite, en convertissant les guillemets droits en guillemets bouclés, ---en tirets cadratins, --en tirets demi-cadratins et ...en points de suspension. Notez que cette smartoption est activée par défaut.
+
+Par exemple:
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  html_document:
+    theme: united
+    highlight: tango
+---
+```
+
+### 1.4 CSS personnalisé
+
+Vous pouvez ajouter votre propre CSS à un document HTML en utilisant l' cssoption :
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  html_document:
+    css: styles.css
+---
+```
+
+## 2. Document PDF
+
+Pour créer un document PDF à partir de R Markdown, vous spécifiez le `pdf_document` format de sortie dans les métadonnées YAML :
+
+```{yaml}
+---
+title: "Titre du document"
+author: Auteur
+date: La date
+output: pdf_document
+---
+```
+
+Dans les documents R Markdown qui génèrent une sortie PDF, vous pouvez utiliser du LaTeX brut et même définir des macros LaTeX. Consultez la documentation de Pandoc sur l' extension `raw_tex` pour plus de détails.
+
+Notez que la sortie PDF (y compris les diapositives Beamer) nécessite une installation de LaTeX.
+
+### 2.1 Table des matières
+
+Vous pouvez ajouter une table des matières à l'aide de l' `toc` option et spécifier la profondeur des en-têtes à appliquer à l'aide de l' `toc_depth` option. Par exemple :
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+---
+```
+
+Si la profondeur de la table des matières n'est pas explicitement spécifiée, elle est par défaut de 2 (ce qui signifie que tous les en-têtes de niveau 1 et 2 seront inclus dans la table des matières), tandis qu'elle est par défaut de 3 dans `html_document`.
+
+Vous pouvez ajouter une numérotation de section aux en-têtes à l'aide de l' `number_sections` option :
+
+```{yaml}
+---
+title: "Titre du document"
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+---
+```
+
+Si vous êtes familier avec LaTeX, `number_sections: true` signifie `\section{}`, et `number_sections: false` signifie `\section*{}` pour les sections dans LaTeX (cela s'applique également à d'autres niveaux de « sections » tels que `\chapter{}`, et `\subsection{}`).
+
+### 2.2 Option LaTeX
+
+De nombreux aspects du modèle LaTeX utilisé pour créer des documents PDF peuvent être personnalisés à l'aide de métadonnées YAML de niveau supérieur (notez que ces options n'apparaissent pas sous la outputsection, mais apparaissent plutôt au niveau supérieur avec title, author, etc.). Par exemple :
+
+```{yaml}
+---
+title: "Titre du document"
+output: pdf_document
+fontsize: 11pt
+geometry: margin=1in
+---
+```
+
+## 3. Document word
+
+Pour créer un document Word à partir de R Markdown, vous spécifiez le `word_document` format de sortie dans les métadonnées YAML de votre document :
+
+```{yaml}
+---
+title: "Titre du document"
+author: Auteur
+date: La date
+output: word_document
+---
+```
+
+La fonctionnalité la plus remarquable des documents Word est le modèle Word, également connu sous le nom de « document de référence de style ». Vous pouvez spécifier un document à utiliser comme référence de style lors de la production d'un `*.docx` fichier (un document Word). Cela vous permettra de personnaliser des éléments tels que les marges et d'autres caractéristiques de mise en forme. Pour de meilleurs résultats, le document de référence doit être une version modifiée d'un `.docx` fichier produit à l'aide de `rmarkdown` ou de Pandoc. Le chemin d'accès d'un tel document peut être passé à l' `reference_docx` argument du `word_document` format. Passez `"default"` pour utiliser les styles par défaut. Par exemple :
+
+```{yaml}
+---
+title: "Titre du document"
+author: Auteur
+date: La date
+output: word_document
+---
+```

@@ -1,0 +1,699 @@
+---
+title: "R Markdown documentation : tables, graphs and equations"
+author: "Jeanne, KC, Samba, Tamsir"
+date: "2025-01-21"
+output: pdf_document
+---
+
+# Présentations générale de Rmarkdown
+
+RMarkdown est une extension du langage Markdown. Il permet d'intégrer dans un même fichier du texte explicatif, du code exécutable (en R ou dans d'autres langages comme Python) et les résultats d'analyse (tableaux, graphiques, etc.). RMarkdown est particulièrement utile pour produire des documents reproductibles, clairs et professionnels.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+
+## We set the work directory for the whole document
+knitr::opts_knit$set(root.dir = 
+"C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 0/Groupe 1 -- ISEP3")
+```
+
+
+```{r message=FALSE}
+library(haven)
+library(reshape2)
+library(ggplot2)
+library(kableExtra)
+library(gtsummary)
+library(stringr)
+
+```
+
+```{r}
+
+Base <- read_dta("Base_de_données.dta")
+
+## Pour transformer en variables catégorielles celles qui ne le sont pas encore.
+
+to_rec <- list()
+for (i in names(Base)){
+  if(is.null(attr(Base[[i]], "labels"))== 0){ # On met deux crochets pour préciser que c'est la colonne que l'on veut
+    to_rec <- c(to_rec, i)
+  }
+}
+
+# Création des variables recodées
+for (i in to_rec ){
+  label <- attr(Base[[i]], "label")
+  
+  Base[[i]] <- factor(Base[[i]], labels= str_to_title(names(attr(Base[[i]], "labels"))), 
+                         levels=unname(attr(Base[[i]], "labels")))
+  attr(Base[[i]], "label") <- label
+  
+  Base[[i]] <- as.character(Base[[i]])
+
+}
+
+
+```
+
+
+
+## Structure générale
+
+Un fichier RMarkdown est structuré en trois parties principales : l'en-tête YAML, le texte explicatif et les code chunks.
+
+L'en-tête YAML contient les métadonnées et les options de configuration du document, comme le titre, l'auteur, la date et le format de sortie.
+
+![Le YALM](C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 0/Groupe 1 -- ISEP3/yalm.jpg)
+
+Le texte explicatif est écrit en Markdown, permettant de structurer le document avec des titres, sous-titres, listes et liens.
+
+![Texte du document](C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 0/Groupe 1 -- ISEP3/text.jpg)
+
+Les chunks permettent d'insérer et d'exécuter du code directement dans le document. Les résultats sont automatiquement intégrés.
+
+![Code chunk](C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 0/Groupe 1 -- ISEP3/code.jpg)
+
+
+## Pourquoi utiliser RMarkdown ?
+
+-   Reproductibilité: Idéal pour documenter les analyses de manière reproductible.
+-   Gain de temps: Génère automatiquement des rapports sans copier-coller les résultats.
+-   Polyvalence: Produit des fichiers HTML interactifs, des PDF élégants ou des documents Word.
+-   Interopérabilité: Peut inclure du code en Python, SQL ou d'autres langages. Les options des chunks de code Chaque chunk peut être configuré pour personnaliser son exécution et son affichage.
+
+Voici les options courantes :
+
+-   echo : Affiche ou cache le code source.
+-   eval : Exécute ou non le code.
+-   warning: Affiche ou supprime les avertissements.
+-   message: Affiche ou cache les messages.
+
+Générer un document avec Knit Pour convertir un fichier “.Rmd” en document final :
+
+1.  Cliquez sur le bouton “Knit” dans RStudio.
+2.  Choisissez le format de sortie selon vos besoins (HTML, PDF ou Word).
+3.  Si nécessaire, installez les packages manquants (comme “rmarkdown”, “knitr” et “pandoc”).
+
+# Faire des graphiques
+
+## Paramètres de mise en forme du graphique
+
+-   Pour préciser la taille du graphique, on peut ajouter dans l'entête du chunk les paramètres suivants : (fig.height=4, fig.width=6) et ajuste la taille selon les besoins.
+-   Pour ne pas afficher les graphiques, on peut utiliser ce paramètre dans l'entête du chunk : (fig.show = "hide").
+
+A noter que ces options peuvent être déclarées au début pour tous les chunks, en paramètres généraux.
+
+```{r Code_chunk_N1, fig.height=3, fig.width=6}
+#'Avez-vous rencontré un problème de santé 
+#'durant les 12 derniers mois qui a entrainé une hospitalisation ?
+
+#'Bénéficiez-vous d'une couverture maladie ?
+
+ggplot(Base)+
+  geom_bar(aes(x=s00q04, fill=s03q32), position="dodge" )+
+  coord_flip()
+
+```
+
+
+Un petit texte sur les heatmaps...
+
+Les **heatmaps** (ou cartes de chaleur) sont des représentations graphiques utilisées pour visualiser des données sous forme de matrices, où chaque cellule est colorée en fonction de la valeur qu'elle représente. Ces visualisations sont particulièrement utiles pour identifier rapidement des motifs, des tendances, ou des anomalies dans des données complexes. Les heatmaps sont fréquemment utilisées en analyse de données, en bioinformatique (comme dans les études d'expression génique), en sciences sociales, et en machine learning pour des matrices de corrélation ou de confusion. Les nuances de couleurs utilisées, souvent issues de dégradés, aident à différencier les valeurs basses, moyennes et élevées, rendant les relations entre les variables plus intuitives et visuellement attrayantes.
+
+
+
+
+```{r, fig.height=10, fig.width=15}
+
+variables_numeriques <-  c("s03q13","s03q14", "s03q30","s03q30","s03q31")
+
+# Calcul de la matrice de corrélation
+cor_matrix <- cor(Base[variables_numeriques], use = "complete.obs")
+
+# Création de la heatmap
+ g <- ggplot(melt(cor_matrix), aes(Var1, Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Corrélation") +
+  labs(title = "Heatmap des corrélations") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+g
+```
+
+
+
+Quelques jolis graphiques....
+
+
+
+```{r Code_chunk_N3, fig.height=5, fig.width=10}
+#'Bénéficiez-vous d'une couverture maladie ?
+
+ggplot(Base)+
+  geom_bar(aes(x=s00q04, fill=s03q32), position="fill" )+
+  coord_flip()
+
+```
+
+
+**Code chunk**
+
+```{r Code_chunk_N6, fig.height=5, fig.width=10}
+#'s03q40: Moyens de prévention du paludisme autres que moutiquaire,
+#'suivant la tendance à utiliser une moustiquaire. 
+
+#'s03q38: Dormez-vous habituellement sous une moustiquaire ?
+
+
+Base1 <- Base[!is.na(Base$s03q39),]
+Base1 %>% 
+  #filter(!is.na(s03q39)) %>%
+ggplot()+
+  geom_bar(aes( x=s03q39, y=after_stat(count*100/sum(count)), fill=s03q40))+
+  facet_grid(cols= vars(s03q40))
+
+```
+```{r}
+ ggplot(Base) +
+  geom_bar(aes(x = "", y = s03q01, fill = s03q01), width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  theme_void()+
+   labs(title = "Répartition des individus suivant la rencontre ou non d’un problème de santé pendant les trente (30) derniers jours", caption="Source : ANSD, EHCVM 2018/2019, calculs propres ")
+
+```
+
+
+```{r}
+## Utilisez-vous des protections anti-moustiques autres que les moustiquaires ?
+
+Base[!is.na(Base$s03q38),] %>%
+ggplot()+
+  geom_bar(aes(x=s03q38,y=after_stat(count*100/sum(count)), fill=s03q40))+
+ facet_wrap(vars(s03q40), nrow=2)+
+ theme(legend.position = "top")
+
+```
+
+
+# Faire des tableaux
+
+On réalise peut réaliser des tableaux avec sur Rmarkdown, avec la fonction kable() du package knitr ou en utilisant les packages kableExtra et gtsummary.
+
+## kable() et le package kableExtra()
+
+Faisons un petit tableau.
+
+```{r}
+# L'individu utilise t-il d'autres protections qu'une moustiquare ?
+t <- table(Base$s03q40)
+t
+
+```
+
+Pas très attrayant...Et si on rendait cela plus regardable ?
+
+```{r, fig.align='center'}
+kable(t)
+```
+
+Nous pouvons changer ajouter un titre et changer le style
+
+```{r}
+t %>% 
+kable(format = "latex")
+
+```
+
+```{r}
+t %>% 
+kable(format = "latex", booktable = TRUE)
+
+```
+
+Avec kable_style() de kableExtra, on peut aller plus loin. Notons que cette dfonction s'applique à un tableau kable.
+
+```{r}
+t %>% 
+ kable("latex", booktabs = T)%>%
+  kable_styling(latex_options = "striped")
+```
+
+On peut en sorte que cela prenne toute la largeur de la page et on peut ajuster la taille de police.
+
+```{r}
+
+t %>% 
+    kable("latex", booktabs = T)%>%
+  kable_styling(full_width = TRUE, font_size = 6)
+
+```
+
+Et si les colonnes de notre dztaframe sont nombreuses, on peut s'arranger pour qu'elles s'affichent toutes avec l'option "scale_down". Comparez !
+
+```{r}
+Base[1:10, 1:12] %>% 
+    kable("latex", booktabs = T)
+  
+```
+
+Et...
+
+```{r fig.align='center'}
+
+Base[1:10, 1:12] %>% 
+  kable() %>% 
+  kable_styling(latex_options = c("striped", "scale_down"))
+
+```
+
+Aussi, il est possible de sectionner des lignes ou des colonnes specifiques et de leur donner un style rien qu'à eux!
+
+```{r}
+
+  head(Base[1:10, 1:10]) %>%
+  kable("latex", booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(5, color = "red") %>%
+  row_spec(1, bold = T, color = "white", background = "black", italic = TRUE) %>%
+  row_spec(0, angle = 45, bold = TRUE)
+
+```
+
+## gtsummary
+
+gtsummary permets de réaliser des tableaux statistiques combinant plusieurs variables, l’affichage des résultats pouvant dépendre du type de variables.
+
+Par défaut, gtsummary considère qu’une variable est catégorielle s’il s’agit d’un facteur, d’une variable textuelle ou d’une variable numérique ayant moins de 10 valeurs différentes.
+
+Une variable sera considérée comme dichotomique (variable catégorielle à seulement deux modalités) s’il s’agit d’un vecteur logique (TRUE/FALSE), d’une variable textuelle codée yes/no ou d’une variable numérique codée 0/1.
+
+Dans les autres cas, une variable numérique sera considérée comme continue.
+
+On peut réaliser des tableaux croisés interessants...
+
+```{r}
+
+ tbl_summary(
+    Base,
+    include = c(s01q01, s03q38, s03q34), # sexe, moustiquaire, finacmt de l'assurance
+    by = s00q04, #  group
+    missing = "no" # don't list missing data separately
+  ) %>% 
+  add_n() %>%  # add column with total 
+  modify_header(label = "**Variable**") %>%  # column header
+  bold_labels()
+
+```
+
+On peut faire cela, et d'autres choses encore...
+
+
+# COMMENT FAIRE DES MATHS AVEC RMARKDOWN (EQUATIONS ET AUTRES) ?
+
+# PARTIE 1 : Des formules qui apparaissent dans le sommeil...
+
+
+![Ramanujan réveille les mathématiques](C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 0/Groupe 1 -- ISEP3/Ramanujan.jpg)
+
+Ramanujan EST **UN GENIE DES MATHS HORS DU COMMUN**.
+Ramanujan disait que les solutions mathématiques lui étaient **chuchotées par des divinités dans ses rêves**. Lorsqu'il se réveillait, il les notait immédiatement. Cette image illustre bien son génie:
+
+## Qui était Ramanujan?
+
+Voici quelques points essentiels sur sa vie:
+
+- **Nom complet** : Srinivasa Ramanujan (1887-1920).
+- **Origine** : Né dans une famille pauvre en Inde, dans le village d'Erode.
+- **Formation** : Appris les mathématiques avec seulement **deux livres** : 
+  - "A Synopsis of Elementary Results" de G.S. Carr.
+  - Des carnets où il notait ses propres idées.
+- **Découverte** : Ses travaux ont été reconnus par le mathématicien **G.H. Hardy**, qui l'invita à Cambridge, en Angleterre.
+- **Décès prématuré** : Mort à 32 ans, mais ses contributions continuent d'influencer les mathématiques modernes.
+
+---
+
+Srinivasa Ramanujan (1887-1920) est l'un des plus grands mathématiciens autodidactes de l'histoire. Né en Inde dans une famille modeste, il a appris les mathématiques presque **seul**, en étudiant **deux livres**:
+- "A Synopsis of Elementary Results" de G.S. Carr.
+- Ses propres carnets où il notait ses idées.
+
+Ses travaux, bien qu'étonnants et souvent sans démonstration, ont impressionné le célèbre mathématicien britannique **G.H. Hardy**, qui l'invita à Cambridge. En dépit de sa courte vie (il est mort à 32 ans), Ramanujan a laissé un héritage monumental.
+
+---
+
+## Anecdotes fascinantes sur Ramanujan 
+
+- **Le mystère des carnets** :
+  Ramanujan a laissé derrière lui des milliers de formules mathématiques dans des carnets. Certaines n'ont été prouvées que des **décennies après sa mort**!
+
+- **Le taxi 1729** :
+  Alors qu'il était à l'hôpital, Hardy lui rend visite et mentionne que le taxi qu'il a pris avait un numéro "ennuyeux" : **1729**. Ramanujan répond :  
+  _"Non! C'est le plus petit nombre qui peut s'exprimer comme la somme de deux cubes de deux manières différentes."_  
+  \[
+  1729 = 1^3 + 12^3 = 9^3 + 10^3
+  \]
+
+---
+
+
+## Contributions mathématiques majeures
+
+Ramanujan a marqué les mathématiques avec des formules à la fois incroyables et pratiques. Voici quelques-unes de ses contributions :
+
+### **1. Formule pour calculer \( \pi \)**
+Cette formule est utilisée aujourd'hui pour calculer \( \pi \) avec une précision impressionnante :
+
+
+$$
+\frac{1}{\pi} = \frac{2\sqrt{2}}{9801} \sum_{n=0}^\infty \frac{(4n)!(1103 + 26390n)}{(n!)^4 396^{4n}}
+$$
+
+### **2. La somme infinie des entiers**
+Ramanujan a démontré que :
+
+$$
+1 + 2 + 3 + 4 + \dots = -\frac{1}{12}
+$$
+
+Bien que cela semble paradoxal, cette formule a des applications en physique théorique, notamment dans la théorie des cordes.
+
+### **3. La fonction partition**
+Ramanujan a étudié la fonction **partition \( p(n) \)**, qui compte le nombre de façons de décomposer un entier en somme d'entiers positifs. Par exemple :
+\[
+p(4) = 5 \quad \text{car } 4 = 4, \; 3+1, \; 2+2, \; 2+1+1, \; 1+1+1+1
+\]
+Il a découvert des propriétés remarquables sur cette fonction, comme :
+
+$$
+p(5) = \frac{1}{2} \left( \sqrt{5} + 1 \right)^5
+$$
+
+### **4. Les séries hypergéométriques**
+Ramanujan a exploré les séries hypergéométriques, une classe d'équations infinies utiles en analyse complexe et en physique :
+
+$$
+1 + \frac{1}{1^2} + \frac{1}{2^2} + \frac{1}{3^2} + \dots = \frac{\pi^2}{6}
+$$
+### **5. Identité de Ramanujan pour les fonctions thêta**
+
+Ramanujan a étudié les **fonctions thêta**, qui jouent un rôle crucial en analyse complexe, en théorie des nombres et même en physique. Voici une de ses célèbres identités :
+
+$$
+\left( \sum_{n=-\infty}^\infty q^{n^2} \right)^2 = \sum_{n=-\infty}^\infty q^{n(n+1)}
+$$
+
+Cette équation relie deux séries infinies, où \( q \) est un paramètre complexe, avec \( |q| < 1 \). Ces identités apparaissent dans les formes modulaires, un domaine clé de la théorie des nombres.
+
+---
+
+### Exemple spécifique avec \( q = e^{-\pi} \)
+
+Lorsque \( q = e^{-\pi} \), une version particulière de cette identité devient :
+
+$$
+\left( 1 + 2q + 2q^4 + 2q^9 + \dots \right)^2 = 1 + 2q^2 + 2q^6 + 2q^{12} + \dots
+$$
+
+Les fonctions thêta sont utilisées aujourd'hui en cryptographie, en théorie des partitions, et en physique théorique.
+
+---
+
+# PARTIE 2 : Premiers pas sur les maths avec RMarkdown
+
+Maintenant que nous avons vu des exemples impressionnants issus des travaux de Ramanujan, explorons comment écrire des mathématiques dans un fichier RMarkdown. Nous allons commencer par les bases.
+
+RMarkdown utilise le langage **LaTeX** pour afficher des équations mathématiques. Voici les deux manières principales d'écrire des mathématiques :
+
+1. **Équations en ligne** : Utilisez `$...$` pour insérer une équation dans une phrase.
+2. **Équations en bloc** : Utilisez `$$...$$` pour afficher une équation sur une ligne séparée et centrée.
+
+---
+
+## Équations en ligne
+
+Les équations en ligne sont utiles lorsque vous voulez insérer des mathématiques au milieu d'une phrase.
+
+### Exemple 1 : Texte avec mathématiques
+
+```markdown
+La formule de Pythagore est donnée par $a^2 + b^2 = c^2$.
+
+## Exemple 1 : Formule d'énergie
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+E = mc^2
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+E = mc^2
+$$
+
+---
+
+## Exemple 2 : Fonction rationnelle
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+y = \frac{x^2 + 3x + 2}{x - 1}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+y = \frac{x^2 + 3x + 2}{x - 1}
+$$
+
+---
+
+## Exemple 3 : Somme, produit et intégrale
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+S = \sum_{i=1}^n i, \quad P = \prod_{i=1}^n x_i, \quad \int_0^1 x^2 \, dx
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+S = \sum_{i=1}^n i, \quad P = \prod_{i=1}^n x_i, \quad \int_0^1 x^2 \, dx
+$$
+
+---
+
+## Exemple 4 : Fonction polynomiale
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+f(x) = x^2 + \text{terme constant}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+f(x) = x^2 + \text{terme constant}
+$$
+
+---
+
+## Exemple 5 : Matrice
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+\begin{matrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{matrix}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+\begin{matrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{matrix}
+$$
+
+---
+
+## Exemple 6 : Système d'équations
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+\begin{aligned}
+x + y &= 10 \\
+2x - y &= 5
+\end{aligned}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+\begin{aligned}
+x + y &= 10 \\
+2x - y &= 5
+\end{aligned}
+$$
+
+# Tableaux récapitulatifs des commandes LaTeX
+
+Voici des tableaux utiles pour apprendre et utiliser les commandes mathématiques dans RMarkdown avec LaTeX.
+
+---
+
+## **Tableau 1 : Opérations mathématiques de base**
+
+| **Commande**         | **Description**           | **Exemple LaTeX**          | **Rendu**                 |
+|-----------------------|---------------------------|-----------------------------|---------------------------|
+| `+`, `-`, `\times`, `/` | Opérations de base       | `$a + b$, $a \times b$`     | \(a + b\), \(a \times b\) |
+| `\frac{num}{den}`    | Fraction                  | `$\frac{a}{b}$`            | \(\frac{a}{b}\)          |
+| `^`                  | Puissance                | `$x^2$`                    | \(x^2\)                  |
+| `_`                  | Indice                  | `$x_1$`                    | \(x_1\)                  |
+| `\sqrt{}`            | Racine carrée            | `$\sqrt{a+b}$`             | \(\sqrt{a+b}\)           |
+
+---
+
+## **Tableau 2 : Sommes, produits et intégrales**
+
+| **Commande**       | **Description**           | **Exemple LaTeX**          | **Rendu**              |
+|---------------------|---------------------------|-----------------------------|------------------------|
+| `\sum_{i=1}^n`     | Somme                    | `$\sum_{i=1}^n i$`          | \(\sum_{i=1}^n i\)    |
+| `\prod_{i=1}^n`    | Produit                  | `$\prod_{i=1}^n x_i$`       | \(\prod_{i=1}^n x_i\) |
+| `\int_a^b`         | Intégrale définie        | `$\int_a^b x^2 \, dx$`      | \(\int_a^b x^2 \, dx\)|
+
+---
+
+## **Tableau 3 : Commandes avancées pour matrices et alignements**
+
+| **Commande**           | **Description**                  | **Exemple LaTeX**            | **Rendu**                 |
+|-------------------------|----------------------------------|-------------------------------|---------------------------|
+| `\begin{matrix}`        | Matrice simple                  | `\begin{matrix} 1 & 2 \\ 3 & 4 \end{matrix}` | \(\begin{matrix} 1 & 2 \\ 3 & 4 \end{matrix}\) |
+| `\left(...\right)`      | Parenthèses autour d'une matrice| `\left( \begin{matrix} 1 & 2 \\ 3 & 4 \end{matrix} \right)` | \(\left( \begin{matrix} 1 & 2 \\ 3 & 4 \end{matrix} \right)\) |
+| `\begin{aligned}`       | Alignement des équations        | `\begin{aligned} x + y &= 10 \\ 2x - y &= 5 \end{aligned}` | \(\begin{aligned} x + y &= 10 \\ 2x - y &= 5 \end{aligned}\) |
+
+---
+
+## **Tableau 4 : Commandes pour inclure du texte dans les équations**
+
+| **Commande**       | **Description**           | **Exemple LaTeX**          | **Rendu**              |
+|---------------------|---------------------------|-----------------------------|------------------------|
+| `\text{}`          | Texte dans une équation   | `$f(x) = x^2 + \text{terme constant}$` | \(f(x) = x^2 + \text{terme constant}\) |
+| `\quad`            | Espacement dans une équation | `$x^2 + 3x \quad \text{et} \quad x-1$` | \(x^2 + 3x \quad \text{et} \quad x-1\) |
+
+---
+
+
+
+
+## Équations et rendus des équations de RAMANUJAN
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+\frac{1}{\pi} = \frac{2\sqrt{2}}{9801} \sum_{n=0}^\infty \frac{(4n)!(1103 + 26390n)}{(n!)^4 396^{4n}}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+\frac{1}{\pi} = \frac{2\sqrt{2}}{9801} \sum_{n=0}^\infty \frac{(4n)!(1103 + 26390n)}{(n!)^4 396^{4n}}
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+1 + 2 + 3 + 4 + \dots = -\frac{1}{12}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+1 + 2 + 3 + 4 + \dots = -\frac{1}{12}
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+p(4) = 5 \quad \text{car } 4 = 4, \; 3+1, \; 2+2, \; 2+1+1, \; 1+1+1+1
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+p(4) = 5 \quad \text{car } 4 = 4, \; 3+1, \; 2+2, \; 2+1+1, \; 1+1+1+1
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+p(5) = \frac{1}{2} \left( \sqrt{5} + 1 \right)^5
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+p(5) = \frac{1}{2} \left( \sqrt{5} + 1 \right)^5
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+1 + \frac{1}{1^2} + \frac{1}{2^2} + \frac{1}{3^2} + \dots = \frac{\pi^2}{6}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+1 + \frac{1}{1^2} + \frac{1}{2^2} + \frac{1}{3^2} + \dots = \frac{\pi^2}{6}
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+\left( \sum_{n=-\infty}^\infty q^{n^2} \right)^2 = \sum_{n=-\infty}^\infty q^{n(n+1)}
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+\left( \sum_{n=-\infty}^\infty q^{n^2} \right)^2 = \sum_{n=-\infty}^\infty q^{n(n+1)}
+$$
+
+---
+
+Code LaTeX :  
+\begin{verbatim}
+$$
+\left( 1 + 2q + 2q^4 + 2q^9 + \dots \right)^2 = 1 + 2q^2 + 2q^6 + 2q^{12} + \dots
+$$
+\end{verbatim}
+
+Rendu mathématique :  
+$$
+\left( 1 + 2q + 2q^4 + 2q^9 + \dots \right)^2 = 1 + 2q^2 + 2q^6 + 2q^{12} + \dots
+$$

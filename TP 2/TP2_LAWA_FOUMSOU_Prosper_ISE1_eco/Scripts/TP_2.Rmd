@@ -1,0 +1,120 @@
+---
+title: "TP2"
+author: "LAWA FOUMSOU Prosper"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 12pt
+geometry: margin=1in
+mainfont: "Times New Roman"
+header-includes:
+  - \usepackage{sectsty}
+  - \usepackage{xcolor}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \renewcommand{\headrulewidth}{0.4pt}
+  - \renewcommand{\footrulewidth}{0.4pt}
+  - \sectionfont{\color{blue}}
+---
+
+# Verification puis installation des packages
+
+```{r, message=FALSE,warning = FALSE}
+## Chargement des packages après vérification
+packages <- c("ggplot2", "dplyr", "haven", "utils", "knitr")
+for (i in packages) {
+  if (!require(i, character.only = TRUE)) {
+    # Si le package n'est pas installé, l'installer
+    install.packages(i, dependencies = TRUE)
+    
+    # Charger le package après l'installation
+    if (!require(i, character.only = TRUE)) {
+      stop(paste("Le package", i, "n'a pas pu être installé."))
+    }
+  } else {
+    message(paste("Le package", i, "est déjà installé."))
+  }
+}
+```
+
+# Chargement des bases ménage et individus
+
+Après installation des packages nécessaires pour la suite de notre travail, importons les bases.
+
+```{r}
+# Importation des bases
+base_ind <- haven::read_dta("../Données/ehcvm_individu_SEN2018.dta")
+base_men <- haven::read_dta("../Données/ehcvm_menage_SEN2018.dta")
+
+# Gestion des labels
+base_ind <- base_ind %>%
+  mutate(across(where(is.labelled), haven::as_factor))
+base_men <- base_men %>%
+  mutate(across(where(is.labelled), haven::as_factor))
+```
+
+# Informtions sur les bases
+
+```{r}
+# Nombre d'observations et de variables dans chaque bases
+base::dim(base_ind)
+base::dim(base_men)
+
+```
+
+# Jointures
+
+Les différents types de jointures avec chacune sa fonctionnalité. On distingue:
+
+1.  La jointure qui conserve le lignes communes aux deux tables. Elle est appelée inner join
+
+2.  La jointure qui concerve toutes les lignes de la table de gauche. Elle est appelée left join
+
+3.  La jointure qui concerve toutes les lignes de la table de droite. Elle est appelée right join
+
+4.  La jointure qui concerve toutes les lignes des deux tables. Elle appelée full join
+
+5.  La jointure qui concerve toutes lignes de la table de gauche qui ont une correspondance.Ellle est appelée semi join
+
+6.  La jointure qui concerve toutes les lignes de la table de gauches sans correspondance. Elle est appelée anti join.
+
+Effectuons une left join pour reccupérer les informations du chef de ménage
+
+```{r}
+base_ind_unique <- base_ind %>%
+  dplyr::group_by(hhid) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup()
+
+base_CM <- base_men %>%
+  dplyr::left_join(base_ind_unique, by = "hhid")
+
+
+# Informations de la base
+base::dim(base_CM)
+```
+
+# Informations sur le chef de ménage
+
+```{r}
+# Répartiton des CM selon le sexe
+base_CM %>%
+  count(sexe) %>%
+  kable(col.names = c("Sexe", "Fréquence"), caption = "Tableau des fréquences de sexe")
+
+# Répartition des CM selon le milieu de résidence
+base_CM %>%
+  count(milieu) %>%
+  kable(col.names = c("Milieu de résidence", "Fréquence"), caption = "Tableau des fréquences du milieu de résidence")
+
+# Répartition des CM selon la réligion
+base_CM %>%
+  count(religion) %>%
+  kable(col.names = c("Religion", "Fréquence"), caption = "Tableau des fréquences de la réligion")
+
+# Répartition des CM par elon le diplome
+base_CM %>%
+  count(diplome) %>%
+  kable(col.names = c("Diplome", "Fréquence"), caption = "Tableau des fréquences du diplome")
+```
