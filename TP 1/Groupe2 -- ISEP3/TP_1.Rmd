@@ -722,20 +722,7 @@ summary(modele)
 - **Intercept (\(\beta_0\))** : 3183.5
 - **Coefficient d'âge (\(\beta_1\))** : -16.75
 
-Cela signifie que pour chaque année supplémentaire d'âge, le revenu diminue en moyenne de **\$16.75**, selon ce modèle fictif.
-
-## 3. Analyse de la variance (ANOVA)
-
-Effectuons une ANOVA pour déterminer si le niveau d'éducation a un effet significatif sur le revenu.
-
-```{r anova-education, echo=TRUE}
-anova_modele <- aov(Revenu ~ Education, data = df_fictif)
-summary(anova_modele)
-```
-
-### Interprétation des résultats
-
-Le test ANOVA montre si les différences de moyenne de revenu entre les différents niveaux d'éducation sont statistiquement significatives.
+Cela signifie que pour chaque année supplémentaire d'âge, le revenu diminue en moyenne de **16.75**, selon ce modèle fictif.
 
 # IX. Astuces et bonnes pratiques en R Markdown
 

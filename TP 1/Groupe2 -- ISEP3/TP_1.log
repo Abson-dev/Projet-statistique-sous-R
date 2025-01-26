@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.1.26)  26 JAN 2025 22:37
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.1.26)  26 JAN 2025 22:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1323,22 +1323,22 @@ Underfull \hbox (badness 3735) in paragraph at lines 1320--1320
 [17]
 
 [18]
-
-[19]
-Underfull \hbox (badness 4492) in paragraph at lines 1529--1529
+Underfull \hbox (badness 4492) in paragraph at lines 1502--1502
 |\TU/Cambria(0)/b/n/24.88 IX. Astuces et bonnes pratiques en R
  []
 
 
 
+[19]
+
 [20]
+LaTeX Font Info:    Font shape `TU/Cambria(0)/b/n' will be
+(Font)              scaled to size 7.0pt on input line 1656.
+LaTeX Font Info:    Font shape `TU/Cambria(0)/b/n' will be
+(Font)              scaled to size 5.0pt on input line 1656.
+
 
 [21]
-LaTeX Font Info:    Font shape `TU/Cambria(0)/b/n' will be
-(Font)              scaled to size 7.0pt on input line 1683.
-LaTeX Font Info:    Font shape `TU/Cambria(0)/b/n' will be
-(Font)              scaled to size 5.0pt on input line 1683.
-
 
 [22] (./TP_1.aux)
  ***********
@@ -1350,10 +1350,10 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 19837 strings out of 475852
- 363449 string characters out of 5773468
- 919196 words of memory out of 5000000
- 42434 multiletter control sequences out of 15000+600000
+ 19833 strings out of 475852
+ 363369 string characters out of 5773468
+ 919093 words of memory out of 5000000
+ 42430 multiletter control sequences out of 15000+600000
  562808 words of font info for 110 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  90i,10n,125p,1193b,413s stack positions out of 10000i,1000n,20000p,200000b,200000s

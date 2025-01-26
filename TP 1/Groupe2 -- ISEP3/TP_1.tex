@@ -1192,7 +1192,7 @@ les exporter en format LaTeX ou HTML.
 
 \begin{verbatim}
 ## % latex table generated in R 4.3.2 by xtable 1.8-4 package
-## % Sun Jan 26 22:37:38 2025
+## % Sun Jan 26 22:54:18 2025
 ## \begin{table}[ht]
 ## \centering
 ## \caption{Tableau croisé : Sexe vs Education} 
@@ -1495,34 +1495,7 @@ résultats}\label{interpruxe9tation-des-ruxe9sultats}}
 \end{itemize}
 
 Cela signifie que pour chaque année supplémentaire d'âge, le revenu
-diminue en moyenne de \textbf{\$16.75}, selon ce modèle fictif.
-
-\hypertarget{analyse-de-la-variance-anova}{%
-\subsection{3. Analyse de la variance
-(ANOVA)}\label{analyse-de-la-variance-anova}}
-
-Effectuons une ANOVA pour déterminer si le niveau d'éducation a un effet
-significatif sur le revenu.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{anova\_modele }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(Revenu }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Education, }\AttributeTok{data =}\NormalTok{ df\_fictif)}
-\FunctionTok{summary}\NormalTok{(anova\_modele)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##              Df    Sum Sq Mean Sq F value Pr(>F)
-## Education     2    426913  213456   0.311  0.733
-## Residuals   497 340816749  685748
-\end{verbatim}
-
-\hypertarget{interpruxe9tation-des-ruxe9sultats-1}{%
-\subsubsection{Interprétation des
-résultats}\label{interpruxe9tation-des-ruxe9sultats-1}}
-
-Le test ANOVA montre si les différences de moyenne de revenu entre les
-différents niveaux d'éducation sont statistiquement significatives.
+diminue en moyenne de \textbf{16.75}, selon ce modèle fictif.
 
 \hypertarget{ix.-astuces-et-bonnes-pratiques-en-r-markdown}{%
 \section{IX. Astuces et bonnes pratiques en R
