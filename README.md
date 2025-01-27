@@ -32,6 +32,12 @@ A partir de Rmarkdown, reproduisez les rapports suivants:
 
 ### TP 10
 
+- Theme 1: Application de l'Intelligence Artificiel(IA) avec R
+- Theme 2: Pratique des enquetes avec R
+- Theme 3: Reproduire un livre a l'aide de R
+- Theme 4: Suivie de la collecte des donnees avec R
+- Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
+
 ### TP 11
 
 
