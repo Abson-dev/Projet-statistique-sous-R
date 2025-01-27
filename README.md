@@ -12,6 +12,10 @@ Le cours de Projet Statistique sous R et Python est dispense par Mr Hema Aboubac
 
 ### TP 3
 
+A partir de Rmarkdown, reproduisez les rapports suivants:
+
+- [Résumé de cours : Séries numériques](https://www.bibmath.net/ressources/index.php?action=affiche&quoi=mathsup/cours/series.html#:~:text=Dans%20toute%20la%20suite%2C%20%28un%29n%E2%88%88N%20%28u%20n%29%20n,%3D%20%E2%88%91%20k%20%3D%200%20n%20u%20k.)
+
 ### TP 4
 
 ### TP 5
