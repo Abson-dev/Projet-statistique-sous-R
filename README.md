@@ -20,6 +20,9 @@ A partir de Rmarkdown, reproduisez les rapports suivants:
 
 ### TP 4
 
+En utilisant les enquetes EHCVM 2019 des pays de l'UEMOA, proposez une harmisation de ces bases de donnees au niveau administratif le plus fin (communes par exemple).
+Le decoupage administratif a utilise est soit [HDX](https://data.humdata.org/) ou [geoBoundaries](https://www.geoboundaries.org/simplifiedDownloads.html)
+
 ### TP 5
 
 ### TP 6
