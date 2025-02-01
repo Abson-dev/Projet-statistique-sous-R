@@ -1,0 +1,54 @@
+---
+title: "Le rapport statistique"
+author: "Illy"
+date: "21-01-2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+installation de package
+```{r}
+library(utils)
+library(dplyr)
+```
+
+
+Chargement des bases
+```{r}
+menage<-utils::read.csv("ehcvm_menage_bfa2021.csv")
+individu<-utils::read.csv("ehcvm_individu_bfa2021.csv")
+```
+Structure de la base menage
+```{r}
+utils::str(menage)
+`
+``
+Structure de la base individu
+```{r}
+utils::str(individu)
+```
+
+```{r}
+base_merge<-dplyr::left_join(individu,menage,by="hhid")
+
+```
+Logement
+
+```{r}
+
+result <-  base_merge %>% 
+            select(pid,logem)
+result
+
+```
+
+
+```{r}
+
+```
+
+
+

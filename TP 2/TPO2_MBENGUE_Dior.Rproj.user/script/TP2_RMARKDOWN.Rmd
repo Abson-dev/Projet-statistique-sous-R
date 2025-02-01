@@ -1,0 +1,60 @@
+---
+title: "TP2_Dior_MBENGUE"
+author: "Dior MBENGUE"
+date: "2025-01-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+chargemnet des packages
+
+```{r}
+library(utils)
+library(dplyr)
+```
+chargement des bases ménages et individus
+
+```{r}
+menage <-utils::read.csv("../données/ehcvm_menage_sen2021.csv")
+indiv <- utils::read.csv("../données/ehcvm_individu_sen2021.csv")
+
+```
+
+
+Structure de la base ménages
+
+```{r}
+utils::str(menage)
+```
+
+Structure de la base individus
+```{r}
+utils::str(indiv)
+```
+Merge des bases
+
+```{r}
+base_merge <- dplyr::left_join(indiv,menage,by="hhid")
+base_merge
+
+```
+Séléctionner pour avoir le sexe du chef de ménage aprés avoir filtrer dans la base individu les chef de ménages
+```{r}
+resultat <- indiv%>%
+            dplyr::filter(lien=="1") %>% 
+            dplyr::select(hhid,sexe)
+print(resultat)
+  
+```
+Ici, on a fait une jointure entre la base nouvellement créée, resultat et la base indiv puis selectionner le sexe du chef de ménage(sexe.y) et celui des individus(sexe.x) appartenant à ce ménage
+
+
+```{r}
+base_sexe_cm <- dplyr::left_join(indiv,resultat,by="hhid") %>% 
+                dplyr::select(numind,sexe.x,hhid,sexe.y)
+base_sexe_cm
+
+```
+
