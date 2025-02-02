@@ -1,0 +1,60 @@
+---
+title: "TP02"
+author: "Paul_BALAFAI"
+date: "January 21, 2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+chargement des packages
+```{r}
+library(utils)
+library(dplyr)
+```
+
+
+
+chargement des bases
+```{r}
+d_individus <- utils::read.csv("donnees/ehcvm_individu_sen2021.csv")
+d_menage <- utils::read.csv("donnees/ehcvm_menage_sen2021.csv")
+
+```
+```{r}
+utils::str(d_individus)
+```
+
+```{r}
+utils::str(d_menage)
+```
+
+
+```{r}
+d_menage
+d_individus
+```
+
+fusion des 2 bases
+```{r}
+base_merge <- dplyr::left_join(d_individus,d_menage,by="hhid")
+```
+
+```{r}
+names(base_merge)
+summary.factor(base_merge$sexe)
+```
+
+
+menage ou le chef de menage est une femme
+```{r}
+chef_femme <- base_merge %>% dplyr::filter(sexe == 1)
+
+```
+
+
+
+
+
