@@ -1,0 +1,90 @@
+---
+title: "TP2"
+output: html_document
+date: "2025-01-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#chargement de données 
+```{r}
+
+library(utils)
+library(dplyr)
+```
+```{r}
+menage <- utils::read.csv("../données/ehcvm_menage_bfa2021.csv") 
+
+```
+```{r}
+individu <- utils::read.csv("../données/ehcvm_individu_bfa2021.csv")
+```
+
+```{r}
+str(menage)
+```
+```{r}
+str(individu)
+```
+```{r}
+menage 
+individu
+```
+
+```{r}
+base_merged <- dplyr::left_join(individu,menage,by='hhid')
+base_merged
+
+```
+
+```{r}
+
+# Identifier le sexe du chef de ménage 
+
+resultats <- individu %>%
+              group_by(hhid) %>%                 # Regrouper par ID_menage
+              mutate(Sexe_chef = sexe[lien == "Chef de ménage"]) %>%      # Identifier le sexe du chef
+              ungroup()%>%                              # Désactiver le regroupement
+              select(hhid,pid,sexe,Sexe_chef)
+            
+print(resultats)
+
+```
+
+*Merge des bases*
+
+**Différents type de merge**
+  * - *inner_join()* :Conserve uniquement les lignes qui ont des correspondances dans les deux tables.
+  
+  * - *rigth_join()* : Conserve toutes les lignes de la deuxième table (droite) et ajoute les correspondances de la première table (gauche). Les valeurs manquantes sont remplies par NA.
+  
+  * - *left_join()* :Conserve toutes les lignes de la première table (gauche) et ajoute les correspondances de la deuxième table (droite). Les valeurs manquantes sont remplies par NA
+  
+  * - *full_join()* : Conserve toutes les lignes des deux tables, qu'il y ait correspondance ou non. Les valeurs manquantes sont remplies par NA.
+ 
+*Ici, l'objectif est de donner à chaque individu, le ménage corrrepondant*. Donc nous utiliserons la jointure gauche (left_join())
+
+```{r}
+
+base_merge <-  dplyr::left_join(individu,menage, by = "hhid")
+base_merge
+
+```
+
+*Type de logement pour chaque individu*
+
+```{r}
+
+result <-  base_merge %>% 
+            select(pid,logem)
+result
+
+```
+
+
+```{r}
+
+```
+
+

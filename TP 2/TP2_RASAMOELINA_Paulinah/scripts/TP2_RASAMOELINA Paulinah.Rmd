@@ -1,0 +1,89 @@
+---
+title: "TP2"
+author: "RASAMOELINA Paulinah"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+  word_document: 
+    toc: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I-Installation des packages et importation des bases de données
+## I-1-Installation des packages
+
+```{r}
+library(utils)
+library(dplyr)
+```
+
+## I-2- Importation des bases de données (menage et individu)
+
+Nous avons choisi la base de données EHCVM du Burkina Faso pour l'année 2021.
+
+```{r}
+menage <- utils::read.csv("../donnees/ehcvm_menage_bfa2021.csv")
+individu <- utils::read.csv("../donnees/ehcvm_individu_bfa2021.csv")
+```
+
+## I-3- Structure des deux bases (menage et individu)
+
+Nous allons utiliser la fonction "str" du package "utils" pour afficher la structure des deux bases de données.
+
+### I-3-1- Structurede la base ménage
+
+```{r}
+utils::str(menage)
+
+```
+
+### I-3-2- Structurede de la base individu
+
+```{r}
+utils::str(individu)
+
+```
+
+# II- Jointure des deux bases
+Nous allons utiliser la fonction "left_join" du package "dplyr" pour fusionner les deux bases de données. Pour ce faire, nous avons identifié la clé commune qui relie les deux tables. Ici c'est l'identifiant "hhid". Nous avons ensuite obtenu une nouvelle base que nous avons nommée "base_merge".
+
+```{r}
+menage
+individu
+```
+
+```{r}
+base_merge <- dplyr:: left_join(individu, menage, by = "hhid" )
+base_merge
+```
+
+# III- Création d'une nouvelle base de données appelée base_final
+
+Nous allons créer cette nouvelle base de données pour faciliter l'analyse au niveau individuel en combinant les deux identifiants, hhid et pid, issus de la base "base_merge"  afin d'obtenir une nouvelle variable appelée "identifiant". Ensuite, nous avons placé cette variable identifiant après la variable pid dans la base base_final, pour mieux la comparer aux identifiants hhid et pid.
+Nous allons utiliser les fonctions mutate, select et arrange du package dplyr pour effectuer cette tâche. À la fin, le nombre de variables augmentera pour atteindre 96 (=95+1).
+
+```{r}
+base_final <- base_merge %>% 
+  dplyr:: mutate(identifiant = hhid * 100 + pid) %>%
+   select(country.x, year.x, vague.x, hhid, grappe.x, menage.x, pid, identifiant, everything()) %>%
+  dplyr:: arrange(identifiant)
+base_final
+```
+
+# IV- Filtrage de données par l'analyse de chaque individu
+
+Nous allons utiliser la fonction filter du package dplyr pour afficher les informations concernant un (ou plusieurs) individu(s) à travers son identifiant dans la base base_final. Nous avons choisi d'afficher les informations suivantes : le sexe de l'individu, son âge, son adresse, son lien dans le ménage, et le statut de l'individu concernant son logement..
+
+```{r}
+base_filter <- base_final %>%
+  dplyr:: filter(identifiant == "58600503") %>%
+  select(sexe, age,region, province, commune, milieu, lien, logem)
+base_filter
+```
+

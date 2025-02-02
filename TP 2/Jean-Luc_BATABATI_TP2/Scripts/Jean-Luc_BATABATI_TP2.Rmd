@@ -1,0 +1,100 @@
+---
+title: "Untitled"
+author: "Jean-Luc BATABATI"
+date: "2025-01-23"
+output: word_document
+---
+
+# Répertoire de travail
+```{r}
+setwd("C:/Users/ASUS/OneDrive/Documents/GitHub/Projet-statistique-sous-R/TP 2/Jean-Luc_BATABATI_TP2")
+
+```
+
+
+## Chargement des packages
+
+```{r}
+View(installed.packages())
+```
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(utils)
+```
+
+
+
+
+# Importation de la base individu
+```{r}
+Base_ind <- readr::read_csv("../Données/ehcvm_individu_sen2021.csv")
+```
+
+#  Importation de la base menage
+```{r}
+Base_men <- readr::read_csv("../Données/ehcvm_menage_sen2021.csv")
+```
+
+#Informations sur la base individu
+
+```{r}
+utils::str(Base_ind)
+```
+
+#Informations sur la base ménage
+
+```{r}
+utils::str(Base_men)
+```
+
+
+
+2.Merging des deux bases
+
+Pour merger les deux bases nous avons les fonction suivantes de dplyr :
+  - inner_join() : Conserve uniquement les lignes correspondantes des deux bases.
+  - left_join() : Conserve toutes les lignes de la première base, même si elles n'ont pas de correspondance dans la seconde.
+  - right_join() : Conserve toutes les lignes de la deuxième base.
+  - full_join() : Conserve toutes les lignes des deux bases.
+
+Nous utiliserons la fonction left_join et la clé de merging ici est hhid
+
+```{r}
+Base_merge <- Base_ind %>%
+  dplyr::left_join(Base_men, by = "hhid")
+```
+
+
+*Retrouvons les caractéristiques du Chef de Ménage à partir de la base mergée*
+
+
+# Retrouvons l'age moyen des chefs de menage selon le sexe des individus
+
+```{r}
+Age_mean <- Base_merge %>% 
+  group_by(sexe) %>%                            
+  summarize(
+    age_moyen = mean(age, na.rm = TRUE),        
+     ) %>% 
+print(Age_mean)
+
+```
+
+
+#Distribution des ménages par milieu de résidence des individus
+
+```{r}
+Nb_milieu <- Base_merge %>% 
+  select(hhid, milieu) %>%      
+  group_by(milieu) %>%              
+  summarize(nombre_men = n()) %>%
+  mutate(pourcentage = nombre_men / sum(nombre_men) * 100) %>% 
+  ungroup()                          
+
+print(Nb_milieu)
+```
+
+

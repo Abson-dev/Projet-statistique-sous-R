@@ -1,0 +1,95 @@
+---
+title: "TP_2"
+author: "ZINABA_Albert"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc_depth: 2
+    toc: true
+  html_document:
+    toc_depth: 2
+  pdf_document:
+    toc: true
+    toc_depth: '2'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results= 'hide', warning =FALSE, message = FALSE)
+
+#Compte tenue de la taille des bases de données pour optons de ne pas affiché les resultats #dans les sorties a travers "results='hide'".
+```
+
+# I-Telechargements des packages et importation des bases de données
+
+## I-1-Telechargement des packages
+
+```{r}
+library(utils)
+library(dplyr)
+```
+
+## I-2 Importation de la base Individu
+
+```{r}
+Individu<- utils::read.csv("../Données/ehcvm_individu_bfa2021.csv")
+Individu
+
+
+#La syntaxe ci-dessus permet a travers la fonction 'read.csv()' permet de charger #le fichier 'ehcvm_individu_bfa2021.csv' dans un objet 'Individu' sous #forme de dataframe manipulable dans R.
+```
+
+## I-3-Importation de la base Menage
+
+```{r}
+Menage<- utils::read.csv("../Données/ehcvm_menage_bfa2021.csv")
+Menage
+
+#Cette syntaxe aussi permet de charger le #fichier 'ehcvm_menage_bfa2021.csv' dans un objet 'Menage' sous forme de #dataframe #manipulable dans R.
+
+```
+
+## I-4 Structure des deux bases
+
+Nous allons utiliser la fonction "str" du package "utils" pour afficher la structure des deux bases.
+```{r,} 
+utils::str(Individu)
+utils::str(Menage)
+```
+
+
+# II-Jointure des deux bases
+
+Ici nous utilisons la fonction "left_join" du package dplyr pour fusioner les deux bases. On obtient une nouvelle base de données tout en gardeant les identifiants des individus.
+```{r}
+Base_merge<- dplyr:: left_join(Individu,Menage,by="hhid")
+Base_merge
+
+```
+
+## II-1 Creation d'une nouvelle base de données avec un identifiant unique pour chaque individu
+
+Cette nouvelle base a été crée en ajoutant la variable "identifiant" crée par combinaison de deux vriables a savoir "hhid" et "pid", issus de la base "base_merge". Cette nouvelle base nommée "Base_Id" contient a present 96 variables.
+
+```{r}
+Base_Id <- Base_merge %>%
+  dplyr:: mutate(identifiant = hhid * 100 + pid) %>%
+  select(country.x,year.x,vague.x, hhid, grappe.x, menage.x, pid, identifiant, everything()) %>%
+  arrange(identifiant)
+Base_Id
+
+
+```
+
+## II-2 Filtrage de données par l'identifiant de l'individu
+
+A travers la fonction "filter et select" de dplyr nous filtrons certaines informations d'un individu dans la Base_Id en inserant comme argument son identifiant crée. 
+Par exemple avec la syntaxe suivante on filtre les informations de l'individu "58600507" comme son sexe, son age, son logement et lien avec le chef de menage, sa religion, sa region entre autres.
+
+```{r}
+Donnee_filtre <- Base_Id %>%
+ dplyr:: filter(identifiant == "58600507") %>%
+  select(sexe, age, logem, lien, religion, region)
+Donnee_filtre
+```
+
+
