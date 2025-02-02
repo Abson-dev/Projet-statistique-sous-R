@@ -1,0 +1,97 @@
+---
+title: "My TP3"
+author: "FALL Ndeye Ramatoulaye Ndoye et SOMA Ben Idriss"
+date: "2025-01-31"
+output: 
+  html_document:
+    css: style.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ***Exercices corrigés - Séries numériques - études pratiques***
+
+## **Convergence de séries à termes positifs**
+
+__Exercice 1__ __Majorations et équivalents - 1__
+
+Étudier la convergence des séries $\sum u_n$ suivantes :
+
+1.  $u_n = \frac{n}{n^3 + 1}$
+2.  $u_n = \frac{\sqrt{n}}{n^2 + \sqrt{n}}$
+3.  $u_n = n \sin\left(\frac{1}{n}\right)$
+4.  $u_n = \frac{1}{\sqrt{n}} \ln\left(1 + \frac{1}{\sqrt{n}}\right)$
+5.  $u_n = \frac{(-1)^n + n}{n^2 + 1}$
+6.  $u_n = \frac{1}{n!}$
+7.  $u_n = \frac{3^n + n^4}{5^n - 2^n}$
+8.  $u_n = \frac{n + 1}{2^n + 8}$
+9.  $u_n = \frac{1}{\ln(n^2 + 1)}$
+
+__Exercice 2__ __Équivalents et majorations - 2__
+
+Étudier la convergence des séries $\sum u_n$ suivantes :
+
+1.  $u_n = \left(\frac{1}{2}\right)^{\sqrt{n}}$
+2.  $u_n = a^n n! ,\quad a \in \mathbb{R}_+$
+3.  $u_n = n e^{-\sqrt{n}}$
+4.  $u_n = \frac{\ln(n^2+3) \sqrt{2^n+1}}{4^n}$
+5.  $u_n = \frac{\ln n}{\ln(e^n -1)}$
+6.  $u_n = \left(\frac{1}{n}\right)^{1+\frac{1}{n}}$
+7.  $u_n = \frac{(n!)^3}{(3n)!}$
+
+__Exercice 3 - Règle de d'Alembert__
+
+Étudier la convergence des séries de terme général suivant :
+
+1.  $u_n = \frac{n!}{n^{a n}}, \quad a \in \mathbb{R}$
+
+2.  $u_n = \frac{n^\alpha (\ln n)^n}{n!}, \quad \alpha \in \mathbb{R}$
+
+3.  $u_n = \frac{(n!)^\alpha}{(2n)!}, \quad \alpha \in \mathbb{R}$
+
+__Exercice 4 - Équivalents à partir de développements limités__
+
+Donner la nature des séries numériques $\sum u_n$ suivantes :
+
+1.  $u_n = 1 - \cos\left(\frac{\pi}{n}\right)$
+
+2.  $u_n = \exp\left(\cos\left(\frac{1}{n}\right)\right) - \exp\left(\cos\left(\frac{2}{n}\right)\right)$
+
+3.  $u_n = \left(\frac{n}{n+1}\right)^{n^2}$
+
+
+__Exercice 5 - Avec des paramètres - 1__
+
+Discuter, suivant la valeur des paramètres, la convergence des séries suivantes :
+
+1.  $u_n = e^{\frac{1}{n}} - a - \frac{b}{n}, \quad a, b \in \mathbb{R}$
+2.  $u_n = \cos\left(\frac{1}{n}\right) - a - \frac{b}{n}, \quad a, b \in \mathbb{R}$
+3.  $u_n = \frac{1}{a n + b - c n}, \quad a, b, c \in \mathbb{R}, \quad (a, b) \neq (0, 0)$
+
+__Exercice 6 - Avec des paramètres - 3__
+
+Déterminer en fonction des paramètres la nature des séries numériques $\sum u_n$ suivantes :
+
+1.  $u_n = (n \sin(\frac{1}{n}))^{n^\alpha}, \quad \alpha \geq 0$
+2.  $u_n = \frac{1}{n^\alpha} ((n+1)^{1+1/n} - (n-1)^{1-1/n}), \quad \alpha \in \mathbb{R}$
+
+__Exercice 7 - Inclassables__
+
+Étudier la nature des séries $\sum u_n$ suivantes :
+
+1.  $u_n = \frac{1}{n}$ si $n$ est un carré, et 0 sinon.
+2.  $u_n = \arctan(n + a) - \arctan(n), \quad a > 0$
+
+__Exercice 8 - Cas limite de la règle de d'Alembert__
+
+Soit, pour $n \geq 1$ et $a > 0$, la suite $u_n = \frac{a^n}{n! n^n}$. Étudier la convergence de la série $\sum u_n$ lorsque $a \neq e$.
+Lorsque $a = e$, prouver que, pour $n$ assez grand, $\frac{u_{n+1}}{u_n} \geq 1$. Que dire de la nature de la série $\sum u_n$ ?
+
+__Exercice 9 - Cas limite de la règle de d'Alembert__
+
+1. Soit, pour tout entier $n \geq 1$, $u_n = \frac{1 \times 3 \times 5 \times \dots \times (2n-1)}{2 \times 4 \times 6 \times \dots \times (2n)}$. Quelle est la limite de $\frac{u_{n+1}}{u_n}$ ? Montrer que la suite $(n u_n)$ est croissante. En déduire que la série de terme général $u_n$ est divergente.
+
+2. Soit, pour tout entier $n \geq 2$, $v_n = \frac{1 \times 3 \times 5 \times \dots \times (2n-3)}{2 \times 4 \times 6 \times \dots \times (2n)}$. Quelle est la limite de $\frac{v_{n+1}}{v_n}$ ? Montrer que, si $1 < \alpha < \frac{3}{2}$, on a $(n+1)^\alpha v_{n+1} \leq n^\alpha v_n$. En déduire que la série de terme général $v_n$ converge.
