@@ -1,0 +1,47 @@
+/* Couleur de fond */
+body {
+    background-color: #f8f9f0; /* Violet clair */
+    color: #000000; /* Texte noir */
+    font-family: Arial, sans-serif;
+}
+
+/* Titres */
+h1 {
+    color: #000080; /* Bleu foncé */
+    text-align: center;
+}
+
+h2 {
+    color: #006400; /* Rouge foncé */
+    border-bottom: 2px solid #8B0000;
+    padding-bottom: 5px;
+}
+
+/* Mise en forme des exercices */
+strong {
+    color: #8B0000; /* Rouge foncé */
+}
+
+/* Blocs de code */
+pre {
+    background-color: #FFFFE0; /* Jaune clair */
+    border: 1px solid  #006400;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Formules mathématiques */
+.math {
+    color: ; /* Vert foncé */
+}
+
+/* Liens */
+a {
+    color: #000080;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #8B0000;
+    text-decoration: underline;
+}
