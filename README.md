@@ -24,7 +24,14 @@ En utilisant les enquetes EHCVM 2019 des pays de l'UEMOA, proposez une harmisati
 Le decoupage administratif a utilise est soit [HDX](https://data.humdata.org/) ou [geoBoundaries](https://www.geoboundaries.org/simplifiedDownloads.html)
 
 ### TP 5
+Pour chacune des bases EHCVM 2021/2022, il faut:
 
+- Sortir les statistiques descriptives ;
+- Faire la jointure avec la base ménage; 
+- Sortir des stats compte tenu de la jointure; 
+- Sortir des résultats avec et sans poids
+**Important**: Le TP est a faire sur Rmarkdown.
+  
 ### TP 6
 
 ### TP 8
