@@ -30,6 +30,7 @@ Pour chacune des bases EHCVM 2021/2022, il faut:
 - Faire la jointure avec la base ménage; 
 - Sortir des stats compte tenu de la jointure; 
 - Sortir des résultats avec et sans poids
+  
 **Important**: Le TP est a faire sur Rmarkdown.
   
 ### TP 6
