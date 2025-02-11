@@ -1,0 +1,171 @@
+---
+output: pdf_document
+fontsize: 12pt
+geometry: a4paper
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{titling}
+  - \usepackage{lmodern}
+  - \usepackage{fancyhdr}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{=tex}
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    \includegraphics[width=4cm]{logo.jpg} \\[0.2cm] 
+    {\large \textit{Ecole nationale de la Statistique et de l'Analyse Economique}}
+    
+    \vspace*{5cm}
+    
+    \[
+\fbox{\textbf{\LARGE \textsf{TRAVAIL PRATIQUE 3}}}
+\]
+
+      \vspace*{5cm}
+      
+         \begin{minipage}{0.5\textwidth}
+            \begin{flushleft} \large
+               \emph{\textsf{Rédigé par :}}\\
+                 LAWA FOUMSOU Prosper\\
+                 RASAMOELINA Paulinah\\
+               \textit{\small \color{blue} Élèves Ingénieurs Statisticiens Économistes}
+            \end{flushleft}
+         \end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                  M. Aboubacar HEMA\\
+                \textit{\small \color{blue} Research Analyst }
+            \end{flushright}
+        \end{minipage}
+        
+\end{titlepage}
+```
+\newpage
+
+## Exercice 10 - Un cran au-dessus
+
+### Enoncé
+
+Étudier la convergence des séries suivantes : 1.
+$u_n = \frac{1 + \frac{1}{2} + \cdots + \frac{1}{n}}{\ln(n!)}$ 2.
+$u_n = \int_0^{\pi/n} \frac{\sin^3(x)}{1 + x} dx$ 3.
+$u_n = e^{-u_n / n^\alpha}$, avec $\alpha \in \mathbb{R}$
+
+## Exercice 11 - Série harmonique
+
+### Enoncé
+
+Pour $n \geq 1$, on note $H_n = \sum_{k=1}^{n} \frac{1}{k}$. Démontrer
+que, pour tout $n \geq 1$, $$ \ln(n+1) \leq H_n \leq 1 + \ln(n) $$ En
+déduire un équivalent de $H_n$. On pose pour $n \geq 1$,
+$v_n = H_n - \ln(n+1)$. Vérifier que, pour $n \geq 2$,
+$$ v_n - v_{n-1} = \frac{1}{n} - \ln\left(1 + \frac{1}{n}\right) $$
+Étudier la monotonie de $(v_n)$. En déduire que $(v_n)$ est convergente.
+On note $\gamma$ sa limite et on pose pour $n \geq 1$,
+$$ w_n = H_n - \ln(n+1) - \gamma $$ Vérifier que, pour tout $x \geq 0$,
+$$ \ln(1 + x) = x - \int_0^x \frac{(x - t)}{(1 + t)^2} dt $$ En déduire
+que, pour tout $x \geq 0$,
+$$ \left|\ln(1 + x) - x\right| \leq \frac{x^2}{2} $$ Démontrer que, pour
+tout $n \geq 2$, $$ |w_n - w_{n-1}| \leq \frac{1}{2n^2} $$ Soit
+$M > N \geq 1$. Démontrer que
+$$ \sum_{k=N+1}^M \frac{1}{k^2} \leq \frac{1}{N} $$ En déduire, sous les
+mêmes hypothèses, que $$ |w_M - w_N| \leq \frac{1}{2N} $$ Puis que
+$$ |v_N - \gamma| \leq \frac{1}{2N} $$ Écrire un algorithme permettant
+de calculer une valeur approchée de $\gamma$ à $10^{-3}$ près.
+
+## Exercice 12 - Série des inverses des nombres premiers
+
+### Enoncé
+
+Soit $(p_k)_{k \geq 1}$ la suite ordonnée des nombres premiers. Le but
+de l'exercice est d'étudier la divergence de la série
+$$ \sum_{k \geq 1} \frac{1}{p_k} $$ Pour $n \geq 1$, on pose
+$$ V_n = \prod_{k=1}^n \left(1 - \frac{1}{p_k}\right) $$ Montrer que la
+suite $(V_n)$ est convergente si et seulement si la suite $(\ln V_n)$
+est convergente. En déduire que la suite $(V_n)$ est convergente si et
+seulement si la série $$ \sum_{k \geq 1} \frac{1}{p_k} $$ est
+convergente. Démontrer que
+$$ V_n = n \prod_{k=1}^n \left( \sum_{j \geq 0} \frac{1}{p_j^k} \right) $$
+En déduire que $$ V_n \geq \sum_{j=1}^n \frac{1}{j} $$ Quelle est la
+nature de la série $$ \sum_{k \geq 1} \frac{1}{p_k} $$ Pour
+$\alpha \in \mathbb{R}$, quelle est la nature de la série
+$$ \sum_{k \geq 1} \frac{1}{p_k^\alpha} $$
+
+## Exercice 13 - Valeur absolue et sinus
+
+# Énoncé
+
+Étudier la convergence de la série de terme général : $$
+S_n = \sum \frac{|\sin(n)|}{n}
+$$
+
+## Exercice 14 - Entiers sans 9
+
+# Énoncé
+
+On note $A$ l'ensemble des entiers naturels non-nuls dont l'écriture (en
+base 10) ne comporte pas de 9.\
+On énumère $A$ en la suite croissante $(k_n)$.
+
+Quelle est la nature de la série suivante ?
+
+$$
+\sum_{n=1}^{\infty} \frac{1}{k_n}
+$$
+
+# Convergence de séries à termes quelconques
+
+## Exercice 15 - Sans le critère des séries alternées
+
+### Énoncé
+
+On considère la série :
+
+$$
+\sum_{n \geq 1} \frac{(-1)^k}{k}
+$$
+
+et on note, pour $n \geq 1$,
+
+$$
+S_n = \sum_{k=1}^{n} \frac{(-1)^k}{k}, \quad u_n = S_{2n}, \quad v_n = S_{2n+1}.
+$$
+
+1.  La série est-elle **absolument convergente** ?\
+2.  Démontrer que les deux suites $(u_n)$ et $(v_n)$ sont
+    **adjacentes**.\
+3.  Conclure que la série est **convergente**.
+
+## Exercice 16 - Pour commencer
+
+### Énoncé
+
+Etudiez la nature des séries $\sum u_n$ suivantes
+
+1.  $$
+    u_n = \frac{\sin(n^2)}{n^2}
+    $$
+2.  $$
+    u_n = \frac{(-1)^n \ln n}{n}
+    $$
+3.  $$
+    u_n = \frac{\cos(n^2\pi)}{n \ln n}
+    $$
+
+## Exercice 17 - Convergence absolue
+
+## Enoncé
+
+Soit $f : [0,1] \to \mathbb{R}$ une fonction continue. Montrer que la
+série de terme général
+
+$$
+\frac{1}{n} \int_0^1 t^n f(t) \, dt
+$$ est elle convergente?
