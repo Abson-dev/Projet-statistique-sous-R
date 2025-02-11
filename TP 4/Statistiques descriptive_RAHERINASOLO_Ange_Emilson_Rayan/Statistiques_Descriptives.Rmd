@@ -1,0 +1,122 @@
+---
+title: "Statistiques_descriptives_ehcvm"
+author: "KD"
+date: "2025-02-11"
+output: html_document
+---
+
+# Exportation de la base EHCVM 2021
+```{r}
+library(haven)
+s01_me_gnb2021 <- read_dta("s01_me_gnb2021.dta")
+head(s01_me_gnb2021)
+```
+Objectif = faire un bon tableau
+```{r}
+install.packages("gtsummary")
+```
+```{r}
+unique(s01_me_gnb2021)
+library(gtsummary)
+
+s01_me_gnb2021 %>% select(trt,age,grade,response) %>% tbl_summary()
+```
+
+```{r}
+library(haven)
+ehcvm_menage <- read.csv("ehcvm_menage_gnb2021.csv")
+View(ehcvm_menage)
+
+```
+```{r}
+ehcvm_menage %>% select(logem,mur,toit,sol) %>% tbl_summary()
+```
+
+```{r}
+library(haven)
+ehcvm_menage <- read_dta("ehcvm_menage_gnb2021.dta")
+View(ehcvm_menage)
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol) %>% tbl_summary()
+```
+```{r}
+library(haven)
+ehcvm_menage <- read_dta("ehcvm_menage_gnb2021.dta")
+
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol) %>% tbl_summary( label = list(logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement")) %>% modify_header(label = "Caractérisques de l'habitat du ménage")
+```
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol,superf,grosrum, petitrum) %>% tbl_summary( label = list(superf ~ "Superficie agricole",
+ grosrum ~ "Nombre de gros ruminants",
+ petitrum~ "Nombre de petits ruminants",
+ logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement"
+ ),
+ statistic = list(superf ~ "{mean} ({sd})",##pour avoir la moyenne et l'écart-type
+                  grosrum ~ "{mean} ({sd})",
+                  petitrum ~ "{mean} ({sd})"
+                  ),
+ digits = everything() ~c(0,0,0,0),
+ missing = "always",  ##Pour afficher les missings
+ missing_text= "Valeurs manquantes"
+ ) %>% modify_header(label = "Agriculture, Elevage et logement")
+```
+
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol,superf,grosrum, petitrum) %>% tbl_summary( label = list(superf ~ "Superficie agricole",
+ grosrum ~ "Nombre de gros ruminants",
+ petitrum~ "Nombre de petits ruminants",
+ logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement"
+ ),
+ statistic = list(superf ~ "{mean} ({sd})",##pour avoir la moyenne et l'écart-type
+                  grosrum ~ "{mean} ({sd})",
+                  petitrum ~ "{mean} ({sd})"
+                  ),
+ digits = everything() ~c(0,0,0,0),
+ missing = "always",  ##Pour afficher les missings
+ missing_text= "Valeurs manquantes"
+ ) %>% modify_header(label = "Agriculture, Elevage et logement")
+```
+
+
+
+
+```{r}
+library(haven)
+ehcvm_welfare <- read_dta("ehcvm_welfare_gnb2021.dta")
+
+ehcvm_welfare %>% labelled::to_factor() %>% select(hgender,hage,hmstat,heduc,hdiploma) %>% tbl_summary( 
+  label = list(hgender ~ "Genre du chef de ménage",
+ hage ~ "Âge du chef de ménage",
+ hmstat~ "Situation matrimoniale du chef de ménage",
+ heduc ~ "Niveau d'éducation du chef de ménage",
+ hdiploma ~ "Diplôme du chef de ménage"
+ ),
+ statistic = list(hage ~ "{mean} ({sd})",
+                  hgender~ "{n}/{N} ({p}%)"##pour avoir la moyenne et l'écart-type
+                  ),
+ digits = everything() ~c(0,0,0,0),
+ missing = "always",  ##Pour afficher les missings
+ missing_text= "Valeurs manquantes"
+ ) %>% modify_header(label = "Caractéristiques du chef de ménage")
+
+```
+
+
