@@ -1,0 +1,115 @@
+---
+title: "statistiques descriptive"
+output: html_document
+date: "2025-02-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(utils)
+```
+
+
+```{r}
+library(dplyr)
+library(gtsummary)
+library(haven)
+```
+```{r}
+menage <- haven::read_dta("../Données/ehcvm_menage_ben2021.dta")
+```
+```{r}
+str(menage)
+```
+```{r}
+menage %>% select(logem,toit,mur)%>% tbl_summary()
+```
+```{r}
+menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary()
+```
+```{r}
+menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary(
+  label=list(logem~"logement du chef de menage ",
+             toit~"toit de la maison du chef",
+             mur~"mur de la maison "
+             )
+)
+```
+
+```{r}
+menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary(
+  label=list(logem~"logement du chef de menage ",
+             toit~"toit en matériaux ",
+             mur~"mur de la maison "
+             )
+  
+) %>% modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+```{r}
+
+```
+```{r}
+menage %>% select(grosrum,petitrum,superf) %>% tbl_summary()
+```
+```{r}
+menage %>%labelled::to_factor() %>% select(grosrum,petitrum,superf) %>% tbl_summary(statistic =list(grosrum~"{mean}({sd})",
+                                                                            petitrum~"{mean}({sd})",
+                                                                            superf~"{mean}({sd})"))
+```
+
+```{r}
+menage %>%labelled::to_factor() %>% select(grosrum,petitrum,superf) %>% tbl_summary(statistic =list(grosrum~"{mean}({sd})",
+                                                                            petitrum~"{mean}({sd})",
+                                                                            superf~"{mean}({sd})"),
+                                                                            digits =everything()~c(0,0,0))
+
+```
+
+```{r}
+menage %>%labelled::to_factor() %>% select(grosrum,petitrum,superf) %>% tbl_summary(statistic =          list(grosrum~"{mean}({sd})",
+                                                                            petitrum~"{mean}({sd})",
+                                                                            superf~"{mean}({sd})"),
+                                                                            digits =everything()~c(0,0,0),
+                                                                            missing = "always",
+                                                                        missing_text = "Valeurs manquantes ",
+                                                                            )
+
+```
+```{r}
+welfare <-haven::read_dta("../Données/ehcvm_welfare_ben2021.dta")
+```
+
+```{r}
+str(welfare)
+```
+
+```{r}
+welfare %>% select(hgender,hage,hmstat,heduc,hdiploma)%>% tbl_summary()
+```
+```{r}
+welfare %>%labelled::to_factor() %>% select(hgender,hage,hmstat,heduc,hdiploma) %>% tbl_summary()
+                                                                           
+```
+
+```{r}
+welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"
+                                                                            ))
+```
+```{r}
+welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"),
+missing = "always",
+missing_text = "Valeurs Manquantes "
+                                                                            )
+```
+
+```{r}
+welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"),
+missing = "always",
+missing_text = "Valeurs Manquantes ") %>% modify_header(label="Caratéristiques du ménage ")
+
+```
+
+
