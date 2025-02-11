@@ -1,0 +1,101 @@
+---
+title: "TP3"
+author: "ZINABA_KAFAND0"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  #word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+$\\$
+
+
+
+##### **Exercice 26 ⭐⭐⭐⭐- Critère de Cauchy**
+
+Montrer que la série de terme général $u_n = \frac{\cos(\ln(n))}{n}$  est divergente
+
+$\\$
+
+##### **Exercice 27⭐⭐⭐⭐⭐- Un cran au-dessus!**
+
+Etudier les séries de terme général:
+
+**1.** $u_n = \sin(\pi e n!)$ et $v_n = \sin(\frac{\pi}{e} n!)$
+
+**2.** $u_n = \frac{(-1)^{\lfloor \sqrt{n} \rfloor}}{n^\alpha}$, pour $\alpha \in \mathbb{R}$.
+
+
+$\\$
+
+
+### Comparaison à une intégrale
+
+$\\$
+
+##### **Exercice 28  ⭐- Somme partielle des série de Riemann**
+
+Soit $\alpha \in \mathbb{R}$.
+
+**1.** Pour $\alpha \in \mathbb{R},$ déterminer un équivalent de $S_n = \sum_{k=1}^{n} \frac{1}{k^\alpha}$.
+
+**2.** Pour $\alpha= 0$ déterminer un équivalent de $S_n = \sum_{k=1}^{n} \frac{1}{k^\alpha}$.
+
+$\\$
+
+##### **Exercice 29 ⭐- Reste d'une série de Rieman.**
+
+Soit $\alpha  >1 .$  On  note $$R_n = \sum_{k=n+1}^{\infty} \frac{1}{k^\alpha} .$$
+
+**1.** Soit $\alpha> 0.$ Déterminer 
+$$\lim_{{x \to +\infty}} \int_x^a \frac{dt}{t^\alpha}.$$
+
+**2.** En déduire un équivalent simple de $R_n$.
+
+$\\$
+
+##### **Exercice 30 ⭐⭐- Où sont les séries.**
+
+Déterminer un equivalent de $ln(n!).$
+
+$\\$
+
+
+#####  **Exercice 31 ⭐⭐⭐ - Suivant un paramètre**
+
+Suivant la valeur de $\alpha \in \mathbb{R}$, déterminer la nature de la série $\sum_{n} u_n$, où 
+$$ u_n = \frac{\sqrt{1} + \sqrt{2} + \dots + \sqrt{n} }{n^\alpha}.$$
+$\\$
+
+##### **Exercice 32 ⭐⭐⭐ - Séries de Bertrand**
+
+On souhaite étudier, suivant la valeur de $\alpha , \beta \in \mathbb{R}$ , la convergence de la série de terme général
+$$ u_n = \frac{1}{n^\alpha (\ln\,n)^\beta}.$$
+
+**1.** Démontrer que la série converge si \( \alpha > 1 \).
+
+**2.** Traiter le cas \( \alpha < 1 \).
+
+**3.** On supppose que \( \alpha = 1.\). On pose \(T_n = \int_{2}^{n} \frac{dx}{x(lnx)^\beta} \).
+
+$\quad$ **3.1.** Montrer que si \( \beta \leq 0 \), alors la série de terme général \( u_n \) est divergente.
+
+$\quad$ **3.2.** Montrer que si \( \beta > 1 \), alors la suite \( (T_n) \) est bornée, alors que si \( \beta \leq 1 \), la suite \( (T_n) \) tend vers \( +\infty \).
+
+$\quad$ **3.3.** Conclure pour la série de terme général \( u_n \), lorsque \( \alpha = 1 \). $\\$
+
+$\\$
+
+##### **Exercice 33 ⭐⭐⭐⭐ - Somme de logarithmes** 
+
+Par comparaison à une intégrale, donner un équivalent de  $u_n = \sum_{k=1}^{n} \ln^2(k).$ La série de terme général $\frac{1}{u_n}$ est-elle convergente?
+
+
+$\\$
+
+
+
