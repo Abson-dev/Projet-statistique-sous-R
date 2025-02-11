@@ -1,0 +1,109 @@
+---
+title: "statistiques descriptives"
+author: "Samba DIENG"
+date: "2025-02-11"
+output: pdf_document
+---
+
+
+
+```{r }
+packages <- c("haven","dplyr","gtsummary","labelled")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {  
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) 
+}
+base_01 <- read_dta("./Données/ehcvm_menage_civ2021.dta")
+welfare <- read_dta("./Données/ehcvm_welfare_civ2021.dta")
+
+```
+
+```{r }
+# Affichange sans les labels
+base_01 %>% 
+  select(logem, toit, mur) %>%
+  gtsummary::tbl_summary()
+
+
+```
+
+
+
+```{r }
+#labelisation des variables à travers la librairie labelled
+
+base_01 %>% labelled::to_factor()  %>% select(logem, toit, sol)  %>% tbl_summary()
+```
+
+```{r }
+#changer les labels qui s'affichent sur letableau avec tbl_summary(label..  
+base_01 %>%  labelled::to_factor() %>%
+            select(logem, toit, mur)  %>%
+            tbl_summary(label=list(logem~ " logement du chef de menage",
+                                   toit~ " toit de la maison",
+                                    mur ~ " mur de la maison"))%>%
+  
+            modify_header (label="description du menage")#pour modifier le titre du tableau (la première ligne)
+
+             
+```
+
+```{r }
+base_01 %>%  labelled::to_factor() %>%
+            select(logem, toit, mur,superf, grosrum)  %>%
+            tbl_summary(label=list(logem~ " logement du chef de menage",
+                                   toit~ " toit de la maison",
+                                    mur ~ " mur de la maison",
+                                    superf ~ " superficie du champ",
+                                    grosrum ~ " nombre de grand ruminants" ))%>%
+            modify_header (label="charactéristiques du ménage")
+```
+
+
+```{r }
+# statistic=pour calculer les moyennes et les écarts des variables quantitative
+#digits= pour controler le nombre de chiffres après la virgule (autant de zéros
+#que de variables dans statistic)
+#Pour modifier l'affichage des missing values, tu mets missin_text et tu remplaces #par le texte que tu veux (valeur manquantes, NA etc)
+base_01 %>%  labelled::to_factor() %>%
+            select(superf, grosrum, petitrum)  %>%
+            tbl_summary(label=list(superf ~ " superficie du champ",
+                                    grosrum ~ " nombre de grand ruminants",
+                                    petitrum ~ " nombre de petit ruminants" ),
+         
+            statistic=list( superf ~ "{mean} ({sd})",
+                            petitrum ~ "{mean} ({sd})",
+                            grosrum ~ "{mean} ({sd})"),
+                            digits=everything()~c(0,0,0),
+                            missing="always",
+                            missing_text = "valeur manquante")
+```
+
+
+```{r}
+#avec une autre base welfare
+
+
+welfare %>%  labelled::to_factor() %>%
+            select(hgender, hage, hmstat,heduc, hdiploma )  %>%
+            tbl_summary(label=list(hgender~ "genre du chef de menage",
+                                   hage~ "age du chef de menage",
+                                    hmstat ~ "situation matrimonialen du chef de menage",
+                                    heduc ~ "niveau déducation du chef de menage",
+                                    hdiploma ~ "diplome du chef de menage"),
+                        
+            statistic=list( 
+                            hage ~ "{mean} ({sd})"
+                           
+                           
+            ),
+                      digits=everything()~c(0,0,0,0,0),
+                      missing_text = "valeur manquante")
+
+```
+
+
+
+

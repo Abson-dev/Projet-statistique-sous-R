@@ -1,0 +1,6 @@
+"0","#Importation de la base menage EHCVM Benin"
+"0",""
+"0","base_men <-  utils::read.csv(""./Données/ehcvm_menage_ben2021.csv"")"
+"0","library(gtsummary)"
+"0",""
+"0","base_men %>% select(logem,toit,mur)%>% tbl_summary()"

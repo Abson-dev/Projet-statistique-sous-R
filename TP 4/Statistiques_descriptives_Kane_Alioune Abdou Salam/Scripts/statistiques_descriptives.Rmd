@@ -1,0 +1,288 @@
+---
+title: "statistiques_descriptives"
+author: "Alioune Abdou Salam Kane"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# 1- Importation de la base ménage  EHCVM pour la Guinée Bisseau
+
+```{r}
+# Charger le package nécessaire
+library(haven)
+
+# Importer le fichier Stata avec un chemin relatif depuis Scripts/
+donnees <- read_dta("../data/ehcvm_menage_gnb2021.dta")
+
+# Aperçu des données
+head(donnees)
+
+```
+
+# 2- Tableau 1
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels et en-tête modifié
+donnees_factorisees %>% 
+  select(logem, mur, toit, sol) %>% 
+  tbl_summary(
+    label = list(
+      logem = "Type de Logement",
+      mur = "Type de mur du logement",
+      toit = "Type de toit du logement",
+      sol = "Type de sol du logement"
+    )
+  ) %>% 
+  modify_header(label = "**Caractéristiques de l'habitat du ménage**")
+
+```
+
+
+# 3- Tableau 2
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels et en-tête modifié
+donnees_factorisees %>% 
+  select(superf, grosrum, petitrum) %>% 
+  tbl_summary(
+    label = list(
+      superf = "Superficie agricole",
+      grosrum = "Nombre de grands ruminants",
+      petitrum = "Nombre de petits ruminants"
+    )
+  ) %>% 
+  modify_header(label = "**Caractéristiques des ruminants**")
+```
+
+
+#4- Tableau 3
+
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels, les statistiques et l'en-tête modifié
+donnees_factorisees %>% 
+  select(superf, grosrum, petitrum) %>% 
+  tbl_summary(
+    label = list(
+      superf = "Superficie agricole",
+      grosrum = "Nombre de grands ruminants",
+      petitrum = "Nombre de petits ruminants"
+    ),
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    )
+  ) %>% 
+  modify_header(label = "**Caractéristiques des ruminants**")
+
+```
+
+#5- Tableau 4
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels, les statistiques et l'en-tête modifié
+donnees_factorisees %>% 
+  select(superf, grosrum, petitrum) %>% 
+  tbl_summary(
+    label = list(
+      superf = "Superficie agricole",
+      grosrum = "Nombre de grands ruminants",
+      petitrum = "Nombre de petits ruminants"
+    ),
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    )
+  ) %>% 
+  modify_header(label = "**Caractéristiques des ruminants**")
+
+```
+
+
+
+#6- Tableau 5
+
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees_1 <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels, les statistiques, les chiffres affichés et l'en-tête modifié
+donnees_factorisees_1 %>% 
+  select(superf, grosrum, petitrum) %>% 
+  tbl_summary(
+    label = list(
+      superf = "Superficie agricole",
+      grosrum = "Nombre de grands ruminants",
+      petitrum = "Nombre de petits ruminants"
+    ),
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    ),
+    digits = list(everything() ~ c(0, 0, 0))  # Arrondi à 0 décimales
+  ) %>% 
+  modify_header(label = "**Caractéristiques des ruminants**")
+
+```
+
+#7- Gestion des valeurs manquantes
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(labelled)
+
+# Convertir les variables labellisées en facteurs
+donnees_factorisees_1 <- donnees %>% 
+  to_factor()
+
+# Créer un tableau de résumé avec les labels, les statistiques, les chiffres affichés, la gestion des valeurs manquantes et l'en-tête modifié
+donnees_factorisees_1 %>% 
+  select(superf, grosrum, petitrum) %>% 
+  tbl_summary(
+    label = list(
+      superf = "Superficie agricole",
+      grosrum = "Nombre de grands ruminants",
+      petitrum = "Nombre de petits ruminants"
+    ),
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    ),
+    digits = list(everything() ~ c(0, 0, 0)),  # Arrondi à 0 décimales
+    missing = "always",  # Toujours afficher les valeurs manquantes
+    missing_text = "Valeur manquante ou NA"  # Texte affiché pour les valeurs manquantes
+  ) %>% 
+  modify_header(label = "**Caractéristiques des ruminants**")
+
+```
+
+#8-Tableau 6
+
+
+```{r}
+# Construire le chemin du fichier avec un chemin relatif depuis Scripts/
+chemin_fichier_1 <- "../data/ehcvm_welfare_gnb2021.dta"
+
+# Importer le fichier Stata
+donnees_exo <- read_dta(chemin_fichier_1) %>% 
+  to_factor()
+
+# Renommer les modalités en français
+donnees_exo <- donnees_exo %>%
+  mutate(
+    hgender = recode(hgender,
+      "Masculino" = "Masculin",
+      "Feminino" = "Féminin"
+    ),
+    hmstat = recode(hmstat,
+      "Solteiro (a)" = "Célibataire",
+      "Casado(a) monogâmico(a)" = "Marié(e) monogame",
+      "Casado(a) poligâmico(a)" = "Marié(e) polygame",
+      "União de facto" = "Union libre",
+      "Viúvo(a)" = "Veuf/Veuve",
+      "Divorciado(a)" = "Divorcé(e)",
+      "Separado(a)" = "Séparé(e)"
+    ),
+    heduc = recode(heduc,
+      "Nenhum" = "Aucun niveau",
+      "Pre-escolar" = "Pré-scolaire",
+      "primario 1 ciclo" = "Primaire 1er cycle",
+      "Primario 2 ciclo" = "Primaire 2ème cycle",
+      "primario 3 ciclo.gl 1" = "Primaire 3ème cycle",
+      "Ensino. tec.Prof 1" = "Enseignement technique",
+      "Second. gl 2" = "Secondaire général",
+      "Ensino Medio" = "Enseignement secondaire",
+      "Superior" = "Enseignement supérieur"
+    ),
+    hdiploma = recode(hdiploma,
+      "Nenhum" = "Aucun diplôme",
+      "EP 1 (Ensino Primário 1º ciclo)" = "Diplôme primaire 1er cycle",
+      "EP 2 (Ensino Primário 2º ciclo)" = "Diplôme primaire 2ème cycle",
+      "EP 3 (Ensino Primário 3º ciclo)" = "Diplôme primaire 3ème cycle",
+      "ETP (Ensino Técnico/Profissional)" = "Diplôme technique",
+      "ES (Ensino Secundário)" = "Diplôme secondaire",
+      "EM (Ensino Médio)" = "Diplôme enseignement moyen",
+      "Licenciado" = "Diplôme universitaire",
+      "Pós graduação/Especialização" = "Post-graduation/Spécialisation",
+      "Mestrado" = "Master",
+      "Doutorado" = "Doctorat"
+    )
+  )
+
+# Créer un tableau de résumé avec les labels, les statistiques et la gestion des valeurs manquantes
+donnees_exo %>% 
+  select(hgender, hage, hmstat, heduc, hdiploma) %>% 
+  tbl_summary(
+    label = list(
+      hgender = "Sexe du chef de ménage",
+      hage = "Âge du chef de ménage",
+      hmstat = "Statut matrimonial",
+      heduc = "Niveau d'éducation",
+      hdiploma = "Diplôme obtenu"
+    ),
+    statistic = list(
+      hage ~ "{mean} ({sd})"
+    ),
+    digits = list(everything() ~ c(0, 0, 0)),  # Arrondi à 0 décimales
+    missing = "always",  # Toujours afficher les valeurs manquantes
+    missing_text = "Valeur manquante ou NA"  # Texte affiché pour les valeurs manquantes
+  ) %>% 
+  modify_header(label = "**Caractéristiques des chefs de ménage**")
+
+```
+

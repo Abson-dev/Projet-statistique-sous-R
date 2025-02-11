@@ -1,0 +1,139 @@
+---
+title: "TP3-ISE1-Groupe 7"
+author: "Jean BATABATI, Dior MBENGUE, Francis HABA"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Exercice 42 - Série alternée
+
+Écrire un algorithme en Python fournissant un encadrement à $10^{-5}$ près de la somme :
+
+$$
+S = \sum_{n \geq 1} \frac{(-1)^n}{n \ln(n+1)}.
+$$
+
+# Exercice 43 - Très vite!
+
+Soit pour $n \geq 1$, $u_n = \frac{1}{(2n-1)5^{2n-1}}$.
+
+1.  Montrer que la série de terme général $u_n$ converge.
+
+2.  On note $R_n = \sum_{k=n+1}^{+\infty} u_k$. Montrer que :
+
+$$
+R_n \leq \frac{25}{24} u_{n+1}.
+$$
+
+3.  En déduire la valeur de $\sum_{n=1}^{+\infty} u_n$ à 0,001 près.
+
+# Exercice 44 - Développement asymptotique de la série harmonique
+
+On pose $H_n = 1 + \frac{1}{2} + \cdots + \frac{1}{n}$.
+
+1.  Prouver que $H_n \sim_{+\infty} \ln n$.
+
+2.  On pose $u_n = H_n - \ln n$, et $v_n = u_{n+1} - u_n$. Étudier la nature de la série $\sum v_n$. En déduire que la suite $(u_n)$ est convergente. On notera $\gamma$ sa limite.
+
+3.  Soit $R_n = \sum_{k=n+1}^{+\infty} \frac{1}{k^2}$. Donner un équivalent de $R_n$.
+
+4.  Soit $w_n$ tel que $H_n = \ln n + \gamma + w_n$, et soit $t_n = w_{n+1} - w_n$. Donner un équivalent du reste $\sum_{k \geq n} t_k$. En déduire que :
+
+$$
+H_n = \ln n + \gamma + \frac{1}{2n} + o\left(\frac{1}{n}\right).
+$$
+
+# Exercice 45 - Somme et développement asymptotique de la série des inverses des carrés
+
+Le but de l'exercice est de calculer $\sum_{n \geq 1} \frac{1}{n^2}$ et de donner un développement asymptotique de la somme partielle $S_n = \sum_{k=1}^{n} \frac{1}{k^2}$.
+
+1.  1.1. Soit $\alpha > 1$ et $k \geq 2$. Démontrer que :
+
+    $$
+    \int_k^{k+1} \frac{dt}{t^\alpha} \leq \frac{1}{k^\alpha} \leq \int_{k-1}^k \frac{dt}{t^\alpha}.
+    $$
+
+    1.2. En déduire que :
+
+    $$
+    \sum_{k \geq n} \frac{1}{k^\alpha} \sim_{+\infty} \frac{1}{(\alpha - 1)n^{\alpha-1}}.
+    $$
+
+2.  Soit $f$ une fonction de classe $C^1$ sur $[0, \pi]$. Démontrer que :
+
+$$
+\int_0^\pi f(t) \sin\left(\frac{(2n+1)t}{2}\right) dt \to_{n \to +\infty} 0.
+$$
+
+3.  On pose $A_n(t) = \frac{1}{2} + \sum_{k=1}^n \cos(kt)$. Vérifier que, pour $t \in [0, \pi]$, on a :
+
+$$
+A_n(t) = \frac{\sin((2n+1)t/2)}{2 \sin(t/2)}.
+$$
+
+4.  Déterminer deux réels $a$ et $b$ tels que, pour tout $n \geq 1$ :
+
+$$
+\int_0^\pi (at^2 + bt) \cos(nt) dt = \frac{1}{n^2}.
+$$
+
+Vérifier alors que :
+
+$$
+\int_0^\pi (at^2 + bt) A_n(t) dt = S_n - \frac{\pi^2}{6}.
+$$
+
+5.  Déduire des questions précédentes que $S_n \to \frac{\pi^2}{6}$.
+
+6.  Déduire des questions précédentes que :
+
+$$
+S_n = \frac{\pi^2}{6} - \frac{1}{n} + o\left(\frac{1}{n}\right).
+$$
+
+# Exercice 46 - Reste d'une série alternée
+
+Le but de l'exercice est de déterminer un équivalent du reste de certaines séries alternées. On considère $(u_n)_{n\geq0}$ une suite de réels positifs décroissants vers $0$, et on considère la série $\sum_{n\geq0}{(-1)^n u_n}$ dont on rappelle qu'elle est convergente. On note $R_n = \sum_{k=n+1}^{+\infty}{(-1)^k u_k}$ son reste. On suppose de plus que la suite $(u_n)$ vérifie les deux conditions suivantes :
+
+$$
+\forall n \geq 0, \quad u_{n+2} - 2u_{n+1} + u_n \geq 0 \quad \text{et} \quad \lim_{n \to +\infty} \frac{u_{n+1}}{u_n} = 1.
+$$
+
+1.  Démontrer que pour tout $n \geq 0$, $|R_n| + |R_{n+1}| = u_{n+1}$.
+
+2.  Démontrer que la suite $(|R_n|)$ est décroissante.
+
+3.  En déduire que
+
+$$
+R_n \sim \frac{(-1)^{n+1} u_n}{2}.
+$$
+
+# Exercice 47 - Somme et produit de Cauchy
+
+1.  Soient $(a, b) \in \mathbb{C}^2$ tels que $|a| < 1$ et $|b| < 1$. Prouver que
+
+$$
+\begin{cases}
+\frac{1}{(1-a)(1-b)} = \sum_{n=0}^{+\infty} \frac{a^{n+1} - b^{n+1}}{a-b}, & \text{si } a \neq b, \\
+\frac{1}{(1-a)^2} = \sum_{n=0}^{+\infty} (n+1)a^n, & \text{si } a = b.
+\end{cases}
+$$
+
+# Exercice 48 - Somme d'une série par produit de Cauchy
+
+Pour $n \geq 0$, on pose $w_n = 2^{-n} \sum_{k=0}^{n} \frac{4^k}{k!}$.
+
+1.  Montrer que la série de terme général $w_n$ converge.
+
+2.  Calculer sa somme en utilisant le produit d'une série géométrique par une autre série classique.
+
+# Exercice 49 - Séries semi-convergentes et produit de Cauchy
+
+Soit, pour $n \geq 0$, $u_n=\frac{(-1)^n}{\sqrt{n+1}}$.
+
+1.  Vérifier que $\sum_n u_n$ est semi-convergente.
+
+2.  Montrer que le produit de Cauchy de $\sum_n u_n$ par $\sum_n u_n$ ne converge pas.
+
+3.  Soit $\sigma : \mathbb{N} \to \mathbb{N}$ définie par $\sigma(3p) = 2p$, $\sigma(3p+1) = 4p+1$, $\sigma(3p+2) = 4p+3$. Vérifier que $\sigma$ est une permutation de $\mathbb{N}$. Que peut-on dire de la série $\sum_n u_{\sigma(n)}$ ?

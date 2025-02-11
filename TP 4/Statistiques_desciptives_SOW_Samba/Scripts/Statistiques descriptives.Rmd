@@ -1,0 +1,140 @@
+---
+title: "Statistiques descriptives"
+author: "Samba"
+date: '`r Sys.Date()`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+#Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r}
+packages <- c("readr","utils","haven","dplyr","psych", "gtsummary", "labelled")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {  
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+# Importation des bases
+
+```{r cars}
+menage <- haven::read_dta("../bases/ehcvm_menage_mli2021.dta")
+welfare <- haven::read_dta("../bases/ehcvm_welfare_mli2021.dta")
+colnames(welfare)
+```
+
+
+Nous selectionnons les variables de la base *menage* dont on affichera les statistiques en utilisant la fonction *tbl_summary()*
+
+```{r}
+menage %>% 
+  select(logem,toit,sol)%>% 
+  tbl_summary()
+```
+
+Utilisons la fonction *to_factor* du package *labelled* pour afficher les labels des variables
+
+```{r}
+menage%>% 
+  labelled::to_factor()%>% 
+    select(logem,toit,sol)%>%
+    tbl_summary()
+```
+
+Explotons l option *label* dans *tbl_summary* labelliser les variables et *modify_header* pour le changer le titre
+
+```{r}
+menage%>% 
+  labelled::to_factor()%>% 
+    select(logem,toit,sol)%>%
+    tbl_summary(
+      label = list(logem~"Logement du ménage",
+                   toit~"Toit du logemnt",
+                   sol~"Le sol")) %>% 
+  modify_header(label="Caracteristiques du logement du CM")
+
+```
+
+
+Ici, on fait appel à l option *statistic* pour sortir des statistique comme pour les variables numériques
+
+```{r}
+menage%>% 
+  labelled::to_factor()%>% 
+    select(logem,toit,sol,superf,grosrum,petitrum)%>%
+    tbl_summary(
+      label = list(logem~"Logement du ménage",
+                   toit~"Toit du logemnt",
+                   sol~"Le sol"),
+       statistic=list(superf ~"{mean} ({sd})",
+                      grosrum~ "{mean} ({sd})",
+                      petitrum~"{mean} ({sd})")
+      ) 
+ 
+```
+
+
+On utilise l option *digits* ici pour préciser le nombre de chiffres après la virgule
+```{r}
+menage%>% 
+  labelled::to_factor()%>% 
+    select(logem,toit,sol,superf,grosrum,petitrum)%>%
+    tbl_summary(
+      label = list(logem~"Logement du ménage",
+                   toit~"Toit du logemnt",
+                   sol~"Le sol"),
+       statistic=list(superf ~"{mean} ({sd})",
+                      grosrum~ "{mean} ({sd})",
+                      petitrum~"{mean} ({sd})"),
+      #digits everything()~c(0,0,0)
+      digits = list(superf~2)
+      ) 
+```
+
+Ici, on utilise l option *missing* pour afficher les valeurs manquantes en labélisant
+
+```{r}
+menage%>% 
+  labelled::to_factor()%>% 
+    select(logem,toit,sol,superf,grosrum,petitrum)%>%
+    tbl_summary(
+      label = list(logem~"Logement du ménage",
+                   toit~"Toit du logemnt",
+                   sol~"Le sol"),
+       statistic=list(superf ~"{mean} ({sd})",
+                      grosrum~ "{mean} ({sd})",
+                      petitrum~"{mean} ({sd})"),
+      missing = "always",
+      missing_text = "Valeurs manquantes"
+      )
+```
+
+
+On fait les mêmes manipulations pour la base *welfare* afin de sortir certaines statistiques pour des variables que l on choisira
+
+```{r}
+welfare%>% 
+  labelled::to_factor()%>% 
+    select(hgender,hage,hmstat,heduc,hdiploma,hethnie)%>%
+    tbl_summary(
+      label = list(hgender~"Sexe",
+                   hage~"Age",
+                   hmstat~"Situation matrimoniale",
+                   heduc~"Education",
+                   hdiploma~"Diplôme",
+                   hethnie~"Ethnie"),
+       #statistic=list(superf ~"{mean} ({sd})",
+          #            grosrum~ "{mean} ({sd})",
+           #           petitrum~"{mean} ({sd})"),
+      missing = "always",
+      missing_text = "Valeurs manquantes"
+      ) 
+```
+
