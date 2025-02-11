@@ -1,0 +1,23 @@
+"0",""
+"0","packages <- c(""readr"",""haven"",""utils"",""dplyr"")"
+"0",""
+"0","for (package in packages) {"
+"0","  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé"
+"0","    install.packages(package)"
+"0","  }"
+"0","  library(package, character.only = TRUE)"
+"0","}"
+"2","
+Attachement du package : ‘dplyr’
+
+"
+"2","Les objets suivants sont masqués depuis ‘package:stats’:
+
+    filter, lag
+
+"
+"2","Les objets suivants sont masqués depuis ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"

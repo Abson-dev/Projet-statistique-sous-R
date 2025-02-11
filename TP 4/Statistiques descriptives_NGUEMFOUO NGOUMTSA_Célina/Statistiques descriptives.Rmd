@@ -1,0 +1,415 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+  html_document:
+    toc_float: true
+header-includes: |
+  \usepackage{hyperref}
+  \usepackage{amsmath}
+  \usepackage{amssymb}
+  \usepackage{graphicx}
+  \usepackage{fontspec}
+  \usepackage{fancyhdr}
+  \setmainfont{Cambria}
+  \setsansfont{Franklin Gothic Demi Cond}
+  \setmonofont{Courier New}
+  \usepackage[margin=1in]{geometry}
+  \usepackage{titlesec}
+  \titleformat{\section}{\Huge\bfseries\color{orange}}{\thesection}{1em}{}
+  \titleformat{\subsection}{\huge\bfseries\color{orange}}{\thesubsection}{1em}{}
+  \titleformat{\subsubsection}{\LARGE\bfseries\color{brown}}{\thesubsubsection}{1em}{}
+  \usepackage{tocloft}
+  \renewcommand{\cftsecfont}{\small}   
+  \renewcommand{\cftsubsecfont}{\footnotesize} 
+  \renewcommand{\cftsecpagefont}{\small}   
+  \renewcommand{\cftsubsecpagefont}{\footnotesize}
+  \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}  
+  
+   % Style du texte
+  \renewcommand{\familydefault}{\rmdefault}
+  \renewcommand{\baselinestretch}{1.5}
+  \renewcommand{\normalsize}{\fontsize{12pt}{12pt}\selectfont}
+---
+
+```{=tex}
+\begin{titlepage}
+    \begin{center}
+        \textbf{\LARGE RÉPUBLIQUE DU SÉNÉGAL}\\[0.1cm]
+        \includegraphics[width=3cm]{LOGO3.JPG} \\[0.1cm]  % Insère le chemin de ton logo
+        \textbf{\large Un Peuple - Un But - Une Foi}\\[0.2cm]
+        
+        \includegraphics[width=4cm]{LOGO2.JPG} \\[0.1cm] 
+        
+        \textbf{\large Agence Nationale de la Statistique et de la Démographie}\\[0.2cm]
+        
+        \includegraphics[width=4cm]{LOGO1.JPG} \\[0.1cm]  
+        
+        \textbf{\large École Nationale de la Statistique et de l'Analyse Économique}\\[0.4cm]
+        
+        \textbf{\LARGE A LA DECOUVERTE DE GTSUMMARY}\\[0.3cm]
+        \textbf{\Huge \color{orange} \textsf{Illustration avec la base EHCVM 2021 de la Côte d'Ivoire}}\\[0.2cm]
+        \rule{\linewidth}{0.2mm} \\[0.5cm]
+        
+        \begin{minipage}{0.5\textwidth}
+    \begin{flushleft} \large
+        \emph{\textsf{Rédigé par :}}\\
+        \textbf{NGUEMFOUO NGOUMTSA Célina}\\
+        \textit{Élève Ingénieure Statisticienne Économiste}
+    \end{flushleft}
+\end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                \textbf{M. Aboubacar HEMA}\\
+                \textit{Data analyst}
+            \end{flushright}
+        \end{minipage}
+
+        \vfill
+
+        {\large \textsf{Année scolaire : 2024/2025}}\\[0.5cm]
+        
+    \end{center}
+\end{titlepage}
+```
+
+\phantomsection
+\section*{Avant-propos}
+\addcontentsline{toc}{section}{Avant-propos}
+
+Dans un monde en constante évolution, le rôle des Ingénieurs Statisticiens Économistes (ISE) est devenu indispensable pour répondre aux enjeux complexes des sociétés modernes. Leur expertise en matière de collecte, d’analyse et d’interprétation des données permet aux décideurs publics et privés de mieux comprendre les dynamiques économiques, sociales et démographiques, et de prendre des décisions éclairées. Grâce à leur formation polyvalente, les ISE contribuent de manière décisive à l’élaboration et à l’évaluation des politiques publiques, ainsi qu’au développement de stratégies économiques efficaces.
+
+C’est dans ce cadre que l’École nationale de la Statistique et de l'Analyse économique Pierre Ndiaye (ENSAE) du Sénégal s’est imposée comme l’un des principaux établissements de formation en Afrique francophone. L’ENSAE offre plusieurs parcours de formation spécialisés dans la statistique et l’économie appliquée, avec des filières comme :
+
+* **Les Analystes Statisticiens (AS)** : une formation de trois ans, qui forme des techniciens en statistique capables de traiter et d’analyser des données à des fins variées.
+* **Les Ingénieurs Statisticiens Économistes (ISE)** : un cycle court de trois ans, et un cycle long de cinq ans, qui offre une formation approfondie à ceux qui souhaitent devenir des cadres spécialisés dans l’analyse statistique et économique.
+
+L’accès à l’ENSAE est soumis à un concours rigoureux ouvert aux étudiants détenteurs du baccalauréat ou d’un diplôme universitaire selon le niveau d’admission. De plus, l’école propose des bourses pour les étudiants méritants, facilitant ainsi l’accès à une formation d’excellence, tant pour les étudiants sénégalais que pour ceux venant d’autres pays africains francophones.
+En tant que membre du Réseau des Écoles Africaines de la Statistique, l’ENSAE collabore étroitement avec d’autres institutions prestigieuses comme l'Institut Sous-Régional de Statistique et d'Économie Appliquée (ISSEA) au Cameroun et l'École Nationale Supérieure de Statistique et d'Économie Appliquée (ENSEA) en Côte d'Ivoire. Ce réseau permet d’harmoniser les programmes de formation et d’offrir aux élèves une reconnaissance internationale de leurs compétences.
+
+Durant leur cursus, les étudiants de la filière ISE réalisent de nombreux rapports pour leur permettre d’appliquer les concepts et de se familiariser avec leurs outils de travail. Le présent rapport s’inscrit dans cette démarche, et a pour thème **« A la découverte du package gtsummary : Illustration avec la base EHCVM 2021 de la Côte d'Ivoire »**.
+
+\newpage
+
+\phantomsection
+\section*{Sommaire}
+\addcontentsline{toc}{section}{Sommaire}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\newpage
+
+
+\phantomsection
+\section*{Résumé}
+\addcontentsline{toc}{section}{Résumé}
+
+Ce rapport explore l'utilisation du package gtsummary dans le cadre de l’analyse statistique descriptive, en s’appuyant sur les données de l'EHCVM 2021 de la Côte d'Ivoire. L'objectif est de montrer comment cet outil facilite la génération de tableaux synthétiques et permet une visualisation claire des statistiques descriptives. Après une présentation du package et des données, nous illustrons les fonctionnalités de la fonction tbl_summary, qui permet de résumer efficacement les variables d’un jeu de données. À travers des exemples concrets, nous mettons en évidence la simplicité et la puissance de gtsummary, notamment pour automatiser la production de rapports statistiques. Ce travail s'inscrit dans une démarche plus large d'amélioration des outils d'analyse de données, essentielle pour les statisticiens et économistes en quête d'efficacité et de reproductibilité.
+
+\newpage
+
+
+\phantomsection
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Dans le cadre de l'analyse des données, les ingénieurs statisticiens économistes doivent extraire rapidement des informations pertinentes à partir de vastes ensembles de données.
+L'une des premières étapes exploratoires consiste à générer des résumés statistiques (summary), permettant d'identifier les tendances générales, et d'obtenir une vision synthétique des données avant d'engager des analyses plus approfondies. Cette étape facilite la compréhension des distributions, la détection des erreurs potentielles et l’adaptation des méthodes d’analyse.
+Les fonctions classiques de R, comme *summary()*, permettent d'obtenir des statistiques descriptives de base. Cependant, elles présentent plusieurs limites :
+
+* Elles sont souvent générales et ne permettent pas d’obtenir des résumés adaptés à des types de données spécifiques (textes, facteurs, valeurs manquantes).
+
+* Elles manquent de flexibilité pour afficher des statistiques avancées comme l'asymétrie, l'aplatissement, ou des quantiles personnalisés.
+
+* Leur présentation n’est pas toujours optimisée pour l’interprétation et l’exportation des résultats.
+
+Ce rapport vise à explorer le package **gtsummary**, qui fournit des fonctions plus complètes et adaptées pour générer des résumés statistiques avancés. Nous allons détailler son fonctionnement et illustrer ses principales fonctionnalités à travers des exemples concrets.
+Afin de repondre à cet objectif, notre rapport s'articulera en 2 chapitres. Le premier fera une brève présentation du package **gtsummary** et de l'**EHCVM**, et le second s'attardera en particulier sur la fonction **tbl_summary** du package.
+
+\newpage
+
+\phantomsection
+\section*{Chapitre 1 : présentation du package et de l'EHCVM}
+\addcontentsline{toc}{section}{Chapitre 1 : présentation du package et de l'EHCVM}
+
+## I. Présentation du package gtsummary
+
+Le package **gtsummary** est une extension de R conçue pour faciliter la création de tableaux de synthèse et de rapports statistiques bien structurés. Il est particulièrement utilisé en biostatistique et en analyse de données pour produire des résumés descriptifs, des comparaisons de groupes et des résultats de modèles statistiques sous un format clair et lisible.
+Développé pour être compatible avec des outils de présentation comme gt, flextable et kableExtra, gtsummary permet d’obtenir des tableaux prêts à être exportés dans des documents professionnels (Word, PDF, HTML). Il s’intègre parfaitement avec les pipelines de tidyverse, notamment dplyr, facilitant ainsi l’automatisation des analyses.
+
+L'objectif principal de gtsummary est de simplifier la génération de tableaux statistiques tout en garantissant une présentation soignée et adaptée aux rapports scientifiques, une compatibilité avec plusieurs formats d’exportation (HTML, Word, LaTeX), ainsi qu'une intégration fluide avec dplyr pour un usage efficace dans les flux de travail en R.
+
+Le package gtsummary propose plusieurs fonctions clés :
+
+* **tbl_summary() :** Génère un tableau de statistiques descriptives pour un jeu de données.
+
+* **tbl_regression() :** Produit des tableaux de résultats pour les modèles de régression (linéaire, logistique, etc.).
+
+* **tbl_compare() :** Compare des statistiques entre plusieurs groupes.
+
+* **tbl_merge() :** Fusionne plusieurs tableaux gtsummary.
+
+* **as_flextable() et as_gt() :** Convertit les tableaux pour une personnalisation avancée et une meilleure exportation.
+
+Dans la suite du rapport, nous nous concentrerons sur la fonction **tbl_summary** et de ses paramètres. Pour l'illusration, nous utiliserons les bases *ménages* et *welfare* de l'EHCVM en Côte d'Ivoire.
+
+\newpage
+
+## II. Présentation de l'EHCVM
+
+L’**Enquête Harmonisée sur les Conditions de Vie des Ménages** (EHCVM) est une initiative régionale menée dans plusieurs pays de l’UEMOA, dont la **Côte d’Ivoire**, dans le but de produire des données comparables sur le bien-être des ménages. Cette enquête s’inscrit dans un cadre d’harmonisation des statistiques de la pauvreté et des conditions de vie afin d’améliorer l’élaboration et l’évaluation des politiques publiques.
+
+L’EHCVM vise à fournir des informations détaillées sur :
+
+* **Les conditions de vie des ménages** : accès aux services de base, logement, éducation, emploi.
+
+* **La consommation et la pauvreté** : estimation des dépenses des ménages pour calculer les indicateurs de bien-être économique.
+
+* **Les inégalités et la vulnérabilité** : analyse des écarts entre différents groupes sociaux et géographiques.
+
+* **L’impact des politiques publiques** : suivi des stratégies nationales de lutte contre la pauvreté et le développement humain.
+
+L’enquête repose sur un échantillonnage représentatif au niveau national, couvrant les zones urbaines et rurales. Les données sont collectées à l’aide de questionnaires détaillés adressés aux ménages, permettant d’analyser le profil sociodémographique des ménages, leur accès aux infrastructures et services sociaux, leurs revenus, dépenses et stratégies de subsistance.
+
+Parmi les différentes bases de l’EHCVM, deux bases essentielles seront utilisées dans cette analyse :
+
+* **La base "ménage"** : Contient les informations générales sur les ménages (composition, logement, accès aux services).
+
+* **La base "welfare"** : Fournit des indicateurs clés sur la consommation, la pauvreté et le bien-être économique des ménages.
+Ces bases de données permettent une exploration approfondie des dynamiques socioéconomiques en Côte d’Ivoire et constituent des sources précieuses pour les analyses quantitatives.
+
+\newpage
+
+\phantomsection
+\section*{Chapitre 2 : fontion tbl summary}
+\addcontentsline{toc}{section}{Chapitre 2 : fontion tbl summary}
+
+
+## I. Base ménage
+
+la base ménage a d'abord été importée. Pour ce faire, le package **haven** a été utilisé.
+Il s'agit d'un fichier .dta.
+
+```{r, warning=FALSE}
+library(haven)
+menage <- read_dta(
+  "CIV_2021_EHCVM_Stata/ehcvm_menage_civ2021.dta")
+```
+
+Voici les premières lignes de la base
+
+```{r, warning=FALSE}
+library(knitr)
+kable(head(menage[, 1:10]))
+```
+
+Visualisons à présent un summary des variables *logem, toit* et *sol*. 
+
+Pour cela, il faut charger la librairie **gtsummary**.
+
+```{r, warning=FALSE}
+library(gtsummary)
+suppressMessages(
+  menage %>% select(logem,toit,sol) %>% tbl_summary()
+  )
+```
+
+\newpage
+
+Affichons à présent les modalités des variables:
+
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(logem,toit,sol) %>%
+  tbl_summary()
+```
+
+
+\newpage
+
+Attribuons à présent des labels aux différentes variables sélectionnées
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(logem,toit,sol) %>%
+  tbl_summary(
+    label=list(logem~"Type de logement du CM",
+               toit~"Type de toit de la maison du CM",
+               sol~"Yype de sol de la maison du CM"))
+```
+
+\newpage
+
+Modifions à présent le titre du tableau
+
+```{r, warning=FALSE}
+menage %>% labelled::to_factor() %>%
+  select(logem,toit,sol) %>%
+  tbl_summary(
+    label=list(logem~"Type de logement du CM",
+               toit~"Type de toit de la maison du CM",
+               sol~"Type de sol de la maison du CM")) %>%
+  modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+Considérons à présent les variables *superf, grosrum* et *petitrum*
+Comme il s'agit de variable numériques, le paramètre **statistic** a été ajouté pour visualiser la **moyenne** (mean) et l'écartype (sd).
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(superf,grosrum,petitrum) %>%
+  tbl_summary(
+    label=list(superf~"Superficie agricole en moyenne par ménage",
+               grosrum~"Nombre de gros ruminants en moyenne par ménage",
+               petitrum~"Nombre de petits ruminants en moyenne par ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})")) %>%
+  modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+les valeurs présentes dans le tableau comme indiqué dans la dernière ligne sont les moyennes et entre parenthèse l'écart-type pour chacune des variables.
+On constate la présence de valeurs manquantes.
+
+Le code suivant permet de toujours les afficher:
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(superf,grosrum,petitrum) %>%
+  tbl_summary(
+    label=list(superf~"Superficie agricole en moyenne par ménage",
+               grosrum~"Nombre de gros ruminants en moyenne par ménage",
+               petitrum~"Nombre de petits ruminants en moyenne par ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})"),
+    missing="always") %>%
+  modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+On a également la possibilté de renommer les valeurs manquantes.
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(superf,grosrum,petitrum) %>%
+  tbl_summary(
+    label=list(superf~"Superficie agricole en moyenne par ménage",
+               grosrum~"Nombre de gros ruminants en moyenne par ménage",
+               petitrum~"Nombre de petits ruminants en moyenne par ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})"),
+    missing="always",
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+On peut en outre choisir le nombre de chiffres après la virgule. Choisissons aucun chiffre après la virgule :
+
+```{r, warning=FALSE}
+menage %>%
+  labelled::to_factor() %>%
+  select(superf,grosrum,petitrum) %>%
+  tbl_summary(
+    label=list(superf~"Superficie agricole en moyenne par ménage",
+               grosrum~"Nombre de gros ruminants en moyenne par ménage",
+               petitrum~"Nombre de petits ruminants en moyenne par ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})"),
+    digits = everything()~c(0,0,0),
+    missing="always",
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(label="Caractéristiques de l'habitat du CM")
+```
+
+
+\newpage
+
+## II. Base welfare
+
+Commençons par charger la base en question.
+
+```{r, warning=FALSE}
+library(haven)
+welfare <- read_dta(
+  "CIV_2021_EHCVM_Stata/ehcvm_welfare_civ2021.dta"
+  )
+```
+
+voici un aperçu de la base chargée :
+
+```{r, warning=FALSE}
+
+library(knitr)
+kable(head(welfare[, 1:10]))
+```
+
+Faisons à présent un summary pour les variables hgender, hage, hmstat, heduc, hdiploma. Seule la variable age est numérique, donc c'est uniquement pour elle que le paramètre statistic (mean et sd) a été défini.
+Les modalités ont été affichées, le titre du tableau renomé, le nombre de chiffre après la virgule fixé, et les valeurs manquantes affichées. Voici le résultat:
+
+```{r, warning=FALSE}
+welfare %>%
+  labelled::to_factor() %>%
+  select(hgender, hage, hmstat, heduc, hdiploma) %>%
+  tbl_summary(label=list(hgender~"Genre du CM",
+                         hage~"Âge du CM",
+                         hmstat~"Situation matrimoniale du CM",
+                         heduc~"Niveau d'étude du CM",
+                         hdiploma~"Diplome le plus élevé"),
+              statistic = list(hage~"{mean}({sd})"),
+              digits = everything()~c(0,0,0),
+              missing="always",
+              missing_text = "Valeurs manquantes")%>%
+  modify_header(label="Caractéristiques du chef de ménage")
+```
+
+\newpage
+
+\phantomsection
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+L’utilisation du package gtsummary s’avère être une solution efficace pour la synthèse et la présentation des statistiques descriptives, particulièrement dans le cadre de l’analyse d’enquêtes comme l’EHCVM 2021. Grâce à ses fonctionnalités intuitives, il permet de gagner du temps et d’assurer une meilleure lisibilité des résultats. L’application de tbl_summary démontre qu’il est possible de produire des tableaux complets et personnalisables avec un minimum d’effort, tout en garantissant une présentation standardisée. Ce rapport met ainsi en avant l’intérêt d’intégrer des outils comme gtsummary dans les pratiques courantes des statisticiens, contribuant ainsi à une analyse plus rapide et plus fiable des données.
+
+\newpage
+
+\phantomsection
+\section*{Table de matières}
+\addcontentsline{toc}{section}{Table de matières}
+
+Avant-propos
+
+Sommaire
+
+Résumé
+
+Introduction
+
+Chapitre 1 : présentation du package et de l'EHCVM
+
+
+  I. Présentation du package gtsummary
+  
+  II. Présentation de l'EHCVM
+  
+Chapitre 2 : fonction tbl summary
+
+
+  I. Base ménage
+  
+  II. Base welfare
+  
+Conclusion
+
+Table de matières
