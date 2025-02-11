@@ -1,0 +1,95 @@
+---
+title: "TP_ILLY_DIALLO"
+author: "Illy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##### Exercice 18
+
+**1.** Démontrer que la série $\sum_n\frac{(-1)^n}{\sqrt{n}}$ converge.
+
+**2.** Démontrer que $\frac{(-1)^n}{\sqrt{n}+(-1)^n}=\frac{(-1)^n}{\sqrt{n}}-\frac{1}{n}+o(\frac{1}{n})$ 
+
+**3.** Étudier la convergence de la série $\sum_n\frac{(-1)^n}{\sqrt{n}+(-1)^n}$
+
+**4.** Qu'a-t-on voulu mettre en évidence dans cet exercice?
+
+##### Exercice 19
+Étudier la convergence des séries de terme général :
+
+
+**1**.$\ln(1+\frac{(-1)^n}{2n+1})$ $\qquad$
+      **2**.$\frac{(-1)^n}{\sqrt{n^{\alpha}+(-1)^n}},\alpha >0$
+
+**3**.$\frac{(-1)^n}{n^{\alpha}+(-1)^nn^\beta},\alpha,\beta \in \mathbb{R}.$
+
+#### Exercice 20
+Discuter la nature de la série de terme général
+      $$u_{n}=\frac{a^n2^{\sqrt{n}}}{2^{\sqrt{n}}+b^n}$$
+où $a$ et $b$ sont deux nombres complexes,a $a \neq 0$ .
+
+
+##### Exercice 21
+
+Suivant la position du point de coordonnées $(x,y)$
+ dans le plan, étudier la nature de la série de terme général
+ $$u_{n}=\frac{x^n}{y^n+n}$$.
+
+##### Exercice 22
+
+On fixe $\alpha>0$et on pose $u_n=\sum_{p=n}^{+\infty}\frac{(-1)^n}{p^\alpha}$ 
+. Le but de l'exercice est démontrer que la série de terme général
+ converge.
+ 
+ **1.** Soit $n \geq 1 $ fixé. On pose 
+ $$ v_p=\frac{1}{(p+n)^n}-\frac{1}{(p+n+1)^\alpha}.$$
+ Démontrer que la suite$(v_p)$décroît vers 0. En déduire la convergence de $\sum_{p=n}^{+\infty}(-1)^pv_p$.Quel est le signe de sa somme?
+ 
+ **2.**En appliquant le critère des séries alternées, démontrer que la série de terme général $(u_n)$  converge.
+
+
+$$\\$$
+
+
+##### Exercice 23
+
+On considère deux suites complexes $(u_n)$ et $(v_n)$. On s'intéresse à la convergence de la série $\sum_n u_n v_n .$ Pour $n \geq 1$, on note $s_n = \sum_{k=0}^{n} u_k .$
+
+1. Montrer que , pour tout $n \in \mathbb{N}$, on a :
+$$\sum_{k=1}^{n} u_k v_k = s_n v_n - s_0 v_1 + \sum_{k=1}^{n-1} s_k (v_k - v_{k+1}) .$$
+
+2. Montrer que si la suite$(s_n)$ est bornée, et si la suite $(v_n)$ est à valeurs dans $\mathbb{R^+}$, décroisssante et de limite nulle, alors $\sum_n u_n v_n$ est convergente.
+
+3. Montrer que la série $\sum_{k=1}^{n} \frac{sin(n \theta)}{\sqrt{n}}$ converge pour tout $\theta \in \mathbb{R}$.
+
+
+
+$$\\$$
+
+##### Exercice 24
+
+Étudier la convergence des séries suivantes :
+
+$$1.\; \sin \left( \frac{\sin n}{\sqrt[3]{n}} \right) \qquad 2. \; \frac{(-1)^n \cos n}{n \sqrt{n} + \sin n} .$$  
+
+$$\\$$
+
+
+##### Exercice 25
+
+tudier la nature de la série de terme général 
+ $$u_n = \prod_{q=2}^{n} \left(1 + \frac{(-1)^q}{\sqrt{q}} \right) $$
+
+
+
+
+
+
+
+
+
+
