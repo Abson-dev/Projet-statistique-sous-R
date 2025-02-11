@@ -1,0 +1,72 @@
+---
+title: "stat_desc"
+author: "Paul_BALAFAI"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+library(haven)
+library(dplyr)
+```
+
+
+```{r}
+base_menage <- haven::read_dta("Donnees/ehcvm_menage_ner2021.dta")
+```
+
+#visualisation de la structure de la base
+```{r}
+str(base_menage)
+```
+
+#visualisation des variables logem, toit et mur dans un tableau. Ici les modalités ne sont pas labellisées
+```{r}
+base_menage %>% select(logem, toit, mur) %>% tbl_summary()
+```
+
+#visualisaion des variables logem, toit et mur dans un tableau. Ici les modalités sont labellisées
+```{r}
+base_menage %>% labelled::to_factor() %>% select(logem,toit,mur) %>% tbl_summary()
+```
+
+#visualisation des variables superf, grosrum et petitrum dans un tableau avec labelisation
+```{r}
+base_menage %>% labelled::to_factor() %>% select(logem,toit,mur) %>% tbl_summary( label=list(logem ~ "Type de logement du CM", toit ~ "Type de toiture", mur ~ "Type de mur") ) %>%  modify_header(label = "Caractéristiques de l'habitat du CM")
+```
+
+#visualisation des variables superf, grosrum et petitrum dans un tableau avec labelisation des modalités
+```{r}
+base_menage %>% labelled::to_factor() %>% select(superf, grosrum, petitrum ) %>% tbl_summary()
+```
+
+#affichage des moyennes et écart-types des variables superf, grosrum et petitrum
+```{r}
+base_menage %>% labelled::to_factor() %>% select(superf, grosrum, petitrum ) %>% tbl_summary(statistic=list(superf ~ "{mean} ({sd})", grosrum ~ "{mean} ({sd})", petitrum ~ "{mean} ({sd})"), digits = everything() ~ c(0,0,0))
+```
+
+#affichage des moyennes et écart-types des variables superf, grosrum et petitrum avec prise en compte des valeurs manquantes
+```{r}
+base_menage %>% labelled::to_factor() %>% select(superf, grosrum, petitrum ) %>% tbl_summary(statistic=list(superf ~ "{mean} ({sd})", grosrum ~ "{mean} ({sd})", petitrum ~ "{mean} ({sd})"), digits = everything() ~ c(0,0,0), missing = "always", missing_text = "valeurs manqantes")
+```
+
+#importation de la base welfare Niger 2021
+```{r}
+base_welfare <- haven::read_dta("Donnees/ehcvm_welfare_ner2021.dta")
+```
+
+#visualisation de la structure de la base. 
+```{r}
+base_welfare %>% labelled::to_factor() %>% select(hgender, hage, hmstat, heduc, hdiploma) %>% tbl_summary(label = list(hgender ~ "Genre du CM", hage ~ "Age du CM", hmstat ~ "Statut matrimonial du CM", heduc ~ "Niveau d'éducation du CM", hdiploma ~ "Diplôme du CM")) %>% modify_header(label = "Caractéristiques socio-démographiques du CM") %>% modify_table_styling(
+  
+)
+```
+
+
+
