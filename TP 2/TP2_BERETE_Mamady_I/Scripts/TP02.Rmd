@@ -35,7 +35,6 @@ utils::str(individu)
 ```
 
 
-
 Filtrage des Chefs de ménage dans la base individu
 ```{r}
 resultats <- individu %>% 
