@@ -3,7 +3,10 @@ title: "TP3"
 author: "ZINABA_KAFAND0"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
+  html_document:
+    toc: TRUE
+    
+    
   #word_document: default
 ---
 
