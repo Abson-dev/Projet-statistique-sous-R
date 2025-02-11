@@ -1,0 +1,117 @@
+---
+title: "Statistique Descriptive"
+author: "BERETE Mamady I"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+packages <- c("readr","haven","utils","dplyr", "knitr", "tidyr", "gtsummary", "labelled")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+```
+
+
+chargement de la base ménage
+```{r }
+menage <- utils::read.csv("../Statistique descriptive/ehcvm_menage_bfa2021.csv")
+```
+
+Structure de la base ménage 
+```{r }
+utils::str(menage)
+```
+
+Affichage du tableau contenant le type de logement, de toit, de sol et le mur
+```{r}
+menage %>% select(logem, toit, sol, mur) %>% tbl_summary()
+```
+
+Labélisation des variables
+```{r}
+menage %>%    select(logem, toit, sol, mur) %>% tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage")
+) %>% 
+modify_header(
+  label = " ")
+            
+```
+
+Labélisation des variables 
+```{r}
+menage %>%    select(logem, toit, sol, mur, superf, grosrum, petitrum) %>% tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol ~ "Sol de la maison du chef de ménage",
+               superf ~ "Superficie agricole",
+               grosrum ~ "Nombre de gros Ruminants",
+               petitrum ~ "Nombre de petit Ruminants")
+) %>% 
+modify_header(
+  label = " ")
+
+```
+
+Le calcul de la moyeene et l'écart-type
+```{r}
+menage %>%    select(logem, toit, sol, mur, superf, grosrum, petitrum) %>% tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol ~ "Sol de la maison du chef de ménage",
+               superf ~ "Superficie agricole",
+               grosrum ~ "Nombre de gros Ruminants",
+               petitrum ~ "Nombre de petit Ruminants"),
+   statistic = list(superf ~ "{mean}({sd})",
+                 grosrum ~ "{mean}({sd})",
+                 petitrum ~ "{mean}({sd})"),
+  digits = everything()~c(0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+) %>% 
+modify_header(
+  label = " ")
+
+```
+
+chargement de la base welfare
+```{r}
+welfare <- utils::read.csv("../Statistique descriptive/ehcvm_welfare_2b_bfa2021.csv")
+```
+
+Sructure de la welfare
+```{r}
+utils::str(welfare)
+```
+
+Les statistiques sur le chef de ménage
+```{r}
+
+welfare %>%   select(hgender, hage, hmstat, heduc, hdiploma) %>% tbl_summary(
+  label = list(hgender ~ "Le sexe du chef de ménage",
+               hmstat ~ "Situation matrimoniale du chef de ménage",
+               hage ~ "Âge du chef de ménage",
+               heduc ~ "Le niveau d'éducation du chef de ménage",
+               hdiploma ~ "Le plus haut dimlôme du chef de ménagee"),
+  statistic = list(hage ~ "{mean}({sd})"
+                   ),
+  digits = everything()~c(0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+) %>% 
+modify_header(
+  label = " ")
+```
+
