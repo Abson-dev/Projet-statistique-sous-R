@@ -1,0 +1,69 @@
+---
+title: "TP2"
+author: "FALL Ndeye Ramatoulaye Ndoye"
+date: "2025-01-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Chargement du package readr
+```{r}
+library(utils)
+library(dplyr)
+```
+
+##Nomenclature des bases
+```{r}
+menage <- utils::read.csv("../Données/ehcvm_menage_sen2021.csv")
+individu <- utils::read.csv("../Données/ehcvm_individu_sen2021.csv")
+
+```
+
+
+```{r}
+utils::str(menage)
+```
+```{r}
+individu
+menage
+```
+
+
+
+
+```{r}
+base_merge <- dplyr::left_join(individu,menage,by="hhid")
+base_merge
+
+```
+
+
+*******************repertoire des menages suivant le sexe du chef
+```{r}
+
+sexe_cm <- individu %>%  dplyr::filter(lien=="1") %>% dplyr::select(hhid,sexe)
+sexe_cm
+
+```
+***jointure des bases pour que chaque individu reçoive le code du sexe de son chef de menage
+```{r}
+base_fusion <- dplyr::left_join(individu,sexe_cm,by="hhid")
+base_fusion
+```
+
+***affichage ordonnée des resultats de chaque individu, de son menage, et sexe du chef
+```{r}
+
+resultats <- base_fusion %>% dplyr::select(numind,hhid,sexe.y)
+resultats
+
+```
+
+
+
+
+

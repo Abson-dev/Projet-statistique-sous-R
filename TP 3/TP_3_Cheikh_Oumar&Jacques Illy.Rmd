@@ -1,0 +1,43 @@
+---
+title: "TP_3_CHEIKH_OUMAR&Jaques Illy"
+author: "Cheikh Oumar DIALLO"
+date: "2025-02-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###### **Exercice 18**
+
+1. Démontrer que la série $\sum_{n} \frac{(-1)^n}{\sqrt{n}}$ converge.
+
+2. Démontrer que $\frac{(-1)^n}{\sqrt{n}+(-1)^n}=$$\frac{(-1)^n}{\sqrt{n}}-\frac{1}{n}+o(\frac{1}{n})$
+
+3.Étudier la convergence de la série $\sum_n\frac{(-1)^n}{\sqrt{n}+(-1)^n}$
+4. Qu'a-t-on voulu mettre en évidence dans cet exercice ?
+
+###### Exercice 19 
+
+###### Exercice 21
+
+
+###### Exercice 22
+
+
+###### Exercice 23
+On considère deux suites complexes $(u_{n}) et (V_{n})$
+. On s'intéresse à la convergence de la série $\sum_n{u_n}{v_n}$.Pour n≥1, on $s_n=$$\sum_{k=0}^{n}{u_k}.$
+
+ 1.Montrer que, pour tout n∈N, on a :
+ 
+ $\sum_{k=1}^{n}{u_kv_k=s_nv_n -s_0v_1}+$$\sum_{k=1}^{n}{S_k(v_k-v_{k+1}).}$
+ 
+ 2.Montrer que si la suite $(s_n)$ est bornée, et si la suite $(v_n)$ est à valeurs dans $\mathbb{R^+}$, décroissante et de limite nulle, alors$\sum{U$
+###### Exercice 24
+
+
+###### Exercice 25
+
+

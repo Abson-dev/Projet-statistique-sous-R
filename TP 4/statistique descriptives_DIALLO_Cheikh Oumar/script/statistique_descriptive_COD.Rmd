@@ -1,0 +1,114 @@
+---
+title: "statistique_descriptive"
+author: "Cheikh Oumar DIALLO"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#chargement package
+```{r}
+library(utils)
+library(dplyr)
+library(gtsummary)
+library(labelled)
+```
+#chargement de la base
+```{r}
+data<-utils::read.csv("../données/ehcvm_menage_civ2021.csv")
+
+```
+#chargement de la base
+```{r}
+base<-utils::read.csv("../données/ehcvm_welfare_civ2021.csv")
+```
+
+#basic code
+```{r}
+data %>%  select(logem, toit,sol) %>%  tbl_summary()
+
+```
+
+```{r select variables}
+names (data)
+data %>% select(logem,toit,sol) %>% tbl_summary()
+
+```
+
+```{r Basic codes}
+### les tableaux doivent etre explicites. toujours labelliser
+data %>% to_factor() %>% select(logem,toit,sol) %>% tbl_summary
+
+```
+
+```{r modif du titre des tableaux}
+###Descritption
+data %>% to_factor() %>% 
+#Convertir les variables catégorielles en facteurs 
+  select (logem,toit,sol) %>%  tbl_summary(
+    label=list(logem~"Type de logement du chef de ménage",toit~"Type de toit",sol~"Type de sol"
+    )
+  ) %>% modify_header(label~"carak")
+##Modifier le titre du tab
+```
+
+```{r kaizen}
+###lDescription
+data %>%
+  to_factor() %>% # Convertir les variables catégorielles en facteurs
+  select(logem, toit, sol, superf,grosrum) %>%
+  tbl_summary(
+    label = list(
+      logem ~ "Type de logement du chef de ménage",
+      toit ~ "Type de toit",
+      sol ~ "Type de sol",
+      superf~ "superficie",
+      grosrum~"Nombre de gros ruminants"
+    ), 
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})")
+  )
+
+```
+
+```{r kaizen deux}
+
+###lDescription
+data %>%
+  to_factor() %>% # Convertir les variables catégorielles en facteurs
+  select(superf,grosrum) %>%
+  tbl_summary(
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})"))
+
+```
+#base welfare
+
+```{r}
+base %>%  select(hgender, hage , hmstat, heduc,hdiploma) %>%  tbl_summary()
+```
+
+
+
+```{r}
+base %>%  select(hgender, hage , hmstat, heduc,hdiploma) %>%  tbl_summary()
+```
+
+
+```{r }
+###lDescription
+base %>%
+  to_factor() %>% # Convertir les variables catégorielles en facteurs
+  select(hgender, hage , hmstat, heduc,hdiploma) %>%
+  tbl_summary(
+    label = list(hgender ~ "sexe du chef de ménage",
+      hage~"age du chef de  ménage",
+      hmstat ~ "situation matrimoniale",
+      heduc ~ "Niveau d'education",
+      hdiploma~ "diplome du chef de ménage"
+    ),missing = "always",missing_text = "valeurs manquantes",
+    statistic = list(hage~ "{mean}({sd})")
+  )
+
+```
