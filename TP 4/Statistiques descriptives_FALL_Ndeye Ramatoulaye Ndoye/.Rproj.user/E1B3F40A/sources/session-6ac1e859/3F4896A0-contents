@@ -17,14 +17,12 @@ Dans cette section, nous installons tous les packages qui servirons dans la suit
 
 packages <- c("readr","haven","utils","dplyr")
 
-
 for (package in packages) {
   if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
     install.packages(package)
   }
-  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+  library(package, character.only = TRUE)
 }
-
 
 ```
 
@@ -62,7 +60,6 @@ base_men
 base_ind
 
 ```
-
 # Quelques caractéristiques
 
 *Sexe du chef de ménage pour chaque individu*
@@ -91,8 +88,7 @@ print(resultats)
   
   * - *left_join()* :Conserve toutes les lignes de la première table (gauche) et ajoute les correspondances de la deuxième table (droite). Les valeurs manquantes sont remplies par NA
   
-  
-  * - *full_join()* : Conserve toutes les lignes des deux tables, qu'il y ait correspondance ou non. Les valeurs manquantes sont remplies par NA. Toutes les deux bases doivent etre de la même nature (nbre de ligne)
+  * - *full_join()* : Conserve toutes les lignes des deux tables, qu'il y ait correspondance ou non. Les valeurs manquantes sont remplies par NA.
  
 *Ici, l'objectif est de donner à chaque individu, le ménage corrrepondant*. Donc nous utiliserons la jointure gauche (left_join())
 
@@ -100,7 +96,6 @@ print(resultats)
 
 base_merge <-  dplyr::left_join(base_ind,base_men, by = "hhid")
 base_merge
-
 
 ```
 
