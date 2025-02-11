@@ -1,0 +1,48 @@
+---
+title: "TP 2_Keren"
+author: "Keren"
+date: "2025-01-21"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#chargement des packages
+```{r}
+library(utils)
+library(dplyr)
+```
+
+```{r}
+menage <- utils::read.csv("../données/ehcvm_individu_bfa2021.csv")
+individu <-utils::read.csv("../Données/ehcvm_individu_bfa2021.csv") 
+```
+
+```{r}
+utils::str(menage)
+```
+```{r}
+utils::str(individu)
+```
+
+```{r}
+bases_réunies <- dplyr::left_join(individu,menage,by ="hhid")
+bases_réunies 
+```
+fitrage de donnees suivant chefs de ménages ; par la suite selection de l' identifiant du menages et du sexe du chef de menage
+```{r} 
+resultat <- individu%>%
+                    dplyr::filter(lien=="Chef de ménage")%>%
+                    dplyr::select(hhid,sexe)
+print(resultat)                    
+```
+Jointure pour affecter a chaque individu le sexe de son chef de menage
+```{r}
+bases_sexe_chef_men <- dplyr::left_join(individu,resultat,by ="hhid")%>%
+                dplyr::select(pid,sexe.x,hhid,sexe.y)   
+bases_sexe_chef_men 
+```
+
