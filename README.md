@@ -31,7 +31,7 @@ Pour chacune des bases EHCVM 2021/2022, il faut:
 - Sortir des stats compte tenu de la jointure; 
 - Sortir des résultats avec et sans poids
   
-**Important**: Le TP est a faire sur Rmarkdown.
+**Important**: Le TP est a faire sur Rmarkdown et l'utilisation du package [gtsummary](https://www.danieldsjoberg.com/gtsummary/) est recommande.
   
 ### TP 6
 
