@@ -54,7 +54,8 @@ En utilisant les outputs du **TP 4**, faites des cartes en affichant des variabl
  - les communes/le 3e decoupage administratif du pays
 
 ### TP 9
-
+Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
+Pour ce faire
 
 ### TP 10
 
