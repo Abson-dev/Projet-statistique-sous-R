@@ -31,15 +31,33 @@ Pour chacune des bases EHCVM 2021/2022, il faut:
 - Sortir des stats compte tenu de la jointure; 
 - Sortir des résultats avec et sans poids
   
-**Important**: Le TP est a faire sur Rmarkdown.
+**Important**: Le TP est a faire sur Rmarkdown et l'utilisation du package [gtsummary](https://www.danieldsjoberg.com/gtsummary/) est recommande.
   
 ### TP 6
 
+Pour chacune des bases EHCVM 2018/2019, il faut:
+
+- Sortir les statistiques descriptives ;
+- Faire la jointure avec la base ménage; 
+- Sortir des stats compte tenu de la jointure; 
+- Sortir des résultats avec et sans poids
+  
+**Important**: Le TP est a faire sur Rmarkdown et l'utilisation du package [gtsummary](https://www.danieldsjoberg.com/gtsummary/) est recommande.
+
+### TP 7
+
 ### TP 8
 
+**Cartographie avec R**
+En utilisant les outputs du **TP 4**, faites des cartes en affichant des variables/indicateurs suivant:
+ - les pays
+ - les regions/le 1er decoupage administratif du pays
+ - les departements/le 2e decoupage administratif du pays
+ - les communes/le 3e decoupage administratif du pays
 
 ### TP 9
-
+Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
+Pour ce faire
 
 ### TP 10
 
@@ -49,6 +67,7 @@ Pour chacune des bases EHCVM 2021/2022, il faut:
 - Theme 3: Reproduire un livre a l'aide de R
 - Theme 4: Suivie de la collecte des donnees avec R
 - Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
+- Theme 6: Le calcul parallele sur R
 
 ### TP 11
 
