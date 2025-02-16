@@ -1,0 +1,194 @@
+---
+title: "Statistiques descriptives et tabulation avec gtsummary"
+author: "Malick SENE"
+date: "2025-02-11"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+\newpage
+# Introduction
+
+Ce document présente une analyse descriptive détaillée des données EHCVM2021 pour le Mali. Grâce aux packages **haven**, **dplyr**, **labelled** et **gtsummary**, nous importons, manipulons et résumons ces données pour en extraire des statistiques descriptives personnalisées.
+
+
+Pour commencer, nous définissons une liste de packages requis, vérifions si chacun est installé et, si nécessaire, l'installons avec ses dépendances, puis nous les chargeons dans l'environnement.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Définition de la liste des packages requis
+packages <- c("gtsummary", "dplyr", "readr", "haven")
+
+# Vérification de l'installation et installation des packages manquants
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+
+# Chargement des packages dans l'environnement
+for (pkg in packages) {
+  library(pkg, character.only = TRUE)
+}
+```
+
+
+Ensuite nous utilisons la fonction `read_dta()` du package **haven** pour importer le fichier Stata (.dta).  
+ 
+Puis, le package **dplyr** offre des fonctions efficaces pour la manipulation des données.  
+Ici, nous utilisons la fonction `select()` pour extraire uniquement les colonnes d'intérêt, à savoir `toit` et `sol`.  
+
+Enfin, le package **gtsummary** fournit des outils pour créer des tableaux de statistiques descriptives élégants et personnalisables.  
+La fonction `tbl_summary()` génère un tableau récapitulatif des variables sélectionnées.
+
+```{r, echo=TRUE, message=FALSE,warning=FALSE}
+# Importation du fichier Stata à l'aide de la fonction read_dta() du package haven
+data <- haven::read_dta("../data/ehcvm_menage_mli2021.dta")
+
+# Sélection des colonnes 'toit' et 'sol' avec dplyr::select() 
+# et génération d'un tableau résumé avec gtsummary::tbl_summary()
+data %>%
+  dplyr::select(toit, sol) %>%
+  gtsummary::tbl_summary()
+```
+
+Ici, nous convertissons les variables en facteurs en utilisant la fonction `to_factor()` du package **labelled**.  
+Cette conversion permet d'utiliser les étiquettes associées aux variables dans le tableau récapitulatif, ce qui améliore la lisibilité des résultats.
+
+Ensuite, nous utilisons la fonction `select()` du package **dplyr** pour extraire les colonnes `toit` et `sol` du jeu de données.  
+Enfin, la fonction `tbl_summary()` du package **gtsummary** est employée pour générer un tableau de statistiques descriptives pour ces variables.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Conversion des variables en facteurs à l'aide de labelled::to_factor(),
+# extraction des colonnes 'toit' et 'sol' avec dplyr::select()
+# et création d'un tableau résumé avec gtsummary::tbl_summary()
+data %>% 
+  labelled::to_factor() %>% 
+  dplyr::select(toit, sol) %>% 
+  gtsummary::tbl_summary()
+```
+
+Le code suivant réalise les opérations suivantes :
+
+1. Conversion des variables en facteurs avec `labelled::to_factor()`, ce qui permet d'utiliser les étiquettes intégrées dans les données.
+2. Sélection des colonnes `toit` et `sol` via `select()` du package **dplyr**.
+3. Génération d'un tableau résumé à l'aide de `tbl_summary()` du package **gtsummary**, en précisant des libellés personnalisés pour améliorer la lisibilité :
+   - La colonne `toit` est renommée "Toit en materiaux définitif".
+   - La colonne `sol` est renommée "Sol en materiaux définitif".
+
+```{r, echo=TRUE,message=FALSE, warning=FALSE}
+data %>% 
+  labelled::to_factor() %>% 
+  dplyr::select(toit, sol) %>% 
+  gtsummary::tbl_summary(
+    label = list(
+      toit ~ "Toit en materiaux définitif",
+      sol ~ "Sol en materiaux définitif"
+    )
+  )
+```
+
+
+
+
+Ici, la fonction `modify_header()` permet de modifier l'en-tête du tableau pour que la colonne des libellés affiche "Caractéritiques logement".
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+data %>% 
+  labelled::to_factor() %>% 
+  dplyr::select(toit, sol) %>%  
+  gtsummary::tbl_summary(
+    label = list(
+      toit ~ "Toit en materiaux définitif", 
+      sol ~ "Sol en materiaux définitif"
+    )
+  ) %>% 
+  gtsummary::modify_header(label = "Caractéritiques logement")
+```
+
+
+
+Maintenant nous extrayons plusieurs colonnes du jeu de données (`toit`, `sol`, `superf`, `grosrum` et `petitrum`) grâce à la fonction `select()` du package **dplyr**. La fonction `tbl_summary()` du package **gtsummary** génère un tableau de statistiques descriptives pour ces variables, avec des libellés personnalisés pour améliorer la lisibilité :
+  
+- `toit` est renommé "Toit en materiaux définitif"  
+- `sol` est renommé "Sol en materiaux définitif"  
+- `superf` est renommé "Superficie cultivée"  
+- `grosrum` est renommé "gros rumunant"  
+- `petitrum` est renommé "petit ruminants"  
+
+Pour les variables numériques `superf`, `grosrum` et `petitrum`, nous affichons la moyenne et l'écart-type en utilisant l'argument `statistic`. L'argument `digits` permet de fixer le format numérique (ici aucune décimale). Enfin, nous modifions l'en-tête du tableau pour que la colonne des libellés affiche "Caractéritiques logement" à l'aide de `modify_header()`.Nous résumons donc ici l'ensemble des manipulations effectuées sur cette base avec les commentaires explicatifs.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Conversion en facteurs, sélection des colonnes et création d'un tableau résumé personnalisé
+data %>% 
+  labelled::to_factor() %>%  # Conversion des variables en facteurs selon leurs étiquettes
+  dplyr::select(toit, sol, superf, grosrum, petitrum) %>% # Extraction des colonnes d'intérêt
+  gtsummary::tbl_summary(
+    label = list(
+      toit    ~ "Toit en materiaux définitif",         # Libellés personnalisés
+      sol     ~ "Sol en materiaux définitif",            
+      superf  ~ "Superficie cultivée",                   
+      grosrum ~ "gros rumunant",                         
+      petitrum~ "petit ruminants"                        
+    ),
+    statistic = list(  # Afficher les statistiques
+      superf  ~ "{mean} ({sd})",                       
+      grosrum ~ "{mean} ({sd})",                       
+      petitrum~ "{mean} ({sd})"                 
+    ),
+    digits = dplyr::everything() ~ c(0, 0, 0, 0, 0, 0)   # Formatage numérique sans décimales
+  ) %>% 
+  gtsummary::modify_header(label = "Caractéritiques logement")  # Modification de l'en-tête du tableau
+```
+
+
+Ici, nous importons le fichier welfare.
+Ensuite, nous convertissons les variables en facteurs avec la fonction `to_factor()` du package **labelled**, ce qui permet d'utiliser les étiquettes associées aux variables dans le tableau récapitulatif.  
+
+Nous utilisons ensuite la fonction `select()` du package **dplyr** pour extraire les colonnes d'intérêt :  
+- `hgender` (Genre du chef de ménage)  
+- `hage` (Âge du chef de ménage)  
+- `hmstat` (Statut matrimonial)  
+- `heduc` (Niveau d'éducation)  
+- `hdiploma` (Diplômes)
+
+La fonction `tbl_summary()` du package **gtsummary** génère un tableau de statistiques descriptives pour ces variables, en personnalisant les libellés pour améliorer la lisibilité :  
+- `hgender` est renommé en "Genre CM"  
+- `hage` est renommé en "Age CM"  
+- `hmstat` est renommé en "Statut matrimonial"  
+- `heduc` est renommé en "Education CM"  
+- `hdiploma` est renommé en "Diplomes CM"
+
+Pour la variable `hage`, nous affichons la moyenne et l'écart-type en utilisant l'argument `statistic`.  
+L'argument `digits` fixe le format numérique (ici, aucune décimale).  
+Nous affichons systématiquement les valeurs manquantes grâce aux paramètres `missing = "always"` et `missing_text = "NA"`.  
+Enfin, nous modifions l'en-tête du tableau pour que la colonne des libellés affiche "Caractéritiques Chef de ménage" en utilisant la fonction `modify_header()`.
+
+```{r, echo=TRUE,  message=FALSE, warning=FALSE}
+# Importation du fichier Stata concernant le bien-être
+wf <- haven::read_dta("../data/ehcvm_welfare_mli2021.dta")
+
+# Conversion des variables en facteurs, extraction des colonnes d'intérêt,
+# création d'un tableau résumé avec libellés personnalisés et formatage des statistiques,
+# affichage des valeurs manquantes et modification de l'en-tête du tableau
+wf %>% 
+  labelled::to_factor() %>% 
+  dplyr::select(hgender, hage, hmstat, heduc, hdiploma) %>% 
+  gtsummary::tbl_summary(
+    label = list(
+      hgender  ~ "Genre CM",
+      hage     ~ "Age CM",
+      hmstat   ~ "Statut matrimonial",
+      heduc    ~ "Education CM",
+      hdiploma ~ "Diplomes CM"
+    ),
+    statistic = list(
+      hage ~ "{mean} ({sd})"  # Affichage de la moyenne et de l'écart-type pour 'hage'
+    ),
+    digits = dplyr::everything() ~ c(0, 0, 0, 0, 0),  # Format numérique sans décimales
+    missing = "always",        # Affiche systématiquement les valeurs manquantes
+    missing_text = "NA"        # Remplace les valeurs manquantes par "NA"
+  ) %>% 
+  gtsummary::modify_header(label = "Caractéritiques Chef de ménage")
+```
