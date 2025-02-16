@@ -35,8 +35,23 @@ Pour chacune des bases EHCVM 2021/2022, il faut:
   
 ### TP 6
 
+Pour chacune des bases EHCVM 2018/2019, il faut:
+
+- Sortir les statistiques descriptives ;
+- Faire la jointure avec la base ménage; 
+- Sortir des stats compte tenu de la jointure; 
+- Sortir des résultats avec et sans poids
+  
+**Important**: Le TP est a faire sur Rmarkdown et l'utilisation du package [gtsummary](https://www.danieldsjoberg.com/gtsummary/) est recommande.
+
 ### TP 8
 
+**Cartographie avec R**
+En utilisant les outputs du **TP 4**, faites des cartes en affichant des variables/indicateurs suivant:
+ - les pays
+ - les regions/le 1er decoupage administratif du pays
+ - les departements/le 2e decoupage administratif du pays
+ - les communes/le 3e decoupage administratif du pays
 
 ### TP 9
 
