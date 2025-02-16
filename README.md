@@ -44,6 +44,8 @@ Pour chacune des bases EHCVM 2018/2019, il faut:
   
 **Important**: Le TP est a faire sur Rmarkdown et l'utilisation du package [gtsummary](https://www.danieldsjoberg.com/gtsummary/) est recommande.
 
+### TP 7
+
 ### TP 8
 
 **Cartographie avec R**
