@@ -1,0 +1,177 @@
+---
+title: "Travaux Pratiques"
+author: "Djerakei MISTALENGAR et PAHANE SEUNKAM Kerencia Dyvana"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+# Résumé de cours : Séries numériques
+
+Dans toute la suite, $(u_n)_{n \in \mathbb{N}}$ désigne une suite de nombres complexes.
+
+------------------------------------------------------------------------
+
+## Généralités
+
+### **Définition d'une série**
+
+On appelle **série de terme général** $u_n$ la suite $(S_n)_{n \geq 0}$ où, pour tout $n \geq 0$ :
+
+$$
+S_n = \sum_{k=0}^n u_k.
+$$
+
+On note $\sum u_k$ cette suite, et $S_n$ est appelé **somme partielle d'ordre** $n$ de la série $\sum u_k$.
+
+### **Convergence d'une série**
+
+On dit que la série $\sum u_n$ **converge** si la suite de ses sommes partielles $(S_n)_{n \geq 0}$ est convergente. Dans le cas contraire, on dit qu'elle **diverge**.
+
+Dans le cas de la convergence, on note :
+
+$$
+\sum_{k=0}^{+\infty} u_k = \lim_{n \to +\infty} S_n.
+$$
+
+Le nombre complexe $\sum_{k=0}^{+\infty} u_k$ s'appelle **la somme de la série** $\sum u_k$.
+
+### **Reste d'une série**
+
+Dans le cas où la série converge, le **reste d'ordre** $n$ de la série est défini par :
+
+$$
+R_n = \sum_{k=n+1}^{+\infty} u_k.
+$$
+
+------------------------------------------------------------------------
+
+### **Propriétés**
+
+#### **Propriété 1 :**
+
+Si la série $\sum u_n$ converge, alors la suite $(u_n)_{n \geq 0}$ converge vers 0.
+
+#### **Propriété 2 :**
+
+Une série $\sum u_n$ telle que $(u_n)$ ne tend pas vers 0 est dite **grossièrement divergente**.
+
+------------------------------------------------------------------------
+
+### **Séries géométriques**
+
+#### Proposition :
+
+Soit $a \in \mathbb{C}$. La série géométrique $\sum a^n$ converge si et seulement si $|a| < 1$. Dans ce cas, on a :
+
+$$
+\sum_{n=0}^{+\infty} a^n = \frac{1}{1 - a}.
+$$
+
+------------------------------------------------------------------------
+
+### **Lien suite-série**
+
+Si on pose, pour $n \geq 0$ :
+
+$$
+v_n = u_{n+1} - u_n,
+$$
+
+alors :
+
+$$
+\sum_{k=0}^n v_k = u_{n+1} - u_0.
+$$
+
+En particulier, la suite $(u_n)$ converge si et seulement si la série $\sum (u_{n+1} - u_n)$ converge.
+
+------------------------------------------------------------------------
+
+## Séries à termes positifs
+
+### **Croissance des sommes partielles**
+
+Si la suite $(u_n)$ est une suite de réels positifs, alors la suite des sommes partielles $(S_n)$ est croissante. On en déduit les résultats suivants :
+
+### **Théorème :**
+
+Une série à termes positifs converge si et seulement si la suite de ses sommes partielles est majorée.
+
+### **Corollaire 1 :**
+
+Soient $(u_n)$ et $(v_n)$ deux suites de réels positifs telles que $u_n \leq v_n$. Alors :
+
+1.  Si $\sum v_n$ converge, alors $\sum u_n$ converge.
+2.  Si $\sum u_n$ diverge, alors $\sum v_n$ diverge.
+
+### **Corollaire 2 :**
+
+Si $u_n \sim v_n$, alors $\sum u_n$ converge si et seulement si $\sum v_n$ converge.
+
+### **Séries de référence**
+
+Pour appliquer ces résultats, on utilise des séries de référence. Par exemple, les séries géométriques ou les séries de la forme :
+
+$$
+\sum_{n \geq 1} \frac{1}{n^\alpha}.
+$$
+
+------------------------------------------------------------------------
+
+## Comparaison avec une intégrale
+
+Soit $f : [0, +\infty[ \to \mathbb{R}$ une fonction continue par morceaux. On s'intéresse aux séries du type $\sum f(n)$. Lorsque $f$ est monotone, on peut encadrer $f(n)$ en utilisant la méthode des rectangles :
+
+-   Si $f$ est croissante, alors pour tout $n \geq 1$ :
+
+$$
+\int_{n-1}^n f(t) \, dt \leq f(n) \leq \int_n^{n+1} f(t) \, dt.
+$$
+
+-   Si $f$ est décroissante, alors pour tout $n \geq 1$ :
+
+$$
+\int_n^{n+1} f(t) \, dt \leq f(n) \leq \int_{n-1}^n f(t) \, dt.
+$$
+
+En sommant ces inégalités, on obtient des encadrements pour les sommes partielles et les restes des séries.
+
+------------------------------------------------------------------------
+
+## Séries absolument convergentes
+
+### **Définition**
+
+Une série $\sum u_n$ est dite **absolument convergente** si la série $\sum |u_n|$ est convergente.
+
+### **Théorème :**
+
+Toute série absolument convergente est convergente. Cependant, la réciproque est fausse. Une série convergente sans être absolument convergente est dite **semi-convergente**.
+
+------------------------------------------------------------------------
+
+## Exemples
+
+### **Exemple 1 : Série exponentielle**
+
+Pour tout $z \in \mathbb{C}$, la série $\sum \frac{z^n}{n!}$ est absolument convergente. On a :
+
+$$
+\exp(z) = \sum_{n=0}^{+\infty} \frac{z^n}{n!}.
+$$
+
+------------------------------------------------------------------------
+
+## Développement décimal propre d'un réel
+
+### **Théorème :**
+
+Soit $x \in [0, 1[$. Il existe une unique suite $(a_n)_{n \geq 1}$ d'éléments de $\{0, \dots, 9\}$ telle que :
+
+1.  $(a_n)$ n'est pas stationnaire à 9 ;
+2.  $x = \sum_{n=1}^{+\infty} \frac{a_n}{10^n}$.
+
+Cette écriture s'appelle le **développement décimal propre de** $x$.
