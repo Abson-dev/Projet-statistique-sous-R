@@ -46,6 +46,13 @@ Pour chacune des bases EHCVM 2018/2019, il faut:
 
 ### TP 7
 
+**ISEP 3**
+
+Structurer le **TP 4** sous forme de livre en ligne en utilisant [bookdown](https://bookdown.org/yihui/bookdown/).
+Vous devriez avoir un seul lien qui groupe toutes les etapes d'harmonisation des bases des donnees des differents pays.
+
+**Bon courage!**
+
 ### TP 8
 
 **Cartographie avec R**
