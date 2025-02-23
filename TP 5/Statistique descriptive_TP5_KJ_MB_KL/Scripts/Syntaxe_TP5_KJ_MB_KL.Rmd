@@ -1,0 +1,410 @@
+---
+title: "TP5"
+author: "KAFANDO Judicaël Oscar, Mamady I BERETE & SEUKAM Divana Kerencia"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled","survey")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+## Section I : Importation et analyse des  bases
+
+
+### Importation des bases
+
+```{r}
+## Base ménage
+
+base_men <-  utils::read.csv("../Data/ehcvm_menage_bfa2021.csv")
+## Base pondération
+base_pond <- utils::read.csv("../Data/ehcvm_ponderations_bfa2021.csv")
+
+
+```
+
+### Structure des bases**
+
+```{r}
+print("Structure de la Base ménage")
+str(base_men)
+
+print("Structure de la Base pondération")
+str(base_pond)
+
+```
+
+
+### Nom des colonnes dans chaque base
+
+```{r}
+print("Noms des colonnes de la Base ménage")
+colnames(base_men)
+
+print("Noms des colonnes de la Base pondération")
+colnames(base_pond)
+
+```
+## Section 2 : Statistiques sur la base (sans pondération)
+
+### Caracteristiques du logement
+
+```{r}
+base_men %>%    
+  select(logem, toit, sol, mur) %>% 
+  tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage"),
+  digits = everything()~c(0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+      ) 
+
+            
+
+```
+
+
+
+### Accès aux infrastructures de base
+
+
+```{r}
+base_men %>%   
+  select(eauboi_ss,eauboi_sp,elec_ac,elec_ur,elec_ua,ordure,toilet,eva_toi,eva_eau) %>% tbl_summary(
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural.",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               toilet ~ "Type de toilettes utilisées par le ménage",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  digits = everything()~c(0,0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+###  Équipements du ménage	
+
+```{r}
+base_men %>% 
+  select(tv, fer, frigo, cuisin, ordin, decod, car ) %>% 
+  tbl_summary(
+    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold") 
+  
+
+```
+
+
+### Superficie et bétail du ménage
+
+```{r}
+base_men %>% 
+  select(superf, grosrum, petitrum, porc, lapin, volail) %>% 
+  tbl_summary(
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porc",
+               lapin ~"Le Nombre de lapin",
+               volail ~ "Le Nombre de volail"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),  
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+### Chocs et vulnérabilités
+
+```{r}
+base_men %>% 
+  select(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth) %>% 
+  tbl_summary(
+    label = list(
+      sh_id_demo ~ "Chocs démographiques)",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs")) %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+```
+
+
+
+
+## Section 3 : Statistique sur las base ( avec pondération)
+
+Dans cette section, nous reprenons les tableaux de la section 2 en les pondérant juste.
+
+### Fusion
+
+L'objectif est d'avoir les différents poids dans la base ménage.
+
+```{r}
+
+base_men_pond <- dplyr::left_join(base_men,base_pond,by='grappe')
+#base_men_pond
+
+```
+
+### Pondération
+
+**Procédure d'échantillonnage**
+
+La base de sondage de l'EHCVM-2 se compose d'une liste de toutes les zones de dénombrement (ZD) du recensement général de la population et de l'habitat de 2019. À la première étape, **600 ZD (grappe)** sont sélectionnées proportionnellement en fonction de leur taille en termes de nombre de ménages issus de la cartographie.
+
+À la deuxième étape, un échantillon de **7 200 ménages, soit 12 ménages par ZD,** est sélectionné à l'aide d'un échantillonnage systématique à **probabilité égale** dans chaque zone de dénombrement.
+La taille finale de l'échantillon du panel est de 7 176 ménages, dont 3 585 ont été interrogés lors de la première vague et 3 591 lors de la deuxième vague.
+
+Cependant, une analyse de la base montre que certains grappe n'ont pas 12 ménages (8,11).
+
+**Calculons d'abord le nombre de ménage par grappe**
+
+```{r}
+base_men_pond$nombre_menage = stats::ave(base_men_pond$menage,base_men_pond$grappe,FUN = length)
+
+```
+
+**Calcul du poids de chaque ménagé**
+
+Le tirage etant proportionnel, on repartie juste le poids de la grappe de façon proportionnel aux ménages
+
+```{r}
+base_men_pond$poids <- base_men_pond$hhweight/base_men_pond$nombre_menage
+
+```
+
+
+**Vérification des poids**
+
+```{r}
+## Poids total calculé à partir des grappes
+
+poids_par_grappe <- base_men_pond %>%
+  select(grappe, hhweight) %>%
+  distinct(grappe, .keep_all = TRUE)
+
+sum(poids_par_grappe$hhweight)
+
+## Poids total calculé à partir des ménages
+sum(base_men_pond$poids)
+
+```
+**Création du design de ponderation**
+
+```{r}
+
+base_men_avec_pond <- svydesign(id = ~grappe,  # Identifiant de la grappe (unité primaire de tirage)
+                    weights = ~poids,  # Poids  du ménage
+                    data = base_men_pond)  
+
+
+```
+
+
+### Caracteristiques du logement
+
+```{r}
+base_men_avec_pond %>%    
+  tbl_svysummary(
+  include = c(logem, toit, sol, mur),
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage"),
+  digits = everything()~c(0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+            
+
+```
+
+
+### Accès aux infrastructures de base
+
+```{r}
+base_men_avec_pond %>%   
+ tbl_svysummary(
+  include = c(eauboi_ss,eauboi_sp,elec_ac,elec_ur,elec_ua,ordure,toilet,eva_toi,eva_eau),
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural.",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               toilet ~ "Type de toilettes utilisées par le ménage",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+      
+  digits = everything()~c(0,0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+) %>% 
+modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+###  Équipements du ménage	
+
+```{r}
+base_men_avec_pond %>% 
+  tbl_svysummary(
+    include = c(tv, fer, frigo, cuisin, ordin, decod, car ),
+    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold") 
+  
+
+```
+
+
+### Superficie et bétail du ménage
+
+```{r}
+base_men_avec_pond %>% 
+  tbl_svysummary(
+    include = c(superf, grosrum, petitrum, porc, lapin, volail),
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porc",
+               lapin ~"Le Nombre de lapin",
+               volail ~ "Le Nombre de volail"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),  
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+### Chocs et vulnérabilités
+
+```{r}
+base_men_avec_pond %>% 
+  tbl_svysummary(
+    include = c(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth),
+    label = list(
+      sh_id_demo ~ "Chocs démographiques",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs")) %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2021-2022 (BFA)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+```
+
+

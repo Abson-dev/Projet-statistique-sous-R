@@ -1,0 +1,86 @@
+---
+title: "Statistique descriptive"
+author: "Jean-Luc BATABATI"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+packages <- c("readr","haven","utils","dplyr", "gtsummary", "labelled")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) { 
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) #
+}
+```
+
+## Importation de la base ménage sous formats csv
+
+```{r}
+Base_men <- utils::read.csv("../Données/Base_menage.csv")
+```
+
+
+## Tableau statistiques
+
+```{r}
+Base_men %>% select(logem, toit, sol)%>% tbl_summary()
+```
+
+
+## Ajout des labels et l'en tête
+
+```{r}
+Base_men %>% select(logem, toit, sol)%>% tbl_summary(label = list(logem ~ "logement" ,toit ~ "Possede un toit", sol~"Possède un sol" )) %>% modify_header(label=("Caractéristiques du CM"))
+```
+
+## Ajout des statistiques et arrondi des chiffres
+
+```{r}
+Base_men %>%labelled::to_factor() %>% select(logem, toit, sol, superf, grosrum, petitrum)%>% 
+  tbl_summary(label = list(logem ~ "logement",toit ~ "Possede un toit"), statistic = list(superf ~ "{median} {min} {max} ({p25}, {p75})", grosrum ~ "{median} {min} {max} ({p25}, {p75})", petitrum ~ "{median} {min} {max} ({p25}, {p75})"), digits=list(superf=c(0, 0, 0)))%>% modify_header(label=("Caractéristiques du CM"))
+```
+
+## Gestion des valeurs manquantes
+
+```{r}
+Base_men %>%labelled::to_factor() %>% select(logem, toit, sol, superf, grosrum, petitrum)%>% 
+  tbl_summary(label = list(logem ~ "logement",toit ~ "Possede un toit"), statistic = list(superf ~ "{median} {min} {max} ({p25}, {p75})", grosrum ~ "{median} {min} {max} ({p25}, {p75})", petitrum ~ "{median} {min} {max} ({p25}, {p75})"), digits=list(superf=c(0, 0, 0)), missing ="always", missing_text = "Valeurs manquantes")%>% modify_header(label=("Caractéristiques du CM"))
+```
+
+
+
+## Importation de la base Base welfare
+```{r}
+Base_welfare <- haven::read_dta("../Données/ehcvm_welfare_ner2021.dta")
+```
+
+
+## Structure de la base
+```{r}
+str(Base_welfare)
+```
+
+
+## Quelques statistiques sur la base welfare
+
+```{r}
+Base_welfare %>%labelled::to_factor()%>% select(hgender, hage, hmstat, heduc, hdiploma, milieu, hhsize)%>% 
+  
+  tbl_summary(label = list(hgender ~ "Sexe du CM" ,
+                           hage ~ "Age du CM", 
+                           hmstat~"Situatiom matrimonaile du CM",
+                           heduc~"Niveau d'éducation du CM", 
+                           hdiploma~"Diplome du CM",
+                           milieu~"Milieu de résidence",
+                           hhsize~"Taille du ménage" ), statistic = list(hage ~ "{median} {min} {max} ({p25}, {p75})", hhsize ~ "{median} {min} {max} ({p25}, {p75})"),missing ="always", missing_text = "Valeurs manquantes") %>% modify_header(label=("Caractéristiques du CM"))
+```
+
+
+

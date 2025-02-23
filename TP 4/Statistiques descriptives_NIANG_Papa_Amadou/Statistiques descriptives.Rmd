@@ -1,0 +1,71 @@
+---
+title: "Statistiques descriptives"
+author: "Papa Amadou NIANG"
+date: "2025-02-11"
+output: pdf_document
+---
+
+# Importation des bases
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+data <- haven::read_dta("../data_sn/ehcvm_menage_SEN2021.dta")
+data2 <- haven::read_dta("../data_sn/ehcvm_welfare_SEN2021.dta")
+```
+
+## Code élémentaire pour un tableau avec gtsummary
+```{r}
+data %>% select(logem, toit,sol) %>%  gtsummary::tbl_summary()
+```
+
+## Labelisation des variables au niveau du tableau
+```{r}
+data %>% labelled::to_factor() %>%
+  select(logem, toit,sol) %>%  
+  gtsummary::tbl_summary()
+```
+
+## Modifier les titres
+```{r}
+data %>% labelled::to_factor() %>% select(logem, toit,mur) %>%  
+  gtsummary::tbl_summary(
+    label = list(logem ~ "Logement du chef de ménage",
+                 toit  ~ "Toit en matériau définitif",
+                 mur ~ "Mur de la maison")) %>% 
+  gtsummary::modify_header(label= "Habitat du CM")
+```
+
+## Calcul de stat desc avec gtsummary
+```{r}
+data %>% labelled::to_factor() %>%
+  select( grosrum, petitrum, superf) %>%  
+  gtsummary::tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} [max {max}]",
+      superf ~ "{mean}  (médiane{median}) [min {min}]  (max {max})"),
+    digits = everything() ~ c(0,0,0)) %>% 
+  gtsummary::modify_header(label= "Habitat du CM")
+```
+
+## Gestion des valeurs manquantes
+```{r}
+data %>% labelled::to_factor() %>%
+  select( grosrum, petitrum, superf) %>%  
+  gtsummary::tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} [max {max}]",
+      superf ~ "{mean}  (médiane{median}) [min {min}]  (max {max})"),
+    digits = everything() ~ 0, 
+    missing = "always",
+    missing_text = "Valeurs manquantes") %>%
+  gtsummary::modify_header(label= "Habitat du CM")
+```
+
+## Utilisation de la base Welfare
+```{r}
+data2  %>% labelled::to_factor() %>% 
+  select(hgender, hage, hmstat, heduc, hdiploma)  %>%
+  gtsummary::tbl_summary()
+```
