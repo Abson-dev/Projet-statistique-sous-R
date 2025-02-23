@@ -1,0 +1,579 @@
+---
+output:
+  html_document:
+    df_print: paged
+fontsize: 12pt
+geometry: a4paper
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{titling}
+- \usepackage{lmodern}
+- \usepackage{fancyhdr}
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    \includegraphics[width=4cm]{logo.jpg} \\
+    {\large \textit{Ecole nationale de la Statistique et de l'Analyse Economique}}
+    
+    \vspace*{5cm}
+    
+    \[
+\fbox{\textbf{\LARGE \textsf{Analyse des prix : Evolution des prix par région}}}
+\]
+
+      \vspace*{3.5cm}
+      
+         \begin{minipage}{0.5\textwidth}
+            \begin{flushleft} \large
+               \emph{\textsf{\textbf{Rédigé par :}}}\\
+                 LAWA FOUMSOU Prosper\\
+                 BEN IDRISS Soma\\
+                 BALAFAI Paul\\
+                 FROMO Francis\\
+               \textit{\small \color{blue} Élèves Ingénieurs Statisticiens Économistes}
+            \end{flushleft}
+         \end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{\textbf{Sous la supervision de :}}} \\
+                  M. Aboubacar HEMA\\
+                \textit{\small \color{blue} Research Analyst }
+            \end{flushright}
+        \end{minipage}
+        
+\end{titlepage}
+
+\newpage
+
+```{r, warning=FALSE, results='hide',include=FALSE}
+library("haven")
+library("dplyr")
+library("gtsummary")
+library("labelled")
+library("GGally")
+library("stringr")
+```
+
+```{r}
+base_prix <- haven::read_dta("../bases/base_prix.dta")
+prixsen <- haven::read_dta("../bases/base_prix.dta")
+colnames(base_prix)
+```
+
+```{r}
+# Conversion en facteur ou numérique
+base_prix <- base_prix %>%
+  mutate(across(where(is.labelled), ~ as_factor(.)))
+
+base_prix <- base_prix %>%
+  mutate(region = str_to_title(region),
+         Poste=str_to_title(Poste))  # Met la première lettre de chaque mot en majuscule
+```
+
+```{r, message = FALSE, echo=FALSE}
+base_prix %>% labelled::to_factor() %>% select("Poste") %>%
+tbl_summary() %>% modify_header(label="Nom du poste")
+```
+## Analyse des prix pour le poste "Produits Alimentaires et Boissons non Alcoolisees"
+
+```{r}
+prix_moyen_produits <- base_prix %>%
+  filter(Poste == "Produits Alimentaires Et Boissions Non Alcoolisees") %>%  # Sélectionne la catégorie
+  group_by(region) %>%  # Regroupe par région
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))
+```
+
+
+```{r}
+# Graphique
+ggplot(prix_moyen_produits, aes(x = region, y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen des produits alimentaires par région",
+       x = "Région",
+       y = "Prix moyen") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des labels
+```
+## Analyse des prix pour le poste "Boissons Alcoolisees, Tabac et Stupefiants"
+```{r}
+prix_moyen_boisson <- base_prix %>%
+  filter(Poste == "Boissons Alcoolisees, Tabac Et Stupefiants") %>%  # Sélectionne la catégorie
+  group_by(region) %>%  # Regroupe par région
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))
+```
+
+```{r}
+# Graphique
+ggplot(prix_moyen_boisson, aes(x = region, y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen boissons alcoolisés,tabac et stupéfiants",
+       x = "Région",
+       y = "Prix moyen") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Analyse des prix pour le poste "Vetements et chaussures"
+
+```{r}
+prix_moyen_vetement <- base_prix %>%
+  filter(Poste == "Vêtements Et Chaussures") %>%  # Sélectionne la catégorie
+  group_by(region) %>%  # Regroupe par région
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))
+```
+
+```{r}
+# Graphique
+ggplot(prix_moyen_vetement, aes(x = region, y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen Vêtements et chaussures",
+       x = "Région",
+       y = "Prix moyen") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## analyse du poste "LOGEMENT, EAU, ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES et sante"
+
+```{r}
+prixsen <- prixsen %>%
+  mutate(across(where(is.labelled), ~ as_factor(.)))
+
+prixsen %>% filter(Poste == "LOGEMENT, EAU, ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES")
+```
+
+
+```{r}
+
+prix_logement <- prixsen %>%
+  filter(Poste == "LOGEMENT, EAU, ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES")
+
+# Calcul des prix moyens par région
+prix_moyen_log <- prix_logement %>%
+  group_by(region) %>%
+  summarise(prix_moyen_log = mean(prix, na.rm = TRUE))  # Moyenne des prix, en ignorant les valeurs NA
+
+
+```
+
+```{r}
+prix_logement %>%labelled ::to_factor() %>%select(region,prix) %>% tbl_summary()%>% modify_header(label="prix des LOGEMENT, EAU, ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES. ")
+```
+
+
+```{r}
+
+# Création de l'histogramme
+ggplot(prix_moyen_log, aes(x = reorder(region, prix_moyen_log), y = prix_moyen_log, fill = region)) +
+  geom_bar(stat = "identity") +  # Dessiner les barres avec les vraies valeurs
+  labs(title = "Prix moyen des logements  par région",
+       x = "Région",
+       y = "Prix moyen (CFA)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des noms de régions
+```
+
+
+```{r}
+prix_logement
+```
+
+```{r}
+prix_logement %>%
+  select(prix) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label="Quelques Statistiques sur  le LOGEMENT, EAU, ÉLECTRICITÉ, GAZ ET AUTRES COMBUSTIBLES. ")
+
+```
+```{r}
+colnames(prix_logement)
+```
+
+
+```{r}
+colnames(prix_logement)
+```
+```{r}
+
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_logement <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region)
+
+prix_logement %>%
+  select(region) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label="prix  des logements   par région ")
+
+
+```
+
+```{r}
+
+prix_logement <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region) %>%
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))  # Calcul de la moyenne
+# Création de l'histogramme
+ggplot(prix_logement, aes(x = reorder(region, prix_moyen), y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +  # Dessiner les barres avec les vraies valeurs
+  labs(title = "Prix moyen des produits par région",
+       x = "Région",
+       y = "Prix moyen (CFA)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des noms de régions
+
+
+```
+
+
+
+## Analyse des prix pour le poste "Santé"
+```{r}
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_sante <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region) %>%
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))  # Calcul de la moyenne
+```
+
+
+
+```{r}
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_sante <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region)
+
+prix_sante %>%
+  select(region) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label="prix  des soins de santé par région ")
+
+```
+
+
+
+
+```{r}
+
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_sante <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region) %>%
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))  # Calcul de la moyenne
+
+```
+
+
+```{r}
+colnames(prix_sante)
+```
+
+```{r}
+prix_sante %>%
+  select(prix_moyen) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label="Statistiques sur les prix  des soins de santé par région ")
+```
+
+
+
+
+
+
+```{r}
+# Calcul des prix moyens par région
+prix_moyen_sante  <- prix_sante %>%
+  group_by(region) %>%
+  summarise(prix_moyen_sante = mean(prix_moyen, na.rm = TRUE))  
+
+```
+
+
+
+```{r}
+# Création de l'histogramme
+ggplot(prix_moyen_sante, aes(x = reorder(region, prix_moyen_sante), y = prix_moyen_sante, fill = region)) +
+  geom_bar(stat = "identity") +  # Dessiner les barres avec les vraies valeurs
+  labs(title = "Prix moyen des produits  de santé par région",
+       x = "Région",
+       y = "Prix moyen (CFA)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des noms de régions
+```
+
+
+```{r}
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_ameuble <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region)
+
+prix_ameuble %>%
+  select(region) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label="prix  des soins de santé par région ")
+
+
+
+```
+
+
+
+
+
+```{r}
+prix_ameuble <- prixsen %>%
+  filter(Poste == "AMEUBLEMENT, ÉQUIPEMENT MÉNAGER ET ENTRETIEN COURANT DU MÉNAGE")%>%  # Filtrer sur 
+  group_by(region) %>%
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))  # Calcul de la moyenne
+
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_sante <- prixsen %>%
+  filter(Poste == "SANTÉ") 
+```
+
+
+```{r}
+prix_ameuble
+```
+
+
+```{r}
+
+prix_ameuble <- prixsen %>%
+  filter(Poste == "AMEUBLEMENT, ÉQUIPEMENT MÉNAGER ET ENTRETIEN COURANT DU MÉNAGE")%>%  # Filtrer sur 
+  group_by(region)
+
+prix_ameuble %>%
+  select(region) %>%  # Sélectionne uniquement la variable prix
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} [{p25}, {p75}]"),
+    missing = "ifany"  # Affiche le nombre de valeurs manquantes si présent
+  )%>% modify_header(label=" prix des  AMEUBLEMENT, ÉQUIPEMENT MÉNAGER ET ENTRETIEN COURANT DU MÉNAGE par région")
+
+```
+
+
+
+```{r}
+
+# Filtrer uniquement les données d'hospitalisation et calculer la moyenne par région
+prix_sante <- prixsen %>%
+  filter(Poste == "SANTÉ") %>%  # Filtrer sur l'hospitalisation
+  group_by(region) %>%
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))  # Calcul de la moyenne
+
+```
+
+
+
+
+```{r}
+
+# Vérification et calcul du prix moyen
+prix_moyen_ameuble <- prix_ameuble %>%
+  group_by(region) %>%
+  summarise(prix_moyen_ameuble = mean(prix, na.rm = TRUE))  # Vérifie bien que `prix` est la bonne colonne
+
+# Vérification des types
+prix_moyen_ameuble$region <- as.factor(prix_moyen_ameuble$region)
+
+# Création de l'histogramme
+ggplot(prix_moyen_ameuble, aes(x = reorder(region, prix_moyen_ameuble), y = prix_moyen_ameuble, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen des produits d'ameublement par région",
+       x = "Région",
+       y = "Prix moyen (CFA)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des noms des régions
+
+```
+
+
+## analyse des prix du potste "assurances et produits financiers"
+```{r}
+ass_pdtfin <- prixsen %>% to_factor() %>% filter(Poste== "ASSURANCES ET SERVICES FINANCIERS")
+```
+
+
+
+```{r}
+ass_pdtfin %>% select(prix, mois) %>% tbl_summary(
+   by=mois,
+   statistic = prix ~ "{mean} ({sd})"
+   ) %>%  modify_header(label = "Evolution des prix selon les mois")
+```
+
+
+```{r}
+# Tableau descriptif pour la variable region
+tbl_region <- ass_pdtfin %>%
+  select(region) %>%
+  tbl_summary(
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Région**")
+tbl_region
+
+# Tableau descriptif pour la variable mois
+tbl_mois <- ass_pdtfin %>%
+  select(mois) %>%
+  tbl_summary(
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Mois**")
+tbl_mois
+
+# Tableau descriptif pour la variable prix (numérique)
+tbl_prix <- ass_pdtfin %>%
+  select(prix) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd})\nMedian: {median}"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Prix**")
+tbl_prix
+
+```
+
+
+
+
+```{r}
+ass_pdtfin_summary <- ass_pdtfin %>%
+  group_by(mois) %>%  
+  summarise(
+    prix_moyen = mean(prix, na.rm = TRUE),
+    prix_sd = sd(prix, na.rm = TRUE)  # Écart-type pour affichage des barres d'erreur
+  )
+ggplot(ass_pdtfin_summary, aes(x = mois, y = prix_moyen, group = 1)) +
+  geom_line(color = "blue", size = 1) +  # Courbe d'évolution
+  geom_point(color = "red", size = 2) +  # Points sur la courbe
+  geom_errorbar(aes(ymin = prix_moyen - prix_sd, ymax = prix_moyen + prix_sd), 
+                width = 0.2, color = "gray") +  # Ajout des barres d'erreur
+  theme_minimal() + 
+  labs(
+    title = "Évolution du prix moyen par mois",
+    x = "Mois",
+    y = "Prix moyen"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotation des labels pour lisibilité
+
+```
+
+
+
+```{r}
+ass_pdtfin %>% select(region, mois, prix) %>% 
+  group_by(region, mois) %>%  # Regroupement par région et mois
+  tbl_summary(
+     # Comparaison des statistiques par région
+    statistic = prix ~ "{mean} ({sd})",  # Moyenne et écart-type du prix
+    ) %>%  modify_header(label="Assurances et produits financiers")
+
+
+```
+
+
+
+
+## analyse des prix du poste "restaurants et services d'hebergement"
+
+```{r}
+rest_svch <- prixsen %>% to_factor() %>% filter(Poste== "RESTAURANTS ET SERVICES D'HÉBERGEMENT")
+```
+
+```{r}
+# Tableau descriptif pour la variable region
+tbl_region2 <- rest_svch %>%
+  select(region) %>%
+  tbl_summary(
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Région**")
+tbl_region
+
+# Tableau descriptif pour la variable mois
+tbl_mois2 <- rest_svch %>%
+  select(mois) %>%
+  tbl_summary(
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Mois**")
+tbl_mois2
+
+# Tableau descriptif pour la variable prix (numérique)
+tbl_prix2 <- rest_svch %>%
+  select(prix) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd})\nMedian: {median}"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Prix**")
+tbl_prix2
+```
+
+
+## analyse des prix du poste "Transports"
+
+```{r}
+prix_moyen_transport <- base_prix %>%
+         filter(Poste == "Transport") %>%  # Sélectionne la catégorie
+    group_by(region) %>%  # Regroupe par région
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))
+```
+
+```{r}
+# Graphique
+ggplot(prix_moyen_transport, aes(x = region, y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen Transport",
+       x = "Région",
+       y = "Prix moyen") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+## analyse des prix du poste "Services d'enseignement"
+
+```{r}
+prix_moyen_enseignement <- base_prix %>%
+         filter(Poste == "Services D'enseignement") %>%  # Sélectionne la catégorie
+    group_by(region) %>%  # Regroupe par région
+  summarise(prix_moyen = mean(prix, na.rm = TRUE))
+```
+
+```{r}
+# Graphique
+ggplot(prix_moyen_enseignement, aes(x = region, y = prix_moyen, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Prix moyen Services D'enseignement",
+       x = "Région",
+       y = "Prix moyen") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
