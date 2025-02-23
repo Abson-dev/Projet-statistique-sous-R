@@ -1,0 +1,803 @@
+---
+title: "TP6"
+author: "BERETE Mamady I & Cheick Oumar DIALLO"
+date: "2025-02-21"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled","survey")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+## Section I : Importation et analyse des  bases
+
+
+### Importation des bases
+
+```{r}
+## Base ménage
+base_men <-  utils::read.csv("../Données/ehcvm_menage_mli2018.csv")
+
+## Base individu
+base_indi <- utils::read.csv("../Données/ehcvm_individu_mli2018.csv")
+
+## Base pondération
+base_pond <- utils::read.csv("../Données/ehcvm_ponderations_mli2018.csv")
+
+```
+
+
+### Structure des bases**
+
+```{r}
+print("Structure de la Base ménage")
+str(base_men)
+
+print("Structure de la Base individu")
+str(base_indi)
+
+print("Structure de la Base pondération")
+str(base_pond)
+
+```
+
+
+### Nom des colonnes dans chaque base
+
+```{r}
+print("Noms des colonnes de la Base ménage")
+colnames(base_men)
+
+print("Noms des colonnes de la Base individu")
+colnames(base_indi)
+
+print("Noms des colonnes de la Base pondération")
+colnames(base_pond)
+```
+
+## Section 2 : Statistiques sur la base (sans pondération)
+
+### Base ménage
+####Caracteristiques du logement
+
+```{r}
+base_men <- base_men %>%
+  mutate(
+    logem = factor(logem, labels = c("Titre propriétaire", "Propriétaire sans titre", "Locataire", "Autre")),
+    toit = factor(toit, labels = c("Oui", "Non")),
+    mur = factor(mur, labels = c("Oui", "Non")),
+    sol = factor(sol, labels = c("Oui", "Non")),
+    toilet = factor(toilet, labels = c("Oui", "Non"))
+  )
+
+base_men %>%    
+  select(logem, toit, sol, mur, toilet) %>% 
+  tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit en materiaux definitifs de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage",
+               toilet ~ "Type de toilettes utilisées par le ménage"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**")  %>%    # Personnalisation des en-têtes et du style
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+      )
+
+```
+
+
+
+#### Accès aux infrastructures de base
+
+
+```{r}
+base_men <- base_men %>%
+  mutate(
+    eauboi_ss = factor(eauboi_ss, labels = c("Oui", "Non")),
+    eauboi_sp = factor(eauboi_sp, labels = c("Oui", "Non")),
+    elec_ac = factor(elec_ac, labels = c("Oui", "Non")),
+    elec_ur = factor(elec_ur, labels = c("Oui", "Non")),
+    elec_ua = factor(elec_ua, labels = c("Oui", "Non")),
+    ordure = factor(ordure, labels = c("Oui", "Non")),
+    eva_toi = factor(eva_toi, labels = c("Oui", "Non")),
+    eva_eau = factor(eva_eau, labels = c("Oui", "Non"))
+  )
+
+
+base_men %>%   
+  select(eauboi_ss, eauboi_sp, elec_ac, elec_ur, elec_ua, ordure, eva_toi, eva_eau) %>% tbl_summary(
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  type = list(all_categorical() ~ "categorical"),      # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2018 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+####  Bien et Équipements du ménage	
+
+```{r}
+base_men <- base_men %>%
+  mutate(
+    tv = factor(tv, labels = c("Oui", "Non")),
+    fer = factor(fer, labels = c("Oui", "Non")),
+    frigo = factor(frigo, labels = c("Oui", "Non")),
+    cuisin = factor(cuisin, labels = c("Oui", "Non")),
+    ordin = factor(ordin, labels = c("Oui", "Non")),
+    decod = factor(decod, labels = c("Oui", "Non")),
+    car = factor(car, labels = c("Oui", "Non"))
+  )
+
+base_men %>% 
+  select(tv, fer, frigo, cuisin, ordin, decod, car ) %>% 
+  tbl_summary(
+    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold") 
+  
+
+```
+
+
+
+#### Superficie et bétail du ménage
+
+```{r}
+base_men %>% 
+  select(superf, grosrum, petitrum, porc, lapin, volail) %>% 
+  tbl_summary(
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porcs",
+               lapin ~"Le Nombre de lapins",
+               volail ~ "Le Nombre de volailles"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+
+#### Chocs et vulnérabilités
+
+```{r}
+base_men <- base_men %>%
+  mutate(
+    sh_id_demo = factor(sh_id_demo, labels = c("Oui", "Non")),
+    sh_co_natu = factor(sh_co_natu, labels = c("Oui", "Non")),
+    sh_co_eco = factor(sh_co_eco, labels = c("Oui", "Non")),
+    sh_co_vio = factor(sh_co_vio, labels = c("Oui", "Non")),
+    sh_co_oth = factor(sh_co_oth, labels = c("Oui", "Non"))
+    )
+
+base_men %>% 
+  select(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth) %>% 
+  tbl_summary(
+    label = list(
+                  sh_id_demo ~ "Chocs démographiques)",
+                  sh_co_natu ~ "Chocs naturels",
+                  sh_co_eco ~ "Chocs économiques",
+                  sh_co_vio ~ "Chocs liés à la violence",
+                  sh_co_oth ~ "Autres types de chocs"),
+  
+  type = list(all_categorical() ~ "categorical"),   # La précision de toutes les variables catégorielles
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+###Base individu
+
+####caracteristique sociodémographique
+
+```{r}
+base_indi <- base_indi %>%
+  mutate(
+    milieu = factor(milieu, labels = c("Urbain" , "Rural")),
+    sexe = factor(sexe, labels = c("Masculin", "Féminin")),
+    mstat = factor(mstat, labels = c("Célibataire", "Marié(e) monogame", "Marié(e) polygame", "Union libre", "Veuf(ve)", "Divorcé(e)", "séparé(e)")),
+    religion = factor(religion, labels = c("Musulman", "Chrétien", "Animiste", "Autre Réligion", "Sans Réligion"))
+        )
+
+base_indi %>%  select(region, milieu, sexe, age, mstat, religion, nation) %>% 
+  tbl_summary(
+    label = list(mstat~ "Situation Matrimoniale"),
+  
+  digits = everything()~c(0,0,0,0,0,0.0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques sociodemographique")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+
+
+####Accés au services de sante
+```{r}
+base_indi %>%
+select(con30j, arrmal, durarr, hos12m, couvmal, moustiq, handit) %>% 
+tbl_summary(
+  label = list(con30j~"consultation ces 30 derniers jours",
+               arrmal~"arrêt maladie",
+               durarr~"durée de l'arrêt",
+               hos12m~"hospitalisations ces 12 derniers mois",
+               moustiq~"utilisation moustiquaire",
+               handit~"indicateur de handicap"),
+    
+  digits = everything()~c(0,0,0,0,0,0.0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+    )%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt()%>%
+  gt::tab_header(title = "Accés aux services de sante")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+
+####Acces à l’éducation
+```{r}
+base_indi %>%
+  select(alfab,scol,educ_scol,educ_hi,diplome) %>% 
+  tbl_summary(
+      label = list(alfab~"alphabétisation",
+                   scol~"scolarisation",
+                   educ_scol~"niveau d'étude scolaire",
+                   educ_hi~"Niveau d'enseigment Supérieur",
+                   diplome~" diplome le plus élèvé"),
+      digits = everything()~c(0,0,0,0,0),
+      missing = "always",
+       missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Acces à l'éducation") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = px(20),
+    heading.title.font.weight = "bold"
+  )
+```
+
+
+
+####Acces à TIC
+```{r}
+base_indi %>%
+  select(telpor, internet) %>%
+  tbl_summary(
+    label = list(telpor ~ "telephone portable"),
+    
+    digits = everything() ~ c(0, 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+      ) %>%
+  
+    modify_header(label = "**Taille de l'échantillon**") %>%
+    as_gt() %>%
+    gt::tab_header(title = "Accès aux Technologies de l'Information et de la Communication") %>%
+    gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+    gt::tab_options(
+      heading.title.font.size = px(20),
+      heading.title.font.weight = "bold"
+  )
+
+```
+
+
+
+#### Accès à l’emploi et services financiers
+
+```{r}
+base_indi <- base_indi %>%
+  mutate(
+    activ7j = factor(activ7j, labels = c("Occuper", "Mâcheur", "TF cherchant emploi", "TF cherchant pas", "Inactif", "Moins de 5 ans")),
+    activ12m = factor(activ12m, labels = c("Occuper", "Fam", "Non occupé", "Moins de 5 ans")),
+    bank = factor(bank, labels = c("Oui", "Non"))
+   )
+
+base_indi %>% 
+  select(activ7j, activ12m, bank) %>% 
+  tbl_summary(
+    label = list(activ7j ~ "Activité dans les 7 derniers jours",
+                 activ12m ~ "Activité dans les 12 derniers mois",
+                 bank ~ "compte banque ou autre"
+                ),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Accès à l’emploi") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+#### Répartition de l’activité économique
+```{r}
+base_indi <- base_indi %>%
+  mutate(
+    sectins = factor(sectins, labels = c("Etat/Collectivités locales", "Entreprise publique/ parapublique", "Entreprise Privée", "Entreprise associative", "Ménage comme employeur de personnel domestique", "Organisme international /Ambassade")),
+    sectins_sec = factor(sectins_sec, labels = c("Etat/Collectivités locales", "Entreprise publique/ parapublique", "Entreprise Privée", "Entreprise associative", "Ménage comme employeur de personnel domestique", "Organisme international /Ambassade")),
+    emploi_sec = factor(emploi_sec, labels = c("Oui", "Non"))
+   )
+
+base_indi %>% 
+  select(branch, sectins, csp, volhor, salaire, emploi_sec, sectins_sec, csp_sec, volhor_sec, salaire_sec) %>% 
+  tbl_summary(
+    label = list(branch ~ "La branche d’activité principale",
+               sectins ~ "Le secteur institutionnel principal",
+               csp ~ "La catégorie socio-professionnelle",
+               volhor ~ "Le volume horaire",
+               salaire ~ "Le niveau de salaire",
+               emploi_sec ~ "Le secteur institutionnel secondaire",
+               sectins_sec ~"La catégorie socio-professionnelle secondaire",
+               csp_sec ~ "Le Nombre de volailles",
+               volhor_sec ~ "volume horaire secondaire",
+               salaire_sec ~ "Le salaire secondaire"),
+    
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Répartition de l’activité économique") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+
+## Section 3 : Statistique sur la base ( avec pondération)
+
+Dans cette section, nous reprenons les tableaux de la section 2 en les pondérant juste.
+
+Comme la variable poids **(hhweight)** se trouve dans la base individu, il suffit de fusionner les deux bases pour obtenir les statistiques pondérées.
+
+### Fusion
+
+L'objectif est d'avoir les différents poids dans la base ménage.
+
+```{r}
+
+base_merge <- dplyr::left_join(base_men,base_indi,by="hhid")
+
+#base_merge
+
+```
+
+
+**Procédure d'échantillonnage**
+
+L’enquête EHCVM Mali 2018/19 a utilisé la sixième édition de l’Enquête Modulaire et Permanente auprès des ménages (EMOP) 2017/18 comme base de sondage, elle-même dérivée du recensement général de 2009. Cette base compte 1153 zones de dénombrement couvrant l’ensemble du pays, avec des exceptions dans certaines zones pour des raisons d’insécurité (Kidal, Taoudénit, Ménaka) ou d’urbanisation (Bamako). Le plan de sondage est stratifié en deux étapes : d’abord 500 zones de dénombrement sélectionnées par probabilité proportionnelle à la taille (nombre de ménages), puis 12 ménages tirés au sort dans chaque zone. Une seconde vague a ajouté 51 zones pour inclure Ménaka et Taoudenit, absentes à la première vague.
+
+L’échantillon prévu était de **6603** ménages **(2752 urbains et 3851 ruraux)**. Chaque zone a été divisée en deux sous-groupes, interrogés lors de la première puis de la deuxième vague. Un système de remplacement a permis de maintenir la taille de l’échantillon malgré d’éventuels refus ou ménages vacants (dans chaque zone, 12 ménages + 6 de remplacement). De même, sept zones impraticables en première vague (pour cause d’insécurité) ont été substituées lors de la deuxième vague. Au final, la taille de l’échantillon total **6602** a été très proche des attentes, avec respectivement **2752** et **3850** ménages interrogés en milieu urbain et rural.
+
+**Création du design de ponderation**
+
+```{r}
+
+base_merge_pond <- svydesign(id = ~hhid,  # Identifiant de la hhid (unité primaire de tirage)
+                    weights = ~hhweight,  # Poids  du ménage
+                    data = base_merge)  
+
+
+```
+
+
+## Structure de la base_merge__pond
+```{r}
+print("Structure de la Base mergéé")
+str(base_merge_pond)
+
+```
+
+
+### Nom des colonnes dans chaque base
+
+```{r}
+print("Noms des colonnes de la Base mergéé")
+colnames(base_merge_pond)
+```
+
+
+####caracteristique sociodémographique
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(region, milieu, sexe, age,mstat ,religion, nation),
+  label = list(mstat~ "Situation Matrimoniale"),
+  
+  digits = everything()~c(0,0,0,0,0,0.0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques sociodemographique")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+
+
+####Caracteristiques du logement
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(logem, toit, sol, mur, toilet),
+  label = list(logem~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage",
+               toilet ~ "Type de toilettes utilisées par le ménage"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**")  %>%    # Personnalisation des en-têtes et du style
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+      )
+
+```
+
+
+#### Accès aux infrastructures de base
+
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(eauboi_ss, eauboi_sp, elec_ac, elec_ur, elec_ua, ordure, eva_toi, eva_eau),
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  type = list(all_categorical() ~ "categorical"),      # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2018 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+####  Bien et Équipements du ménage	
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(tv, fer, frigo, cuisin, ordin, decod, car),
+  label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold") 
+  
+
+```
+
+
+
+####Accés au services de sante
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(con30j, arrmal, durarr, hos12m, couvmal, moustiq, handit),
+  label = list(con30j~"consultation ces 30 derniers jours",
+               arrmal~"arrêt maladie",
+               durarr~"durée de l'arrêt",
+               hos12m~"hospitalisations ces 12 derniers mois",
+               moustiq~"utilisation moustiquaire",
+               handit~"indicateur de handicap"),
+    
+  digits = everything()~c(0,0,0,0,0,0.0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+  )%>%
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt()%>%
+  gt::tab_header(title = "Accés aux services de sante")%>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+
+####Acces à l’éducation
+```{r}
+  base_merge_pond %>%    
+      tbl_svysummary(
+      include = c(alfab,scol,educ_scol,educ_hi,diplome),
+      label = list(alfab~"alphabétisation",
+                   scol~"scolarisation",
+                   educ_scol~"niveau d'étude scolaire",
+                   educ_hi~"Niveau d'enseigment Supérieur",
+                   diplome~" diplome le plus élèvé"),
+      digits = everything()~c(0,0,0,0,0),
+      missing = "always",
+      missing_text = "Valeurs manquantes"
+       ) %>%
+  
+     modify_header(label = "**Taille de la population**") %>%
+     as_gt() %>%
+     gt::tab_header(title = "Acces à l'éducation") %>%
+     gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+     gt::tab_options(
+       heading.title.font.size = px(20),
+       heading.title.font.weight = "bold"
+  )
+```
+
+
+
+####Acces à TIC
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(telpor, internet),
+  label = list(telpor ~ "telephone portable"),
+  
+  digits = everything() ~ c(0, 0),
+  missing = "always",
+  missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accès aux Technologies de l'Information et de la Communication") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)") %>%
+  gt::tab_options(
+    heading.title.font.size = px(20),
+    heading.title.font.weight = "bold"
+  )
+
+```
+
+
+
+#### Superficie et bétail du ménage
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(superf, grosrum, petitrum, porc, lapin, volail),
+  label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porcs",
+               lapin ~"Le Nombre de lapins",
+               volail ~ "Le Nombre de volailles"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+
+#### Chocs et vulnérabilités
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(sh_id_demo, logem, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth),
+  label = list(
+                  sh_id_demo ~ "Chocs démographiques)",
+                  sh_co_natu ~ "Chocs naturels",
+                  sh_co_eco ~ "Chocs économiques",
+                  sh_co_vio ~ "Chocs liés à la violence",
+                  sh_co_oth ~ "Autres types de chocs"),
+  
+  type = list(all_categorical() ~ "categorical"),   # La précision de toutes les variables catégorielles
+  ) %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold")
+```
+
+
+
+
+#### Accès à l’emploi et services financiers
+
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(activ7j, activ12m, bank),
+  label = list(activ7j ~ "Activité dans les 7 derniers jours",
+                 activ12m ~ "Activité dans les 12 derniers mois",
+                 bank ~ "compte banque ou autre"
+                ),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Accès à l’emploi") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
+
+#### Répartition de l’activité économique
+```{r}
+base_merge_pond %>%    
+  tbl_svysummary(
+  include = c(branch, sectins, csp, volhor, salaire, emploi_sec, sectins_sec, csp_sec, volhor_sec, salaire_sec),
+  
+  label = list(branch ~ "La branche d’activité principale",
+               sectins ~ "Le secteur institutionnel principal",
+               csp ~ "La catégorie socio-professionnelle",
+               volhor ~ "Le volume horaire",
+               salaire ~ "Le niveau de salaire",
+               emploi_sec ~ "Le secteur institutionnel secondaire",
+               sectins_sec ~"La catégorie socio-professionnelle secondaire",
+               csp_sec ~ "Le Nombre de volailles",
+               volhor_sec ~ "volume horaire secondaire",
+               salaire_sec ~ "Le salaire secondaire"),
+    
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  type = list(all_categorical() ~ "categorical"),       # La précision de toutes les variables catégorielles
+  digits = everything()~c(0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Répartition de l’activité économique") %>%
+  gt::tab_source_note(source_note = "Source : EHCVM 2018-2019 (MALI)")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+
+
+```
+
+
