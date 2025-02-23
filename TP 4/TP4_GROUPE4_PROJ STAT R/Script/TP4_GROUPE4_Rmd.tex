@@ -1,0 +1,707 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{tcolorbox}
+\usepackage{listings}
+\lstset{ breaklines=true, breakatwhitespace=true, keepspaces=true, xleftmargin=0pt, xrightmargin=0pt, frame=single, columns=fullflexible, linewidth=\dimexpr\textwidth+1in\relax }
+\usepackage[none]{hyphenat}
+\usepackage[dvipsnames]{xcolor}
+\sloppy
+\AtBeginDocument{\geometry{a4paper, top=1in, bottom=1.5in, left=0.75in, right=0.75in}}
+\AtBeginDocument{\setlength{\textwidth}{6.5in}}
+\linespread{1.2}
+\usepackage[hidelinks]{hyperref} % Assure des liens actifs mais discrets
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, filecolor=blue, citecolor=blue}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\setmainfont{Cambria}
+\renewcommand{\normalsize}{\fontsize{12}{14}\selectfont}
+\setsansfont{Franklin Gothic Demi Cond}
+\setmonofont{Courier New}
+\usepackage{titlesec}
+\titleformat{\section}{\Huge\bfseries\color{blue}}{\thesection}{1em}{}
+\titleformat{\subsection}{\huge\bfseries\color{blue}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\LARGE\bfseries\color{blue}}{\thesubsubsection}{1em}{}
+\usepackage{tocloft}
+\renewcommand{\cftsecfont}{\LARGE}
+\renewcommand{\cftsubsecfont}{\Large}
+\renewcommand{\cftsecfont}{\small}
+\renewcommand{\cftsubsecfont}{\footnotesize}
+\renewcommand{\cftsecpagefont}{\small}
+\renewcommand{\cftsubsecpagefont}{\footnotesize}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \sffamily 
+        {\Large \textbf{RÉPUBLIQUE DU SÉNÉGAL}}\\[0.3cm]
+        \includegraphics[width=3cm]{../Donnees/LOGO3.jpg} \\[0.3cm]
+        
+        {\large \textbf{Un Peuple - Un But - Une Foi}}\\[0.5cm]
+        
+        {\Large \textbf{Ministère de l'Économie, du Plan et de la Coopération}}\\[0.5cm]
+        
+        \includegraphics[width=3cm]{../Donnees/LOGO2.jpg} \\[0.3cm]
+        
+        {\Large \textbf{Agence Nationale de la Statistique et de la Démographie (ANSD)}}\\[0.5cm]
+        
+        \includegraphics[width=3cm]{../Donnees/LOGO1.jpg} \\[0.3cm]
+        
+        {\LARGE \textbf{École Nationale de la Statistique et de l'Analyse Économique (ENSAE | Pierre Ndiaye)}}\\[0.8cm]
+        
+        \textbf{\Huge \color{blue} TP4}\\[0.6cm]
+        \rule{\linewidth}{0.6mm} \\[1cm]
+        
+        \vfill  
+        
+        \begin{minipage}{0.5\textwidth}
+    \begin{flushleft} \large
+        \emph{\textsf{Rédigé par :}}\\
+        \textbf{FOGWOUNG DJOUFACK Sarah-Laure}\\
+        \textbf{NIASS Ahmadou}\\
+        \textbf{NGUEMFOUO NGOUMTSA Célina}\\
+        \textbf{SENE Malick}\\
+        \textit{Élèves Ingénieurs Statisticiens Économistes}
+    \end{flushleft}
+\end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                \textbf{M. Aboubacar HEMA}\\
+                \textit{Research Analyst }
+            \end{flushright}
+        \end{minipage}
+
+        \vfill
+
+        {\large \textsf{Année scolaire : 2024/2025}}\\[0.5cm]
+        
+    \end{center}
+\end{titlepage}
+
+\phantomsection
+\section*{\centering \Huge TABLE DE MATIERES}
+\addcontentsline{toc}{section}{TABLE DE MATIERES}
+\tableofcontents
+
+\newpage
+\phantomsection
+\section*{\centering \Huge CONSIGNE DU TP4}
+\addcontentsline{toc}{section}{ CONSIGNE DU TP4}
+
+Ce TP consiste à faire correspondre les codes \textbf{ADM3\_PCODE} de
+chaque commune des pays \textbf{Burkina Faso} et \textbf{Niger} entre
+deux bases de données :
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Base EHCVM} : Contient des informations détaillées sur les
+  conditions de vie, les revenus, et d'autres aspects socio-économiques
+  des ménages.
+\item
+  \textbf{Base HDX} : Contient des données administratives avec les
+  codes \textbf{ADM3\_PCODE}, souvent utilisées pour le suivi
+  humanitaire et les informations géographiques et administratives des
+  communes.
+\end{itemize}
+
+Le \textbf{problème principal} est que les noms des communes ne sont pas
+toujours écrits de la même façon dans les deux bases. Pour résoudre
+cela, il faut regarder aux niveaux département et région afin de trouver
+les correspondances exactes.
+
+L'objectif à atteindre est donc de \textbf{fusionner les deux bases de
+données en s'assurant que les codes ADM3\_PCODE de chaque commune soient
+bien alignés}.
+
+\newpage
+\phantomsection
+\section*{\centering \Huge STEP 1: IMPORTATION DES PACKAGES}
+\addcontentsline{toc}{section}{ STEP 1: IMPORTATION DES PACKAGES}
+
+Dans cette étape, nous importons plusieurs packages qui nous permettront
+d'effectuer le travail demandé. Voici un aperçu de ce que chaque package
+apporte :
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Le package haven} : est particulièrement utile pour importer
+  des fichiers \texttt{.dta} (Stata) en R.
+\item
+  \textbf{Le package readxl} : permet de lire les fichiers Excel
+  (formats .xls et .xlsx).
+\item
+  \textbf{Le package dplyr} :permet de filtrer, sélectionner, regrouper,
+  trier, et effectuer d'autres opérations de transformation, facilitant
+  ainsi la manipulation des données.
+\item
+  \textbf{Le package stringr} : fournit des fonction pour la
+  manipublation des chaines de caractères (traitement de textes,
+  recherche/substitution/modification des chaines de caractères \ldots)
+\item
+  \textbf{Le package sf} : fournit des outils pour lire, manipuler et
+  analyser des données spatiales
+\item
+  \textbf{Le package tidyverse} : collection de packages qui facilitent
+  la manipulation, la visualisation et l'analyse des données. Il inclut
+  des packages comme ggplot2 (pour la visualisation), dplyr (pour la
+  manipulation des données), tidyr (pour le nettoyage des données), et
+  plus encore.
+\item
+  \textbf{Le package stringi} : une version plus complète du package
+  stringr pour la manipulation des chaînes de caractères. Il propose une
+  plus grande variété de fonctions pour le traitement de texte et est
+  conçu pour être plus performant dans des cas plus complexes.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(haven)    }\CommentTok{\# Pour lire le fichier Stata}
+\FunctionTok{library}\NormalTok{(readxl)   }\CommentTok{\# Pour lire le fichier Excel}
+\FunctionTok{library}\NormalTok{(dplyr)    }\CommentTok{\# Pour la manipulation des données}
+\FunctionTok{library}\NormalTok{(stringr)  }\CommentTok{\# Pour manipuler les chaînes de caractères}
+\FunctionTok{library}\NormalTok{(sf) }\CommentTok{\# pour la gestion des données spatiales }
+\FunctionTok{library}\NormalTok{(tidyverse) }\CommentTok{\#manipulation,visualisation et analyse }
+\FunctionTok{library}\NormalTok{(stringi) }\CommentTok{\# Version plus complete de stringr}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+\phantomsection
+\section*{\centering \Huge  STEP 2: TRAITEMENT POUR LE NIGER}
+\addcontentsline{toc}{section}{ STEP 2: TRAITEMENT POUR LE NIGER}
+
+\subsection{2-a CHARGEMENT DES BASES DE
+DONNÉES}\label{a-chargement-des-bases-de-donnuxe9es}
+
+Nous commençons par charger les bases de données en utilisant les
+packages appropriés. La première base est au format Stata (utilisée pour
+les données de l'EHCVM), et la deuxième est au format Excel (utilisée
+pour les données de la base HDX).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm\_raw }\OtherTok{\textless{}{-}}\NormalTok{ haven}\SpecialCharTok{::}\FunctionTok{read\_dta}\NormalTok{(}
+  \StringTok{"../Donnees/s00\_me\_ner2021.dta"}
+\NormalTok{  )  }\CommentTok{\# Chargement de la base de données EHCVM (format Stata)}
+\NormalTok{hdx\_raw }\OtherTok{\textless{}{-}}\NormalTok{ readxl}\SpecialCharTok{::}\FunctionTok{read\_excel}\NormalTok{(}
+  \StringTok{"../Donnees/ner\_admgz\_ignn\_20230720.xlsx"}
+\NormalTok{  ) }\CommentTok{\# Chargement de la base de données HDX (format Excel)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{2-b TRAITEMENT DES COMMUNES DANS LA BASE
+EHCVM}\label{b-traitement-des-communes-dans-la-base-ehcvm}
+
+Nous nettoyons les noms des communes dans la base EHCVM en appliquant
+plusieurs transformations : - Conversion des codes des communes en
+labels. - Mise en minuscules, suppression des accents, des apostrophes
+et des caractères non alphanumériques. - Suppression des espaces en
+début et en fin, ainsi que des espaces multiples. - Correction des noms
+de certaines communes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm\_raw }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{commune\_label =} \FunctionTok{as\_factor}\NormalTok{(s00q03),}
+    \AttributeTok{commune\_clean =}\NormalTok{ commune\_label }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_to\_lower}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      (\textbackslash{}(x) }\FunctionTok{iconv}\NormalTok{(x, }\AttributeTok{to =} \StringTok{"ASCII//TRANSLIT"}\NormalTok{))() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"\textquotesingle{}"}\NormalTok{, }\StringTok{""}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"[\^{}[:alnum:] ]"}\NormalTok{, }\StringTok{" "}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_trim}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{barrondissement}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{""}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b1}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{"i"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b2}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{"ii"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b3}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{"iii"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b4}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{"iv"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b5}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{b"}\NormalTok{, }\StringTok{"v"}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_squish}\NormalTok{()}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{2-c CORRECTION ET TRAITEMENT DES COMMUNES DANS LA BASE
+HDX}\label{c-correction-et-traitement-des-communes-dans-la-base-hdx}
+
+De même, dans la base HDX, nous corrigeons certains noms de communes en
+fonction des départements et régions correspondants. Une série de règles
+est appliquée pour certains cas spécifiques. Nous nettoyons également
+les noms de communes dans la base HDX de la même manière que pour EHCVM.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hdx }\OtherTok{\textless{}{-}}\NormalTok{ hdx\_raw }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{ADM3\_FR =}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{      ADM3\_FR }\SpecialCharTok{==} 
+        \StringTok{"Tibiri"} \SpecialCharTok{\&}\NormalTok{ ADM1\_FR }\SpecialCharTok{==} \StringTok{"Dosso"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Tibiri Doutchi"}\NormalTok{,}
+\NormalTok{      ADM3\_FR }\SpecialCharTok{==} 
+        \StringTok{"Tibiri"} \SpecialCharTok{\&}\NormalTok{ ADM1\_FR }\SpecialCharTok{==} \StringTok{"Maradi"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Tibiri Maradi"}\NormalTok{,}
+\NormalTok{      ADM3\_FR }\SpecialCharTok{==} 
+        \StringTok{"Gangara"} \SpecialCharTok{\&}\NormalTok{ ADM1\_FR }\SpecialCharTok{==} \StringTok{"Maradi"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Gangara Gazaoua"}\NormalTok{,}
+\NormalTok{      ADM3\_FR }\SpecialCharTok{==} 
+        \StringTok{"Gangara"} \SpecialCharTok{\&}\NormalTok{ ADM1\_FR }\SpecialCharTok{==} \StringTok{"Zinder"} \SpecialCharTok{\textasciitilde{}} \StringTok{"Gangara Tanout"}\NormalTok{,}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}}\NormalTok{ ADM3\_FR}
+\NormalTok{    ),}
+    
+    \CommentTok{\# Création de la colonne corrigée commune\_clean}
+    \AttributeTok{commune\_clean =}\NormalTok{ ADM3\_FR }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_to\_lower}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      (\textbackslash{}(x) }\FunctionTok{iconv}\NormalTok{(x, }\AttributeTok{to =} \StringTok{"ASCII//TRANSLIT"}\NormalTok{))() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"\textquotesingle{}"}\NormalTok{, }\StringTok{""}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"[\^{}[:alnum:] ]"}\NormalTok{, }\StringTok{" "}\NormalTok{) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_trim}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+\NormalTok{      stringr}\SpecialCharTok{::}\FunctionTok{str\_squish}\NormalTok{()}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{2-d JOINTURE DES BASES}\label{d-jointure-des-bases}
+
+Nous effectuons une jointure des deux bases (EHCVM et HDX) en utilisant
+la colonne ``commune\_clean'' comme clé de correspondance. Ici, nous
+utilisons une jointure gauche (left\_join) pour conserver toutes les
+communes de la base EHCVM.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm\_hdx\_merged }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{left\_join}\NormalTok{(}
+\NormalTok{  ehcvm, hdx, }\AttributeTok{by =} \StringTok{"commune\_clean"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{2-e VERIFICATION DES COMMUNES NON
+APPARIEES}\label{e-verification-des-communes-non-appariees}
+
+Une fois la jointure effectuée, nous vérifions les communes qui ne se
+sont pas appariées. Nous filtrons et affichons les lignes où
+``ADM3\_FR'' est NA, ce qui signifie qu'il n'y a pas eu de
+correspondance.Et on verra qu'il y a eu des correspondances partout.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{non\_matchees }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}
+\NormalTok{  ehcvm\_hdx\_merged, }\FunctionTok{is.na}\NormalTok{(ADM3\_FR)) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{distinct}\NormalTok{(s00q03, commune\_clean) }
+
+\NormalTok{non\_matchees}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 0 x 2
+## # i 2 variables: s00q03 <dbl+lbl>, commune_clean <chr>
+\end{verbatim}
+
+On constate que toutes les communes sont matchées.
+
+\section{2-f Sauvegarde de la base
+obtenue}\label{f-sauvegarde-de-la-base-obtenue}
+
+La base obtenue a été sauvegardée.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{haven}\SpecialCharTok{::}\FunctionTok{write\_dta}\NormalTok{(ehcvm\_hdx\_merged, }\StringTok{"../Sorties/EHCVM\_HDX\_Niger.dta"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+\phantomsection
+\section*{\centering \Huge  STEP 3: TRAITEMENT POUR LE BURKINA FASO}
+\addcontentsline{toc}{section}{  STEP 3: TRAITEMENT POUR LE BURKINA FASO}
+
+\subsection{3-a CHARGEMENT DES BASES DE
+DONNÉES}\label{a-chargement-des-bases-de-donnuxe9es-1}
+
+Nous commençons par charger les bases de données en utilisant les
+packages appropriés. Comme précedement, la première base est au format
+Stata (utilisée pour les données de l'EHCVM), et la deuxième est au
+format Excel (utilisée pour les données de la base HDX).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm\_raw }\OtherTok{\textless{}{-}}\NormalTok{ haven}\SpecialCharTok{::}\FunctionTok{read\_dta}\NormalTok{(}
+  \StringTok{"../Donnees/s00\_me\_bfa2021.dta"}\NormalTok{)}
+\NormalTok{shape\_raw }\OtherTok{\textless{}{-}}\NormalTok{ readxl}\SpecialCharTok{::}\FunctionTok{read\_excel}\NormalTok{(}
+  \StringTok{"../Donnees/bfa\_adminboundaries\_tabulardata.xlsx"}\NormalTok{, }
+  \AttributeTok{sheet =} \StringTok{"ADM3"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{3-b CORRECTION DES ERREURS
+D'ORTHOGRAPHE}\label{b-correction-des-erreurs-dorthographe}
+
+L'étape suivant est la correction des erreurs des erreurs d'orthographe
+dans la base EHCVM.
+
+Après avoir analysé les noms des communes, nous avons vu que dans la
+base ehcvm certaines communes n'ont pas de correspondance dans la base
+hdx, en vérfiant nous avons vu que cela étaient du à des différences
+orthographiques. Vu qu'elles n'étaient pas nombreuses on a voulu les
+corriger manuellement. Par ailleurs, pour les arrondissements numérotés
+de 1 à 12, nos recherches ont montré qu'ils appartiennent tous à la
+commune de Ouagadougou. Nous avons donc choisi de les uniformiser en
+remplaçant leur nom par ``Ouagadougou'' dans notre base de données. Pour
+ce faire le data frame correction\_map a été créé:
+
+\textbf{Création du correction\_map}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{correction\_map }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{commune\_label =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Zeguedeguin"}\NormalTok{,}\StringTok{"Bondigui"}\NormalTok{,}\StringTok{"Absouya"}\NormalTok{, }\StringTok{"Bondokuy"}\NormalTok{, }
+    \StringTok{"Bomborokuy"}\NormalTok{, }\StringTok{"Bittou"}\NormalTok{, }\StringTok{"Bokin"}\NormalTok{, }\StringTok{"Boudry"}\NormalTok{,}
+    \StringTok{"Bobo Dioulasso{-}Konsa"}\NormalTok{, }\StringTok{"Bobo Dioulasso{-}Dô"}\NormalTok{, }\StringTok{"Arbole"}\NormalTok{, }
+    \StringTok{"Dapelogo"}\NormalTok{, }\StringTok{"Dissin"}\NormalTok{, }\StringTok{"Fada N\textquotesingle{}gourma"}\NormalTok{, }\StringTok{"Gounghin"}\NormalTok{,}
+    \StringTok{"Kokoloko"}\NormalTok{, }\StringTok{"Gourcy"}\NormalTok{, }\StringTok{"La{-}Todin"}\NormalTok{, }\StringTok{"Karankasso{-}Vigue"}\NormalTok{,}
+    \StringTok{"Sanga"}\NormalTok{, }\StringTok{"Meguet"}\NormalTok{, }\StringTok{"Soaw"}\NormalTok{, }\StringTok{"Samorogouan"}\NormalTok{, }\StringTok{"Sabce"}\NormalTok{,}
+    \StringTok{"Tanghin Dassouri"}\NormalTok{, }\StringTok{"Oury"}\NormalTok{, }\StringTok{"Cassou"}\NormalTok{,}
+    \StringTok{"Arrondissement 1"}\NormalTok{, }\StringTok{"Arrondissement 2"}\NormalTok{,}
+    \StringTok{"Arrondissement 3"}\NormalTok{, }\StringTok{"Arrondissement 4"}\NormalTok{,}
+    \StringTok{"Arrondissement 5"}\NormalTok{, }\StringTok{"Arrondissement 6"}\NormalTok{,}
+    \StringTok{"Arrondissement 7"}\NormalTok{, }\StringTok{"Arrondissement 8"}\NormalTok{,}
+    \StringTok{"Arrondissement 9"}\NormalTok{, }\StringTok{"Arrondissement 10"}\NormalTok{,}
+    \StringTok{"Arrondissement 11"}\NormalTok{, }\StringTok{"Arrondissement 12"}\NormalTok{,}
+    \StringTok{"Arrondissement N 1"}\NormalTok{, }\StringTok{"Arrondissement N 2"}\NormalTok{,}
+    \StringTok{"Arrondissement N 3"}\NormalTok{, }\StringTok{"Arrondissement N 4"}\NormalTok{,}
+    \StringTok{"Arrondissement N 5"}\NormalTok{, }\StringTok{"Arrondissement N 6"}\NormalTok{,}
+    \StringTok{"Arrondissement N 7"}\NormalTok{),}
+  \AttributeTok{corrected\_name =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Senguènèga"}\NormalTok{,}\StringTok{"Bondokui"}\NormalTok{,}\StringTok{"Ambsouya"}\NormalTok{, }\StringTok{"Bondokui"}\NormalTok{, }
+    \StringTok{"Bomborokui"}\NormalTok{, }\StringTok{"Bitou"}\NormalTok{, }\StringTok{"Boken"}\NormalTok{, }\StringTok{"Boudri"}\NormalTok{,}
+    \StringTok{"Bobo{-}Dioulasso"}\NormalTok{, }\StringTok{"Bobo{-}Dioulasso"}\NormalTok{, }\StringTok{"Arbollé"}\NormalTok{,}
+    \StringTok{"Dapeolgo"}\NormalTok{, }\StringTok{"Dissihn"}\NormalTok{, }\StringTok{"Fada Ngourma"}\NormalTok{, }\StringTok{"Gounguen"}\NormalTok{,}
+    \StringTok{"Kokologo"}\NormalTok{, }\StringTok{"Goursi"}\NormalTok{, }\StringTok{"La{-}Toden"}\NormalTok{, }\StringTok{"Karangasso{-}Vigué"}\NormalTok{,}
+    \StringTok{"Sangha"}\NormalTok{, }\StringTok{"Mégué"}\NormalTok{, }\StringTok{"Soa"}\NormalTok{, }\StringTok{"Samôgôgouan"}\NormalTok{, }\StringTok{"Sabsé"}\NormalTok{,}
+    \StringTok{"Tanguen{-}Dassouri"}\NormalTok{, }\StringTok{"Ouri"}\NormalTok{, }\StringTok{"Kassou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{,}
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{,}
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{,}
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{,}
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{,}
+    \StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{, }\StringTok{"Ouagadougou"}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Application de la correction à la base EHCVM}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm\_corrected }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm\_raw }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{left\_join}\NormalTok{(correction\_map, }
+                   \AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"s00q03"} \OtherTok{=} \StringTok{"commune\_label"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}\AttributeTok{s00q03 =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(corrected\_name),}
+\NormalTok{                                s00q03, corrected\_name)) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{corrected\_name)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{3-c NETTOYAGE DES DONNES}\label{c-nettoyage-des-donnes}
+
+Nous nettoyons ensuite les noms des communes et départements des bases
+EHCVM et HDX, notament en tenant compte de la casse, supprimant les
+accents, caractères spéciaux, apostrophes et espaces inutiles. Pour ce
+faire, la fonction \emph{clean\_names} a été crée.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Création de la fonction}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clean\_names }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(name) \{}
+\NormalTok{  name }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_to\_lower}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{iconv}\NormalTok{(}\AttributeTok{to =} \StringTok{"ASCII//TRANSLIT"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"\textquotesingle{}"}\NormalTok{, }\StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"[{-}]"}\NormalTok{, }\StringTok{" "}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_replace\_all}\NormalTok{(}\StringTok{"[\^{}[:alnum:] ]"}\NormalTok{, }\StringTok{" "}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_trim}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    stringr}\SpecialCharTok{::}\FunctionTok{str\_squish}\NormalTok{()}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Traitement de la base EHCVM}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# EHCVM : convertion des codes en labels et nettoyage}
+\NormalTok{ehcvm }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm\_corrected }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{commune\_label =}\NormalTok{ forcats}\SpecialCharTok{::}\FunctionTok{as\_factor}\NormalTok{(s00q03),}
+    \AttributeTok{departement\_label =}\NormalTok{ forcats}\SpecialCharTok{::}\FunctionTok{as\_factor}\NormalTok{(s00q02),}
+    \AttributeTok{commune\_clean =} \FunctionTok{clean\_names}\NormalTok{(commune\_label),}
+    \AttributeTok{departement\_clean =} \FunctionTok{clean\_names}\NormalTok{(departement\_label)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Traitement de la base HDX}
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Shape Data : nettoyage des communes et départements}
+\NormalTok{shape }\OtherTok{\textless{}{-}}\NormalTok{ shape\_raw }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{commune\_clean =} \FunctionTok{clean\_names}\NormalTok{(ADM3\_FR),}
+    \AttributeTok{departement\_clean =} \FunctionTok{clean\_names}\NormalTok{(ADM2\_FR)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{3-d FUSION}\label{d-fusion}
+
+Une fois toutes les données nettoyées, nous effectuons une jointure sur
+la base EHCVM afin d'obtenir les noms corrects des communes dans la
+base.
+
+Toutefois, il existe des communes necessitant des vérifications par
+département : il s'agit des communes boussouma, namissiguima et thiou.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{communes\_ambigues }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"boussouma"}\NormalTok{, }\StringTok{"namissiguima"}\NormalTok{, }\StringTok{"thiou"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Une fois ces communes identifiées, un premier merge sera effectué sur
+les autres communes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Premier merge}
+\NormalTok{ehcvm\_shape\_merged }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{commune\_clean }\SpecialCharTok{\%in\%}\NormalTok{ communes\_ambigues) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{left\_join}\NormalTok{(shape, }\AttributeTok{by =} \StringTok{"commune\_clean"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Une fusion est à présent faite sur les communes ambigües en tenant
+compte des départements.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Fusion pour les communes ambigües}
+\NormalTok{ehcvm\_shape\_merged\_ambigues }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(commune\_clean }\SpecialCharTok{\%in\%}\NormalTok{ communes\_ambigues) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{left\_join}\NormalTok{(shape, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"commune\_clean"}\NormalTok{, }\StringTok{"departement\_clean"}\NormalTok{))}
+
+\CommentTok{\# Combiner les deux bases après fusion}
+\NormalTok{ehcvm\_shape\_final }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{bind\_rows}\NormalTok{(}
+\NormalTok{  ehcvm\_shape\_merged, ehcvm\_shape\_merged\_ambigues)}
+\end{Highlighting}
+\end{Shaded}
+
+Une fois la fusion terminée, finalisons le travail en faisant des
+vérifications et en supprimant les colonnes inutiles.
+
+\subsection{3-e VERFICATION}\label{e-verfication}
+
+Vérifions si toutes les communes ont été vusionnées
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{non\_matchees }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm\_shape\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(ADM3\_PCODE)) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{distinct}\NormalTok{(s00q03, departement\_label, commune\_clean)}
+
+\FunctionTok{head}\NormalTok{(non\_matchees)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 0 x 3
+## # i 3 variables: s00q03 <chr>, departement_label <fct>, commune_clean <chr>
+\end{verbatim}
+
+Toutes les communes ont été matchées. La dernière étape, la suppression
+des colonnes temporaires peut enfin être éffectuée.
+
+\subsection{3-f SUPPRESSION DES COLONNES
+TEMPORAIRES}\label{f-suppression-des-colonnes-temporaires}
+
+Les colonnes temporaires à supprimer sont: communes\_clean,
+departement\_clean et commune\_label.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ehcvm\_final }\OtherTok{\textless{}{-}}\NormalTok{ ehcvm\_shape\_final }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}
+    \SpecialCharTok{{-}}\NormalTok{commune\_clean, }\SpecialCharTok{{-}}\NormalTok{departement\_clean.x, }\SpecialCharTok{{-}}\NormalTok{departement\_clean.y, }
+    \SpecialCharTok{{-}}\NormalTok{departement\_clean, }\SpecialCharTok{{-}}\NormalTok{commune\_label, }\SpecialCharTok{{-}}\NormalTok{departement\_label)}
+\end{Highlighting}
+\end{Shaded}
+
+Voici un aperçu de la base finale:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(ehcvm\_final))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 43
+##     hhid grappe menage vague hhweight s00q00     s00q01  s00q02   s00q03 s00q04 
+##    <dbl>  <dbl>  <dbl> <dbl>    <dbl> <dbl+lbl>  <dbl+l> <dbl+lb> <chr>  <dbl+l>
+## 1 586005    586      5     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## 2 586028    586     28     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## 3 586043    586     43     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## 4 586044    586     44     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## 5 586052    586     52     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## 6 586082    586     82     2      439 2 [Burkin~ 2 [Bou~ 13 [Kos~ Djiba~ 2 [Rur~
+## # i 33 more variables: s00q05 <chr>, s00q07a <dbl+lbl>, s00q07b <dbl+lbl>,
+## #   s00q07c <dbl+lbl>, s00q07d <dbl+lbl>, s00q07d2 <dbl+lbl>, s00q22 <dbl>,
+## #   s00q23a <chr>, s00q24a <chr>, s00q25a <chr>, s00q23b <chr>, s00q24b <chr>,
+## #   s00q25b <chr>, s00q08 <dbl+lbl>, s00q27 <dbl+lbl>, s00q28 <dbl+lbl>,
+## #   GPS__Latitude <dbl>, GPS__Longitude <dbl>, ADM3_FR <chr>, ADM3_PCODE <chr>,
+## #   ADM3_REF <chr>, ADM3ALT1_FR <lgl>, ADM3ALT2_FR <lgl>, ADM2_FR <chr>,
+## #   ADM2_PCODE <chr>, ADM1_FR <chr>, ADM1_PCODE <chr>, ADM0_FR <chr>, ...
+\end{verbatim}
+
+\section{3-h SAUVEGARDE DE LA BASE
+OBTENUE}\label{h-sauvegarde-de-la-base-obtenue}
+
+La base obtenue a ensuite été sauvegardée.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{haven}\SpecialCharTok{::}\FunctionTok{write\_dta}\NormalTok{(ehcvm\_final, }\StringTok{"../Sorties/EHCVM\_HDX\_Burkina.dta"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}
