@@ -1,0 +1,127 @@
+---
+title: "Statistiques descriptives"
+author: "ZINABA_Albert"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+  pdf_document: default
+  word_document:
+    toc: true
+
+---
+
+```{r setup, include=FALSE, message=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chargement des packages necessaires 
+
+```{r}
+# Liste des packages nécessaires
+packages <- c("readr", "haven", "utils", "dplyr", "gtsummary")
+
+# Vérification et installation
+invisible(lapply(packages, function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, quiet = TRUE)  
+  }
+  if (!pkg %in% .packages()) {  
+    suppressMessages(library(pkg, character.only = TRUE))
+  }
+}))
+```
+
+
+
+## Importation de la base menage
+
+```{r}
+data_menage<- haven::read_dta("../Donnees/ehcvm_menage_gnb2021.dta")
+data_menage
+```
+
+
+### Structure de la base
+
+```{r}
+utils::str(data_menage)
+```
+
+### quelques statistiques sur les variables logem, toit, mur
+```{r}
+data_menage %>% select (logem, toit, mur)%>% tbl_summary()
+
+```
+ 
+
+### Generation d'un tableau descriptif et informatif des caractéristiques de l'habitat du chef de ménage.
+```{r}
+data_menage %>% labelled::to_factor()%>%
+  select (logem, toit, mur)%>% 
+  tbl_summary(label = list(logem ~"logement", toit ~"materiaux du toit du chef de manage", mur~ "mur de la maison"))%>%modify_header(label= "Caracteristique de l'habitat du CM")
+```
+
+
+
+### Analyse descriptive des caractéristiques de l'habitat du chef de ménage (CM)
+
+```{r}
+data_menage %>% labelled::to_factor()%>%
+  select (logem, toit, mur, superf,grosrum,petitrum)%>% 
+  tbl_summary(label = list(logem ~"logement", toit ~"toit du chef de manage", mur~ "mur de la maison", superf ~"superficie", grosrum ~"gros rumunants", petitrum ~ "pétits rumunants"))%>%modify_header(label= "Caracteristique de l'habitat du CM")
+```
+
+### Analyse descriptive des caractéristiques de l'habitat du chef de ménage (CM)
+
+```{r}
+data_menage %>% labelled::to_factor()%>%
+  select (logem, toit, mur, superf,grosrum,petitrum)%>% 
+  tbl_summary(label = list(logem ~"logement", toit ~"toit du chef de manage", mur~ "mur de la maison", superf ~"superficie", grosrum ~"gros rumunants", petitrum ~ "pétits rumunants"), 
+  statistic = list(superf~"{mean} ({sd}",petitrum~ "{mean} ({sd})", grosrum ~ "{mean} ({sd})") )%>%modify_header(label= "Caracteristique de l'habitat du CM")
+```
+
+
+### Analyse descriptive des caractéristiques de l'habitat du chef de ménage (CM) en gerant les valeurs manquantes et les missing
+
+```{r}
+data_menage %>% labelled::to_factor()%>%
+  select (logem, toit, mur, superf,grosrum,petitrum)%>% 
+  tbl_summary(label = list(logem ~"logement", toit ~"toit du chef de manage", mur~ "mur de la maison", superf ~"superficie", grosrum ~"gros rumunants", petitrum ~ "pétits rumunants"), 
+  statistic = list(superf~"{mean} ({sd}",petitrum~ "{mean} ({sd})", grosrum ~ "{mean} ({sd})"),
+  digits = everything()~c(0,0,0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>%modify_header(label= "Caracteristique de l'habitat du CM")
+```
+
+
+## Importation de la base welfare
+
+```{r}
+data_welfare<- haven::read_dta("../Donnees/ehcvm_welfare_gnb2021.dta")
+data_welfare
+```
+
+
+### Structure de la base welfare
+
+```{r}
+utils::str(data_welfare)
+```
+
+
+
+### Analyse descriptive des caractéristiques du chef de ménage (CM).
+
+```{r}
+data_welfare %>% labelled::to_factor()%>%
+  select (hgender, hage, hmstat, heduc, hdiploma)%>% 
+  tbl_summary(label = list(hgender ~"Genre du CM", hage ~" age du CM", hmstat~ "statut matrimonial du CM", heduc ~"niveau d'education du CM", hdiploma ~"diplome du CM"), 
+  statistic = list(hage~"{mean} ({sd}"),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>%modify_header(label= "Caracteristique du CM")
+
+```
+

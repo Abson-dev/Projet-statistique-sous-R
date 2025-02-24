@@ -1,0 +1,146 @@
+---
+title: "Statistiques descriptives"
+author: "FALL Ndeye Ramatoulaye Ndoye"
+date: "2025-02-11"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+##Installation des packages
+packages <- c("readr","haven","utils","dplyr","labelled","gtsummary")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Pour vérifier si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+```{r}
+#Importation de la base menage EHCVM Benin
+
+base_men <-  utils::read.csv("../Données/ehcvm_menage_ben2021.csv")
+
+base_men %>% select(logem,toit,mur)%>% tbl_summary()
+```
+
+base
+
+
+```{r}
+base_men %>% 
+  select(logem,mur,toit) %>% 
+  tbl_summary(
+    label=list(logem~"logement du chef de ménage",
+                 toit~"Toit avec matériaux définitifs",
+                 mur~"Murs faits de matériaux définitifs")
+  ) %>% 
+modify_header(
+  label="Caractéristiques de l'habitat du chef de ménage")
+```
+```{r}
+base_men %>% 
+  select(logem,mur,toit,superf,grosrum,petitrum) %>% 
+  tbl_summary(
+    label=list(logem~"logement du chef de ménage",
+                 toit~"Toit avec matériaux définitifs",
+                 mur~"Murs faits de matériaux définitifs",
+               superf~"superficie agricole",
+               grosrum~"Gros ruminant",
+               petitrum~"Ptit ruminant")
+  ) %>% 
+modify_header(
+  label="Caractéristiques de l'habitat du chef de ménage")
+```
+```{r}
+#Sortie de statistiques sur l'habitat, l'activité agricole et d'élevage
+base_men %>% 
+  select(logem,mur,toit,superf,grosrum,petitrum) %>% 
+  tbl_summary(
+    label=list(logem~"logement du chef de ménage",
+                 toit~"Toit avec matériaux définitifs",
+                 mur~"Murs faits de matériaux définitifs",
+               superf~"superficie agricole",
+               grosrum~"Gros ruminant",
+               petitrum~"Petit ruminant"),
+    statistic=list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})")
+  ) %>% 
+modify_header(
+  label="Caractéristiques de l'habitat du chef de ménage")
+```
+
+```{r}
+
+base_men %>% 
+  select(logem,mur,toit,superf,grosrum,petitrum) %>% 
+  tbl_summary(
+    label=list(logem~"logement du chef de ménage",
+                 toit~"Toit avec matériaux définitifs",
+                 mur~"Murs faits de matériaux définitifs",
+               superf~"superficie agricole",
+               grosrum~"Gros ruminant",
+               petitrum~"Petit ruminant"),
+    statistic=list(superf~"{mean}({sd})",
+                     grosrum~"{mean}({sd})",
+                     petitrum~"{mean}({sd})"),
+                     digits = everything()~c(0,0,0),
+                     missing = "always",
+                     missing_text = "Valeurs manquantes"
+  ) %>% 
+modify_header(
+  label="Caractéristiques de l'habitat du chef de ménage")
+```
+
+
+```{r}
+##Importation de la base Welfare de EHCVM Benin
+welfare <- haven::read_dta("../Données/ehcvm_welfare_ben2021.dta")
+colnames(welfare)
+
+```
+
+```{r}
+#Travail avec la base welfare, vue sur les caracteristiques du chef de ménage
+install.packages("labelled")
+library(labelled)
+welfare %>% 
+  select(hage,hgender,heduc,hdiploma,hmstat) %>% 
+  labelled::to_factor() %>% 
+  tbl_summary(
+    label=list(hage~"Age du chef de ménage",
+               hgender~"Sexe du chef de ménage",
+               heduc~"Niveau d'éducation du chef de ménage",
+               hmstat~"Situation matrimoniale du chef de ménage",
+               hdiploma~"Plus haut diplome du chef de ménage"),
+    statistic = list(hage~"{mean}({sd})",
+                     missing = "always",
+                     missing_text = "Valeurs manquantes"
+                     )
+  )%>% 
+modify_header(
+  label="Informations sur le chef de ménage")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

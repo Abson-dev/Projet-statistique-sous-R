@@ -1,0 +1,723 @@
+---
+title: "Analyse des caractéristiques socio démographique au Niger en 2018"
+author: "Jean-Luc BATABATI, Ramatoulaye FALL"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Installation et importation des packages
+
+Avant toute chose, nous veillerons à installer tous les packages qui servirons dans la suite puis les charger.
+
+```{r, warning=FALSE, message=FALSE}
+
+packages <- c("readr","haven","utils","dplyr", "kableExtra", 
+              "gtsummary", "labelled", "survey", "cardx", "Hmisc")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+```
+
+# Chargement des bases
+
+Nous importons la base ménage et la base individu.
+
+```{r}
+Base_men  <-haven::read_dta("../Données/ehcvm_menage_ner2018.dta")
+Base_ind <-  haven::read_dta("../Données/ehcvm_individu_ner2018.dta")
+
+```
+
+
+# Vue des bases
+
+```{r}
+View(Base_men)
+View(Base_ind)
+```
+
+# Structure des bases
+
+La base ménage contient `r nrow(Base_men)` observations et `r ncol(Base_men)` variables.
+
+La base individu contient `r nrow(Base_ind)` observations et `r ncol(Base_ind)` variables.
+
+# Nom des colonnes dans chaque base
+
+```{r}
+print("Noms des colonnes de la Base ménage")
+colnames(Base_men)
+
+print("Noms des colonnes de la Base individu")
+colnames(Base_ind)
+```
+
+
+Dans la suite, nous réaliserons des statistiques descriptives. Dans un premier temps, nous utiliserons les deux bases, avec et sans pondérations. Ensuite, nous présenterons les statistiques après la jointure des deux bases.
+
+
+# PARTIE 1: Statistiques descriptives sans pondération
+
+## A- Analyse des caractéristiuqes des ménages
+
+### I- Caracteristiques des ménages
+
+```{r}
+Base_men %>%
+  labelled::to_factor() %>%
+  select(logem, toit, sol, mur) %>% 
+  tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage"),
+  digits = everything()~c(2,2,2,2),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+
+L'analyse des caractéristiques du logement révèle que **62,57%** des chefs de ménage sont propriétaires sans titre, tandis que **12,25%** possèdent un titre de propriété. Environ **8,13%** des ménages sont locataires et **17,05%** occupent un autre type de logement. Concernant les matériaux de construction, **79,28%** des maisons n’ont pas un toit considéré comme adéquat, **78,93%** ont un sol inadéquat, et **69,87%** ont des murs qui ne respectent pas les normes de qualité.
+
+
+### II- Accès des ménages aux infrastructures de base
+
+
+```{r}
+Base_men %>%  
+  labelled::to_factor() %>%
+  select(eauboi_ss,eauboi_sp,elec_ac,elec_ur,elec_ua,ordure,toilet,eva_toi,eva_eau) %>% tbl_summary(
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural.",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               toilet ~ "Type de toilettes utilisées par le ménage",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  digits = everything()~c(0,0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+
+```
+
+L'analyse des infrastructures de base au Niger, selon les données de l’EHCVM 2018-2019, met en évidence plusieurs défis en matière d'accès aux services essentiels. En ce qui concerne l'approvisionnement en eau, **57% des ménages** ont accès à une source d’eau en saison sèche, et **54%** en saison pluvieuse, indiquant une légère baisse de disponibilité en période humide.  
+
+L’accès à l’électricité reste limité, particulièrement en **milieu urbain**, où seulement **17% des ménages** sont connectés au réseau électrique. En **milieu rural**, ce taux est légèrement plus élevé (**23%**), suggérant une disparité entre les zones géographiques. De plus, l’électricité issue d’alternatives comme les panneaux solaires ou les générateurs est rare, ne concernant que **5% des ménages**.  
+
+Les conditions sanitaires révèlent également des défis majeurs. Seulement **11% des ménages** disposent de toilettes améliorées, et **89%** des foyers n’ont pas de système adéquat pour l’évacuation des eaux usées domestiques. De même, **82% des ménages** ne disposent pas d’un mode organisé d’élimination des ordures.
+
+
+
+
+### III-  Équipements des ménages	
+
+```{r}
+Base_men %>% 
+  labelled::to_factor() %>%
+  select(tv, fer, frigo, cuisin, ordin, decod, car ) %>% 
+  tbl_summary(
+    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+
+```
+
+L'analyse du tableau montre que seulement **16% des ménages** disposent d’un téléviseur. De même, **6% des ménages** possèdent un réfrigérateur et **4%** une cuisinière, mettant en évidence des contraintes en matière de conservation des aliments et de préparation des repas.  
+
+Les équipements technologiques restent peu répandus : **97% des ménages** ne possèdent pas d’ordinateur et **94%** n’ont pas de décodeur, suggérant un accès restreint aux nouvelles technologies et à l'information. Par ailleurs, seuls **3% des ménages** disposent d’un véhicule.
+
+
+## IV- Élevage et Agriculture des ménages
+
+```{r}
+Base_men %>% 
+  select(superf, grosrum, petitrum, porc, lapin, volail) %>% 
+  tbl_summary(
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porc",
+               lapin ~"Le Nombre de lapin",
+               volail ~ "Le Nombre de volail"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} , {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),  
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+
+Les données montrent que la superficie agricole médiane est de **3 ha**, avec **2 405 ménages sans données renseignées**. L’élevage est principalement dominé par les **petits ruminants (médiane : 4)** et les **gros ruminants (médiane : 1)**, avec une forte variabilité. La volaille est également présente (**médiane : 0**, max : 10).  
+
+L’élevage de porcs est inexistant, et les lapins sont rares (<0,1% des ménages). Le taux élevé de valeurs manquantes (**2 101 ménages**) suggère une pratique inégale de l’agriculture et de l’élevage dans l’échantillon.
+
+### V- Chocs et vulnérabilités des ménages
+
+```{r}
+Base_men %>%
+  labelled::to_factor() %>%
+  select(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth) %>% 
+  tbl_summary(
+    label = list(
+      sh_id_demo ~ "Chocs démographiques)",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs")) %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité des ménages") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+Les ménages nigériens sont principalement affectés par des **chocs naturels (38%)** et **démographiques (23%)**, ce qui indique une exposition importante aux événements climatiques et aux changements familiaux. Les **chocs économiques** concernent **12%** des ménages, tandis que les **chocs liés à la violence (3,9%)** et **autres chocs (3,6%)** restent marginaux. La majorité des ménages ne déclarent pas avoir subi ces types de perturbations.
+
+## B- Analyse des caractéristiuqes des individus
+
+### I- Situation géographique des individus
+
+
+```{r, results='asis'}
+
+Base_ind %>%
+  labelled::to_factor() %>%
+  select(region, milieu) %>%
+  tbl_summary(
+    label = list(
+      region ~ "Region",
+      milieu ~ "Milieu de résidence"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Situation géographique des individus") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+
+Les données montrent une répartition relativement équilibrée de la population entre les régions, avec une concentration plus élevée à **Maradi (16%)**, **Zinder (15%)** et **Tillabéri (14%)**, tandis que **Agadez (9.5%)** et **Diffa (10%)** comptent moins d'habitants.  
+
+La majorité de la population vit en **milieu rural (74%)**, contre **26% en milieu urbain**, soulignant une prédominance rurale marquée au Niger.
+
+### II- Caractéristiques socio-démographiques  des individus
+
+
+```{r, results='asis'}
+
+Base_ind %>%
+  labelled::to_factor() %>%
+  select(sexe, age, mstat, religion, agemar) %>%
+  tbl_summary(
+    label = list(
+      age ~ "Age de l'individu",
+      sexe ~ "Sexe",
+      mstat ~ "Situation matrimoniale",
+      religion ~ "Réligion",
+      agemar ~ "Age au premier mariage"
+    ),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} , {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Caractéristiques socio-démographiques  des individus") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+L'échantillon comprend 35 406 individus, répartis équitablement entre hommes (49 %) et femmes (51 %). L'âge médian est de 13 ans (6, 30). La majorité des individus sont célibataires (64 %), tandis que 24 % sont mariés en monogamie et 9,3 % en polygamie. Les autres statuts matrimoniaux sont marginaux. Pratiquement toute la population se déclare musulmane (100 %), avec une très faible proportion de chrétiens (0,4 %) et d’autres croyances. L'âge médian au premier mariage est de 18 ans (16,0, 23,0), mais une part importante des données est manquante (22 507 observations).
+
+
+### II- Santé et condition de vie des individus
+
+
+```{r, results='asis'}
+Base_ind %>%labelled::to_factor()%>% select(mal30j, arrmal, couvmal, moustiq)%>% 
+  tbl_summary(label = list(mal30j ~ "Problème de santé pour les 30 derniers jours",
+                           arrmal ~ "Arrêt d'activité pour maladie",
+                           couvmal ~ "Couverture maladie",
+                           moustiq ~ "Dors sous une moustiquaire"), 
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Santé et condition de vie"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+Sur les 35 406 individus, 36 % ont déclaré avoir eu un problème de santé au cours des 30 derniers jours, et 25 % ont dû interrompre leur activité pour raison de maladie. La couverture maladie est quasi inexistante, avec seulement 0,5 % des individus assurés. Concernant les conditions de vie, 62 % dorment sous une moustiquaire, tandis que 38 % n'en utilisent pas.
+
+### III- Éducation et alphabétisation des individus
+
+
+```{r, results='asis'}
+Base_ind %>%labelled::to_factor()%>% select(alfab, scol, educ_scol, diplome)%>% 
+  
+  tbl_summary(label = list(alfab ~ "Alphabétiser",
+              scol ~ "Fréquenté en 2017-2018",
+              educ_scol ~ "Niveau d'éduaction actuel",
+              diplome ~ "Diplome le plus haut"
+              ), 
+              
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Éducation et alphabétisation"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+L'alphabétisation reste faible, avec seulement 27 % des individus sachant lire et écrire. La majorité (81 %) n’a pas fréquenté d’établissement scolaire en 2017-2018. Parmi ceux qui sont scolarisés, 70 % sont au niveau primaire, 18 % au secondaire général (post-primaire) et moins de 2 % dans l’enseignement supérieur. Concernant les diplômes, 91 % des individus n’en possèdent aucun, tandis que seuls 6 % ont obtenu le CEPE et moins de 2 % détiennent un diplôme supérieur au BEPC.
+
+### IV- Accès aux services et aux technologie
+
+
+```{r, results='asis'}
+Base_ind %>%labelled::to_factor()%>% select(internet, telpor, bank  )%>% 
+  
+  tbl_summary(label = list(internet ~ "Accès à une connexion internet",
+                           telpor ~ "Possède un téléphone portable",
+              bank ~ "Possède un compte bancaire"), 
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Accès aux services et aux technologie"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+L'accès aux services et technologies reste limité, avec seulement **5,7 %** des individus disposant d’une connexion Internet et **21 %** possédant un téléphone portable. L'inclusion financière est également faible, puisque **98 %** de la population ne détient pas de compte bancaire.
+
+### V- Emploi et revenu des individus
+
+
+```{r, results='asis'}
+Base_ind %>%labelled::to_factor()%>% select(branch,volhor, salaire,emploi_sec)%>% 
+  
+  tbl_summary(label = list(branch ~ "Branche d'activité",
+              volhor ~ "Volume horaire",
+              salaire ~ "Salaire",
+              emploi_sec ~ "Emploi secondaire"), 
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Emploi et revenu"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+
+# PARTIE 2: Statistiques descriptives avec pondération
+
+## A- Analyse des caractéristiuqes des ménages
+
+Pour sortir les statistiques avec pondération, nous allons merger la base ménage avec la base welfare et ne retenir que la variable de pondération.
+
+
+```{r}
+
+Base_wel <-  haven::read_dta("../Données/ehcvm_welfare_ner2018.dta")
+Base_wel<- Base_wel%>%select(hhid, hhweight)
+Base_men<- Base_men %>%
+  dplyr::left_join(Base_wel, by = "hhid")
+
+```
+
+## Transformer les variables en facteur 
+
+```{r}
+Base_men  <-  Base_men %>%
+  labelled::to_factor() 
+
+```
+
+
+
+### I- Caracteristiques des ménages
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(logem, toit, sol, mur), 
+                 
+                label = list(logem ~ "Type de logement du chef de ménage", 
+                 toit~ "Toit de la maison du chef de ménage",
+                 mur ~ "Mur de la maison du chef de maison",
+                 sol~ "Sol de la maison du chef de ménage"),
+    digits = everything()~c(2,2,2,2),
+    missing = "always",
+    missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+La majorité des chefs de ménage sont propriétaires sans titre (**72,32 %**), tandis que **9,01 %** possèdent un titre foncier et **4,94 %** sont locataires. En ce qui concerne les matériaux de construction, **82,21 %** des logements n’ont pas de toit en dur, **84,71 %** ont un sol non aménagé et **72,48 %** des habitations ont des murs en matériaux précaires.
+
+
+
+### II- Accès des ménages aux infrastructures de base
+
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(eauboi_ss,eauboi_sp,elec_ac,elec_ur,elec_ua,ordure,toilet,eva_toi,eva_eau), 
+                 
+                label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural.",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               toilet ~ "Type de toilettes utilisées par le ménage",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  digits = everything()~c(0,0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+L'accès aux infrastructures de base reste limité. En saison sèche, **54 %** des ménages ont une source d'eau disponible, contre **50 %** en saison pluvieuse. L'accès à l'électricité est faible, avec seulement **12 %** des ménages urbains et **17 %** des ménages ruraux raccordés au réseau. Les sources alternatives d'électricité sont quasi inexistantes (**5 %**). La gestion des déchets et de l'assainissement est préoccupante : **89 %** des ménages ne disposent pas d'un système organisé d'élimination des ordures, **93 %** n'ont pas de toilettes aménagées et **98 %** évacuent leurs eaux usées de manière non contrôlée.
+
+### III-  Équipements des ménages	
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(tv, fer, frigo, cuisin, ordin, decod, car), 
+                 
+               label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+```
+
+Les ménages disposent rarement de biens électroménagers ou technologiques. En effet, **90 %** des ménages ne possèdent pas de téléviseur, **99 %** n’ont pas de fer à repasser, **96 %** n’ont pas de réfrigérateur, **98 %** ne possèdent pas de cuisinière, d’ordinateur, ou de décodeur, et **98 %** ne possèdent pas de véhicule. Seuls de petits pourcentages de ménages ont accès à ces équipements, respectivement **10 %** pour le téléviseur, **1 %** pour le fer à repasser, **4 %** pour le réfrigérateur, **2 %** pour la cuisinière, l’ordinateur et le décodeur, et **2 %** pour le véhicule.
+
+
+### IV- Élevage et Agriculture des ménages
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(superf, grosrum, petitrum, porc, lapin, volail), 
+                 
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porc",
+               lapin ~"Le Nombre de lapin",
+               volail ~ "Le Nombre de volail"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} , {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),  
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+La superficie agricole moyenne est de **2 669 580 hectares**, avec une médiane de **4 hectares**. Concernant l’élevage, le nombre moyen de gros ruminants est **2 580 141**, avec une médiane de **2**, tandis que pour les petits ruminants, la moyenne est également de **2 580 141**, avec une médiane de **6**. Aucun ménage ne possède de porcs, avec **100 %** d’entre eux n’en ayant pas, et très peu possèdent des lapins (**<0,1 %**). Le nombre moyen de volailles est de **2 580 141**, avec une médiane de **4**.
+
+
+### V- Chocs et vulnérabilités des ménages
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth), 
+                 
+      label = list(
+      sh_id_demo ~ "Chocs démographiques)",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité des ménages") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+En termes de chocs affectant les ménages, **25 %** ont connu des chocs démographiques, **42 %** ont été confrontés à des chocs naturels, et **12 %** ont subi des chocs économiques. Les chocs liés à la violence et les autres chocs sont moins fréquents, avec respectivement **3 %** et **2 %** des ménages affectés.
+
+## B- Analyse des caractéristiuqes des individus
+
+## Transformer les variables en facteur 
+
+```{r}
+Base_ind  <-  Base_ind %>%
+  labelled::to_factor() 
+
+```
+
+
+### I- Situation géographique des individus
+
+```{r}
+
+survey::svydesign(~1, data = as.data.frame(Base_ind), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(region, milieu), 
+    label = list(
+      region ~ "Region",
+      milieu ~ "Milieu de résidence"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Situation géographique des individus") %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+```
+
+La population du Niger est majoritairement rurale, avec **83 %** des individus résidant en milieu rural contre **17 %** en milieu urbain. La répartition régionale montre que **Zinder (21 %)** et **Maradi (20 %)** sont les régions les plus peuplées, suivies de **Tahoua (19 %)** et **Tillabéri (16 %)**. La capitale, **Niamey**, ne représente que **5,4 %** de la population. Les régions d’**Agadez (2,6 %)** et de **Diffa (3,3 %)** ont les plus faibles effectifs.
+
+
+### II- Caractéristiques socio-démographiques  des individus
+
+
+```{r, results='asis'}
+survey::svydesign(~1, data = as.data.frame(Base_ind), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(sexe, age, mstat, religion, agemar), 
+    label = list(
+      age ~ "Age de l'individu",
+      sexe ~ "Sexe",
+      mstat ~ "Situation matrimoniale",
+      religion ~ "Réligion",
+      agemar ~ "Age au premier mariage"
+    ),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} , {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Caractéristiques socio-démographiques  des individus") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+Les données socio-démographiques du Niger montrent une population majoritairement **féminine (52 %)** contre **48 % d'hommes**. L'âge médian est de **13 ans**, reflétant une population très jeune.  
+
+En termes de situation matrimoniale, **64 %** des individus sont **célibataires**, tandis que **32 %** sont mariés, dont **23 % en monogamie** et **9,9 % en polygamie**. Le veuvage (**2,1 %**) et le divorce (**1 %**) restent marginaux.  
+
+Concernant la religion, la population est **quasiment entièrement musulmane (99,7 %)**, avec une minorité chrétienne (**0,2 %**) et quelques individus animistes ou sans religion.  
+
+L'âge médian au premier mariage est de **18 ans**, soulignant des mariages précoces, bien que cette donnée présente de nombreuses valeurs manquantes.
+
+
+### III- Éducation et alphabétisation des individus
+
+
+```{r, results='asis'}
+  survey::svydesign(~1, data = as.data.frame(Base_ind), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(alfab, scol, educ_scol, diplome), 
+  label = list(alfab ~ "Alphabétiser",
+              scol ~ "Fréquenté en 2017-2018",
+              educ_scol ~ "Niveau d'éduaction actuel",
+              diplome ~ "Diplome le plus haut"
+              ), 
+              
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Éducation et alphabétisation"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+Les données sur l'éducation et l'alphabétisation au **Niger** montrent un **faible taux d'alphabétisation**, avec **75 % de la population non alphabétisée** et seulement **25 % sachant lire et écrire**.  
+
+Concernant la scolarisation, en **2017-2018**, **82 % des individus n'étaient pas scolarisés**, tandis que **18 % fréquentaient un établissement scolaire**.  
+
+Parmi ceux actuellement scolarisés, la majorité se trouve au **primaire (75 %)**, suivi du **secondaire 1 général (17 %)**. Les niveaux supérieurs restent peu fréquentés, avec seulement **1 % en enseignement supérieur**.  
+
+En matière de diplômes, **93 % de la population n'ont aucun diplôme**. Seuls **5,1 % ont obtenu le CEPE**, et **moins de 1 % ont atteint un niveau universitaire (Licence, Master, Doctorat)**.  
+
+
+### IV- Accès aux services et aux technologie
+
+
+```{r, results='asis'}
+survey::svydesign(~1, data = as.data.frame(Base_ind), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(internet, telpor, bank ), 
+  label = list(internet ~ "Accès à une connexion internet",
+                           telpor ~ "Possède un téléphone portable",
+              bank ~ "Possède un compte bancaire"), 
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Accès aux services et aux technologie"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+L'accès aux services et aux technologies au Niger reste limité, avec seulement **3,9 %** de la population ayant une connexion Internet et **18 %** possédant un téléphone portable. L'inclusion financière est également très faible, puisque **99 %** des individus ne disposent pas de compte bancaire.
+
+### V- Emploi et revenu des individus
+
+
+```{r, results='asis'}
+survey::svydesign(~1, data = as.data.frame(Base_ind), weights = ~hhweight) %>%
+  tbl_svysummary(include = c(branch,volhor, salaire,emploi_sec ), 
+  label = list(branch ~ "Branche d'activité",
+              volhor ~ "Volume horaire",
+              salaire ~ "Salaire",
+              emploi_sec ~ "Emploi secondaire"), 
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=(" Emploi et revenu des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+  
+```
+
+L'emploi au Niger est principalement dominé par l’agriculture (**65 %**) et l’élevage/pêche (**14 %**), tandis que les autres secteurs comme l’industrie, le commerce et les services regroupent des parts plus modestes. La majorité des travailleurs n’a pas d’emploi secondaire (**82 %**), et les revenus restent globalement faibles, avec un salaire médian de **600 000 FCFA**. 
+
+
+# PARTIE 3 : FUSION DES BASES INDIVIDU ET MENAGE
+
+
+```{r}
+Base_merge <- Base_ind %>%
+  dplyr::left_join(Base_men, by = "hhid")
+```
+
+## I- Situation géographique des ménages
+
+
+```{r, results='asis'}
+
+Base_merge %>%
+  labelled::to_factor() %>%
+  distinct(hhid, .keep_all = TRUE) %>%
+  select(region, milieu) %>%
+  tbl_summary(
+    label = list(
+      region ~ "Région",
+      milieu ~ "Milieu de résidence"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Situation géographique des ménages") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2018-2019 du Niger")
+
+
+
+```
+
+La répartition géographique des ménages au Niger montre une concentration plus élevée dans les régions de **Zinder (15 %), Maradi (14 %) et Tahoua (13 %)**, tandis que Niamey représente **12 %** des ménages. La majorité des ménages vit en milieu **rural (74 %)**, contre **26 %** en milieu urbain, soulignant une forte ruralité dans la structure des ménages nigériens.
+
+## II- Caractéristiques des ménages suivant le mileu
+
+
+```{r}
+Base_merge %>%
+  labelled::to_factor() %>%
+  distinct(hhid, .keep_all = TRUE) %>%
+  select(milieu, logem, toit, sol, mur) %>%
+  tbl_summary(
+    by = milieu,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage")
+  ) %>%
+  modify_caption("Caratéristiques des ménages selon le milieu")
+```
+
+
+## III- Caractéristiques des individus suivant le sexe
+
+```{r}
+Base_merge %>%
+  select(sexe, age, mstat, couvmal, moustiq, scol, diplome, telpor) %>%
+  tbl_summary(
+    by = sexe,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(age ~ "Age de l'individu",
+                 mstat ~ "Situation matrimoniale",
+                 moustiq ~ "Dors sous une moustiquaire",
+                 scol ~ "Scolarisé en 2017-2018",
+                 diplome ~ "Diplome le plus élevé",
+                 telpor ~ "Possède un telephone portable")) %>%
+  modify_caption("Caractéristiques des individus suivant le sexe ")
+```
+
+## IV- Caractéristiques des individus suivant le milieu
+
+
+```{r}
+Base_merge %>%
+  select(milieu, educ_scol, diplome, mstat, couvmal, moustiq, scol, diplome, telpor) %>%
+  tbl_summary(
+    by = milieu,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      educ_scol ~ "Niveau d'éducation",
+      mstat ~ "Situation matrimoniale",
+                 moustiq ~ "Dors sous une moustiquaire",
+                 scol ~ "Scolarisé en 2017-2018",
+                 diplome ~ "Diplome le plus élevé",
+                 telpor ~ "Possède un telephone portable"
+    )
+  ) %>%
+  modify_caption("Caratéristiques des individus selon le milieu")
+```
+

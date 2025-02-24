@@ -1,0 +1,48 @@
+---
+title: "TP_2"
+author: "Cheikh Oumar DIALLO"
+date: "2025-01-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#chargement du package
+```{r}
+library(utils)
+library(dplyr)
+```
+# Chargement des bases de données
+```{r}
+menage <- utils::read.csv("Données/ehcvm_menage_sen2021.csv")
+```
+
+```{r}
+individu <- utils::read.csv("Données/ehcvm_individu_sen2021.csv")
+
+```
+# La strture de la base
+```{r}
+utils::str(menage)
+```
+
+```{r}
+utils::str(individu)
+```
+Merges des Bases
+```{r}
+menage
+individu
+```
+```{r}
+base_merge <- dplyr::left_join(individu,menage,by="hhid")
+base_merge
+```
+
+```{r cars}
+read
+summary(cars)
+```
+

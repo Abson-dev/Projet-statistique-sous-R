@@ -1,0 +1,120 @@
+---
+title: "Statistiques descriptives_Coulibaly_Khadidiatou"
+author: "KCoulibaly"
+date: "2025-02-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gtsummary)
+library(haven)
+library(dplyr)
+library(labelled)
+
+
+```
+
+```{r}
+data <- read.csv("C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 4/data/ehcvm_menage_sen2021.csv")
+
+data_dta<- read_dta("C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 4/data/ehcvm_menage_SEN2021.dta")
+```
+
+
+```{r}
+names(data)
+data %>%  select(logem, toit,sol) %>%  tbl_summary()
+data_dta %>%  select(logem, toit,sol) %>%  tbl_summary()
+
+```
+
+
+
+```{r}
+## En vue de labelliser les variables --- de faire sortir le systèle de "codage"
+
+data_dta <- data_dta %>% labelled::to_factor() %>%  select(logem, toit,sol)
+
+data_dta %>% labelled::to_factor() %>%select(logem, toit,sol) %>%  tbl_summary()
+```
+
+# Changement de labels
+
+```{r}
+
+
+data_dta %>% labelled::to_factor() %>%select(logem, toit,mur) %>%  
+  tbl_summary(
+    label = list(logem ~ "Logement du chef de ménage",
+                 toit  ~ "Toit en matériau définitif",
+                 mur ~ "Mur de la maison")) %>% 
+      modify_header(label= "Caractéristiques de l'habitat du CM")
+```
+
+# On spécifie les stats à présenter sur le tableau...
+
+```{r}
+
+data_dta %>% labelled::to_factor() %>%select( grosrum, petitrum, superf) %>%  
+  tbl_summary(
+    statistic = list(grosrum ~ "{mean} ({sd})",
+                     petitrum ~ "{mean} [max {max}]",
+                     superf ~ "{mean}  (médiane{median}) [min {min}]  (max {max})")) %>% 
+      modify_header(label= "Caractéristiques de l'habitat du CM")
+
+
+```
+
+## On traite les missing...
+
+```{r}
+data_dta %>% labelled::to_factor() %>%select( grosrum, petitrum, superf) %>%  
+  tbl_summary(
+    statistic = list(grosrum ~ "{mean} ({sd})",
+                     petitrum ~ "{mean} [max {max}]",
+                     superf ~ "{mean}  (médiane{median}) [min {min}]  (max {max})"),
+                      digits =everything()~c(0,0,0)) %>% 
+      modify_header(label= "Caractéristiques de l'habitat du CM")
+
+
+```
+
+# AUtre manière de le faire...
+
+```{r}
+
+data_dta %>% labelled::to_factor() %>%select( grosrum, petitrum, superf) %>%  
+  tbl_summary(
+    statistic = list(grosrum ~ "{mean} ({sd})",
+                     petitrum ~ "{mean} [max {max}]",
+                     superf ~ "{mean}  (médiane{median}) [min {min}]  (max {max})"),
+                      digits = everything() ~ 0, 
+                  missing = "always",
+                  missing_text = "Valeurs manquantes") %>%  ## Valeurs manquantes
+      modify_header(label= "Caractéristiques de l'habitat du CM")
+
+
+```
+
+
+
+# Base welfare
+
+```{r}
+data_welf <-  read_dta("C:/Users/DELL/Documents/ISEP3_2025/Stats_spatiale/Projet-statistique-sous-R/TP 4/data_sn/ehcvm_welfare_sen2021.dta")
+
+data_welf <- data_welf %>% labelled::to_factor()
+help("read_dta")
+str(data_welf)
+```
+
+## Selecting the variables et tableau...
+
+```{r}
+
+data_welf %>%  select(hgender, hage, hmstat, heduc, hdiploma) %>% 
+  tbl_summary()
+
+```
+

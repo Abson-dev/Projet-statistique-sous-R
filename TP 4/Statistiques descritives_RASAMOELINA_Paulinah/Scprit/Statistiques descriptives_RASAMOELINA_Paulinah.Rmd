@@ -1,0 +1,76 @@
+---
+title: "Statistiques descriptives"
+author: "RASAMOELINA Paulinah"
+date: "2025-02-11"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(gtsummary)
+library(haven)
+```
+
+## R Markdown
+```{r}
+basemenage <- haven::read_dta("../Données/ehcvm_menage_ner2021.dta")
+```
+
+```{r}
+str(basemenage)
+```
+```{r}
+basemenage%>%select(logem,toit,mur)%>%tbl_summary()
+```
+```{r}
+basemenage %>% labelled::to_factor() %>% select(logem,toit,mur) %>% tbl_summary()
+```
+
+```{r}
+basemenage %>% labelled::to_factor() %>% select(logem,toit,mur) %>%tbl_summary(
+  label=list(logem ~ "logement du chef de menage",
+             toit~"toit en matériaux",
+             mur~"mur de la maison"
+             )
+  )
+```
+
+```{r}
+basemenage %>% labelled::to_factor() %>% select(logem,toit,sol) %>% tbl_summary(
+  label=list(logem ~ "Logement du chef de menage", 
+             toit~"toit en matériaux", 
+             sol~"sol de la maison")) %>% modify_header(label=("Caractéristiques de l'habitat du CM"))
+```
+```{r}
+basemenage %>%select(grosrum,petitrum,superf) %>% tbl_summary()
+```
+```{r}
+basemenage %>%labelled::to_factor() %>%  select(grosrum,petitrum,superf) %>% tbl_summary(
+  statistic=list(grosrum~"{mean}({sd})",
+                 petitrum~"{mean}({sd})",
+                 superf~"{mean}({sd})"),
+                 digits=everything()~c(0,0,0),
+                 missing="always",
+                 missing_text="valeurs manquantes"
+                 
+)
+
+```
+## Base welfare
+```{r}
+base_welfare <- haven::read_dta("../Données/ehcvm_welfare_ner2021.dta")
+```
+
+```{r}
+base_welfare %>% labelled::to_factor() %>% 
+  select(hgender, hage, hmstat, heduc, hdiploma) %>% tbl_summary(
+    statistic = list(hage~"{mean}({sd})"),
+    label=list(hgender~"Sexe du chef de ménage", hage~"Age du chef de ménage", hmstat~"Situation matrimoniale du chef de ménage", heduc~"Niveau d'éducation du chef de ménage", hdiploma~"Diplôme du chef de ménage"), missing="always",missing_text = "Valeurs manquantes") %>% modify_header(label=("Caractéristiques du Chef de ménage")
+  )
+```
+

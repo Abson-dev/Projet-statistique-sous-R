@@ -1,0 +1,446 @@
+---
+title: "Analyse de la pauvreté"
+author: "Jean-Luc BATABATI, Jacques ILLY et Paulinah RASAMOELINA"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Installation et importation des packages
+
+Avant toute chose, nous veillerons à installer tous les packages qui servirons dans la suite puis les charger.
+
+```{r}
+
+packages <- c("readr","haven","utils","dplyr", "kableExtra", 
+              "gtsummary", "labelled", "survey", "cardx", "Hmisc")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+
+```
+
+# Chargement des bases
+
+Nous importons la base de bien être (welfare) et la base individu
+
+```{r}
+Base_men  <- utils::read.csv("../Données/ehcvm_welfare_sen2021.csv")
+Base_ind <-  utils::read.csv("../Données/ehcvm_individu_sen2021.csv")
+
+```
+
+# Vue des bases
+
+```{r}
+View(Base_men)
+View(Base_ind)
+```
+
+# Structure des bases
+
+La base ménage contient `r nrow(Base_men)` observations et `r ncol(Base_men)` variables.
+
+La base individu contient `r nrow(Base_ind)` observations et `r ncol(Base_ind)` variables.
+
+# PARTIE 1: Statistiques descriptives sans pondération
+
+## Base ménage welfare
+
+### Caractériqtiques des ménages et des chefs de ménages
+
+```{r, results='asis'}
+
+Base_men %>%
+  labelled::to_factor() %>%
+  select(region, milieu, hhsize) %>%
+  tbl_summary(
+    label = list(
+      region ~ "Region",
+      milieu ~ "Milieu de résidence",
+      hhsize ~ "Taille du ménage"
+    ),
+    statistic = list(hhsize ~ "{median} {min} {max} ({p25}, {p75})"),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Caractéristiques des ménages") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+
+L'analyse des caractéristiques des ménages montre une légère prédominance du milieu urbain, avec **55 % des ménages vivant en ville contre 45 % en milieu rural**. La répartition régionale indique une concentration plus importante des ménages à **Dakar (14 %), Thiès (8 %) et Kaolack (7,4 %)**, tandis que des régions comme **Matam et Sédhiou (5,7 % chacune)** ont une représentation plus faible. La taille médiane des ménages est **de 8 personnes**, avec des valeurs allant d’un **minimum de 1 à un maximum de 53 personnes**.
+
+```{r, results='asis'}
+Base_men %>%labelled::to_factor()%>% select(hgender, hage, hmstat, heduc, hdiploma, hreligion)%>% 
+  
+  tbl_summary(label = list(hgender ~ "Sexe du CM" ,
+                           hage ~ "Age du CM", 
+                           hmstat~"Situatiom matrimonaile du CM",
+                           heduc~"Niveau d'éducation du CM", 
+                           hdiploma~"Diplome du CM", 
+                           hreligion~"Appartenance réligieuse du CM"), 
+              statistic = list(hage ~ "{median} {min} {max} ({p25}, {p75})"),
+              missing ="always", missing_text = "Valeurs manquantes") %>% 
+  modify_header(label=("Caractéristiques du Chef de ménage"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+```
+
+
+L'analyse des caractéristiques des chefs de ménage révèle une prédominance masculine (**72 % contre 28 % de femmes**), avec un âge médian de **54 ans**. La majorité des chefs de ménage sont **mariés en régime monogame (54 %) ou polygame (26 %)**, tandis que **15 % sont veufs**. Concernant l’éducation, **69 % n’ont aucun niveau scolaire**, et seuls **4 % ont atteint l’enseignement supérieur**.
+
+En termes de diplômes, **81 % des chefs de ménage n’en possèdent aucun**, et les niveaux les plus courants après le primaire sont le **CEPE (8,2 %) et le BEPC (4,5 %)**. L’appartenance religieuse est largement dominée par l'**islam (94 %)**, suivi du christianisme (5,3 %).
+
+## Base individu
+
+```{r, results='asis'}
+Base_ind %>%labelled::to_factor()%>% select(sexe, age, mstat, scol, diplome, religion)%>% 
+  
+  tbl_summary(label = list(sexe ~ "Sexe de l'individu" ,
+                           age ~ "Age de l'individu", 
+                           mstat~"Situatiom matrimonaile de l'individu",
+                           scol~"Scolarisation de l'individu", 
+                           diplome~"Diplome de l'individu", 
+                           religion~"Appartenance réligieuse de l'individu"), 
+              statistic = list(age ~ "{median} {min} {max} ({p25}, {p75})"),
+              missing ="always", missing_text = "Valeurs manquantes") %>%
+  modify_header(label=("Caractéristiques des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+```
+
+
+L'analyse des caractéristiques des individus révèle une **légère majorité féminine (54 %) contre 46 % d'hommes**. L'âge médian est de **18 ans**, indiquant une population relativement jeune. En matière de situation matrimoniale, **62 % des individus sont célibataires**, tandis que **32 % sont mariés (monogames ou polygames)**.
+
+Concernant l’éducation, **seulement 26 % des individus sont scolarisés**, et **82 % ne possèdent aucun diplôme**. Le **CEPE (10 %) et le BEPC (4,7 %)** sont les diplômes les plus courants après l'absence totale de certification. Sur le plan religieux, la population est **majoritairement musulmane (95 %)**, suivie des chrétiens (3,5 %)
+
+# PARTIE 2 : Statistiques descriptives avec pondération
+
+## Base pondération
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+Base_Poids1 <- svydesign(ids = ~1, weights = ~hhweight*hhsize, data = Base_men)
+Base_Poids2 <- svydesign(ids = ~1, weights = ~hhweight, data = Base_ind)
+```
+
+## Caratéristiques des ménages
+
+```{r, results='asis'}
+tbl_svysummary(Base_Poids, include = c(region, milieu, hhsize), 
+               label = list(region~"Region",
+                           milieu~"Milieu de résidence",
+                           hhsize~"Taille du ménage" ))%>% 
+  modify_header(label=("Caractéristiques des ménages"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+```
+
+## Caratéristiques des chefs de ménages
+
+```{r}
+tbl_svysummary(Base_Poids, include = c(hgender, hage, hmstat, heduc, hdiploma, hreligion), 
+               label = list(hgender ~ "Sexe du CM" ,
+                           hage ~ "Age du CM", 
+                           hmstat~"Situatiom matrimonaile du CM",
+                           heduc~"Niveau d'éducation du CM", 
+                           hdiploma~"Diplome du CM", 
+                           hreligion~"Appartenance réligieuse du CM"), 
+               statistic = list(hage ~ "{median} {min} {max} ({p25}, {p75})"),
+               missing ="always", missing_text = "Valeurs manquantes")%>%
+  modify_header(label=("Caractéristiques des chefs de ménages"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+```
+
+## Caratéristiques des individus
+
+```{r, results='asis'}
+tbl_svysummary(Base_Poids2, include = c(sexe, age, mstat, scol, diplome, religion), 
+               label = list(sexe ~ "Sexe de l'individu" ,
+                           age ~ "Age de l'individu", 
+                           mstat~"Situatiom matrimonaile de l'individu",
+                           scol~"Scolarisation de l'individu", 
+                           diplome~"Diplome de l'individu", 
+                           religion~"Appartenance réligieuse de l'individu"), 
+               statistic = list(age ~ "{median} {min} {max} ({p25}, {p75})"),
+               missing ="always", missing_text = "Valeurs manquantes")%>% 
+  modify_header(label=("Caractéristiques des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+```
+
+
+# PARTIE 3 : Analyse de la pauvreté
+
+## Création de la variable de pauvreté
+
+Le taux de pauvreté est estimé à partir de la dépense de consommation totale annuelle des ménages. Pour obtenir la dépense annuelle par personne, on divise cette dépense par la taille du ménage. Par ailleurs, pour en prendre en compte l’évolution des prix et les différences de coûts de la vie entre les régions, la consommation totale est ajustée par deux déflateurs : un indice des prix temporel lié à l’évolution des prix entre les deux vagues et un indice spatial du coût de la vie prenant en compte les disparités régionales.
+
+Un ménage sera donc considéré comme pauvre si la dépense annuelle par personne est inférieure au seuil de pauvreté fixé (Zref). Le seuil de pauvreté global au niveau national est donné par : Zref=Zal+Znal où Zal est le seuil alimentaire et Znal le seuil non alimentaire.
+
+```{r}
+# Dépenses par tête avec déflateurs
+Base_men$ctet <- Base_men$dtot / (Base_men$def_spa * Base_men$def_temp * Base_men$hhsize)
+
+#Pauvre si la conso par tête eset inférieur au seuil
+Base_men$pauvre <- ifelse(Base_men$ctet < Base_men$zref, 1, 0)
+Base_men$pauvre <- factor(Base_men$pauvre, 
+                               levels = c(1, 0), 
+                               labels = c("Pauvre", "Non Pauvre"))
+```
+
+
+## Taux de pauvreté des ménages
+
+Pour avoir le taux de pauvreté des ménages il suffit de pondérer par le poids des ménages. Celui des individus sera obtenu en mulitpliant le poids par la taille du ménage.
+
+```{r}
+
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) |>
+  tbl_svysummary(include = c(pauvre), digits = list(pauvre= c(2)))%>% 
+  modify_header(label=("Taux de pauvreté des ménages"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+```
+
+L'analyse du taux de pauvreté des ménages montre que **26,55 % des ménages sont considérées comme pauvre**, tandis que **73,45 % sont non pauvres**.
+
+On définit également la profondeur ou gap de la pauvreté et la sévérité.
+
+-   La profondeur ou le gap de la pauvreté est un indicateur qui permet d'apprécier à quel point le niveau de vie de la population pauvre est éloigné du seuil de pauvreté.
+
+-   La sévérité : C’est une mesure de la gravité de la pauvreté qui permet de mettre davantage l’accent sur les plus pauvres parmi les pauvres. Cet indice augmente parallèlement avec l’écart entre le seuil de pauvreté et les dépenses de consommations des pauvres.
+
+## Création des variables de profondeur et de sévérité de pauvreté
+
+```{r}
+
+Base_men$gap <- ifelse(Base_men$pauvre == "Pauvre", 
+                       (Base_men$zref - Base_men$ctet)*100 / Base_men$zref, 0)
+
+Base_men$severite <- Base_men$gap^2/100
+
+```
+
+## Gap de pauvreté des ménages
+
+```{r}
+
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) |>
+  tbl_svysummary(include = c(gap), statistic = list(gap ~ "{mean})"), 
+                 digits = list(gap= c(2)))%>% 
+  modify_header(label=("Gap de pauvreté des ménages"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+
+La profondeur de la pauvreté des ménages est estimée à 6,79% au niveau national.
+
+## Sévérité de pauvreté des ménages
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight) |>
+  tbl_svysummary(include = c(severite), statistic = list(severite ~ "{mean})"), 
+                 digits = list(severite= c(2)))%>% 
+  modify_header(label=("Severité de pauvreté des ménages"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+La sévérité de la pauvreté des ménages est estimée à 2,57% au niveau national
+
+# Taux de pauvreté des individus
+
+```{r}
+
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight*hhsize) |>
+  tbl_svysummary(include = c(pauvre), digits = list(pauvre= c(2)))%>% 
+  modify_header(label=("Taux de pauvreté des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+L'analyse du taux de pauvreté des individus montre que **37,31 % des ménages sont considérées comme pauvre**, tandis que **62,69 % sont non pauvres**.
+
+## Gap de pauvreté des individus
+
+```{r}
+
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight*hhsize) |>
+  tbl_svysummary(include = c(gap), statistic = list(gap ~ "{mean})"), 
+                 digits = list(gap= c(2)))%>% 
+  modify_header(label=("Gap de pauvreté des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+La profondeur de la pauvreté des individus est estimée à 10,12% au niveau national.
+
+## Sévérité de pauvreté des individus
+
+```{r}
+survey::svydesign(~1, data = as.data.frame(Base_men), weights = ~hhweight*hhsize) |>
+  tbl_svysummary(include = c(severite), statistic = list(severite ~ "{mean})"), 
+                 digits = list(severite= c(2)))%>%
+  modify_header(label=("Severité de pauvreté des individus"))%>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Source : Données de l'EHCVM 2021-2022 du sénégal")
+  
+
+
+```
+
+La sévérité de la pauvreté des individus est estimée à 3,95% au niveau national.
+
+# Taux de pauvreté suivant les caractéristiques des ménages
+
+## Taux de pauvreté et milieu de résidence
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+table<- svytable(~pauvre + milieu, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et region
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+table<- svytable(~pauvre + region, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+# Taux de pauvreté suivant les caractéristiques du chef de ménage
+
+## Taux de pauvreté et sexe du chef de ménage
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+table<- svytable(~pauvre + hgender, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et situation matrimoniale du chef de ménage
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+table<- svytable(~pauvre + hmstat, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et diplome du chef de ménage
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_men)
+table<- svytable(~pauvre + hdiploma, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+#Merge des deux bases
+
+## Renommer les variables qui se repètent
+
+```{r}
+Base_ind <- Base_ind %>%
+  rename(
+    Region = region, 
+    Milieu = milieu,
+    Hhweight = hhweight,
+    Situation_matrimoniale = mstat
+  )
+
+```
+
+```{r}
+Base_merge <- Base_ind %>%
+  dplyr::left_join(Base_men, by = "hhid")
+```
+
+# Taux de pauvrete des individus
+
+## Taux de pauvreté et milieu de residence
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_merge)
+table<- svytable(~pauvre + Milieu, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et region
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_merge)
+table<- svytable(~pauvre + Region, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et sexe des individus
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_merge)
+table<- svytable(~pauvre + sexe, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et situation matrimoniale des individus
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_merge)
+table<- svytable(~pauvre + Situation_matrimoniale, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```
+
+## Taux de pauvreté et diplome des individus
+
+```{r}
+Base_Poids <- svydesign(ids = ~1, weights = ~hhweight, data = Base_merge)
+table<- svytable(~pauvre + diplome, Base_Poids)
+ptable <- prop.table(table, margin = 2) * 100
+ptable
+```

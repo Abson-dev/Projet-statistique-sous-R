@@ -1,0 +1,81 @@
+# TP3
+
+## Samba SOW & Aissatou Séga DIALLO
+
+---
+date: "`r Sys.Date()`" 
+output: html_document
+---
+
+
+------------------------------------------------------------------------
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercice 34 - Trouver une limite
+
+### Énoncé
+
+Déterminer\
+$$ \lim_{a \to +\infty} \sum_{n=1}^{+\infty} \frac{a}{n^2 + a^2} $$
+
+------------------------------------------------------------------------
+
+## Exercice 35 - Série télescopique
+
+### Énoncé
+
+Montrer que la série de terme général $$ u_n = \frac{1}{\sqrt{n} - 1} - \frac{2}{\sqrt{n+1}} $$ est convergente, et calculer sa somme.
+
+------------------------------------------------------------------------
+
+## Exercice 36 - A partir d'une série géométrique
+
+### Énoncé
+
+Soit $$x \in ]-1,1[ $$. Calculer$$ \sum_{k=0}^{+\infty} kx^k $$
+
+------------------------------------------------------------------------
+
+## Exercice 37 - Avec des exponentielles
+
+### Énoncé
+
+Sachant que $$ e = \sum_{n \geq 0} \frac{1}{n!}$$, déterminer la valeur des sommes suivantes :
+
+1.  $$ \sum_{n \geq 0} \frac{n+1}{n!} $$ 2. $$ \sum_{n \geq 0} \frac{n^2 - 2}{n!} $$ 3. $$ \sum_{n \geq 0} \frac{n^3}{n!} $$
+
+------------------------------------------------------------------------
+
+## Exercice 38 - Série harmonique alternée
+
+### Énoncé
+
+En utilisant l'inégalité de Taylor-Lagrange sur la fonction $t \mapsto \ln(1+t)$, montrer que la série $$ \sum_{n \geq 1} \frac{(-1)^{n-1}}{n} $$ est convergente et de somme $\ln 2$.
+
+Sachant que $$ \frac{1}{k} = \int_0^1 t^{k-1} dt, $$ retrouver d'une autre façon le résultat précédent.
+
+------------------------------------------------------------------------
+
+## Exercice 39 - Somme de la série des inverses des carrés
+
+### Énoncé
+
+Calculer $$ \sum_{n \geq 1} \frac{1}{n^2} $$ en utilisant une approche intégrale.
+
+------------------------------------------------------------------------
+
+## Exercice 40 - Élimination imprévue
+
+### Énoncé
+
+Étudier la convergence et calculer la somme de la série de terme général $$\arctan(\frac{1}{k^2 + k + 1}) $$
+
+------------------------------------------------------------------------
+
+## Exercice 41 - Par regroupement !
+
+### Énoncé
+
+Étudier la convergence et calculer la somme de la série de terme général $$ u_n = \frac{(-1)^n}{n} + (-1)^n $$

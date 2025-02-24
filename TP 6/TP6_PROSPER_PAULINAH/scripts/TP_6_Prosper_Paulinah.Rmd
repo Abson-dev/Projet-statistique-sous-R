@@ -1,0 +1,531 @@
+---
+title: "Travail Pratique 6"
+author: "Prosper et Paulinah"
+output: 
+  pdf_document:
+   toc: true      
+   toc_depth: 3
+   number_sections: true
+   latex_engine: xelatex
+header-includes:
+  - \usepackage{fontspec}
+  - \setmainfont{Times New Roman}
+  - \usepackage{sectsty}
+  - \AtBeginDocument{\fontsize{12pt}{12pt}\selectfont}
+---
+
+\newpage
+
+# [Chargement et installation des packages.]{.underline}
+
+```{r, results=FALSE, message=FALSE, include=FALSE}
+
+packages <- c("readr","haven","utils","dplyr","gtsummary","gt","labelled","survey")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+# [Chargement des bases nécessaires pour le TP.]{.underline}
+
+Nous importons en premier lieu les bases qui nous servirons dans ce TP. Il s'agit notamment de la base ménage qui contient les informations relatives aux ménages, la base individus qui contient les informations sur les individus composant les ménages et enfin la base pondération qui comporte les pondérations qui sont les poids associés aux ménages et individus.
+
+## [Base ménage]{.underline}
+
+```{r}
+base_men <- haven::read_dta("../bases/ehcvm_menage_sen2018.dta")
+colnames(base_men)
+```
+
+La base ménage de l'EHCVM 2018/2019 est composée de 7156 ménages et 34 variables.
+
+```{r}
+dim(base_men)
+```
+
+## [Base individus]{.underline}
+
+```{r}
+base_ind <- haven::read_dta("../bases/ehcvm_individu_sen2018.dta")
+colnames(base_ind)
+```
+
+La base individus de l'EHCVM 2018/2019 est composée de 66120 individus et 51 variables.
+
+```{r}
+dim(base_ind)
+```
+
+## [Base pondération]{.underline}
+
+```{r}
+base_pd <- haven::read_dta("../bases/ehcvm_ponderations_sen2018.dta")
+colnames(base_pd)
+```
+
+# [Statistiques descriptives sans pondération.]{.underline}
+
+Dans cette partie, il s'agira de ressortir les statistiques descriptives de variables que nous jugeons pertinentes dans la base ménage puis dans la base individus. Ces statistiques ne prennent pas en compte le poids des ménages ou individus. Les statistiques pondérées feront l'objet de la section suivante.
+
+## [Statistiques de la base ménage]{.underline}
+
+### [Caracteristiques du logement]{.underline}
+
+Les résultats montrent que 76 % des ménages sont propriétaires, mais 36 % d’entre eux n’ont pas de titre foncier, soulignant une insécurité foncière. La location reste peu courante (15 %), tandis que 9,8 % des ménages se trouvent dans des situations plus précaires. En termes de construction, 82 % des logements ont un toit en matériaux durables et 80 % des murs solides, mais environ 18 à 20 % des ménages vivent encore dans des habitations aux matériaux précaires.
+
+```{r, message=FALSE}
+base_men %>% labelled::to_factor() %>% select(logem, toit, sol, mur) %>% 
+  tbl_summary(
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage"),
+  digits = everything()~c(0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+      ) 
+```
+
+### [Accès aux services et infrastructures de base]{.underline}
+
+Les résultats montrent une disparité importante en matière d’accès à l’eau, à l’électricité et à l’assainissement.
+
+Concernant l’accès à l’eau, 76 % des ménages disposent d’une source en saison sèche, contre 72 % en saison pluvieuse, ce qui indique une légère diminution de l’approvisionnement en période de pluies. Toutefois, près d’un quart des ménages (24 à 28 %) reste sans accès fiable à l’eau selon la saison, soulignant un défi persistant en matière de sécurisation des ressources hydriques.
+
+L’accès à l’électricité est légèrement plus répandu en milieu rural (57 %) qu’en milieu urbain (56 %), bien que la différence soit minime. Cependant, 86 % des ménages ne bénéficient pas d’une source alternative d’électricité, ce qui peut accentuer les difficultés en cas de coupures ou d’accès limité au réseau.
+
+En matière de gestion des déchets et d’assainissement, 57 % des ménages ne disposent pas d’un système organisé pour l’élimination des ordures, et 42 % n’ont pas accès à des toilettes adéquates. De plus, 52 % des ménages n’ont pas de mode d’évacuation des eaux usées des toilettes, et 80 % ne disposent pas d’un système d’évacuation des eaux domestiques, ce qui expose ces populations à des risques sanitaires accrus.
+
+```{r, message=FALSE}
+base_men %>% labelled::to_factor() %>% select(eauboi_ss,eauboi_sp,elec_ac,elec_ur,elec_ua,ordure,toilet,eva_toi,eva_eau) %>% tbl_summary(
+  label = list(eauboi_ss ~ "source d'eau en saison sèche ", 
+               eauboi_sp~ "source d eau en saison pluvieuse",
+               elec_ac ~ " Accès à l’électricité en milieu urbain",
+               elec_ur ~ "Accès à l’électricité en milieu rural.",
+               elec_ua ~ " Accès à l’électricité de manière alternative (autres sources)",
+               ordure ~ "Mode d’élimination des ordures ménagères",
+               toilet ~ "Type de toilettes utilisées par le ménage",
+               eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+               eva_eau ~ "Mode d’évacuation des eaux usées domestiques"),
+  digits = everything()~c(0,0,0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base")%>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold")
+```
+
+### [Équipements du ménage]{.underline}
+
+Les résultats stipulent qu'il y a des disparités significatives dans l’accès aux biens durables. Un peu plus de la moitié des ménages (54 %) possèdent un téléviseur, ce qui indique une diffusion relativement large de ce moyen d’information et de divertissement. En revanche, d’autres équipements essentiels restent largement inaccessibles à la majorité des ménages.
+
+Seuls 3 % des ménages disposent d’un fer à repasser et d’une cuisinière, tandis que 28 % possèdent un réfrigérateur, suggérant un accès limité aux équipements facilitant la conservation des aliments et l’organisation domestique. De même, l’ordinateur est présent dans seulement 9 % des foyers, limitant l’accès aux opportunités numériques et éducatives.
+
+L’absence de véhicule dans 96 % des ménages reflète une forte dépendance aux transports publics ou informels, tandis que seulement 18 % des foyers possèdent un décodeur, ce qui montre un accès limité à une offre télévisuelle élargie.
+
+```{r, message=FALSE}
+base_men %>% labelled::to_factor() %>%
+  select(tv, fer, frigo, cuisin, ordin, decod, car ) %>% 
+  tbl_summary(
+    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+               fer ~ "La possession d'un fer à repasser par le ménage",
+               frigo ~ "La possession d'un Frigo par le menage",
+               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+               ordin ~"La possession d'un ordinateur par le ménage",
+               decod ~ "La possession d'un décodeur par le ménage",
+               car ~ "La possession d'un  véhicule par le ménage"),
+  digits = everything()~c(0,0,0,0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Equipements du ménage")%>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold") 
+```
+
+### [Superficie agricole et bétail du ménage]{.underline}
+
+Environ 41 % des ménages (2 934 sur 7 156) disposent d’une superficie agricole, avec une médiane de 3 hectares et une moyenne de 5 hectares, bien que la variation soit importante (écart-type de 16 hectares). Cependant, une majorité de ménages (59 %) ne déclarent pas de terres agricoles, ce qui limite leur autonomie alimentaire et leurs capacités de production.
+
+Concernant l’élevage, la possession de ruminants est relativement faible : la médiane est de 0 pour les gros ruminants et de 6 pour les petits ruminants, traduisant une concentration plus importante sur les petits bétails. La possession de porcs et de lapins est quasi inexistante, tandis que l’élevage de volailles est plus répandu, avec une médiane de 5 et une moyenne de 25, indiquant que de nombreux ménages utilisent cette ressource pour compléter leurs revenus ou leur alimentation.
+
+```{r, message=FALSE}
+base_men %>% labelled::to_factor() %>%
+  select(superf, grosrum, petitrum, porc, lapin, volail) %>% 
+  tbl_summary(
+    label = list(superf ~ "La Superficie agricole ",
+               grosrum ~ "Le nombre de gros Ruminants",
+               petitrum ~ "Le Nombre de petit Ruminants",
+               porc ~ "Le Nombre de porc",
+               lapin ~"Le Nombre de lapin",
+               volail ~ "Le Nombre de volail"),
+  statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+  digits = list(all_continuous() ~ c(0, 0, 0, 0)),  
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title ="Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+### [Chocs et vulnérabilités]{.underline}
+
+L’analyse des chocs subis par les ménages révèle que les chocs démographiques sont les plus fréquents, affectant 29 % des ménages. Ces chocs peuvent inclure des événements tels que des décès, des naissances imprévues ou des migrations, impactant la stabilité des foyers.
+
+Les chocs naturels, touchant 21 % des ménages, indiquent une exposition aux catastrophes environnementales comme les sécheresses, les inondations ou les tempêtes, soulignant la vulnérabilité de certaines zones aux aléas climatiques.
+
+Les chocs économiques sont signalés par 14 % des ménages, ce qui traduit une certaine résilience économique, bien que certains foyers subissent des pertes d’emploi, une inflation accrue ou une baisse des revenus.
+
+Les chocs liés à la violence et autres types de chocs sont relativement rares (environ 1 % des ménages), suggérant une stabilité générale en matière de sécurité et de conflits sociaux.
+
+```{r, message=FALSE}
+base_men %>% labelled::to_factor() %>%
+  select(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth) %>% 
+  tbl_summary(
+    label = list(
+      sh_id_demo ~ "Chocs démographiques)",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs")) %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+## [Statistiques de la base individus]{.underline}
+
+Pour la situation matrimoniale, la majorité (64 %) est célibataire, tandis que 22 % sont mariés en monogamie et 9 % en polygamie. Les autres statuts (union libre, veuf(ve), divorcé(e) ou séparé(e)) restent marginaux, représentant ensemble seulement 5 %.
+
+Sur le plan de l’alphabétisation, 58 % des individus ne savent ni lire ni écrire, un chiffre préoccupant qui se reflète également dans le niveau d’éducation achevé, où 58 % des personnes n’ont suivi aucun cursus scolaire. L’accès à l’éducation reste limité, avec seulement 2 % des individus ayant atteint l’enseignement supérieur.
+
+L’accès aux services modernes est également restreint : 82 % des individus n’ont pas accès à Internet et 98 % ne disposent pas de couverture maladie, révélant un déficit en infrastructures et services sociaux. Cependant, l’utilisation des moustiquaires est quasi universelle, avec 100 % des répondants déclarant en avoir utilisé une la nuit précédente.
+
+```{r, message=FALSE}
+base_ind %>% labelled::to_factor()%>%
+  select (mstat, alfab, educ_hi, age, internet, religion,couvmal, moustiq)%>% 
+  tbl_summary(label = list(mstat~ "Situation matrimoniale", 
+               alfab ~"Alphabetisation",
+               educ_hi ~"Niveau d'instruction", 
+               age~ "Age en année (revolu)", 
+              internet~ "Individu ayant accès a internet", 
+              couvmal~ "Individu ayant une couverture maladie",
+              religion~ "Régilion",
+              moustiq~ "Individu ayant dormi sous une moustiquaire la nuit dernière"),
+  statistic = list(age~"{mean} ({sd}"),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Statistiques sur les individus") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+# [Jointure des bases ménage et individus.]{.underline}
+
+La jointure de la base individus avec la base ménage nous permet de recupérer les informations des individus au niveau ménage. C'est-à-dire qu'après cette opération, nous pourions associer chaque individu à son ménage. En particulier, les informations du chef de ménage (CM) nous intéreserons plus pour le reste de notre TP.
+
+```{r, message=FALSE}
+base_comp <- base_ind %>% left_join(base_men, by="hhid")
+dim(base_comp)
+```
+
+# [Statistiques compte tenu de la jointure]{.underline}
+
+Nous allons extraire les informations du chef de ménage pour juste présenter les statistiques rélatives aux CM.
+
+Pour extraire les informations du CM, nous allons selectionner juste la prémière observation après avoir grouper suivant l'identifiant **hhid**. Cette prémière observation correspond au CM.
+
+```{r, message=FALSE}
+base_CM <- base_comp%>%
+  dplyr::group_by(hhid) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup()
+```
+
+```{r, message=FALSE}
+dim(base_CM)
+```
+
+## Caractéristiques du ménage
+
+```{r, message=FALSE}
+base_CM %>% labelled::to_factor()%>%
+  select (milieu,region,departement)%>% 
+  tbl_summary(label = list(
+               milieu~ "Milieu de résidence du ménage", 
+               region ~"Région du ménage",
+               departement ~"Département du ménage"), 
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes") %>% 
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Statistiques sur les ménages") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+## Statistiques du chef de ménage
+
+```{r, message=FALSE}
+base_CM %>% labelled::to_factor()%>%
+  select (mstat,alfab,educ_hi,age,sexe,couvmal,csp,religion)%>% 
+  tbl_summary(label = list(
+               mstat~ "Situation matrimoniale", 
+               alfab ~"Alphabetisation du CM",
+               educ_hi ~"Niveau d'instruction du CM", 
+               age~ "Age en année (revolu) du CM", 
+               couvmal~ "CM ayant une couverture maladie",
+               religion~ "Régilion du CM",
+               csp~ "Catégorie socio-professionnelle du CM",
+               sexe~ "Sexe du CM"),
+  statistic = list(age~"{mean} ({sd}"),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes") %>% 
+   modify_header(label = "**Taille de l'échantillon**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caractéristiques du CM") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold") 
+```
+
+# [Statistiques avec pondération]{.underline}
+
+Les statistiques de cette section sont pondérées, cela signifie qu'elles sont représentative au niveau national.
+
+```{r, message=FALSE}
+base_pond <- svydesign(id = ~grappe,
+                    weights = ~hhweight, 
+                    data = base_CM) 
+```
+
+## [Statistiques de la base issue de la jointure]{.underline}
+
+### [Caracteristiques du logement]{.underline}
+
+```{r, message=FALSE}
+base_pond %>%    
+  tbl_svysummary(
+  include = c(logem, toit, sol, mur),
+  label = list(logem ~ "Type de logement du chef de ménage", 
+               toit~ "Toit de la maison du chef de ménage",
+               mur ~ "Mur de la maison du chef de maison",
+               sol~ "Sol de la maison du chef de ménage"),
+  digits = everything()~c(0,0,0,0),
+  missing = "always",
+  missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Taille de la population**")  %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caracteristiques du logement") %>%
+  gt::tab_source_note(source_note = "Source : Calcul de auteurs, EHCVM 2018-2019, Sénégal")%>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold")
+```
+
+### [Accès aux services et infrastructures de base]{.underline}
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(eauboi_ss, eauboi_sp, elec_ac, elec_ur, elec_ua, ordure, toilet, eva_toi, eva_eau),
+    label = list(
+      eauboi_ss ~ "Source d'eau en saison sèche", 
+      eauboi_sp ~ "Source d'eau en saison pluvieuse",
+      elec_ac ~ "Accès à l’électricité en milieu urbain",
+      elec_ur ~ "Accès à l’électricité en milieu rural",
+      elec_ua ~ "Accès à l’électricité de manière alternative (autres sources)",
+      ordure ~ "Mode d’élimination des ordures ménagères",
+      toilet ~ "Type de toilettes utilisées par le ménage",
+      eva_toi ~ "Mode d’évacuation des eaux usées des toilettes",
+      eva_eau ~ "Mode d’évacuation des eaux usées domestiques"
+    ),
+    digits = everything() ~ 0,
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Accessibilités aux infrastructures de base") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+### [Équipements du ménage]{.underline}
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(tv, fer, frigo, cuisin, ordin, decod, car),
+    label = list(
+      tv ~ "Possession d'un téléviseur par le ménage",
+      fer ~ "Possession d'un fer à repasser par le ménage",
+      frigo ~ "Possession d'un frigo par le ménage",
+      cuisin ~ "Possession d'une cuisinière par le ménage",
+      ordin ~ "Possession d'un ordinateur par le ménage",
+      decod ~ "Possession d'un décodeur par le ménage",
+      car ~ "Possession d'un véhicule par le ménage"
+    ),
+    digits = everything() ~ 0,
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Équipements du ménage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+      heading.title.font.size = 20,
+      heading.title.font.weight = "bold"
+  )
+```
+
+### [Superficie agricole et bétail du ménage]{.underline}
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(superf, grosrum, petitrum, porc, lapin, volail),
+    label = list(
+      superf ~ "Superficie agricole",
+      grosrum ~ "Nombre de gros ruminants",
+      petitrum ~ "Nombre de petits ruminants",
+      porc ~ "Nombre de porcs",
+      lapin ~ "Nombre de lapins",
+      volail ~ "Nombre de volailles"
+    ),
+    statistic = list(all_continuous() ~ "{N_nonmiss} [{mean} / {median}] ({sd})"),
+    digits = all_continuous() ~ 0,
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Synthèse des données sur les superficies agricoles et l'élevage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+### [Chocs et vulnérabilités]{.underline}
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(sh_id_demo, sh_co_natu, sh_co_eco, sh_co_vio, sh_co_oth),
+    label = list(
+      sh_id_demo ~ "Chocs démographiques",
+      sh_co_natu ~ "Chocs naturels",
+      sh_co_eco ~ "Chocs économiques",
+      sh_co_vio ~ "Chocs liés à la violence",
+      sh_co_oth ~ "Autres chocs"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Chocs et vulnérabilité du ménage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+## Statistiques du chef de ménage
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(mstat, alfab, educ_hi, age, sexe, couvmal, csp, religion),
+    label = list(
+      mstat ~ "Situation matrimoniale", 
+      alfab ~ "Alphabétisation du CM",
+      educ_hi ~ "Niveau d'instruction du CM", 
+      age ~ "Âge en années révolues du CM", 
+      couvmal ~ "CM ayant une couverture maladie",
+      religion ~ "Religion du CM",
+      csp ~ "Catégorie socio-professionnelle du CM",
+      sexe ~ "Sexe du CM"
+    ),
+    statistic = list(age ~ "{mean} ({sd})"),  # Correction de la syntaxe
+    digits = all_continuous() ~ 0,
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Caractéristiques du Chef de Ménage") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
+
+## Caractéristiques du ménage
+
+```{r, message=FALSE}
+base_pond %>% 
+  tbl_svysummary(
+    include = c(milieu, region, departement),
+    label = list(
+      milieu ~ "Milieu de résidence du ménage", 
+      region ~ "Région du ménage",
+      departement ~ "Département du ménage"
+    ),
+    digits = everything() ~ 0,
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label = "**Taille de l'échantillon pondéré**") %>%
+  as_gt() %>%
+  gt::tab_header(title = "Statistiques sur les ménages") %>%
+  gt::tab_source_note(source_note = "Source : Calcul des auteurs, EHCVM 2018-2019, Sénégal") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```

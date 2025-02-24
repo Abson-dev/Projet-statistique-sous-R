@@ -1,0 +1,95 @@
+---
+title: "BERETE MAMADY I ET BALAFAI PAUL TP3"
+output: html_document
+date: "2025-02-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+__Exercice 50__ $\star$ __- Equivalent d'une suite récurrente grace aux séries__<br>
+On considère une suite $(u_n)$ définie par $u_1>0$ et  $u_{n+1}=\frac{3_n-1}{3_n}u_n$ pour $n \ge 1$.
+
+| **1.** Démontrer que $(u_n)$ converge.
+| **2.** On pose, pour $n \ge 1$, $v_n=\ln(n^{1/3}u_n)$.
+|   **2.1** Démontrer que $v_{n+1} - v_n = -\frac{2}{9n^2} + o \left( \frac{1}{n^2} \right)$
+|   **2.2** En déduire que la série de terme général $(v_{n+1} - v_n)$ converge.
+|   **2.3** En déduire que la suite $(v_n)$ converge. On notera $\lambda$ sa limite.<br>
+| **3.** Donner un équivalent simple de $(u_n)$. La série de terme général $u_n$ est elle convergente?
+| **4.** La série de terme général $(-1)^nu_n$ est elle convergente?
+
+__Exercice 51__ $\star\star\star$ __- Formule de Stirling__ <br>
+  1. Soit $(x_n)$ une suite de réels et soit $(y_n)$ définie par $y_n = x_{n+1} - x_n$. Démontrer que la série $\sum_ny_n$ et la suite $(x_n)$ sont de même nature.
+  2. On pose $(u_n)$ la suite définie par $u_n = \frac{n^ne^{-n}\sqrt{n}}{n!}$. Donner la nature de la série de terme général $v_n = ln(\frac{u_{n+1}}{u_n})$.<br>
+  3. En déduire l'existence d'une constante $C>0$ telle que :
+                                                            $n!\sim{+\infty}\ C \sqrt{n} n^n e^{-n}$.
+                  
+
+__Exercice 52__ $\star\star$ __Relation suite/série__ <br>
+Soit $u_n$ une suite de réels strictement positifs telle que
+$$
+\frac{u_n+1}{u_n} = 1 + \frac{\alpha}{n} + O \left( \frac{1}{n^2} \right) \, , avec\; \alpha \in \mathbb{R} 
+$$
+On fixe $\beta \in \mathbb{R}$ et on pose
+$$
+v_n = \ln((n+1)^\beta u_{n+1})-\ln(n^{\beta}u_n)
+$$
+**1.** Pour quel(s) $\beta \in \mathbb{R}$ y a-t-il convergence de la série de terme général $v_n$?<br>
+**2.** En déduire qu'il existe $A \in \mathbb{R}_+^*$ pour lequel $u_n \sim_{+\infty} An^{\alpha}$
+
+__Exercice 53__ $\star\star\star$ __Estimation asymptotique d'un produit__
+
+  Soit $P_n = \prod^n_{k=2}(1 +\frac{(-1)^k}{\sqrt{k}})$. Démontrer qu'il existe $\lambda \in \mathbb{R}$ tel que $P_n \sim{+\infty} \frac{e^\lambda}{\sqrt{n}}$
+
+__Exercice 54__ $\star\star\star$ __Étude d'une suite récurrente__
+
+Soit $(u_n)$ une suite réelle telle que $u_0 \in ]0, pi[$ et $u_{n+1} = \sin u_n, \ pour\ n \ge 0.$
+
+  1. Etudier la convergence de $(u_n)$
+  2. Montrer que $\frac{u_{n+1}}{u^3_n}$ tend vers 1. Calculer la limite de $\frac{u_n +u_{n+1}}{u_n}$
+  3. Montrer que $\frac{u_n -u_{n+1}}{u_n}$ tend vers $1/6$.
+  4. En déduire que $\frac{1}{u^2_{n+1}}-\frac{1}{u^2_n}$ tend vers $\frac{1}{3}$.
+  5. Montrer que l'on a $lim(\sqrt{nu_n})= \sqrt{3}.$
+
+__Exercice 55__ $\star\star\star\star$ __- Irrationalité__<br>
+On rappelle que $\cos(1)$ est défini par la série $\cos(1) = \sum_{k=0}^{+\infty} \frac{(-1)^k}{(2k)!}$. Montrer que $\cos(1)$ est irrationnel.
+
+
+__Exercice 56__ $\star\star\star\star\star$ __- Au niveau Terminale S__<br>
+Proposer un énoncé d'exercice, au niveau Terminale Spécialité Maths, prouvant la convergence de la suite $(K_n)_{n\ge 1}$ définie par $K_n = \sum_{k=1}^{n} \frac{1}{k^2}$
+ 
+__Exercice 57__ $\star\star\star$ __- Sur le developpement décimal d'un réel__<br>
+On rappelle que si $x$ est un réel positif, on appelle développement décimal propre de $x$ la donnée d'un entier $m$ et d'une suite $(a_n)_{n\ge 1}$ d'entiers de $\{0,\dots,9\}$, non stationnaire à 9, tels que
+$$
+x = m + \sum_{n=1}^{+\infty} \frac{a_n}{10^n}.
+$$
+On rappelle que tout réel positif admet un unique développement décimal propre, et qu'on écrit alors $x = m,a_1a_2a_3\dots$
+
+|  **1.** Quel est le réel dont le développement décimal propre est $m=0$, et $a_n=5$ pour tout $n\ge 1$ ? Celui dont le développement décimal propre est $m=12$ et $(a_n)$ est donnée par $a_{3n+1}=2,\; a_{3n+2}=3,\; a_{3n+3}=1,\; \text{pour tout } n\ge 0\ ?$
+
+|  **2.** Déterminer le développement décimal propre de $\frac{4}{7}$.
+
+**3.** Donner une condition nécessaire et suffisante, portant sur son développement décimal propre, pour qu'un réel positif soit décimal.
+
+**4.** Soit $x\in\,]0,1[$ admettant un développement décimal périodique, c'est-à-dire qu'il existe $n_0\ge 1$ et $p\ge 1$ tel que, pour tout $n\ge n_0$, $a_{n+p}=a_n$. On souhaite démontrer que $x$ est rationnel.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;**4.1** On note
+     $$
+     y = a_{n_0} + \frac{a_{n_0+1}}{10} + \dots + \frac{a_{n_0+p-1}}{10^{p-1}}.
+     $$
+     Démontrer qu'il existe un rationnel $r$ tel que
+     $$
+     x = r + \frac{y}{10^{n_0}} \times \sum_{l=0}^{+\infty} \frac{1}{10^{lp}}.
+     $$<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;**4.2** Conclure.
+
+**5.** Réciproquement, soit $x\in\,]0,1[\cap\mathbb{Q}$. On écrit $x=a/b$ avec $a,b$ des entiers naturels.<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;**5.1** Démontrer qu'il existe $0\le s < t$ tels que $10^s a$ et $10^t a$ ont le même reste dans la division euclidienne par $b$.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;**5.2** En déduire que $\frac{10^s a}{b} - \frac{10^t a}{b}$ est un entier.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;**5.3** On note $(a_n)_{n\ge1}$, $(b_n)_{n\ge1}$ et $(c_n)_{n\ge1}$ les parties            fractionnaires des développements décimaux propres de, respectivement, $\frac{a}{b}$, $\frac{10^s a}{b}$ et $\frac{10^t a}{b}$. Exprimer les suites $(b_n)$ et $(c_n)$ en fonction de la suite $(a_n)$, puis donner une relation entre les suites $(b_n)$ et $(c_n)$.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;**5.4** En déduire que la suite $(a_n)$ est périodique.<br>
+**6.** Démontrer que les nombres décimaux sont denses dans l'ensemble des nombres réels.<br>
+**7.** En déduire que les nombres rationnels sont denses dans l'ensemble des nombres réels.<br>
+**8.** Les nombres irrationnels sont-ils denses dans l'ensemble des nombres réels ? On pourra utiliser que si $q$ est un rationnel non nul, alors $\sqrt{2}\,q$ est un irrationnel.
+
+
