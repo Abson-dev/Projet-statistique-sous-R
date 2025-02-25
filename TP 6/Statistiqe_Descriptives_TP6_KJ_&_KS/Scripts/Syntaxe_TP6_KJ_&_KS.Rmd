@@ -1,0 +1,647 @@
+---
+title: "TP6"
+author: "KAFANDO Judicaël Oscar & SEUKAM Divana Kerencia"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Installation et importation des packages**
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled","survey")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+## **Section I : Importation et analyse des  bases**
+
+
+### ***Importation des bases***
+
+```{r}
+## Base ménage
+base_men <-  haven::read_dta("../Données/ehcvm_menage_bfa2018.dta")
+
+## Base individu
+base_ind <-  haven::read_dta("../Données/ehcvm_individu_bfa2018.dta")
+
+```
+
+### ***Structure des bases***
+
+```{r}
+print("Structure de la Base ménage")
+str(base_men)
+
+print("Structure de la Base individu")
+str(base_ind)
+
+```
+
+
+### **Nom des colonnes dans chaque base**
+
+```{r}
+print("Noms des colonnes de la Base ménage")
+colnames(base_men)
+
+print("Noms des colonnes de la Base individus")
+colnames(base_ind)
+
+```
+
+## **Section 2 : Statistiques sur les bases (sans pondération)**
+
+### ***Caracteristiques et équipement du logement***
+
+
+```{r}
+table_carac <- base_men %>%    
+                  select(logem, toit, sol, mur) %>% 
+                  labelled::to_factor() %>% 
+                  tbl_summary(
+                  label = list(logem ~ "Type de logement du chef de ménage", 
+                               toit~ "Toit de la maison du chef de ménage",
+                               mur ~ "Mur de la maison du chef de maison",
+                               sol~ "Sol de la maison du chef de ménage"),
+                  digits = everything()~c(0,0,0,0),
+                  missing = "always",
+                  missing_text = "Valeurs manquantes") %>% 
+                  modify_header(label = "Taille de l'échantillon") %>% 
+                  bold_labels()
+
+```
+
+```{r}
+
+table_equip <- base_men %>% 
+                  select(tv, fer, frigo, cuisin, ordin, decod, car ) %>% 
+                  labelled::to_factor() %>% 
+                  tbl_summary(
+                    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+                               fer ~ "La possession d'un fer à repasser par le ménage",
+                               frigo ~ "La possession d'un Frigo par le menage",
+                               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+                               ordin ~"La possession d'un ordinateur par le ménage",
+                               decod ~ "La possession d'un décodeur par le ménage",
+                               car ~ "La possession d'un  véhicule par le ménage"),
+                  digits = everything()~c(0,0,0,0,0,0,0),
+                  missing = "always",
+                  missing_text = "Valeurs manquantes") %>% 
+                  modify_header(label = "**Taille de l'échantillon**") %>% 
+                  bold_labels() 
+
+```
+
+```{r}
+table_finale <- tbl_stack(
+                  tbls = list(table_carac, table_equip),
+                  group_header = c("Caractéristiques du logement par milieu", 
+                                  "Equipement du logement par sexe"), quiet = TRUE
+                  )
+```
+
+```{r}
+table_finale %>%
+  as_gt() %>%
+  tab_header(
+    title = md("**Caractéristiques et équipements du logement**")) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold", size = px(14), color = "black"),
+      cell_fill(color = "#0073C2")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold",size = px(14), color = "black",align = "center"),
+      cell_fill(color = "#E5F5FF")),
+    locations = cells_row_groups()
+  ) %>%
+  tab_options(
+    table.font.size = "medium",
+    heading.align = "center",
+    column_labels.font.weight = "bold",
+    row_group.border.top.width = px(2),
+    row_group.border.bottom.width = px(2)
+  )
+```
+
+
+
+
+### ***Caractéristiques socio-démographiques***
+
+```{r}
+## Caractéristiques sociales
+
+table_socio <- base_ind%>%    
+                  select( sexe, age, lien, mstat, religion, agemar) %>% 
+                  labelled::to_factor() %>%
+                  tbl_summary(
+                    label=list(sexe~"Sexe de l'individu",
+                              age~"Age de l'individu",
+                              lien~" Lien de parenté avec le chef de ménage",
+                              mstat~"Situation de famille",
+                              religion~"Réligion",
+                              agemar~"Age premier marriage"),
+                    statistic = list(c(age,agemar) ~ "{mean} ({sd}) {median}"),
+                    digits=everything()~c(0,0,0,0,0),
+                    missing = "always",
+                    missing_text="Valeurs manquante")%>%
+                  modify_header(label = "**Taille de l'échantillon**") %>% 
+                  bold_labels() 
+
+```
+
+```{r}
+table_demo <- base_ind%>%    
+                select(region,milieu,resid) %>% 
+                labelled::to_factor() %>%
+                tbl_summary(
+                  label = list(region~ "Region de residence",
+                               milieu~ "Milieu de résidence",
+                               resid~ "Résident"),
+                digits = everything()~c(0,0,0),
+                missing = "always",
+                missing_text = "Valeurs manquantes"
+              ) %>% bold_labels()
+
+```
+
+
+
+```{r}
+table_finale <- tbl_stack(
+                  tbls = list(table_socio, table_demo),
+                  group_header = c("Caractéristiques sociales des individus", 
+                                  "Caractéristiques démographiques des individus"), quiet = TRUE
+                  )
+```
+
+```{r}
+table_finale %>%
+  as_gt() %>%
+  tab_header(
+    title = md("**Caractéristiques socio-démographiques des individus**")) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold", size = px(14), color = "black"),
+      cell_fill(color = "#0073C2")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold",size = px(14), color = "black",align = "center"),
+      cell_fill(color = "#E5F5FF")),
+    locations = cells_row_groups()
+  ) %>%
+  tab_options(
+    table.font.size = "medium",
+    heading.align = "center",
+    column_labels.font.weight = "bold",
+    row_group.border.top.width = px(2),
+    row_group.border.bottom.width = px(2)
+  )
+```
+
+### ***Éducation et alphabétisation***
+
+```{r}
+base_ind%>%    
+  select(alfab, scol, educ_scol, educ_hi, diplome)%>% 
+  labelled::to_factor() %>%
+  tbl_summary(
+             label=list(alfab~"Savoir lire et écrire ",
+                        scol~"A fréquenté en 2017/18 ",
+                        educ_scol~"Niveau d’éducation actuel",
+                        educ_hi~" Plus haut niveau d’éducation atteint ",
+                        diplome~"Diplôme le plus élevé obtenu"),
+ digits=everything()~c(0,0,0,0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Education et alphabétisation"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+```
+
+
+### ***Activité économique et emploi***
+
+```{r}
+base_ind%>%  
+  labelled::to_factor() %>%
+  select(activ7j, activ12m, branch, sectins, csp, volhor, salaire, emploi_sec,      sectins_sec,csp_sec, volhor_sec, salaire_sec,bank)%>% 
+  tbl_summary(
+     label=list(activ7j~ "Situation d'activité au cours des 7 derniers jours ",
+                activ12m~ "Situation d'activité au cours des 12 derniers mois ",
+                branch~ "Branche d'activité de l’emploi principal",
+                sectins~ "Secteur institutionnel de l'emploi principal",
+                csp~ "Catégorie socioprofessionnelle de l'emploi principal",
+                volhor~ "Volume horaire annuel du travail dans l'emploi principal",
+                salaire~"Salaire annuel de l'emploi principal",
+                emploi_sec~"A un emploi secondaire",
+                sectins_sec~"Secteur institutionnel de l'emploi secondaire",
+                csp_sec~"Catégorie socioprofessionnelle de l'emploi secondaire",
+                volhor_sec~ "Volume horaire annuel du travail dans l'emploi secondaire",
+                salaire_sec~"Salaire annuel de l'emploi secondaire",
+                bank ~ "Possède un compte bancaire ou autre"),
+ digits=everything()~c(0,0,0,0,0,0,0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Activité économique et emploi"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+```
+
+
+
+### ***Tableau croisé***
+
+**Jointure : Base individu et base ménage**
+
+```{r}
+base_ind_men <- dplyr::left_join(base_ind,base_men,by = "hhid")
+#base_ind_men
+
+```
+
+```{r}
+base_ind_men%>%    
+  select(logem,sexe,internet)%>% 
+  labelled::to_factor() %>%
+  tbl_summary(
+             by = logem,
+             label=list(sexe~"Sexe de l'individu",
+                        internet~"Accès à internet"),
+ digits=everything()~c(0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Type de logement**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Sexe/Internet en fonction du logement"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+```
+
+## **Section 3 : Statistiques sur les bases (avec pondération)**
+
+### ***Pondération***
+
+**Poids de chaque ménage**
+
+```{r}
+base_poid <- base_ind %>%   #Base individu
+        select(hhid,hhweight) %>% # selection de l'identifiant du ménage et du poids
+        distinct(hhid, .keep_all = TRUE) #supression des doublons pour ne garder qu'un seul individu par ménage
+
+```
+
+**Ajout du poids à la base ménage**
+
+```{r}
+base_men_pond<- dplyr::left_join(base_men,base_poid,by="hhid")
+
+```
+
+**Création du design de pondération sur la base menage**
+
+```{r}
+
+base_men_avec_pond <- svydesign(id = ~1,
+                    weights = ~hhweight,  # Poids  du ménage / de l'individu
+                    data = base_men_pond)  
+
+
+```
+
+**Création du design de pondération sur la base individu**
+
+```{r}
+
+base_ind_avec_pond <- svydesign(id = ~grappe,  # Identifiant de la grappe (unité primaire de tirage)
+                    weights = ~hhweight,  # Poids  du ménage
+                    data = base_ind)  
+
+
+```
+
+
+**Création du design de pondération sur la base individu/menage**
+
+```{r}
+
+base_ind_men_avec_pond <- svydesign(id = ~1,
+                    weights = ~hhweight,  # Poids  du ménage / de l'individu
+                    data = base_ind_men)  
+
+
+```
+
+
+### ***Caracteristiques et équipement du logement***
+
+```{r}
+
+# Conversion en facteurs des variables
+base_men_avec_pond$variables <- labelled::to_factor(base_men_avec_pond$variables)
+
+table_carac <- base_men_avec_pond %>%    
+                  tbl_svysummary(
+                    include =c(logem, toit, sol, mur),
+                    label = list(logem ~ "Type de logement du chef de ménage", 
+                               toit~ "Toit de la maison du chef de ménage",
+                               mur ~ "Mur de la maison du chef de maison",
+                               sol~ "Sol de la maison du chef de ménage"),
+                  digits = everything()~c(0,0,0,0),
+                  missing = "always",
+                  missing_text = "Valeurs manquantes") %>% 
+                  modify_header(label = "Taille de la population") %>% 
+                  bold_labels()
+
+```
+
+
+```{r}
+
+table_equip <- base_men_avec_pond %>% 
+                  tbl_svysummary(
+                    include = c(tv, fer, frigo, cuisin, ordin, decod, car ),
+                    label = list(tv ~ "La possession d'un téléviseur par le ménage ",
+                               fer ~ "La possession d'un fer à repasser par le ménage",
+                               frigo ~ "La possession d'un Frigo par le menage",
+                               cuisin ~ "La possession d'une  Cuisiniere par le ménage",
+                               ordin ~"La possession d'un ordinateur par le ménage",
+                               decod ~ "La possession d'un décodeur par le ménage",
+                               car ~ "La possession d'un  véhicule par le ménage"),
+                  digits = everything()~c(0,0,0,0,0,0,0),
+                  missing = "always",
+                  missing_text = "Valeurs manquantes") %>% bold_labels()
+```
+
+```{r}
+table_finale <- tbl_stack(
+                  tbls = list(table_carac, table_equip),
+                  group_header = c("Caractéristiques du logement par milieu", 
+                                  "Equipement du logement par sexe"), quiet = TRUE
+                  )
+```
+
+```{r}
+table_finale %>%
+  as_gt() %>%
+  tab_header(
+    title = md("**Caractéristiques et équipements du logement**")) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold", size = px(14), color = "black"),
+      cell_fill(color = "#0073C2")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold",size = px(14), color = "black",align = "center"),
+      cell_fill(color = "#E5F5FF")),
+    locations = cells_row_groups()
+  ) %>%
+  tab_options(
+    table.font.size = "medium",
+    heading.align = "center",
+    column_labels.font.weight = "bold",
+    row_group.border.top.width = px(2),
+    row_group.border.bottom.width = px(2)
+  )
+```
+
+
+### ***Caractéristiques socio-démographiques***
+
+```{r}
+## Caractéristiques sociales
+
+# Conversion en facteurs des variables
+base_ind_avec_pond$variables <- labelled::to_factor(base_ind_avec_pond$variables)
+
+table_socio <- base_ind_avec_pond%>%    
+                  tbl_svysummary(
+                    include = c(sexe, age, lien, mstat, religion, agemar),
+                    label=list(sexe~"Sexe de l'individu",
+                              age~"Age de l'individu",
+                              lien~" Lien de parenté avec le chef de ménage",
+                              mstat~"Situation de famille",
+                              religion~"Réligion",
+                              agemar~"Age premier marriage"),
+                    statistic = list(c(age,agemar) ~ "{mean} ({sd}) {median}"),
+                    digits=everything()~c(0,0,0,0,0),
+                    missing = "always",
+                    missing_text="Valeurs manquante")%>%
+                  modify_header(label = "**Taille de la population**") %>% 
+                  bold_labels()
+
+```
+
+```{r}
+table_demo <- base_ind_avec_pond%>%    
+                tbl_svysummary(
+                  include = c(region,milieu,resid),
+                  label = list(region~ "Region de residence",
+                               milieu~ "Milieu de résidence",
+                               resid~ "Résident"),
+                digits = everything()~c(0,0,0),
+                missing = "always",
+                missing_text = "Valeurs manquantes"
+              ) %>% bold_labels() 
+
+```
+
+
+
+```{r}
+table_finale <- tbl_stack(
+                  tbls = list(table_socio, table_demo),
+                  group_header = c("Caractéristiques sociales des individus", 
+                                  "Caractéristiques démographiques des individus"), quiet = TRUE
+                  )
+```
+
+```{r}
+table_finale %>%
+  as_gt() %>%
+  tab_header(
+    title = md("**Caractéristiques socio-démographiques des individus**")) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold", size = px(14), color = "black"),
+      cell_fill(color = "#0073C2")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold",size = px(14), color = "black",align = "center"),
+      cell_fill(color = "#E5F5FF")),
+    locations = cells_row_groups()
+  ) %>%
+  tab_options(
+    table.font.size = "medium",
+    heading.align = "center",
+    column_labels.font.weight = "bold",
+    row_group.border.top.width = px(2),
+    row_group.border.bottom.width = px(2)
+  )
+```
+
+### ***Éducation et alphabétisation***
+
+```{r}
+base_ind_avec_pond%>%    
+  tbl_svysummary(
+             include = c(alfab, scol, educ_scol, educ_hi, diplome), 
+             label=list(alfab~"Savoir lire et écrire ",
+                        scol~"A fréquenté en 2017/18 ",
+                        educ_scol~"Niveau d’éducation actuel",
+                        educ_hi~" Plus haut niveau d’éducation atteint ",
+                        diplome~"Diplôme le plus élevé obtenu"),
+ digits=everything()~c(0,0,0,0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de la population**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Education et alphabétisation"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+```
+
+
+### ***Activité économique et emploi***
+
+```{r}
+base_ind_avec_pond %>%  
+  tbl_svysummary(
+    include = c(activ7j, activ12m, branch, sectins, csp, volhor, salaire, emploi_sec,      sectins_sec,csp_sec, volhor_sec, salaire_sec,bank),
+     label=list(activ7j~"Situation d'activité au cours des 7 derniers jours ",
+                activ12m~"Situation d'activité au cours des 12 derniers mois ",
+                branch~"Branche d'activité de l’emploi principal",
+                sectins~"Secteur institutionnel de l'emploi principal",
+                csp~"Catégorie socioprofessionnelle de l'emploi principal",
+                volhor~" Volume horaire annuel du travail dans l'emploi principal",
+                salaire~"Salaire annuel de l'emploi principal",
+                emploi_sec~"A un emploi secondair ",
+                sectins_sec~"Secteur institutionnel de l'emploi secondaire ",
+                csp_sec~"Catégorie socioprofessionnelle de l'emploi secondaire ",
+                volhor_sec~"Volume horaire annuel du travail dans l'emploi secondaire ",
+                salaire_sec~"Salaire annuel de l'emploi secondaire ",
+                bank ~" Possède un compte bancaire ou autre "),
+ digits=everything()~c(0,0,0,0,0,0,0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de la population**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Activité économique et emploi"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "bold",
+    heading.background.color = "#0073C2"
+  
+)
+```
+
+### ***Tableau croisé***
+
+
+```{r}
+
+# Conversion en facteurs des variables
+base_ind_men_avec_pond$variables <- labelled::to_factor(base_ind_men_avec_pond$variables)
+
+base_ind_men_avec_pond%>%    
+  tbl_svysummary(
+             include = c(logem,sexe,internet),
+             by = logem,
+             label=list(sexe~"Sexe de l'individu",
+                        internet~"Accès à internet"),
+ digits=everything()~c(0,0),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Type de logement**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Sexe/Internet en fonction du logement"
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+```
+

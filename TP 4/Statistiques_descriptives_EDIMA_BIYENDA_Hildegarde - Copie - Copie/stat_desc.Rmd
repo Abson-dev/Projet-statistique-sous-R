@@ -1,0 +1,136 @@
+---
+title: "Statistiques Descriptives"
+author: "Hildegarde EDIMA BIYENDA"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+# Installation et Importation des Packages
+
+Dans cette section, nous installons tous les packages qui seront utilisés dans la suite.
+
+```{r}
+packages <- c("readr", "haven", "utils", "dplyr", "labelled", "gtsummary")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {  # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+# Chargement des Bases de Données
+
+```{r}
+## Base ménage
+base_men <- utils::read.csv("ehcvm_menage_mli2021.csv")
+## base_men2 <- haven::read_dta("ehcvm_menage_mli2021.dta")
+```
+
+# Affichage de Tableau - Version 0
+
+Affichage simple d'un tableau avec les variables `logem`, `toit` et `mur`, avec l'effectif et le pourcentage de présence de chaque modalité. La fonction `to_factor` est utilisée pour afficher les labels des modalités.
+
+```{r}
+base_men %>%
+  labelled::to_factor() %>%
+  select(logem, toit, mur) %>%
+  tbl_summary()
+```
+
+# Affichage de Tableau - Version 1
+
+Amélioration du tableau en renommant les variables avec des noms plus significatifs. L'entête est modifiée avec `modify_header`.
+
+```{r}
+base_men %>%
+  select(logem, toit, mur) %>%
+  tbl_summary(
+    label = list(
+      logem = "Type de logement au Mali",
+      toit = "Type de toiture",
+      mur = "Type de mur"
+    )
+  ) %>%
+  modify_header(label = "Caractéristiques de l'habitat")
+```
+
+# Variables Continues
+
+Sélection et affichage de statistiques descriptives pour des variables continues.
+
+```{r}
+base_men %>%
+  select(grosrum, superf, petitrum) %>%
+  tbl_summary()
+```
+
+# Affichage de Tableau - Version 2
+
+Affichage des moyennes et écarts-types des variables continues précédentes.
+
+```{r}
+base_men %>%
+  select(grosrum, superf, petitrum) %>%
+  tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      superf ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    )
+  )
+```
+
+# Affichage de Tableau - Version 3
+
+Arrondi des valeurs (aucun chiffre après la virgule), prise en compte des valeurs manquantes, affichage des "manquants".
+
+```{r}
+base_men %>%
+  select(grosrum, superf, petitrum) %>%
+  tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      superf ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    ),
+    digits = everything() ~ c(0, 0, 0),
+    missing = "always",
+    missing_text = "Manquants"
+  )
+```
+
+# Analyse de la Base Pauvreté
+
+Chargement et manipulation de la base pauvreté.
+
+```{r}
+base_welfare <- utils::read.csv("ehcvm_welfare_mli2021.csv")
+```
+
+Sélection des variables clés :
+- `hgender` : Genre
+- `hmstat` : Situation matrimoniale
+- `hage` : Âge
+- `heduc` : Niveau d'éducation
+- `hdiploma` : Diplôme
+
+```{r}
+base_welfare %>%
+  labelled::to_factor() %>%
+  select(hgender, hmstat, hage, heduc, hdiploma) %>%
+  tbl_summary(
+    label = list(
+      hgender = "Genre au Mali",
+      hmstat = "Situation matrimoniale au Mali",
+      hage = "Âge au Mali",
+      heduc = "Niveau d'éducation au Mali",
+      hdiploma = "Diplôme au Mali"
+    )
+  ) %>%
+  modify_header(label = "Caractéristiques de la Population")
+
+```
