@@ -266,7 +266,7 @@ Renommons les variables
 
 
 
-#Partie 3 : Statistiques descriptives avec le package gtsummary
+# Partie 3 : Statistiques descriptives avec le package gtsummary
 
 
 Nous nous proposons de faire de statistiques descriptives sans ponderation sur quelques variables. 
@@ -298,7 +298,7 @@ stat_base_ind1 %>%
   #mettons le texte en marron et en gras
   tab_style(style=cell_text(color="darkred", weight="bold"  ), locations = cells_body(columns=everything()))%>%
  #Le titrage en bas 
-  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") 
+  gt:: tab_source_note(source_note="souce: Donnéé") 
 stat_base_ind1
 ```
 
@@ -337,7 +337,7 @@ stat_base1 %>%
   
   #tab_source_note(style=cell_text(color="lightblue")) %>% 
  #Le titrage en bas 
-  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") #style=cell_text(color="lightblue") ) 
+  gt:: tab_source_note(source_note="souce: Donnée") #style=cell_text(color="lightblue") ) 
 stat_base_ind1
 ```
 Ces tableau nous donnent quelques statistiques sur les variables choisits. 
