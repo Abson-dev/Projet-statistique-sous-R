@@ -1,0 +1,124 @@
+---
+title: "Stat_Desc"
+author: "Tamsir"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+# Charger la bibliothèque haven (si non installée, installez-la d'abord)
+library(haven)
+
+# Définir le chemin d'accès
+data <- haven::read_dta("data/ehcvm_menage_mli2021.dta")
+
+
+
+```
+```{r}
+library(gtsummary)
+data %>%
+  select(toit , sol  ) %>% 
+  tbl_summary()
+```
+
+```{r}
+# Appliquer la sélection des variables et générer le tableau résumé
+library(gtsummary)
+library(dplyr)
+library(readr)
+library(haven)
+data %>% labelled::to_factor()  %>% 
+  select( toit , sol  ) %>% 
+  tbl_summary(label = list(toit ~ "Type de logement", sol ~ "Type sol"  ))
+
+```
+```{r}
+# Appliquer la sélection des variables et générer le tableau résumé
+library(gtsummary)
+library(dplyr)
+library(readr)
+library(haven)
+data %>% labelled::to_factor()  %>% 
+  select(toit , sol  ) %>%  
+  tbl_summary(label = list(toit ~ "Type de logement", sol ~ "Type sol"  )) %>% modify_header(label = "Caractéritiques logement" )
+
+
+```
+
+```{r}
+# Appliquer la sélection des variables et générer le tableau résumé
+library(gtsummary)
+library(dplyr)
+library(readr)
+library(haven)
+data %>% labelled::to_factor()  %>% 
+  select(toit , sol , superf , grosrum ,petitrum ) %>%  
+  tbl_summary(label = list(toit ~ "Type de logement", sol ~ "Type sol", superf ~ "Superficie cultivée", grosrum ~ "gros rumunant", petitrum ~ "petit ruminants"  ), statistic = list(superf ~ "{mean} ({sd})",
+                 grosrum ~ "{mean} ({sd})",
+                 petitrum ~ "{mean} ({sd})"), digits = everything()~c(0,0,0))%>% modify_header(label = "Caractéritiques logement" )
+
+
+```
+
+
+```{r}
+# Appliquer la sélection des variables et générer le tableau résumé
+library(gtsummary)
+library(dplyr)
+library(readr)
+library(haven)
+data %>% labelled::to_factor()  %>% 
+  select(toit , sol , superf , grosrum ,petitrum ) %>%  
+  tbl_summary(label = list(toit ~ "Type de logement", sol ~ "Type sol", superf ~ "Superficie cultivée", grosrum ~ "gros rumunant", petitrum ~ "petit ruminants"  ), statistic = list(superf ~ "{mean} ({sd})",
+                 grosrum ~ "{mean} ({sd})",
+                 petitrum ~ "{mean} ({sd})"), digits = everything()~c(0,0,0),  missing = "always",
+ missing_text= "NA",)%>% modify_header(label = "Caractéritiques logement" )
+
+```
+
+
+```{r}
+# Définir le chemin d'accès
+data2 <- haven::read_dta("data/ehcvm_welfare_mli2021.dta")
+```
+
+```{r}
+library(gtsummary)
+library(dplyr)
+library(readr)
+library(haven)
+data2 %>% labelled::to_factor()%>%
+  select(hgender,hage, hmstat, heduc, hdiploma  ) %>% 
+  tbl_summary()
+```
+
+```{r}
+head(data2)
+```
+
+
+

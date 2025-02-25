@@ -1,0 +1,191 @@
+---
+title: "Syntaxe"
+author: "KAFANDO"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+output_dir: "./Sorties"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+
+packages <- c("readr","haven","utils","dplyr","gtsummary","labelled")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+## Travail avec base ménage
+
+
+**Chargement des bases**
+
+```{r}
+## Base ménage
+
+base_men <-  haven::read_dta("../Data/ehcvm_menage_ben2021.dta")
+base_men
+
+```
+**Structure de la base**
+
+```{r}
+utils::str(base_men)
+```
+
+**Lister le nom  des variables**
+```{r}
+
+colnames(base_men)
+
+```
+**Sortie de tableau avec labels**
+
+```{r}
+base_men %>%  labelled::to_factor() %>%  select(logem,toit,sol) %>%  tbl_summary()
+
+```
+
+
+```{r}
+base_men %>%
+  select(logem,toit,sol) %>%  
+  labelled::to_factor() %>%
+  tbl_summary(
+    label = list(logem~ "Logement du chef de ménage",
+                 toit ~"Toit de la maison du chef de ménage",
+                 sol ~ "Type de sol de la maison du chef de ménage")
+    )%>% modify_header(label="Caractéristiques de l'habitat")
+
+```
+
+
+
+**Ajout des statistiques**
+
+```{r}
+base_men %>%
+  select(logem,toit,sol,superf,grosrum,petitrum) %>%  
+  labelled::to_factor() %>%
+  tbl_summary(
+    label = list(logem~ "Logement du chef de ménage",
+                 toit ~"Toit de la maison du chef de ménage",
+                 sol ~ "Type de sol de la maison du chef de ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum ~ "{mean}({sd})",
+                     petitrum ~"{mean}({sd})")
+    )%>% modify_header(label="Caractéristiques de l'habitat")
+
+
+```
+
+
+
+ **Gestion des valeurs manquantes**
+ 
+```{r}
+base_men %>%
+  select(logem,toit,sol,superf,grosrum,petitrum) %>%  
+  labelled::to_factor() %>%
+  tbl_summary(
+    label = list(logem~ "Logement du chef de ménage",
+                 toit ~"Toit de la maison du chef de ménage",
+                 sol ~ "Type de sol de la maison du chef de ménage"),
+    statistic = list(superf~"{mean}({sd})",
+                     grosrum ~ "{mean}({sd})",
+                     petitrum ~"{mean}({sd})"),
+    digits = everything()~c(0,0,0),
+    missing = "always",
+    missing_text = "Valeurs manquantes",
+    )%>% modify_header(label="Caractéristiques de l'habitat")
+
+```
+
+
+
+## TRAVAIL AVEC LA BASE WELFARE
+
+**Importation**
+
+```{r}
+## Base welfare
+
+data <- haven::read_dta("../Data/ehcvm_welfare_ben2021.dta")
+data
+
+```
+
+**Structure de la base**
+
+```{r}
+utils::str(data)
+```
+
+
+**Liste des variables**
+
+```{r}
+colnames(data)
+
+```
+
+
+ **Proposition de tableau**
+ 
+```{r}
+
+data %>%
+  select(hage,hgender,hmstat,heduc,hdiploma) %>%  
+  labelled::to_factor() %>%
+  tbl_summary(
+    label = list(hgender~ "Sexe du chef de ménage",
+                 hmstat ~"Situation matrimonial du chef de ménage",
+                 heduc ~ "Niveau d'éducation du chef de ménage",
+                 hdiploma ~ "Diplome du chef de ménage",
+                 hage ~ "Age du chef de ménage"),
+    statistic = list(hage~"{mean}({sd})"
+                     ),
+    digits = everything()~c(2,1,0,0,2),
+    missing = "always",
+    missing_text = "Valeurs manquantes",
+    )%>% modify_header(label="Caractéristiques du chef de ménage")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

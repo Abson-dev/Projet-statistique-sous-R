@@ -1,0 +1,122 @@
+---
+title: "TP5_Gr4"
+author: "Samba SOW, Dior MBENGUE et Cheikh Oumar DIALLO"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r, echo=TRUE, results="hide"}
+
+packages <- c("readr","utils","dplyr","psych", "survey", "gtsummary")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+```
+
+## Importation des bases
+
+```{r}
+consommation <- utils::read.csv("../bases/ehcvm_conso_sen2021.csv") 
+menage <- utils::read.csv("../bases/ehcvm_menage_sen2021.csv")
+```
+
+## Informations généraless sur les bases
+
+Les bases *ménage* et *consommation* contienent respectivement `r nrow(consommation)` et `r nrow(menage)` observations et respectivement `r ncol(consommation)` et `r ncol(menage)` variables.
+
+```{r}
+utils::str(consommation)
+utils::str(menage)
+```
+
+## **Statatistiques descriptives**
+
+```{r}
+summary(menage)
+psych::describe(consommation)  
+
+```
+
+#Jointure
+
+*Vérifions la clé de jointure*
+
+Ceci nous permettra de nous assurer que la clé de jointure existe dans les deux basees et est écrite exactement de la même manière
+
+```{r}
+colnames(consommation)
+colnames(menage)
+```
+
+*Faisons la jointure*
+
+```{r}
+
+base_jointe <- consommation %>%
+  left_join(menage, by = "hhid") 
+
+```
+
+## Statistiques après jointure
+
+*Moyenne et médiane de la consommation par ménage*
+
+```{r}
+base_jointe %>%
+  summarise(
+    depen_moy = mean(depan, na.rm = TRUE),
+    depen_med = median(depan, na.rm = TRUE)
+  )
+```
+
+*Statisiques par région*
+
+```{r}
+base_jointe %>%
+  group_by(region) %>%
+  summarise(
+    depan_moy = mean(depan, na.rm = TRUE),
+    depan_med = median(depan, na.rm = TRUE),
+    n = n())  # Nombre d'observations
+  
+```
+
+## Statistiques sans pondération
+
+*Exemple: la dépense moyenne sans pondération*
+
+```{r}
+psych::describe(base_jointe$depan)
+mean(base_jointe$depan, na.rm=TRUE)
+```
+
+## Statistiques avec pondération
+
+```{r}
+# Définir le plan d'échantillonnage
+plan_sondage <- survey::svydesign(id = ~hhid, weights = ~hhweight, data = base_jointe)
+```
+
+*Moyenne pondérée de la dépense*
+
+```{r}
+svymean(~depan, plan_sondage, na.rm = TRUE)
+```
+
+*Quantils*
+
+```{r}
+svyquantile(~depan, plan_sondage, quantiles=0.5)
+svyquantile(~depan,plan_sondage, quantiles=c(0.25,0.75) )
+```

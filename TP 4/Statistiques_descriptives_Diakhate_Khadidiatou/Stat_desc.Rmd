@@ -1,0 +1,250 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+  html_document:
+    df_print: paged
+header-includes:
+- \usepackage{hyperref}
+- \usepackage{amsmath}
+- \usepackage{amssymb}
+- \usepackage{graphicx}
+- \usepackage{fontspec}
+- \usepackage{xcolor}
+- \usepackage{tikz}
+- \definecolor{blue}{RGB}{0, 100, 0}
+- \setmainfont{Times New Roman}
+- \setsansfont{Times New Roman}
+- \setmonofont{Courier New}
+- \usepackage[margin=1in]{geometry}
+- \usepackage{titlesec}
+- \titleformat{\section}{\Huge\bfseries\color{pink}}{\thesection}{1em}{}
+- \titleformat{\subsection}{\huge\bfseries\color{pink}}{\thesubsection}{1em}{}
+- \titleformat{\subsubsection}{\LARGE\bfseries\color{pink}}{\thesubsubsection}{1em}{}
+- \usepackage{tocloft}
+- \renewcommand{\cftsecfont}{\small}
+- \renewcommand{\cftsubsecfont}{\footnotesize}
+- \renewcommand{\cftsecpagefont}{\small}
+- \renewcommand{\cftsubsecpagefont}{\footnotesize}
+- \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+---
+
+\begin{titlepage}
+    \begin{center}
+    % Début de la bordure avec TikZ
+    \begin{tikzpicture}[remember picture, overlay] % overlay = force TikZ à dessiner par-dessus le contenu existant de la page, plutôt que de réserver un espace supplémentaire pour le dessin, remember = lorsque vous voulez dessiner par rapport à la position exacte de la page
+    % Définir une couleur élégante
+    \definecolor{blue}{RGB}{0, 100, 0}
+    
+    % Dessiner une bordure élégante avec coins arrondis
+    \draw[
+        line width=5pt, % Épaisseur du trait
+        pink, % Couleur de la bordure
+        rounded corners=15pt, % Coins arrondis
+        double, % Bordure double
+        double distance=2pt % Espacement entre les deux lignes
+    ] 
+        ([xshift=10pt, yshift=-10pt]current page.north west) rectangle
+        ([xshift=-10pt, yshift=10pt]current page.south east);
+    \end{tikzpicture}
+        \includegraphics[width=7cm]{Figures/LOGO1.jpeg} \\[0.1cm]  % C:/Users/hp/Desktop/AwaDIAW_ISE-CL/Semestre2/Informatique/Projet_Statistique_avec_R/Tps_sem6
+        \includegraphics[width=6cm]{Figures/LOGO2.jpeg} \\[0.1cm] % C:/Users/hp/Desktop/AwaDIAW_ISE-CL/Semestre2/Informatique/Projet_Statistique_avec_R/Tps_sem6
+        
+        \textbf{\large Agence nationale de la Statistique et de la Démographie (ANSD)}\\[0.2cm]
+        
+        \includegraphics[width=4cm]{Figures/LOGO3.jpeg} \\[0.1cm]  % C:/Users/hp/Desktop/AwaDIAW_ISE-CL/Semestre2/Informatique/Projet_Statistique_avec_R/Tps_sem6
+        
+        \textbf{\large Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye (ENSAE)}\\[0.4cm]
+        
+        \textit{\LARGE Semestre 2 : Projet statistique sous R }\\[0.3cm]
+        \textbf{\Huge \color{blue} \textsf{Statistiques descriptives avec gtsummary}}\\[0.2cm]
+        
+        \begin{minipage}{0.5\textwidth}
+    \begin{flushleft} \large
+        \emph{\textsf{Rédigé par :}}\\
+        \textbf{Khadidiatou Diakhaté}\\
+        \textit{Elève en ISEP3}
+    \end{flushleft}
+\end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                \textbf{M. Aboubacre HEMA}\\
+                \textit{Research Analyst }
+            \end{flushright}
+        \end{minipage}
+
+        \vfill 
+
+        {\large \textsf{Année scolaire : 2024/2025}}\\[0.5cm]
+        
+    \end{center}
+\end{titlepage}
+
+## Installation des packages si nécessaire
+
+```{r message=FALSE, warning=FALSE}
+packages <- c("haven","dplyr","gtsummary","labelled")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+## Exportation des bases
+
+```{r}
+library(haven)
+ehcvm_menage <- read_dta("donnees/ehcvm_menage_gnb2021.dta") # qui concerne les caractéristiques du ménage
+ehcvm_welfare <- read_dta("donnees/ehcvm_welfare_gnb2021.dta") # qui concerne le bien-être du ménage
+#Visualisons quelques observations de ces bases
+head(ehcvm_menage)
+head(ehcvm_welfare)
+
+```
+
+## Réalisation pas-à pas d'un tableau avec le package gtsummary
+
+Avec la base ehcvm_menage, nous allons présenter quelques statistiques descriptives des variables logem(logement), toit(type de toit), mur(type de mur) et sol(type de sol). Utilisons **tbl_summary** pour cela :
+
+```{r}
+library(gtsummary)
+ehcvm_menage %>% select(logem,mur,toit,sol) %>% tbl_summary()
+```
+
+Cependant, avec ce tableau, on ne voit pas les labels des modalités des variables. Pour les afficher, on va utiliser la fonction **to_factor() du package labelled**.
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol) %>% tbl_summary()
+```
+
+Les noms des variables n'étant pas trop explicites, on peut les reformuler avec la commande **label(list(...))** de tbl_summary
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol) %>% tbl_summary( label = list(logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement")) 
+```
+
+
+
+Le titre du tableau également n'est pas trop explicite, on va utiliser **modify_header()** pour l'adapter
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol) %>% tbl_summary( label = list(logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement")) %>% modify_header(label = "Caractérisques de l'habitat du ménage")
+```
+
+
+
+Pour les variables numériques, on peut également choisir ce qu'on veut calculer à travers la commande **statistic()** dans tbl_summary. Dans ce qui suit, on choisira de calculer la moyenne et l'écart des nouvelles variables *superf*, *grosrum* et *petitrum* intégrées.
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol,superf,grosrum, petitrum) %>% tbl_summary( label = list(superf ~ "Superficie agricole",
+ grosrum ~ "Nombre de gros ruminants",
+ petitrum~ "Nombre de petits ruminants",
+ logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement"
+ ),
+ statistic = list(superf ~ "{mean} ({sd})",##pour avoir la moyenne et l'écart-type
+                  grosrum ~ "{mean} ({sd})",
+                  petitrum ~ "{mean} ({sd})"
+                  )
+ ) %>% modify_header(label = "Agriculture, Elevage et logement")
+```
+
+Pour choisir le nombre de chiffres après la virgule des différents indicateurs, on peut utiliser la commande **digits = everything() \~c(0,0,0,0,...)** dans tbl_summary où everything() sélectionne toutes les colonnes du tableau et c(0,0,0,0,...) définit un format spécifique pour chaque colonne, en indiquant 0 décimale pour chacun
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol,superf,grosrum, petitrum) %>% tbl_summary( label = list(superf ~ "Superficie agricole",
+ grosrum ~ "Nombre de gros ruminants",
+ petitrum~ "Nombre de petits ruminants",
+ logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement"
+ ),
+ statistic = list(superf ~ "{mean} ({sd})",##pour avoir la moyenne et l'écart-type
+                  grosrum ~ "{mean} ({sd})",
+                  petitrum ~ "{mean} ({sd})"
+                  ),
+ digits = everything() ~c(0,0,0,0)
+ ) %>% modify_header(label = "Agriculture, Elevage et logement")
+```
+
+Pour les valeurs manquantes, on peut afficher leur nombre pour chaque variable avec missing = "always" et changer leur appelation par *Valeurs manquantes* ou *NA* avec la commande **missing_text()**
+
+```{r}
+
+library(labelled)
+ehcvm_menage %>% labelled::to_factor() %>%select(logem,mur,toit,sol,superf,grosrum, petitrum) %>% tbl_summary( label = list(superf ~ "Superficie agricole",
+ grosrum ~ "Nombre de gros ruminants",
+ petitrum~ "Nombre de petits ruminants",
+ logem ~ "Logement du chef de ménage",
+ toit ~ "Type de toit du logement",
+ mur~ "Type de mur du logement",
+ sol~"Type de sol du logement"
+ ),
+ statistic = list(superf ~ "{mean} ({sd})",##pour avoir la moyenne et l'écart-type
+                  grosrum ~ "{mean} ({sd})",
+                  petitrum ~ "{mean} ({sd})"
+                  ),
+ digits = everything() ~c(0,0,0,0),
+ missing = "always",  ##Pour afficher les missings
+ missing_text= "Valeurs manquantes"
+ ) %>% modify_header(label = "Agriculture, Elevage et logement")
+```
+
+Le tableau ainsi prêt, essayons d'analyser les statistiques descriptives des variables choisies dans la base ehcvm_ménage.
+
+## Analyse descriptive de quelques variables pour les deux bases
+
+*Le tableau présente des données sur 5 351 ménages concernant leur logement et leurs activités agricoles.*
+
+*La majorité des chefs de ménage sont propriétaires (82% ( 58+24)), principalement sans titre (58%), tandis que 11% sont locataires. Les caractéristiques du logement montrent que 30% ont un type spécifique de mur, 86% un type particulier de toit et 51% un certain type de sol, sans valeurs manquantes.*
+
+*Concernant l'agriculture, la superficie agricole a une moyenne élevée de 6 698 900 avec un écart-type très important (400 815 758), indiquant une grande dispersion, et 1 771 valeurs manquantes. L’élevage révèle une moyenne de 2 gros ruminants (écart-type 9) et 2 petits ruminants (écart-type 6), sans valeurs manquantes.*
+
+Faisons de même pour la base ehcvm_welfare :
+
+```{r}
+library(haven)
+ehcvm_welfare %>% labelled::to_factor() %>% select(hgender,hage,hmstat,heduc,hdiploma) %>% tbl_summary( 
+  label = list(hgender ~ "Genre du chef de ménage",
+ hage ~ "Âge du chef de ménage",
+ hmstat~ "Situation matrimoniale du chef de ménage",
+ heduc ~ "Niveau d'éducation du chef de ménage",
+ hdiploma ~ "Diplôme du chef de ménage"
+ ),
+ statistic = list(hage ~ "{mean} ({sd})",
+                  hgender~ "{n}/{N} ({p}%)"##pour avoir la moyenne et l'écart-type
+                  ),
+ digits = everything() ~c(0,0,0,0),
+ missing = "always",  ##Pour afficher les missings
+ missing_text= "Valeurs manquantes"
+ ) %>% modify_header(label = "Caractéristiques du chef de ménage")
+
+```
+
+*Le tableau ci-dessus présente des données sur les caractéristiques des chefs de ménage. La majorité sont des hommes (78%), avec un âge moyen de 50 ans (écart-type 14). Concernant la situation matrimoniale, 51% sont mariés monogames, 20% polygames, 12% célibataires, et 13% veufs. En termes d’éducation, 47% n’ont aucun niveau scolaire, tandis que 18% ont un premier cycle primaire et 12% un deuxième cycle. Concernant les diplômes, 56% n’en possèdent aucun, 16% ont un diplôme de premier cycle primaire et 10% de deuxième cycle, alors que les niveaux supérieurs (licence, master, doctorat) restent marginaux. Il n’y a aucune valeur manquante dans les données.*

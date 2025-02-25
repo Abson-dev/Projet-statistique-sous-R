@@ -1,0 +1,277 @@
+---
+title: "TP5"
+author: "Groupe 3"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Installation et chargement des packages
+
+```{r eval=FALSE, include=FALSE, results="hide"}
+# Vérifier et installer les packages nécessaires
+packages <- c("haven", "utils", "dplyr", "tidyverse", "gtsummary", "survey", "knitr", "kableExtra")
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+```
+
+## Chargement des données
+
+```{r}
+# Chargement des fichiers
+
+ind <- haven::read_dta("../Données/ehcvm_individu_sen2021.dta")
+
+```
+
+## Statistiques sans poids
+
+```{r echo=TRUE}
+ind %>% labelled::to_factor()%>%
+  select (mstat, alfa,alfa2, educ_hi, age, internet, couvmal, moustiq)%>% 
+  tbl_summary(label = list(mstat~ "Situation matrimoniale", 
+               alfa ~"Alphabetiser/lire/ecrire",
+               alfa2~ "Alphabetiser/lire/ecrire et comprend",
+               educ_hi ~"Niveau d'éducation achevé", 
+               age~ "Age en année", 
+              internet~ "Individu accès a internet", 
+              couvmal~ "Individu couverture maladie",
+              moustiq~ "Dormir la dernière nuit sous une moustiquaire"),
+  statistic = list(age~"{mean} ({sd}"),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>%modify_header(label= "")
+
+```
+
+## Avec pondération
+
+```{r}
+
+# Convertissons les variables en facteurs 
+
+ind %>%
+  labelled::to_factor() %>%
+  select(mstat, alfa, alfa2, educ_hi, age, internet, couvmal, moustiq, hhweight) -> data_processed
+
+# Plan d'echantillonnage
+
+pondere <- svydesign(ids = ~1, data = data_processed, weights = ~hhweight)
+
+
+```
+
+```{r echo=TRUE}
+
+pondere %>%
+  tbl_svysummary(
+    label = list(
+      mstat ~ "Situation matrimoniale", 
+      alfa ~ "Alphabetiser/lire/ecrire",
+      alfa2 ~ "Alphabetiser/lire/ecrire et comprend",
+      educ_hi ~ "Niveau d'éducation achevé", 
+      age ~ "Age en année", 
+      internet ~ "Individu accès a internet", 
+      couvmal ~ "Individu couverture maladie", 
+      moustiq ~ "Dormir la dernière nuit sous une moustiquaire"
+    ),
+    digits = everything() ~ c(0),  
+    missing = "always",
+    missing_text = "valeurs manquantes") %>%
+    modify_header(label = "")
+
+
+```
+
+La comparaison entre les deux tableaux met en évidence l'impact de la pondération sur la répartition des individus selon leur situation familiale et leur niveau d'alphabétisation. Avec la pondération, l'échantillon total passe de 63,530 à 17,812,247 individus, reflétant ainsi une extrapolation à une population plus large. Par exemple, la part des célibataires demeure à 62% dans les deux cas, tandis que les mariés monogames passent de 23% sans pondération à 24% avec pondération. De même, les catégories "marié(e) polygame", "veuf(ve)", "divorcé(e)" et "séparé(e)" conservent les mêmes proportions. Concernant l'alphabétisation, une légère différence est observée : la part des individus capables de lire et écrire passe de 47% sans pondération à 48% avec pondération, tandis que celle des non-alphabétisés diminue de 53% à 52%. Ces variations montrent que la pondération ajuste les données assurant ainsi une meilleure représentativité de la population.
+
+## Fusion des bases "individu" et "ménage"
+
+```{r}
+
+men <- haven::read_dta("../Données/ehcvm_menage_sen2021.dta")
+
+men_ind <- left_join(ind, men, by = "hhid")
+
+```
+
+```{r}
+# Fonction pour générer des tableaux
+summary_table <- function(df, var) {
+  df %>%
+    count(.data[[var]]) %>%
+    mutate(pourcentage = round(n / sum(n) * 100, 2)) %>%
+    arrange(desc(n)) %>%
+    kable()
+}
+
+
+```
+
+
+```{r}
+variables_tableaux <- c("region", "milieu", "sexe", "lien", "csp")
+
+
+# Boucle pour générer les tableaux
+for (var in variables_tableaux) {
+  cat("\n### Répartition de", var, "\n\n")
+  
+  table_data <- men_ind %>%
+    group_by(!!sym(var)) %>%
+    summarise(n = n()) %>%
+    mutate(pourcentage = round((n / sum(n)) * 100, 2))
+
+  # Affichage du tableau avec knitr::kable()
+  print(knitr::kable(table_data, format = "pipe", align = "c", col.names = c(var, "Effectif", "Pourcentage (%)")))
+  
+  cat("\n\n")
+}
+
+
+
+```
+Les données montrent une répartition diversifiée de la population selon plusieurs variables. Par région, les effectifs varient de 5,87 % à 10,24 %. La région de Dakar (10,24 %) est la plus représentée. Cela peut indiquer une concentration plus élevée de la population dans certaines régions. Concernant le milieu, la répartition est presque équivalente entre les deux milieux, avec 50,61 % pour le milieu urbain et 49,39 % pour le milieu rural, suggérant une balance géographique ou socio-économique dans la population. En termes de sexe, les femmes représentent 53,98 % de l'échantillon, soit une légère surreprésentation par rapport aux hommes (46,02 %). La répartition par lien présente une plus grande diversité, avec le lien 3 (enfant) représentant 36,62 % de l'échantillon. Les autres liens (lien 6 à 14) montrent des effectifs relativement faibles, suggérant qu'ils représentent des cas particuliers ou moins courants dans la population étudiée.
+```{r}
+plot_percentage <- function(data, var, color = "steelblue") {
+  data %>%
+    count(.data[[var]]) %>%
+    mutate(pourcentage = n / sum(n)) %>%
+    ggplot(aes(x = factor(.data[[var]]), y = pourcentage, fill = factor(.data[[var]]))) +
+    geom_bar(stat = "identity", color = "black") +
+    geom_text(aes(label = scales::percent(pourcentage, accuracy = 0.1)), vjust = -0.5, size = 5) +
+    labs(title = paste("Répartition de", var),
+         x = var,
+         y = "Pourcentage") +
+    scale_y_continuous(labels = scales::percent) +
+    theme_minimal() +
+    theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_manual(values = color)
+}
+```
+
+
+
+```{r}
+variables_graphes <- c("couvmal", "moustiq", "educ_hi", "diplome", "telpor", "internet", "logem")
+
+for (var in variables_graphes) {
+  cat("\n### Répartition de", var, "\n")
+  
+  # Calculer le nombre de modalités uniques pour chaque variable
+  nb_modalites <- length(unique(men_ind[[var]]))
+  
+  # Générer une palette avec suffisamment de couleurs pour chaque variable
+  palette <- colorRampPalette(c("blue", "red", "green", "orange", "purple"))(nb_modalites)
+  
+  # Afficher le graphique avec la palette dynamique
+  print(plot_percentage(men_ind, var, palette))
+}
+
+
+```
+
+
+## Définition du plan d'échantillonnage
+
+```{r}
+men_ind_svy <- svydesign(ids = ~1, weights = ~hhweight, data = men_ind)
+```
+
+## Analyse sans pondération
+
+```{r}
+
+# convertir les variables en facteurs
+
+men_ind_var <- men_ind %>%
+  mutate(across(c(sexe, educ_hi, internet, region, milieu, couvmal, diplome,csp), ~labelled::to_factor(.)))
+
+```
+
+```{r echo=TRUE}
+tbl_summary(men_ind_var, by = sexe, percent = "column", include = c(educ_hi, internet), label = list(
+sexe = "Sexe",
+internet = "Accès à internet",
+educ_hi = "Education"
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Sexe**")
+
+```
+
+```{r echo=TRUE}
+tbl_summary(men_ind_var, by = internet, percent = "row", include = c(region, milieu), label = list(
+region = "Région",
+internet = "Accès à internet",
+milieu = "Milieu"
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Internet**")
+```
+
+```{r echo=TRUE}
+
+# Création du tableau résumé
+tbl_summary(men_ind_var, by = couvmal, percent = "row", include = c(region, milieu), 
+            label = list(
+              region = "Région",
+              couvmal = "Couverture maladie",
+              milieu = "Milieu"
+            ),
+            digits = list(superf = c(0, 0, 0))) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Couverture maladie**")
+
+```
+
+## Analyse croisée pondérée
+
+```{r echo=TRUE}
+
+# plan d'echantillonnage
+men_ind_svy <- survey::svydesign(ids = ~1, weights = ~hhweight, data = men_ind_var)
+
+tbl_svysummary(men_ind_svy, by = sexe, percent = "column", include = c(educ_hi, internet), label = list(
+sexe = "Sexe",
+internet = "Accès à internet",
+educ_hi = "Education"
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Sexe**")
+
+
+```
+
+```{r echo=TRUE}
+tbl_svysummary(men_ind_svy, by = internet, percent = "row", include = c(region, milieu), label = list(
+region = "Région",
+internet = "Accès à internet",
+milieu = "Milieu"
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Internet**")
+
+
+```
+
+```{r echo=TRUE}
+tbl_svysummary(men_ind_svy, by = couvmal, percent = "row", include = c(region,milieu), label = list(
+region = "Région",
+couvmal = "Couverture maladie",
+milieu = "Milieu",
+digits=list(superf=c(0, 0, 0))
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Couverture maladie**")
+  
+  
+```
+
+On observe que la proportion d'individus sans éducation reste stable (55% des hommes et 58% des femmes), tout comme les niveaux primaire et secondaire. Cependant, la pondération entraîne une légère hausse des effectifs dans l'enseignement supérieur (de 2.4% à 3.0% chez les hommes et de 1.2% à 1.8% chez les femmes), suggérant une sous-représentation de ces niveaux dans les données brutes. De même, l'accès à Internet est légèrement plus fréquent après pondération, passant de 30% à 32% chez les hommes et de 28% à 31% chez les femmes, ce qui indique que les données non pondérées sous-estimaient cette accessibilité.
+
+L'analyse comparative des résultats pondérés et non pondérés montre des différences notables dans l'accès à Internet selon les régions. Dakar affiche une proportion plus élevée d'individus ayant accès à Internet après pondération (53%), mettant en évidence une sur-représentation de cette région dans les données non pondérées. À l'inverse, des régions comme Kaffrine, Kédougou et Kolda présentent une baisse plus marquée de l'accès à Internet après pondération (respectivement 14%, 17% et 16%), suggérant une surestimation dans les données brutes.
