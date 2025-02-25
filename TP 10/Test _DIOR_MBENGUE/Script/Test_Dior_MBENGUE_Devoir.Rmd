@@ -1,0 +1,223 @@
+---
+title: "Test_R"
+author: "Dior MBENGUE"
+date: "2025-02-25"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Installation des packages
+```{r}
+#Vérification et installation des packages nécessaires
+packages <- c("haven", "utils", "dplyr", "tidyverse", "gtsummary", "survey")
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+```
+#importation des bases
+```{r}
+men<-haven::read_dta("../data/base_menage.dta")
+fc_baseline<-haven::read_dta("../data/food_comp_child_baseline.dta")
+fc_endline<-haven::read_dta("../data/food_comp_child_endline.dta")
+fm_baseline<-haven::read_dta("../data/food_comp_mother_baseline.dta")
+fm_endline<-haven::read_dta("../data/food_comp_mother_endline.dta")
+```
+
+#Vérification de l'existence de doublon
+```{r}
+#base ménage
+duplicated(men)
+sum(duplicated(men))
+
+#base food_comp_child_baseline
+duplicated(fc_baseline)
+sum(duplicated(fc_baseline))
+
+#base food_comp_child_endline
+duplicated(fc_endline)
+sum(duplicated(fc_endline))
+
+#base food_comp_mother_baseline
+duplicated(fm_baseline)
+sum(duplicated(fm_baseline))
+
+# base food_comp_mother_endline
+duplicated(fm_endline)
+sum(duplicated(fm_endline))
+
+```
+#Supression des doublons dans la base ménage
+```{r}
+
+men <- men[!duplicated(men), ]
+
+```
+
+
+# vérification de la cohérence des noms des variables
+
+```{r}
+colnames(fc_baseline)
+colnames(fc_endline)
+colnames(fm_baseline)
+colnames(fm_endline)
+```
+#Rectification des noms des variables
+
+```{r}
+colnames(fm_baseline)[colnames(fm_baseline) == "V1"] <- "energ_kcal"
+colnames(fm_baseline)[colnames(fm_baseline) == "V9"] <- "zinc_mg"
+colnames(fm_baseline)
+
+
+```
+#Vérification de présences de données manquantes
+```{r}
+# Calculer le nombre de valeurs manquantes dans toute la base de données
+
+sum(is.na(men))  
+sum(is.na(fc_baseline))
+sum(is.na(fc_endline))
+sum(is.na(fm_baseline))
+sum(is.na(fm_endline))
+
+
+
+```
+Consommation d'énergie moyenne pour l'ensembles des mères
+
+```{r}
+mean(fm_baseline$energ_kcal, na.rm = TRUE)
+```
+les mères consomment en moyenne 714.7165 calories pendant chaque repas
+
+
+#Sauvegarde des bases finales
+
+```{r}
+haven::write_dta(fm_baseline, "mother_baseline_v1.dta")
+haven::write_dta(fm_endline, "mother_endline_v1.dta")
+haven::write_dta(fc_baseline, "child_baseline_v1.dta")
+haven::write_dta(fc_endline, "child_endline_v1.dta")
+haven::write_dta(men, "base_menage_final.dta")
+
+```
+
+
+# chargement des nouvelles bases baseline
+
+```{r}
+# Charger les bases de données
+menf <- haven::read_dta("base_menage_final.dta")
+cbv1<- haven::read_dta("child_baseline_v1.dta")
+mbv1<- haven::read_dta("mother_baseline_v1.dta")
+```
+
+# Empilement pour les baseline
+```{r}
+men_merge <- merge(menf, mbv1, by = "hhid", all = TRUE)
+men_mother_child_merge <- merge(men_merge, cbv1, by = "hhid", all = TRUE)
+
+
+## j'ai mergé les bases child_baseline_v1.dta et mother_baseline_v1.dta dans la base base_menage_final.dta
+```
+
+# Vérification de la base mergée
+```{r}
+colnames(men_mother_child_merge)
+```
+# Renommer les noms des variables de energ_kcal à vit_c_mcg  en ajoutant _b
+
+```{r}
+# Liste des colonnes à renommer
+cols_to_rename <- c("energ_kcal.x", "protein_g.x", "lipid_tot_g.x", "calcium_mg.x", "iron_mg.x","zinc_mg.x","vit_b6_mg.x","vit_b12_mcg.x","vit_c_mg.x")
+
+# Appliquer le suffixe "_b"
+men_mother_child_merge <- men_mother_child_merge %>%
+  rename_with(~ paste0(.x, "_b"), .cols = all_of(cols_to_rename))
+
+```
+
+#chargement des nouvelles bases endline
+```{r}
+cev1<- haven::read_dta("child_endline_v1.dta")
+mev1<- haven::read_dta("mother_endline_v1.dta")
+```
+
+# chargement des bases endline
+```{r}
+men_merge_end <- merge(menf, mev1, by = "hhid", all = TRUE)
+men_mother_child_merge_end <- merge(men_merge, cev1, by = "hhid", all = TRUE)
+
+```
+# vérification de la base mergée endline
+```{r}
+colnames(men_mother_child_merge_end)
+# on constate que les colonnes des base mères et enfants ont été ajouté dans la base ménage
+```
+
+#Statistiques descriptives
+## Statistique univariée
+```{r}
+men_mother_child_merge_end %>% labelled::to_factor() %>%
+  select(regionid, villageid, hhsize, energ_kcal.y, energ_kcal.x, s2_q1, s2_q2, s2_q4, poly, protein_g.x, protein_g.y) %>%
+  tbl_summary(
+    label = list(
+      regionid ~ "Répartition par région de la mère",
+      villageid ~ "Répartition par village de la mère",
+      hhsize ~ "Taille du ménage",
+      energ_kcal.x ~ "Energie consommée de la mère",
+      energ_kcal.y ~ "Energie consommée de l'enfant",
+      s2_q1 ~ "chef de ménage alphabétise en la langue locale",
+      s2_q2 ~ "chef de ménage alphabétise en français",
+      s2_q4 ~ "chef de ménage a été scolarisé",
+      poly ~ "chef de ménage polygame",
+      protein_g.x ~ "protéine_g de la mère",
+      protein_g.y ~ "protéine_g de l'enfant"
+    ),
+    statistic = list(all_categorical() ~ "{n}({p}%)"),
+    missing = "always",
+    missing_text = "Les valeurs manquantes"
+  ) %>% modify_header(label = "Statistiques sur les variables de la base mergée")
+        
+```
+# interprétation
+
+
+
+##Composition du ménage et répartition géographique
+
+La répartition géographique montre une forte concentration des individus dans la Région 2 (58%), suivie des Régions 1 (18%) et 3 (24%). Cela suggère que la majorité des mères et enfants viennent de cette région, ce qui peut avoir des implications sur l'accès aux ressources, à la nutrition et aux services de santé.
+La taille du ménage est relativement grande, avec une médiane de 8 membres, ce qui indique que de nombreux ménages sont composés de plusieurs générations, notamment avec des enfants, des parents et parfois des grands-parents. La distribution est relativement homogène, car l'IQR va de 6 à 11 membres.
+
+
+
+## Consommation énergétique des mères et des enfants
+
+La consommation énergétique de l'enfant (349 kcal) est globalement inférieure à celle de la mère (622 kcal). Cela peut refléter les différences de besoins énergétiques entre les groupes d'âge, mais aussi la disponibilité de nourriture et d'autres facteurs nutritionnels.
+Les valeurs manquantes dans les variables de consommation énergétique (en particulier pour la mère et l'enfant) sont relativement élevées (2,692 pour la mère et 2,128 pour l'enfant), ce qui suggère qu'il y a des lacunes dans la collecte ou la disponibilité des données sur l'alimentation.
+
+
+
+
+## Alphabétisation et éducation du chef de ménage
+
+Les chefs de ménage montrent des taux élevés d'analphabétisme, avec une majorité n'étant pas alphabétisée en langue locale (88%) ni en français (79%). Cependant, environ 12% des chefs de ménage sont alphabétisés en langue locale, et 21% en français. Cela peut avoir des implications sur l'accès à l'information, à l'éducation et à la participation aux décisions de santé ou nutritionnelles.
+De plus, 29% des chefs de ménage ont été scolarisés, ce qui est relativement faible, indiquant peut-être un défi dans l'accès à une éducation formelle pour une proportion significative de la population.
+
+
+
+
+## Polygamie et structure familiale
+
+La répartition sur la polygamie montre que presque 48% des chefs de ménage sont polygames. Cela peut refléter des normes culturelles ou sociales spécifiques aux régions étudiées. La polygamie peut influencer la structure familiale, la répartition des ressources et les dynamiques au sein du ménage.
+
+
+
+
+## Protéines consommées 
+
+Les données sur la consommation de protéines (17 g pour la mère et 10 g pour l'enfant) montrent une tendance vers une consommation relativement modeste de protéines, avec des intervalles interquartiles indiquant une variabilité dans les habitudes alimentaires. Toutefois, les valeurs manquantes pour la consommation de protéines (en particulier pour la mère) sont également assez élevées, ce qui peut nuire à l'exactitude de l'analyse nutritionnelle globale.
