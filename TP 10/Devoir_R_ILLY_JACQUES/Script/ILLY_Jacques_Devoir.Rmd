@@ -1,0 +1,343 @@
+---
+title: "Statistique descriptives"
+author: "ILLY Jacques"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Installation des packages
+
+```{r packages, echo=TRUE}
+#listes des packages à installer
+packages<-c("dplyr","janitor", "readr", "cardx" ,"utils", "haven", "survey", "gtsummary", "labelled","gt")
+#installation des package
+for (pack in packages)
+  {if (!requireNamespace(pack, quietly=TRUE))
+  {install.packages(pack)
+  }
+  #chargement des packages
+  library(pack, character.only=TRUE)
+}
+
+```
+
+#Importation des bases
+```{r }
+#Importation de la base menages
+base_menage<-haven::read_dta("..\\Données\\base_menage.dta")
+
+#Importation de la base food_comp_child_baseline
+base_child_baseline<-haven::read_dta("..\\Données\\food_comp_child_baseline.dta")
+
+#Importation de la base food_comp_child_endline
+base_child_endline<-haven::read_dta("..\\Données\\food_comp_child_endline.dta")
+
+#Importation de la base food_comp_mother_baseline
+base_mother_baseline<-haven::read_dta("..\\Données\\food_comp_mother_baseline.dta")
+
+#Importation de la base food_comp_child_endline
+base_mother_endline<-haven::read_dta("..\\Données\\food_comp_mother_endline.dta")
+
+```
+
+
+
+```{r,}
+View(base_child_baseline)
+
+```
+
+
+
+#Partie 1 : Gestion et nettoyage des bases de données
+
+##	Vérifieons la présence de doublons dans la base de données Baseline
+
+### Dans la base food_comp_child_baseline
+
+
+```{r,}
+# Vérification de la présence de doublons 
+base_doublons <- base_child_baseline %>%
+  duplicated()%>%
+  any()
+
+# Afficher le résultat
+if (base_doublons) {
+  print("Des doublons sont présents dans les données.")
+  #supression des doublons
+base_child_baseline_sans_doublons <- base_child_baseline %>%
+  distinct()
+# Au contraire on affiche
+} else {
+  print("Aucun doublon trouvé.")
+  
+  base_child_baseline_sans_doublons <- base_child_baseline 
+}
+
+```
+
+### Dans la base food_comp_mother_baseline
+
+
+```{r,}
+# Vérification de la présence de doublons 
+base_doublons <- base_mother_baseline %>%
+  duplicated()%>%
+  any()
+
+# Afficher le résultat
+if (base_doublons) {
+  print("Des doublons sont présents dans les données.")
+  #supression des doublons
+base_mother_baseline_sans_doublons <- base_child_baseline %>%
+  distinct()
+# Au contraire on affiche
+} else {
+  print("Aucun doublon trouvé.")
+  
+  base_mother_baseline_sans_doublons <- base_child_baseline
+}
+
+```
+
+##	Vérifieons la présence de doublons dans la base de données endline
+
+### Dans la base food_comp_child_endline
+
+
+```{r,}
+# Vérification de la présence de doublons 
+base_doublons <- base_child_endline %>%
+  duplicated()%>%
+  any()
+
+# Afficher le résultat
+if (base_doublons) {
+  print("Des doublons sont présents dans les données.")
+  #supression des doublons
+base_child_endline_sans_doublons <- base_child_endline %>%
+  distinct()
+# Au contraire on affiche
+} else {
+  print("Aucun doublon trouvé.")
+  
+  base_child_endline_sans_doublons <- base_child_endline
+}
+
+```
+
+### Dans la base food_comp_mother_endline
+
+
+```{r,}
+# Vérification de la présence de doublons 
+base_doublons <- base_mother_endline %>%
+  duplicated()%>%
+  any()
+
+# Afficher le résultat
+if (base_doublons) {
+  print("Des doublons sont présents dans les données.")
+  #supression des doublons
+base_mother_endline_sans_doublons <- base_child_endline %>%
+  distinct()
+# Au contraire on affiche
+} else {
+  print("Aucun doublon trouvé.")
+  
+  base_mother_endline_sans_doublons <- base_child_endline
+}
+
+```
+
+### Dans la base menage
+
+```{r,}
+# Vérification de la présence de doublons 
+base_doublons <- base_menage %>%
+  duplicated()%>%
+  any()
+
+# Afficher le résultat
+if (base_doublons) {
+  print("Des doublons sont présents dans les données.")
+  #supression des doublons
+base_menage_sans_doublons <- base_menage %>%
+  distinct()
+# Au contraire on affiche
+} else {
+  print("Aucun doublon trouvé.")
+  
+  base_menage_sans_doublons <- base_menage
+}
+
+```
+
+```{r,}
+View(base_child_baseline_sans_doublons)
+
+```
+
+## 2.les noms des variables 
+```{r,}
+# Afficher les noms des variables dans la base_child_baseline_sans_doublons
+names(base_child_baseline_sans_doublons)
+
+
+# Afficher les noms des variables dans la base_child_endline_sans_doublons
+names(base_child_endline_sans_doublons)
+# Afficher les noms des variables dans la base_mother_baseline_sans_doublons
+names(base_mother_baseline_sans_doublons)
+
+# Afficher les noms des variables dans la base_mother_endline_sans_doublons
+names(base_mother_endline_sans_doublons)
+```
+```{r,}
+# Vérifions les noms des variables après 
+setdiff(names(base_child_baseline_sans_doublons), names(base_child_endline_sans_doublons))  # Vérifier les variables manquantes dans Endline
+setdiff(names(base_child_endline_sans_doublons),  names(base_child_endline_sans_doublons))  # Vérifier les variables manquantes dans Baseline
+```
+On remarque que les noms des variables sont cohérent
+
+```{r,}
+# Vérifions les noms des variables après 
+setdiff(names(base_mother_baseline_sans_doublons), names(base_mother_endline_sans_doublons))  # Vérifier les variables manquantes dans Endline
+setdiff(names(base_mother_endline_sans_doublons),  names(base_mother_endline_sans_doublons))  # Vérifier les variables manquantes dans Baseline
+```
+
+
+```{r,}
+# Vérifions les noms des variables après 
+base_child_baseline_sans_doublons <- base_child_baseline_sans_doublons %>% clean_names()
+
+base_child_endline_sans_doublons <- base_child_endline_sans_doublons %>% clean_names()
+
+base_mother_baseline_sans_doublons <- base_mother_baseline_sans_doublons %>% clean_names()
+
+base_mother_endline_sans_doublons <- base_mother_endline_sans_doublons %>% clean_names()
+
+```
+
+```{r,}
+head(base_mother_baseline_sans_doublons)
+```
+L'énergie moyenne est:
+
+```{r,}
+# Calculer la consommation d'énergie moyenne par repas pour l'ensemble des mères
+consommation_moyenne_energie <- base_mother_baseline_sans_doublons %>%
+  summarise(consommation_moyenne = mean(energ_kcal, na.rm = TRUE))
+
+# Afficher le résultat
+print(consommation_moyenne_energie)
+
+```
+
+5. Sauvegarde:
+
+
+```{r,}
+mother_baseline_v1.dta<-base_mother_baseline_sans_doublons
+mother_endline_v1.dta<-base_child_endline_sans_doublons
+child_baseline_v1.dta<-base_child_baseline_sans_doublons
+child_endline_v1.dta<-base_child_endline_sans_doublons
+base_menage.dta <-base_menage_sans_doublons
+
+```
+
+# Partie 2 : Empilement et Fusion des données
+
+
+## 1)	Baseline
+
+```{r,}
+#Nous ferrons une jointure gauche
+base1<-mother_baseline_v1.dta %>% left_join(child_baseline_v1.dta, by= "hhid")
+View(base1)
+```
+
+Renommons les variables
+
+**je n'ai pas les compétences nécessaires pour traiter cette partie. je passe à la partie trois**
+
+
+
+#Partie 3 : Statistiques descriptives avec le package gtsummary
+
+
+Nous nous proposons de faire de statistiques descriptives sans ponderation sur quelques variables. 
+
+```{r}
+#Statistiques descriptive 
+stat_base<- mother_baseline_v1.dta %>% labelled::to_factor() %>%  select(regionid, communeid, villageid) %>% tbl_summary(
+  label = list(
+    regionid ~ "La région",
+    communeid ~ "la commune",
+    villageid ~ "Milieu de résidence"
+  ),
+
+  missing = "always",
+  missing_text="val manquant"
+) %>% modify_header(label="statistiques descriptives sur la base individu") #%>% as_gt() %>%  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") 
+
+```
+
+```{r  }
+#mise en forme du tableau avec la le package gt
+stat_base_ind1<- as_gt(stat_base)  
+stat_base_ind1 %>% 
+  tab_header(title="Taille") %>%
+  #Mettons la bordure en vert pour toutes les colonnes
+  tab_style(style=cell_borders(color="green", weight =  px(4)), locations = cells_body(columns=everything())) %>%
+  #Mettons le fonf en jaune
+  tab_style(style=cell_fill(color="yellow"), locations = cells_body(columns=everything())) %>% 
+  #mettons le texte en marron et en gras
+  tab_style(style=cell_text(color="darkred", weight="bold"  ), locations = cells_body(columns=everything()))%>%
+ #Le titrage en bas 
+  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") 
+stat_base_ind1
+```
+
+
+```{r,}
+head(base_child_baseline_sans_doublons)
+```
+
+Base menage
+```{r}
+#Statistiques descriptive 
+stat_base1 <- child_baseline_v1.dta %>% labelled::to_factor() %>%  select(regionid, communeid, villageid) %>% tbl_summary(
+  label = list(
+   regionid ~ "La région",
+    communeid ~ "la commune",
+    villageid ~ "Milieu de résidence"
+  ),
+  missing = "always",
+  missing_text="val manquant"
+) %>% modify_header(label="statistiques descriptives sur la base individu") #%>% as_gt() %>%  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") 
+
+```
+
+```{r  }
+#mise en forme du tableau avec la le package gt
+stat_base1<- as_gt(stat_base1)  
+stat_base1 %>% 
+  tab_header(title="Statistique de la base menage") %>%
+  #Mettons la bordure en vert pour toutes les colonnes
+  tab_style(style=cell_borders(color="blue", weight =  px(4)), locations = cells_body(columns=everything())) %>%
+  #Mettons le fonf en jaune
+  tab_style(style=cell_fill(color="lightblue"), locations = cells_column_labels(columns=everything())) %>% 
+  tab_style(style=cell_fill(color="lightblue"), locations = cells_body(columns=everything())) %>% 
+  #mettons le texte en marron et en gras
+  tab_style(style=cell_text(color="black", weight="bold"  ), locations = cells_body(columns=everything()))%>%
+  
+  #tab_source_note(style=cell_text(color="lightblue")) %>% 
+ #Le titrage en bas 
+  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2019 Togo") #style=cell_text(color="lightblue") ) 
+stat_base_ind1
+```
+Ces tableau nous donnent quelques statistiques sur les variables choisits. 
