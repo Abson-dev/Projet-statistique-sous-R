@@ -28,4 +28,4 @@ data_BEN_Pcode <- data_BEN_Pcode %>%
 data_BEN_fin <- merge(data_BEN,data_BEN_Pcode, by.x="shapeName", by.y="ADM2_FR")
 
 # Faire le merge final pour la récupération du code final
-data_merge_BEN <- right_join(data, data_BEN_fin, by = c("commune" = "shapeName"))
+data_merge_BEN <- right_join(data_BEN_fin,data , by = c("commune" = "shapeName"))
