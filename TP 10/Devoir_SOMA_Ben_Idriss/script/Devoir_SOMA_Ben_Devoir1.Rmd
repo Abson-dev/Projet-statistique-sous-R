@@ -1,8 +1,9 @@
 ---
-title: "Devoir de R"
+title: "Devoir de R SOMA Ben Idriss"
 output:
   word_document: default
-  html_document: default
+  html_document:
+    df_print: paged
 date: "2025-02-25"
 ---
 
@@ -10,7 +11,7 @@ date: "2025-02-25"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Commencons par importer les librairies 
+Commencons par importer les librairies  nécessaires pour notre travail 
 
 ```{r}
 # importation des librairies 
@@ -580,7 +581,7 @@ write_dta(final_data, "../Données/base_finale.dta")
 
 # Partie 3 : Statistiques descriptives interessantes 
 
-On va sortir des statiques descriptives sur les bases child_baseline 
+On va sortir des statiques descriptives sur les bases child_baseline  et child_endline
 
 ```{r}
 colnames(child_baseline)
@@ -605,7 +606,7 @@ energy_summary <- child_baseline %>%
   modify_header(label = "**Énergie (kcal)**")
 
 # Afficher le résumé
-print(energy_summary)
+energy_summary
 
 
 ```
@@ -624,10 +625,10 @@ protein_summary <- child_baseline %>%
   tbl_summary(
     statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
     missing = "no"
-  )
+  )%>% modify_header(label = "**Proteines  **")
 
 # Afficher le résumé
-print(protein_summary)
+protein_summary
 
 ```
 
@@ -645,10 +646,10 @@ lipid_summary <- child_baseline %>%
   tbl_summary(
     statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
     missing = "no"
-  )
+  ) %>% modify_header(label = "**Lipides **")
 
 # Afficher le résumé
-print(lipid_summary)
+lipid_summary
 
 ```
 
@@ -670,34 +671,29 @@ vitamin_summary <- child_baseline %>%
   modify_header(label = "**Vitamines**")  
 
 # Afficher le résumé
-print(vitamin_summary)
+vitamin_summary
 
 
 ```
 
 
-
-# -------------------------
-# Statistiques Descriptives Globales
-# -------------------------
-
-# Statistiques descriptives globales pour toutes les variables
-
-
 ```{r}
-
-global_summary <- child_baseline %>% labelled::to_factor()%>% 
+vitamin_summary <- child_endline %>%
+  select(vit_b6_mg, vit_b12_mcg, vit_c_mg) %>%
   tbl_summary(
     statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
     missing = "no"
   ) %>%
-  modify_header(label = "**Statistiques Globales**")
+  modify_header(label = "**Vitamines**")  
 
 # Afficher le résumé
-print(global_summary)
-
+vitamin_summary
 
 ```
+
+
+
+
 
 
 # -------------------------

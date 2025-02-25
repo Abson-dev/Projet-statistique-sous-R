@@ -7,6 +7,7 @@ date: "2025-02-11"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r}
 library(utils)
 ```
@@ -17,18 +18,23 @@ library(dplyr)
 library(gtsummary)
 library(haven)
 ```
+
 ```{r}
 menage <- haven::read_dta("../Données/ehcvm_menage_ben2021.dta")
 ```
+
 ```{r}
 str(menage)
 ```
+
 ```{r}
 menage %>% select(logem,toit,mur)%>% tbl_summary()
 ```
+
 ```{r}
 menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary()
 ```
+
 ```{r}
 menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary(
   label=list(logem~"logement du chef de menage ",
@@ -51,9 +57,11 @@ menage %>% labelled::to_factor() %>% select(logem,toit,mur)%>% tbl_summary(
 ```{r}
 
 ```
+
 ```{r}
 menage %>% select(grosrum,petitrum,superf) %>% tbl_summary()
 ```
+
 ```{r}
 menage %>%labelled::to_factor() %>% select(grosrum,petitrum,superf) %>% tbl_summary(statistic =list(grosrum~"{mean}({sd})",
                                                                             petitrum~"{mean}({sd})",
@@ -78,6 +86,7 @@ menage %>%labelled::to_factor() %>% select(grosrum,petitrum,superf) %>% tbl_summ
                                                                             )
 
 ```
+
 ```{r}
 welfare <-haven::read_dta("../Données/ehcvm_welfare_ben2021.dta")
 ```
@@ -85,25 +94,38 @@ welfare <-haven::read_dta("../Données/ehcvm_welfare_ben2021.dta")
 ```{r}
 str(welfare)
 ```
+```{r}
+View(welfare)
+
+```
+
+
 
 ```{r}
 welfare %>% select(hgender,hage,hmstat,heduc,hdiploma)%>% tbl_summary()
 ```
+
+
 ```{r}
 welfare %>%labelled::to_factor() %>% select(hgender,hage,hmstat,heduc,hdiploma) %>% tbl_summary()
                                                                            
 ```
 
+
 ```{r}
 welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"
                                                                             ))
 ```
+
+
 ```{r}
 welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"),
 missing = "always",
 missing_text = "Valeurs Manquantes "
                                                                             )
 ```
+
+
 
 ```{r}
 welfare %>%labelled::to_factor() %>% select(hage,hgender,hmstat,heduc,hdiploma) %>% tbl_summary(statistic =list(hage~"{mean}({sd})"),
