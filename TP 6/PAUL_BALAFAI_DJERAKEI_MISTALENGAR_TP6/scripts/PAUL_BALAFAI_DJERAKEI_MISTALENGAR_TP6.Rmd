@@ -1,0 +1,568 @@
+---
+title: "PAUL_BALAFAI_DJERAKEI_MISTALENGAR_TP6"
+output: 
+  html_document:
+---
+
+
+
+
+
+
+chargement des packages
+
+```{r}
+#verifie si le package pacman est installé, sinon l'installe
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+#verifie si les packages sont installés, sinon les installe
+pacman::p_load(tidyverse, gtsummary,haven,labelled,survey,gt)
+
+```
+
+# I- Analyse de la Base menage
+
+### importation des bases de données
+
+```{r bases}
+
+base_menage <- haven::read_dta("../donnees/ehcvm_menage_gnb2018.dta") %>% 
+  labelled::to_factor()
+
+```
+
+Structure de la base menage
+
+```{r}
+colnames(base_menage)
+```
+
+```{r}
+str(base_menage)
+```
+
+### 1. Caractéristiques du Logement
+
+```{r}
+# 1. Caractéristiques du Logement
+table_logement <- base_menage %>% 
+  select(mur, toit, sol, logem, superf) %>% 
+  tbl_summary(
+    type = list(
+      c(mur, toit, sol, logem) ~ "categorical",
+      superf ~ "continuous2"
+    ),
+    statistic = list(
+      all_categorical() ~ "{n} ({p}%)",
+      all_continuous() ~ c("{mean} ({sd})", "{median} [{p25}-{p75}]")
+    ),
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Caractéristiques du Logement**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(
+    source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019"
+  )
+
+table_logement
+```
+
+### 2. Accès aux Services de Base
+
+```{r}
+# 2. Accès aux Services de Base
+table_services <- base_menage %>% 
+  select(eauboi_ss, eauboi_sp, elec_ac, ordure, toilet, eva_toi, eva_eau) %>% 
+  tbl_summary(
+    type = list(all_dichotomous() ~ "categorical"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Accès aux Services de Base**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_services
+```
+
+### 3. Biens Durables
+
+```{r}
+# 3. Biens Durables
+table_biens <- base_menage %>% 
+  select(tv, frigo, cuisin, ordin, decod, car) %>% 
+  tbl_summary(
+    type = list(all_dichotomous() ~ "dichotomous"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Biens Durables**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+table_biens
+```
+
+### 4. Élevage et Agriculture
+
+```{r}
+# 4. Élevage et Agriculture
+table_agri <- base_menage %>% 
+  select(grosrum, petitrum, porc, lapin, volail) %>% 
+  tbl_summary(
+    type = list(all_continuous() ~ "continuous2"),
+    statistic = list(all_continuous() ~ c("{mean} ({sd})", "{median} [{p25}-{p75}]")),
+    digits = list(all_continuous() ~ c(1, 1)),
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Élevage et Agriculture**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+table_agri
+```
+
+### 5. Chocs et Vulnérabilités
+
+```{r}
+# 5. Chocs et Vulnérabilités
+table_chocs <- base_menage %>% 
+  select(sh_id_demo, sh_co_natu, sh_co_eco, sh_id_eco, sh_co_vio, sh_co_oth) %>% 
+  tbl_summary(
+    type = list(all_dichotomous() ~ "dichotomous"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Chocs et Vulnérabilités**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_chocs
+```
+
+
+
+# II- Analyse de la base Individus
+
+```{r}
+#importation de la base individus
+base_individus <- haven::read_dta("../donnees/ehcvm_individu_gnb2018.dta")%>% 
+  labelled::to_factor() %>% 
+  mutate(educ_hi = recode(educ_hi,
+                          "Nenhum" = "Aucun",
+                          "Pre-escolar" = "Pré-scolaire",
+                          "Ensino Basico" = "Enseignement de base",
+                          "Ensino Secundário" = 
+                            "Enseignement secondaire",
+                          "Ensino Técnico/Profissional" =   "Enseignement technique/professionnel",
+                          "Ensino Superior" = 
+                            "Enseignement supérieur"),
+         milieu = recode(milieu, 
+                         "Urbano" = "Urbain", "Rural" = "Rural"),
+         sexe = recode(sexe, 
+                      "Masculino"="Masculin","Feminino"="Féminin"),
+         csp = recode(csp,
+                      "Quadro superior" = "Cadre supérieur",
+                      "Quadro médio/supervisor" = "Cadre moyen/superviseur",
+                      "Operário ou trabalhador qualificado" = 
+                        "Ouvrier ou travailleur qualifié",
+                      "Operário ou trabalhador não qualificado" = 
+                        "Ouvrier ou travailleur non qualifié",
+                      "Servente, serviço doméstico" = 
+                        "Servant, service domestique",
+                      "Estagiário ou aprendiz remunerado" = 
+                        "Stagiaire ou apprenti rémunéré",
+                      "Estagiário ou aprendiz não remunerado" = 
+                        "Stagiaire ou apprenti non rémunéré",
+                      "Trabalhador familiar, contribuinte na e" = 
+                        "Travailleur familial, contributeur dans l'exploitation",
+                      "Trabalhador por conta própria" = 
+                        "Travailleur indépendant",
+                      "Patrão" = "Patron"),
+         lien = recode(lien,
+                       "Chefe do agregado familiar" = 
+                         "Chef de ménage",
+                       "Cônjuge" = "Conjoint(e)",
+                       "Filho, Filha" = "Fils, Fille",
+                       "Pai, Mãe" = "Père, Mère",
+                       "Neto, neta" = "Petit-fils, Petite-fille",
+                       "Avôs" = "Grands-parents",
+                       "Irmão, irmã" = "Frère, Sœur",
+                       "Outros parentes do CAF/cônjuge" = 
+                         "Autres parents du chef de ménage/conjoint",
+                       "Pessoa não aparentada com o CAF/cônjuge" = 
+                         "Personne non apparentée au chef de ménage/conjoint",
+                       "Empregado(a) doméstico(a) ou parente do CAF/cônjuge" = "Employé(e) domestique ou parent du chef de ménage"))
+
+```
+
+```{r}
+colnames(base_individus)
+```
+
+```{r}
+str(base_individus)
+```
+
+### 1. Démographie et Localisation
+
+```{r}
+# 1. Démographie et Localisation
+table_demo1 <- base_individus %>%
+  select(country, zae, region, sousregion, milieu, resid) %>%
+  tbl_summary(
+    type = list(all_categorical() ~ "categorical"),
+                
+    statistic = list(all_categorical() ~ "{n} ({p}%)",
+                     all_continuous() ~ "{mean} ({sd})"),
+    missing = "ifany"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Démographie et Localisation**") %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_demo1
+```
+
+### 2. Caractéristiques des Individus
+
+```{r}
+# 2. Caractéristiques des Individus
+table_indiv <- base_individus %>%
+  select(sexe, age, lien, mstat, religion, nation, agemar) %>%
+  tbl_summary(
+    type = list(c(sexe, lien, mstat, religion, nation) ~ "categorical",
+                age ~ "continuous2",
+                agemar ~ "continuous2"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)",
+                     all_continuous() ~ c("{mean} ({sd})", "{median} [{p25}-{p75}]")),
+    digits = list(all_continuous() ~ 1)
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Caractéristiques des Individus**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_indiv
+```
+
+### 3. Santé
+
+```{r}
+# 3. Santé
+table_sante <- base_individus %>%
+  select(mal30j, aff30j, arrmal, durarr, con30j, hos12m, couvmal, moustiq, handit, handig) %>%
+  tbl_summary(
+    type = list(all_categorical() ~ "categorical"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "ifany"
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Santé**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_sante
+```
+
+### 4. Éducation et Technologie
+
+```{r}
+# 4. Éducation et Technologie
+table_edu <- base_individus %>%
+  select(alfab, scol, educ_scol, educ_hi, diplome, telpor, internet) %>%
+  tbl_summary(
+    type = list(all_categorical() ~ "categorical"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Éducation et Technologie**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_edu
+```
+
+### 5. Emploi et Économie
+
+```{r}
+# 5. Emploi et Économie
+table_emploi <- base_individus %>%
+  select(activ7j, activ12m, branch, sectins, csp, volhor, salaire, 
+         emploi_sec, sectins_sec, csp_sec, volhor_sec, salaire_sec, bank) %>%
+  tbl_summary(
+    type = list(all_categorical() ~ "categorical",
+                c(volhor, salaire, volhor_sec, salaire_sec) ~ "continuous2"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)",
+                     all_continuous() ~ c("{mean} ({sd})", "{median} [{p25}-{p75}]")),
+    digits = list(all_continuous() ~ 0)
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Emploi et Économie**") %>% bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+table_emploi
+```
+
+
+# III- Analyse de la base jointe individus-menage
+
+```{r}
+# Jointure des bases
+base_jointe <- base_individus %>%
+  left_join(base_menage, by = "hhid") %>%
+  labelled::to_factor()
+```
+
+```{r}
+#structure de la base jointe
+str(base_jointe)
+```
+
+### 1. Santé et caractéristiques démographiques
+
+```{r}
+# 1. Santé et caractéristiques démographiques
+sante_table <- base_jointe %>%
+  select(sexe, age, milieu, mal30j, couvmal, con30j, hos12m) %>%
+  tbl_summary(
+    by = sexe,
+    statistic = list(all_continuous() ~ "{mean} ({sd})"),
+    missing = "no"
+  ) %>%
+  add_p() %>%
+  modify_header(label ~ "**Variable**") %>%
+  bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+sante_table
+```
+
+### 2. Éducation et emploi
+
+```{r}
+# 2. Éducation et emploi
+education_table <- base_jointe %>%
+  mutate(age_group = cut(age, breaks = c(0, 15, 25, 45, 100))) %>%
+  select(educ_hi, diplome, activ7j, csp, milieu, age_group) %>%
+  tbl_summary(
+    by = milieu,
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  add_p() %>%
+  modify_caption("**Éducation et Situation Professionnelle**") %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+education_table
+```
+
+### 3. Conditions de vie et accès aux services
+
+```{r}
+# 3. Conditions de vie et accès aux services
+conditions_vie_table <- base_jointe %>%
+  select(milieu, elec_ac, eauboi_ss, toilet, bank, internet) %>%
+  tbl_summary(
+    by = milieu,
+    percent = "column",
+    missing = "no"
+  ) %>%
+  add_p(test = list(all_categorical() ~ "chisq.test")) %>%
+  modify_header(update = list(label ~ "**Indicateur**")) %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+conditions_vie_table
+```
+
+### 4. Actifs économiques et vulnérabilité
+
+```{r}
+# 4. Actifs économiques et vulnérabilité
+economie_table <- base_jointe %>%
+  select(csp, grosrum, volail, sh_co_natu, sh_co_eco) %>%
+  tbl_summary(
+    by = csp,
+    type = list(c("grosrum", "volail") ~ "continuous2"),
+    statistic = list(all_continuous() ~ "{median} ({p25}-{p75})")
+  ) %>%
+  add_p() %>%
+  modify_spanning_header(all_stat_cols() ~ "**Statut Professionnel**") %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+economie_table
+```
+
+### 5. Technologie et développement
+
+```{r}
+# 5. Technologie et développement
+tech_table <- base_jointe %>%
+  select(milieu, telpor, internet, tv, frigo) %>%
+  tbl_summary(
+    by = milieu,
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  add_p(pvalue_fun = ~style_pvalue(.x, digits = 2)) %>%
+  bold_p() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+tech_table
+```
+
+# IV- Analyse de la base jointe avec pondération
+
+```{r}
+# Importation de la base de pondération
+base_pond <- svydesign(ids =~ base_jointe$grappe, 
+                       data = base_jointe, 
+                       weights =~ base_jointe$hhweight)
+```
+
+
+### 1. Santé et caractéristiques démographiques
+```{r}
+
+sante_table_pond <- base_pond %>%
+  tbl_svysummary(
+    by = sexe,
+    include = c(sexe, age, milieu, mal30j, couvmal, con30j, hos12m),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    missing = "no"
+  ) %>%
+  add_p(
+    test = list(
+      all_continuous() ~ "svy.t.test",
+      all_categorical() ~ "svy.chisq.test"
+    )
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  bold_labels() %>%
+  modify_spanning_header(all_stat_cols() ~ "**Sexe**") %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+sante_table_pond
+```
+
+
+
+### 2. Éducation et emploi
+```{r}
+education_table_pond <- base_pond %>%
+  tbl_svysummary(
+    by = milieu,
+    include = c(educ_hi, diplome, activ7j, csp, age),
+    statistic = list(
+      age ~ "{median} ({p25}-{p75})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    missing = "no",
+    digits = list(age ~ c(1,1))
+  ) %>%
+  add_p(
+    test = list(
+      age ~ "svy.wilcox.test",
+      all_categorical() ~ "svy.chisq.test"
+    )
+  ) %>%
+  modify_caption("**Éducation et Situation Professionnelle**") %>%
+  modify_table_styling(columns = "label", align = "left") %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+education_table_pond
+```
+
+
+
+### 3. Conditions de vie et accès aux services
+```{r}
+conditions_vie_table_pond <- base_pond %>%
+  tbl_svysummary(
+    by = milieu,
+    include = c(elec_ac, eauboi_ss, toilet, bank, internet),
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    percent = "column",
+    missing = "no"
+  ) %>%
+  add_p(test = all_categorical() ~ "svy.chisq.test") %>%
+  modify_header(update = list(label ~ "**Indicateur**")) %>%
+  bold_labels() %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+conditions_vie_table_pond
+```
+
+
+
+### 4. Actifs économiques et vulnérabilité
+
+
+```{r}
+# suppression des valeurs manquantes dans la variable csp
+base_jointe_clean <- base_jointe %>% filter(!is.na(csp))
+
+# creation d'une base ponderee sans les valeurs manqueante de la variable csp
+base_pond1 <- svydesign(ids =~ base_jointe_clean$grappe, 
+                       data = base_jointe_clean, 
+                       weights =~ base_jointe_clean$hhweight)
+
+# Create the summary table
+economie_table_pond <- base_pond1 %>%
+  tbl_svysummary(
+    by = csp,
+    include = c(grosrum, volail, sh_co_natu, sh_co_eco),
+    statistic = list(
+      all_continuous() ~ "{median} ({p25}-{p75})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1
+  ) %>%
+  add_p(
+    test = list(
+      c(grosrum, volail) ~ "svy.kruskal.test",
+      c(sh_co_natu, sh_co_eco) ~ "svy.chisq.test"
+    )
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%  # Renaming the label column
+  as_gt() %>%
+  tab_source_note(
+    source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019"
+  )
+
+economie_table_pond
+```
+
+
+
+### 5. Technologie et développement
+```{r}
+tech_table_pond <- base_pond %>%
+  tbl_svysummary(
+    by = milieu,
+    include = c(telpor, internet, tv, frigo),
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    missing = "no"
+  ) %>%
+  add_p(
+    pvalue_fun = ~style_pvalue(.x, digits = 2),
+    test = all_categorical() ~ "svy.chisq.test"
+  ) %>%
+  bold_p() %>%
+  modify_table_styling(columns = "p.value", hide = FALSE) %>%
+  as_gt() %>% 
+  tab_source_note(source_note = "Source : Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM), Guinée-Bissau 2018-2019")
+
+tech_table_pond
+```
+

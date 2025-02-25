@@ -1,0 +1,2037 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{anyfontsize}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={TP-6},
+  pdfauthor={Groupe-8},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{TP-6}
+\author{Groupe-8}
+\date{2025-02-23}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{Chargement des packages
+necessaires}\label{chargement-des-packages-necessaires}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Liste des packages nécessaires}
+\NormalTok{packages }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"readr"}\NormalTok{, }\StringTok{"haven"}\NormalTok{, }\StringTok{"utils"}\NormalTok{, }\StringTok{"dplyr"}\NormalTok{, }\StringTok{"labelled"}\NormalTok{, }\StringTok{"cardx"}\NormalTok{, }\StringTok{"survey"}\NormalTok{, }\StringTok{"kableExtra"}\NormalTok{,  }\StringTok{"gtsummary"}\NormalTok{)}
+
+\CommentTok{\# Vérification et installation}
+\FunctionTok{invisible}\NormalTok{(}\FunctionTok{lapply}\NormalTok{(packages, }\ControlFlowTok{function}\NormalTok{(pkg) \{}
+  \ControlFlowTok{if}\NormalTok{ (}\SpecialCharTok{!}\FunctionTok{requireNamespace}\NormalTok{(pkg, }\AttributeTok{quietly =} \ConstantTok{TRUE}\NormalTok{)) \{}
+    \FunctionTok{install.packages}\NormalTok{(pkg, }\AttributeTok{quiet =} \ConstantTok{TRUE}\NormalTok{)  }
+\NormalTok{  \}}
+  \ControlFlowTok{if}\NormalTok{ (}\SpecialCharTok{!}\NormalTok{pkg }\SpecialCharTok{\%in\%} \FunctionTok{.packages}\NormalTok{()) \{  }
+    \FunctionTok{suppressMessages}\NormalTok{(}\FunctionTok{library}\NormalTok{(pkg, }\AttributeTok{character.only =} \ConstantTok{TRUE}\NormalTok{))}
+\NormalTok{  \}}
+\NormalTok{\}))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Importation de la base
+menage}\label{importation-de-la-base-menage}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_individu}\OtherTok{\textless{}{-}}\NormalTok{ haven}\SpecialCharTok{::}\FunctionTok{read\_dta}\NormalTok{(}\StringTok{"../Donnees/ehcvm\_individu\_tgo2018.dta"}\NormalTok{)}
+\NormalTok{data\_individu}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 27,482 x 52
+##    country  year vague  hhid grappe menage numind zae       region    sousregion
+##    <chr>   <dbl> <dbl> <dbl>  <dbl>  <dbl>  <dbl> <dbl+lbl> <dbl+lbl> <dbl+lbl> 
+##  1 TGO      2018     1   101      1      1      1 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  2 TGO      2018     1   101      1      1      2 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  3 TGO      2018     1   101      1      1      4 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  4 TGO      2018     1   103      1      3      1 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  5 TGO      2018     1   104      1      4      1 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  6 TGO      2018     1   104      1      4      2 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  7 TGO      2018     1   104      1      4      3 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  8 TGO      2018     1   105      1      5      1 5 [Lome]  6 [Lomé ~ 602 [Arro~
+##  9 TGO      2018     1   105      1      5      2 5 [Lome]  6 [Lomé ~ 602 [Arro~
+## 10 TGO      2018     1   106      1      6      1 5 [Lome]  6 [Lomé ~ 602 [Arro~
+## # i 27,472 more rows
+## # i 42 more variables: milieu <dbl+lbl>, hhweight <dbl>, resid <dbl+lbl>,
+## #   sexe <dbl+lbl>, age <dbl>, lien <dbl+lbl>, mstat <dbl+lbl>,
+## #   religion <dbl+lbl>, nation <dbl+lbl>, agemar <dbl>, mal30j <dbl+lbl>,
+## #   aff30j <dbl+lbl>, arrmal <dbl+lbl>, durarr <dbl+lbl>, con30j <dbl+lbl>,
+## #   hos12m <dbl+lbl>, couvmal <dbl+lbl>, moustiq <dbl+lbl>, handit <dbl+lbl>,
+## #   handig <dbl+lbl>, alfab <dbl+lbl>, scol <dbl+lbl>, educ_scol <dbl+lbl>, ...
+\end{verbatim}
+
+\subsection{Importation de la base
+menage}\label{importation-de-la-base-menage-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_menage}\OtherTok{\textless{}{-}}\NormalTok{ haven}\SpecialCharTok{::}\FunctionTok{read\_dta}\NormalTok{(}\StringTok{"../Donnees/ehcvm\_menage\_tgo2018.dta"}\NormalTok{)}
+\NormalTok{data\_menage}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6,171 x 34
+##    country  hhid logem       mur     toit    sol     eauboi_ss eauboi_sp elec_ac
+##    <chr>   <dbl> <dbl+lbl>   <dbl+l> <dbl+l> <dbl+l> <dbl+lbl> <dbl+lbl> <dbl+l>
+##  1 TGO       101 1 [Proprie~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  2 TGO       103 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  3 TGO       104 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  4 TGO       105 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   0 [Non]
+##  5 TGO       106 4 [Autre]   1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  6 TGO       108 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  7 TGO       110 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  8 TGO       111 1 [Proprie~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+##  9 TGO       112 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+## 10 TGO       201 3 [Locatai~ 1 [Oui] 1 [Oui] 1 [Oui] 1 [Oui]   1 [Oui]   1 [Oui]
+## # i 6,161 more rows
+## # i 25 more variables: elec_ur <dbl+lbl>, elec_ua <dbl+lbl>, ordure <dbl+lbl>,
+## #   toilet <dbl+lbl>, eva_toi <dbl+lbl>, eva_eau <dbl+lbl>, tv <dbl+lbl>,
+## #   fer <dbl+lbl>, frigo <dbl+lbl>, cuisin <dbl+lbl>, ordin <dbl+lbl>,
+## #   decod <dbl+lbl>, car <dbl+lbl>, superf <dbl>, grosrum <dbl>,
+## #   petitrum <dbl>, porc <dbl>, lapin <dbl>, volail <dbl>,
+## #   sh_id_demo <dbl+lbl>, sh_co_natu <dbl+lbl>, sh_co_eco <dbl+lbl>, ...
+\end{verbatim}
+
+\subsection{Structure des deux bases}\label{structure-des-deux-bases}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{utils}\SpecialCharTok{::}\FunctionTok{str}\NormalTok{(data\_individu)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tibble [27,482 x 52] (S3: tbl_df/tbl/data.frame)
+##  $ country       : chr [1:27482] "TGO" "TGO" "TGO" "TGO" ...
+##   ..- attr(*, "label")= chr "Pays"
+##   ..- attr(*, "format.stata")= chr "%3s"
+##  $ year          : num [1:27482] 2018 2018 2018 2018 2018 ...
+##   ..- attr(*, "label")= chr "Annee enquete"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ vague         : num [1:27482] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..- attr(*, "label")= chr "Vague"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ hhid          : num [1:27482] 101 101 101 103 104 104 104 105 105 106 ...
+##   ..- attr(*, "label")= chr "Idenfiant menage"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ grappe        : num [1:27482] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..- attr(*, "label")= chr "Numero de grappe"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ menage        : num [1:27482] 1 1 1 3 4 4 4 5 5 6 ...
+##   ..- attr(*, "label")= chr "Numero du menage"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ numind        : num [1:27482] 1 2 4 1 1 2 3 1 2 1 ...
+##   ..- attr(*, "label")= chr "Numero individu"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ zae           : dbl+lbl [1:27482] 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5...
+##    ..@ label       : chr "Zone agroecologique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:5] 1 2 3 4 5
+##    .. ..- attr(*, "names")= chr [1:5] "Zone des plaines du nord" "Zone des montagnes du nord" "Zone des plaines du centre" "Zone cotiere du sud" ...
+##  $ region        : dbl+lbl [1:27482] 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6...
+##    ..@ label       : chr "Region residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Maritime" "Plateaux" "Centrale" "Kara" ...
+##  $ sousregion    : dbl+lbl [1:27482] 602, 602, 602, 602, 602, 602, 602, 602, 602, 602, 60...
+##    ..@ label       : chr "Prefecture residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:41] 101 102 103 104 105 106 107 201 202 203 ...
+##    .. ..- attr(*, "names")= chr [1:41] "golfe" "lacs" "BAS-MONO" "vo" ...
+##  $ milieu        : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Milieu residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 1 2
+##    .. ..- attr(*, "names")= chr [1:2] "Urbain" "Rural"
+##  $ hhweight      : num [1:27482] 598 598 598 598 598 ...
+##   ..- attr(*, "label")= chr "Ponderation menage"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ resid         : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Resident"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sexe          : dbl+lbl [1:27482] 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1...
+##    ..@ label       : chr "Genre"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 1 2
+##    .. ..- attr(*, "names")= chr [1:2] "Masculin" "Féminin"
+##  $ age           : num [1:27482] 89 28 28 38 54 18 28 51 25 28 ...
+##   ..- attr(*, "label")= chr "Age en annees"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ lien          : dbl+lbl [1:27482] 1, 9, 9, 1, 1, 3, 3, 1, 3, 1, 1, 2, 3, 3, 1, 3, 1, 1...
+##    ..@ label       : chr "Lien de parente"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Chef de ménage" "Conjoint ( e )" "Fils, Fille" "Père, Mère" ...
+##  $ mstat         : dbl+lbl [1:27482] 5, 1, 1, 2, 3, 1, 1, 5, 1, 1, 2, 2, 1, 1, 6, 1, 7, 2...
+##    ..@ label       : chr "Situation de famille"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:7] 1 2 3 4 5 6 7
+##    .. ..- attr(*, "names")= chr [1:7] "Célibataire" "Marié(e) monogame" "Marié(e) polygame" "Union libre" ...
+##  $ religion      : dbl+lbl [1:27482] 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2...
+##    ..@ label       : chr "Religion"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:5] 1 2 3 4 5
+##    .. ..- attr(*, "names")= chr [1:5] "Musulman" "Chrétien" "Animiste" "Autre Réligion" ...
+##  $ nation        : dbl+lbl [1:27482]  8,  8,  8,  6,  8,  8,  8,  8,  8,  8,  8,  8,  8, ...
+##    ..@ label       : chr "Nationalité"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:12] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:12] "Benin" "Burkina Faso" "Côte d'Ivoire" "Guinée Bissau" ...
+##  $ agemar        : num [1:27482] NA NA NA 32 22 NA NA 20 NA NA ...
+##   ..- attr(*, "label")= chr "Age premier marriage"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ mal30j        : dbl+lbl [1:27482] 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0...
+##    ..@ label       : chr "Prob. sante 30 dern. jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ aff30j        : dbl+lbl [1:27482]  1, NA,  1,  1, 11, 11, NA, NA, NA, NA, NA, 14, NA, ...
+##    ..@ label       : chr "probleme sante"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:14] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:14] "Fièvre/Paludisme" "Diarrhée" "Accident/Blessure" "Problème dentaire" ...
+##  $ arrmal        : dbl+lbl [1:27482] 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Arret activite pour maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ durarr        : dbl+lbl [1:27482]  3, NA,  3, NA, NA, NA, NA, NA, NA, NA, NA,  2, NA, ...
+##    ..@ label       : chr "Duree arret activite pour maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:3] 1 2 3
+##    .. ..- attr(*, "names")= chr [1:3] "Moins d'une semaine" "Entre une et deux semaines" "Plus de deux semaines"
+##  $ con30j        : dbl+lbl [1:27482]  0, NA,  1,  0,  0,  1, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Consulte 30 dern. jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ hos12m        : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Hospitalisation 12 der. mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ couvmal       : dbl+lbl [1:27482] 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1...
+##    ..@ label       : chr "Indivu couverture maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ moustiq       : dbl+lbl [1:27482] 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0...
+##    ..@ label       : chr "Dormi moustiquire nuit dern."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ handit        : dbl+lbl [1:27482]  1,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0,  0, ...
+##    ..@ label       : chr "Handicap tout niveau"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ handig        : dbl+lbl [1:27482]  1,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0, ...
+##    ..@ label       : chr "Handicap majeur seul"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ alfab         : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Alphabetisation"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ scol          : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0...
+##    ..@ label       : chr "Freq. ecole 2017/18"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ educ_scol     : dbl+lbl [1:27482] NA, NA, NA, NA, NA,  3,  5, NA, NA, NA, NA, NA,  2, ...
+##    ..@ label       : chr "Niv. educ. actuel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:8] 1 2 3 4 5 6 7 8
+##    .. ..- attr(*, "names")= chr [1:8] "Maternelle" "Primaire" "Secondaire 1  (Post Primaire) générale" "Secondaire 1  (Post Primaire) technique" ...
+##  $ educ_hi       : dbl+lbl [1:27482] 1, 6, 6, 6, 3, 4, 6, 4, 8, 8, 1, 4, 3, 3, 3, 4, 9, 9...
+##    ..@ label       : chr "Niv. educ. acheve"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:9] 1 2 3 4 5 6 7 8 9
+##    .. ..- attr(*, "names")= chr [1:9] "Aucun" "Maternelle" "Primaire" "Second. gl 1" ...
+##  $ diplome       : dbl+lbl [1:27482]  0,  2,  5,  2,  0,  1,  2,  2,  5,  6,  0,  1,  0, ...
+##    ..@ label       : chr "Diplome plus eleve"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:11] 0 1 2 3 4 5 6 7 8 9 ...
+##    .. ..- attr(*, "names")= chr [1:11] "Aucun" "CEPE / CEPD" "bepc" "cap" ...
+##  $ telpor        : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1...
+##    ..@ label       : chr "Individu a telephone portable"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ internet      : dbl+lbl [1:27482] 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1...
+##    ..@ label       : chr "Individu a acces internet"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ activ7j       : dbl+lbl [1:27482] 5, 5, 1, 1, 1, 5, 5, 1, 2, 1, 1, 1, 5, 5, 1, 5, 5, 1...
+##    ..@ label       : chr "Situation activite 7 derniers jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Occupe" "Chomeur" "TF cherchant emploi" "TF cherchant pas" ...
+##  $ activ12m      : dbl+lbl [1:27482] 3, 3, 1, 1, 1, 3, 3, 1, 3, 1, 1, 1, 3, 3, 1, 3, 3, 1...
+##    ..@ label       : chr "Situation activite 12 derniers mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Occupe" "Trav. fam." "Non occupe" "Moins de 5 ans"
+##  $ branch        : dbl+lbl [1:27482] NA, NA,  8, 10, 11, NA, NA,  4, NA,  8, 10,  4, NA, ...
+##    ..@ label       : chr "Branche activite"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:11] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:11] "Agriculture" "Elevage/peche" "Indust. extr." "Autr. indust." ...
+##  $ sectins       : dbl+lbl [1:27482] NA, NA,  3,  3,  2, NA, NA,  3, NA,  2,  3,  3, NA, ...
+##    ..@ label       : chr "Sect. institutionnel empl. prin."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Etat/Collectivités locales" "Entreprise publique/ parapublique" "Entreprise Privée" "Entreprise associative" ...
+##  $ csp           : dbl+lbl [1:27482] NA, NA,  9,  9,  4, NA, NA,  9, NA,  2,  9,  9, NA, ...
+##    ..@ label       : chr "CSP empl. prin."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Cadre supérieur" "Cadre moyen/agent de maîtrise" "Ouvrier ou employé qualifié" "Ouvrier ou employé non qualifié" ...
+##  $ volhor        : num [1:27482] NA NA 600 875 NA ...
+##   ..- attr(*, "label")= chr "Horaire an. travail empl. prin."
+##   ..- attr(*, "format.stata")= chr "%9.0g"
+##  $ salaire       : num [1:27482] NA NA NA NA 0 NA NA NA NA 3420000 ...
+##   ..- attr(*, "label")= chr "Salaire an. empl. prin."
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ emploi_sec    : dbl+lbl [1:27482] 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "A un emploi secondaire 12 mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sectins_sec   : dbl+lbl [1:27482] NA, NA, NA, NA,  3, NA, NA, NA, NA, NA,  6, NA, NA, ...
+##    ..@ label       : chr "Secteur instit. emploi sec."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Etat/Collectivités locales" "Entreprise publique/ parapublique" "Entreprise privée" "Entreprise associative" ...
+##  $ csp_sec       : dbl+lbl [1:27482] NA, NA, NA, NA,  9, NA, NA, NA, NA, NA,  4, NA, NA, ...
+##    ..@ label       : chr "CSP emploi sec."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Cadre supérieur" "Cadre moyen/agent de maîtrise" "Ouvrier ou employé qualifié" "Ouvrier ou employé non qualifié" ...
+##  $ volhor_sec    : num [1:27482] NA NA NA NA 720 NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Horaire an. travail emploi sec."
+##   ..- attr(*, "format.stata")= chr "%9.0g"
+##  $ salaire_sec   : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Salaire an. emploi sec."
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ bank          : dbl+lbl [1:27482] 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1...
+##    ..@ label       : chr "compte banque ou autre"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ serviceconsult: dbl+lbl [1:27482]  4, NA,  1,  4,  4,  1, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Service de santé consulté"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Hôpital/Clinique" "Dispensaire" "Autres" "Pas de consultation"
+##  $ persconsult   : dbl+lbl [1:27482]  4, NA,  2,  4,  4,  2, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Personnel de santé consulté"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Médecin" "Infirmier" "Autres" "Pas de consultation"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{utils}\SpecialCharTok{::}\FunctionTok{str}\NormalTok{(data\_menage)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tibble [6,171 x 34] (S3: tbl_df/tbl/data.frame)
+##  $ country   : chr [1:6171] "TGO" "TGO" "TGO" "TGO" ...
+##   ..- attr(*, "format.stata")= chr "%3s"
+##  $ hhid      : num [1:6171] 101 103 104 105 106 108 110 111 112 201 ...
+##   ..- attr(*, "label")= chr "Identifiant menage"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ logem     : dbl+lbl [1:6171] 1, 3, 3, 3, 4, 3, 3, 1, 3, 3, 4, 4, 4, 2, 4, 3, 3, 1,...
+##    ..@ label       : chr "Occupation logement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Proprietaire titre" "Proprietaire sans titre" "Locataire" "Autre"
+##  $ mur       : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "Mur en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ toit      : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "toit en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sol       : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "Sol en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eauboi_ss : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "eau potable saison seche"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eauboi_sp : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "eau potable saison pluie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ac   : dbl+lbl [1:6171] 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1,...
+##    ..@ label       : chr "Acces reseau electrique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ur   : dbl+lbl [1:6171] 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+##    ..@ label       : chr "Utilise elec. reseau"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ua   : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Utilise elec. solaire/groupe"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ ordure    : dbl+lbl [1:6171] 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1,...
+##    ..@ label       : chr "Déchets évacués sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ toilet    : dbl+lbl [1:6171] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1,...
+##    ..@ label       : chr "Toilettes saines"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eva_toi   : dbl+lbl [1:6171] 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1,...
+##    ..@ label       : chr "Excréments évacués sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eva_eau   : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,...
+##    ..@ label       : chr "Eaux usées évacuées sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ tv        : dbl+lbl [1:6171] 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1,...
+##    ..@ label       : chr "Menage a TV"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ fer       : dbl+lbl [1:6171] 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1,...
+##    ..@ label       : chr "Menage a fer electrique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ frigo     : dbl+lbl [1:6171] 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,...
+##    ..@ label       : chr "Menage a frigo/congel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ cuisin    : dbl+lbl [1:6171] 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Menage a cuisiniere elec/gaz"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ ordin     : dbl+lbl [1:6171] 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,...
+##    ..@ label       : chr "Menage a ordinateur"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ decod     : dbl+lbl [1:6171] 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,...
+##    ..@ label       : chr "Menage a decodeur/antenne"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ car       : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,...
+##    ..@ label       : chr "Menage a voiture"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ superf    : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Superficie agricole"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ grosrum   : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr gros ruminants"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ petitrum  : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr petits ruminants"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ porc      : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr porcs"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ lapin     : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr lapins"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ volail    : num [1:6171] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr volailles"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ sh_id_demo: dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1,...
+##    ..@ label       : chr "Choc idio démographique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_natu: dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Choc covariant naturel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_eco : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Choc covariant économique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_id_eco : dbl+lbl [1:6171] 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Choc idio économique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_vio : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Choc covariant violence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_oth : dbl+lbl [1:6171] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+##    ..@ label       : chr "Autres Chocs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+\end{verbatim}
+
+\section{Statistiques avec la base
+indivdu}\label{statistiques-avec-la-base-indivdu}
+
+\subsection{Tableau Statistique sur la base individu sans
+poids}\label{tableau-statistique-sur-la-base-individu-sans-poids}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau1}\OtherTok{\textless{}{-}}\NormalTok{ data\_individu }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{()}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{ (sexe, bank, mstat, alfab, diplome, educ\_hi, age, internet, couvmal, moustiq)}\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{tbl\_summary}\NormalTok{(}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(mstat}\SpecialCharTok{\textasciitilde{}} \StringTok{"Situation de famille"}\NormalTok{,}
+\NormalTok{                 bank }\SpecialCharTok{\textasciitilde{}}\StringTok{"Compte banquaire ou autre"}\NormalTok{,}
+\NormalTok{               alfab }\SpecialCharTok{\textasciitilde{}}\StringTok{"Alphabetisation"}\NormalTok{,}
+\NormalTok{               diplome }\SpecialCharTok{\textasciitilde{}} \StringTok{"Diplome plus élevé"}\NormalTok{,}
+\NormalTok{               educ\_hi }\SpecialCharTok{\textasciitilde{}}\StringTok{"Niveau d\textquotesingle{}éducation achevé"}\NormalTok{, }
+\NormalTok{               age}\SpecialCharTok{\textasciitilde{}} \StringTok{"Age en année"}\NormalTok{, }
+\NormalTok{              internet}\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu accès a internet"}\NormalTok{, }
+\NormalTok{              couvmal}\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{,}
+\NormalTok{              moustiq}\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la dernière nuit sous une moustiquaire"}\NormalTok{),}
+  \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(age}\SpecialCharTok{\textasciitilde{}}\StringTok{"\{mean\} (\{sd\}"}\NormalTok{),}
+  \AttributeTok{digits =} \FunctionTok{everything}\NormalTok{()}\SpecialCharTok{\textasciitilde{}}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{),}
+  \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+  \AttributeTok{missing\_text =} \StringTok{"valeurs manquantes"}\NormalTok{)}\SpecialCharTok{\%\textgreater{}\%}\FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label=} \StringTok{"Statistiques sur les individus"}\NormalTok{)}
+
+\NormalTok{tableau1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lc}
+\toprule
+Statistiques sur les individus & \textbf{N = 27,482}\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Genre &  \\ 
+    Masculin & 13,165 (48\%) \\ 
+    Féminin & 14,315 (52\%) \\ 
+    valeurs manquantes & 2 \\ 
+Compte banquaire ou autre &  \\ 
+    Non & 23,474 (85\%) \\ 
+    Oui & 4,008 (15\%) \\ 
+    valeurs manquantes & 0 \\ 
+Situation de famille &  \\ 
+    Célibataire & 16,716 (61\%) \\ 
+    Marié(e) monogame & 6,323 (23\%) \\ 
+    Marié(e) polygame & 2,185 (8\%) \\ 
+    Union libre & 389 (1\%) \\ 
+    Veuf(ve) & 1,297 (5\%) \\ 
+    Divorcé(e) & 182 (1\%) \\ 
+    Séparé(e) & 388 (1\%) \\ 
+    valeurs manquantes & 2 \\ 
+Alphabetisation &  \\ 
+    Non & 12,636 (46\%) \\ 
+    Oui & 14,846 (54\%) \\ 
+    valeurs manquantes & 0 \\ 
+Diplome plus élevé &  \\ 
+    Aucun & 20,005 (73\%) \\ 
+    CEPE / CEPD & 4,922 (18\%) \\ 
+    bepc & 1,519 (6\%) \\ 
+    cap & 72 (0\%) \\ 
+    bt & 18 (0\%) \\ 
+    bac & 550 (2\%) \\ 
+    DEUG, DUT, BTS & 94 (0\%) \\ 
+    Licence & 190 (1\%) \\ 
+    Maitrise & 71 (0\%) \\ 
+    Master/DEA/DESS & 28 (0\%) \\ 
+    Doctorat/Phd & 13 (0\%) \\ 
+    valeurs manquantes & 0 \\ 
+Niveau d'éducation achevé &  \\ 
+    Aucun & 10,653 (39\%) \\ 
+    Maternelle & 659 (2\%) \\ 
+    Primaire & 9,464 (34\%) \\ 
+    Second. gl 1 & 4,581 (17\%) \\ 
+    Second. tech. 1 & 31 (0\%) \\ 
+    Second. gl 2 & 1,137 (4\%) \\ 
+    Second. tech. 2 & 257 (1\%) \\ 
+    Postsecondaire & 107 (0\%) \\ 
+    Superieur & 592 (2\%) \\ 
+    valeurs manquantes & 1 \\ 
+Age en année & 23 (19 \\ 
+    valeurs manquantes & 2 \\ 
+Individu accès a internet &  \\ 
+    Non & 24,825 (90\%) \\ 
+    Oui & 2,657 (10\%) \\ 
+    valeurs manquantes & 0 \\ 
+Individu couverture maladie &  \\ 
+    Non & 26,281 (96\%) \\ 
+    Oui & 1,201 (4\%) \\ 
+    valeurs manquantes & 0 \\ 
+Dormir la dernière nuit sous une moustiquaire &  \\ 
+    Non & 7,340 (27\%) \\ 
+    Oui & 20,142 (73\%) \\ 
+    valeurs manquantes & 0 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD\\
+\end{minipage}
+\end{table}
+
+\subsection{Tableau Statistique sur la base individu sans poibs selon
+sexe et milieu de
+residence}\label{tableau-statistique-sur-la-base-individu-sans-poibs-selon-sexe-et-milieu-de-residence}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau2 }\OtherTok{\textless{}{-}}\NormalTok{ data\_individu }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  
+  \CommentTok{\# Combiner les variables sexe et milieu en une seule variable afin de voir les statistiques par sexe et par milieu de résidence}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{sexe\_milieu =} \FunctionTok{interaction}\NormalTok{(sexe, milieu, }\AttributeTok{sep =} \StringTok{" {-} "}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(sexe\_milieu, bank, mstat, alfab, diplome, educ\_hi, age, internet, couvmal, moustiq) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{tbl\_summary}\NormalTok{(}
+    \AttributeTok{by =}\NormalTok{ sexe\_milieu,}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      mstat }\SpecialCharTok{\textasciitilde{}} \StringTok{"Situation de famille"}\NormalTok{,}
+\NormalTok{      bank }\SpecialCharTok{\textasciitilde{}} \StringTok{"Compte bancaire ou autre"}\NormalTok{,}
+\NormalTok{      alfab }\SpecialCharTok{\textasciitilde{}} \StringTok{"Alphabétisation"}\NormalTok{,}
+\NormalTok{      diplome }\SpecialCharTok{\textasciitilde{}} \StringTok{"Diplôme plus élevé"}\NormalTok{,}
+\NormalTok{      educ\_hi }\SpecialCharTok{\textasciitilde{}} \StringTok{"Niveau d\textquotesingle{}éducation achevé"}\NormalTok{,}
+\NormalTok{      age }\SpecialCharTok{\textasciitilde{}} \StringTok{"Âge en année"}\NormalTok{,}
+\NormalTok{      internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu accès à internet"}\NormalTok{,}
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{,}
+\NormalTok{      moustiq }\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la dernière nuit sous une moustiquaire"}\NormalTok{),}
+    \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(age }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),  }
+    \AttributeTok{digits =} \FunctionTok{list}\NormalTok{(}\FunctionTok{all\_continuous}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \DecValTok{0}\NormalTok{),  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label =} \StringTok{"Statistiques sur les individus"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 2 missing rows in the "sexe_milieu" column have been removed.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+Statistiques sur les individus & \textbf{Masculin - Urbain}  N = 4,123\textsuperscript{\textit{1}} & \textbf{Féminin - Urbain}  N = 4,467\textsuperscript{\textit{1}} & \textbf{Masculin - Rural}  N = 9,042\textsuperscript{\textit{1}} & \textbf{Féminin - Rural}  N = 9,848\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Compte bancaire ou autre &  &  &  &  \\ 
+    Non & 2,857 (69\%) & 3,432 (77\%) & 7,990 (88\%) & 9,193 (93\%) \\ 
+    Oui & 1,266 (31\%) & 1,035 (23\%) & 1,052 (12\%) & 655 (6.7\%) \\ 
+Situation de famille &  &  &  &  \\ 
+    Célibataire & 2,814 (68\%) & 2,509 (56\%) & 6,058 (67\%) & 5,335 (54\%) \\ 
+    Marié(e) monogame & 989 (24\%) & 1,065 (24\%) & 2,070 (23\%) & 2,199 (22\%) \\ 
+    Marié(e) polygame & 142 (3.4\%) & 287 (6.4\%) & 599 (6.6\%) & 1,157 (12\%) \\ 
+    Union libre & 73 (1.8\%) & 90 (2.0\%) & 97 (1.1\%) & 129 (1.3\%) \\ 
+    Veuf(ve) & 37 (0.9\%) & 360 (8.1\%) & 100 (1.1\%) & 800 (8.1\%) \\ 
+    Divorcé(e) & 29 (0.7\%) & 42 (0.9\%) & 47 (0.5\%) & 64 (0.6\%) \\ 
+    Séparé(e) & 39 (0.9\%) & 114 (2.6\%) & 71 (0.8\%) & 164 (1.7\%) \\ 
+Alphabétisation &  &  &  &  \\ 
+    Non & 905 (22\%) & 1,507 (34\%) & 4,211 (47\%) & 6,011 (61\%) \\ 
+    Oui & 3,218 (78\%) & 2,960 (66\%) & 4,831 (53\%) & 3,837 (39\%) \\ 
+Diplôme plus élevé &  &  &  &  \\ 
+    Aucun & 2,004 (49\%) & 2,774 (62\%) & 6,769 (75\%) & 8,456 (86\%) \\ 
+    CEPE / CEPD & 992 (24\%) & 1,073 (24\%) & 1,692 (19\%) & 1,165 (12\%) \\ 
+    bepc & 568 (14\%) & 361 (8.1\%) & 396 (4.4\%) & 194 (2.0\%) \\ 
+    cap & 36 (0.9\%) & 12 (0.3\%) & 21 (0.2\%) & 3 (<0.1\%) \\ 
+    bt & 8 (0.2\%) & 6 (0.1\%) & 4 (<0.1\%) & 0 (0\%) \\ 
+    bac & 278 (6.7\%) & 143 (3.2\%) & 111 (1.2\%) & 18 (0.2\%) \\ 
+    DEUG, DUT, BTS & 47 (1.1\%) & 33 (0.7\%) & 11 (0.1\%) & 3 (<0.1\%) \\ 
+    Licence & 109 (2.6\%) & 45 (1.0\%) & 28 (0.3\%) & 8 (<0.1\%) \\ 
+    Maitrise & 53 (1.3\%) & 10 (0.2\%) & 7 (<0.1\%) & 1 (<0.1\%) \\ 
+    Master/DEA/DESS & 20 (0.5\%) & 5 (0.1\%) & 3 (<0.1\%) & 0 (0\%) \\ 
+    Doctorat/Phd & 8 (0.2\%) & 5 (0.1\%) & 0 (0\%) & 0 (0\%) \\ 
+Niveau d'éducation achevé &  &  &  &  \\ 
+    Aucun & 798 (19\%) & 1,313 (29\%) & 3,415 (38\%) & 5,125 (52\%) \\ 
+    Maternelle & 107 (2.6\%) & 141 (3.2\%) & 211 (2.3\%) & 200 (2.0\%) \\ 
+    Primaire & 1,238 (30\%) & 1,500 (34\%) & 3,376 (37\%) & 3,350 (34\%) \\ 
+    Second. gl 1 & 992 (24\%) & 1,004 (22\%) & 1,570 (17\%) & 1,015 (10\%) \\ 
+    Second. tech. 1 & 15 (0.4\%) & 10 (0.2\%) & 5 (<0.1\%) & 1 (<0.1\%) \\ 
+    Second. gl 2 & 439 (11\%) & 246 (5.5\%) & 325 (3.6\%) & 127 (1.3\%) \\ 
+    Second. tech. 2 & 139 (3.4\%) & 70 (1.6\%) & 40 (0.4\%) & 8 (<0.1\%) \\ 
+    Postsecondaire & 51 (1.2\%) & 42 (0.9\%) & 10 (0.1\%) & 4 (<0.1\%) \\ 
+    Superieur & 343 (8.3\%) & 141 (3.2\%) & 90 (1.0\%) & 18 (0.2\%) \\ 
+    Valeurs manquantes & 1 & 0 & 0 & 0 \\ 
+Âge en année & 23 (18) & 25 (19) & 22 (19) & 23 (20) \\ 
+Individu accès à internet &  &  &  &  \\ 
+    Non & 2,892 (70\%) & 3,587 (80\%) & 8,657 (96\%) & 9,687 (98\%) \\ 
+    Oui & 1,231 (30\%) & 880 (20\%) & 385 (4.3\%) & 161 (1.6\%) \\ 
+Individu couverture maladie &  &  &  &  \\ 
+    Non & 3,780 (92\%) & 4,177 (94\%) & 8,740 (97\%) & 9,582 (97\%) \\ 
+    Oui & 343 (8.3\%) & 290 (6.5\%) & 302 (3.3\%) & 266 (2.7\%) \\ 
+Dormir la dernière nuit sous une moustiquaire &  &  &  &  \\ 
+    Non & 1,519 (37\%) & 1,548 (35\%) & 2,133 (24\%) & 2,138 (22\%) \\ 
+    Oui & 2,604 (63\%) & 2,919 (65\%) & 6,909 (76\%) & 7,710 (78\%) \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD)\\
+\end{minipage}
+\end{table}
+
+\subsection{Tableau statistique sur la base individu sans poibs en
+fonction de la region de
+residence}\label{tableau-statistique-sur-la-base-individu-sans-poibs-en-fonction-de-la-region-de-residence}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau3 }\OtherTok{\textless{}{-}}\NormalTok{ data\_individu }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(region, bank, mstat, alfab, diplome, educ\_hi, age, internet, couvmal, moustiq) }\SpecialCharTok{\%\textgreater{}\%} \CommentTok{\# Sélectionner les variables}
+  \FunctionTok{tbl\_summary}\NormalTok{(}
+    \AttributeTok{by =}\NormalTok{ region,}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      mstat }\SpecialCharTok{\textasciitilde{}} \StringTok{"Situation de famille"}\NormalTok{,}
+\NormalTok{      bank }\SpecialCharTok{\textasciitilde{}} \StringTok{"Compte bancaire ou autre"}\NormalTok{,}
+\NormalTok{      alfab }\SpecialCharTok{\textasciitilde{}} \StringTok{"Alphabétisation"}\NormalTok{,}
+\NormalTok{      diplome }\SpecialCharTok{\textasciitilde{}} \StringTok{"Diplôme plus élevé"}\NormalTok{,}
+\NormalTok{      educ\_hi }\SpecialCharTok{\textasciitilde{}} \StringTok{"Niveau d\textquotesingle{}éducation achevé"}\NormalTok{,}
+\NormalTok{      age }\SpecialCharTok{\textasciitilde{}} \StringTok{"Âge en année"}\NormalTok{,}
+\NormalTok{      internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu accès à internet"}\NormalTok{,}
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{,}
+\NormalTok{      moustiq }\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la dernière nuit sous une moustiquaire"}\NormalTok{),}
+     \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(age }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),}
+     \AttributeTok{digits =} \FunctionTok{everything}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{), }
+     \AttributeTok{missing =} \StringTok{"always"}\NormalTok{, }
+     \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+     \FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label =} \StringTok{"Statistiques sur les individus"}\NormalTok{) }
+
+\NormalTok{tableau3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccccc}
+\toprule
+Statistiques sur les individus & \textbf{Maritime}  N = 3,764\textsuperscript{\textit{1}} & \textbf{Plateaux}  N = 4,796\textsuperscript{\textit{1}} & \textbf{Centrale}  N = 3,751\textsuperscript{\textit{1}} & \textbf{Kara}  N = 4,929\textsuperscript{\textit{1}} & \textbf{Savanes}  N = 6,509\textsuperscript{\textit{1}} & \textbf{Lomé commune}  N = 3,733\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Compte bancaire ou autre &  &  &  &  &  &  \\ 
+    Non & 3,070 (82\%) & 4,128 (86\%) & 3,297 (88\%) & 4,351 (88\%) & 6,028 (93\%) & 2,600 (70\%) \\ 
+    Oui & 694 (18\%) & 668 (14\%) & 454 (12\%) & 578 (12\%) & 481 (7\%) & 1,133 (30\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+Situation de famille &  &  &  &  &  &  \\ 
+    Célibataire & 2,255 (60\%) & 2,851 (59\%) & 2,301 (61\%) & 2,936 (60\%) & 4,041 (62\%) & 2,332 (63\%) \\ 
+    Marié(e) monogame & 839 (22\%) & 1,123 (23\%) & 914 (24\%) & 1,050 (21\%) & 1,481 (23\%) & 916 (25\%) \\ 
+    Marié(e) polygame & 282 (7\%) & 411 (9\%) & 294 (8\%) & 494 (10\%) & 586 (9\%) & 118 (3\%) \\ 
+    Union libre & 71 (2\%) & 92 (2\%) & 18 (0\%) & 46 (1\%) & 65 (1\%) & 97 (3\%) \\ 
+    Veuf(ve) & 207 (5\%) & 202 (4\%) & 157 (4\%) & 290 (6\%) & 290 (4\%) & 151 (4\%) \\ 
+    Divorcé(e) & 20 (1\%) & 42 (1\%) & 22 (1\%) & 41 (1\%) & 24 (0\%) & 33 (1\%) \\ 
+    Séparé(e) & 90 (2\%) & 75 (2\%) & 45 (1\%) & 72 (1\%) & 22 (0\%) & 84 (2\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 2 \\ 
+Alphabétisation &  &  &  &  &  &  \\ 
+    Non & 1,535 (41\%) & 2,109 (44\%) & 1,734 (46\%) & 2,396 (49\%) & 3,980 (61\%) & 882 (24\%) \\ 
+    Oui & 2,229 (59\%) & 2,687 (56\%) & 2,017 (54\%) & 2,533 (51\%) & 2,529 (39\%) & 2,851 (76\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+Diplôme plus élevé &  &  &  &  &  &  \\ 
+    Aucun & 2,683 (71\%) & 3,662 (76\%) & 2,745 (73\%) & 3,600 (73\%) & 5,465 (84\%) & 1,850 (50\%) \\ 
+    CEPE / CEPD & 759 (20\%) & 839 (17\%) & 725 (19\%) & 909 (18\%) & 795 (12\%) & 895 (24\%) \\ 
+    bepc & 227 (6\%) & 214 (4\%) & 195 (5\%) & 254 (5\%) & 171 (3\%) & 458 (12\%) \\ 
+    cap & 3 (0\%) & 10 (0\%) & 17 (0\%) & 15 (0\%) & 11 (0\%) & 16 (0\%) \\ 
+    bt & 2 (0\%) & 5 (0\%) & 1 (0\%) & 4 (0\%) & 2 (0\%) & 4 (0\%) \\ 
+    bac & 53 (1\%) & 49 (1\%) & 43 (1\%) & 88 (2\%) & 37 (1\%) & 280 (8\%) \\ 
+    DEUG, DUT, BTS & 11 (0\%) & 4 (0\%) & 7 (0\%) & 12 (0\%) & 4 (0\%) & 56 (2\%) \\ 
+    Licence & 19 (1\%) & 7 (0\%) & 8 (0\%) & 31 (1\%) & 21 (0\%) & 104 (3\%) \\ 
+    Maitrise & 3 (0\%) & 6 (0\%) & 8 (0\%) & 15 (0\%) & 3 (0\%) & 36 (1\%) \\ 
+    Master/DEA/DESS & 4 (0\%) & 0 (0\%) & 2 (0\%) & 1 (0\%) & 0 (0\%) & 21 (1\%) \\ 
+    Doctorat/Phd & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 13 (0\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+Niveau d'éducation achevé &  &  &  &  &  &  \\ 
+    Aucun & 1,272 (34\%) & 1,857 (39\%) & 1,381 (37\%) & 2,009 (41\%) & 3,371 (52\%) & 763 (20\%) \\ 
+    Maternelle & 76 (2\%) & 77 (2\%) & 91 (2\%) & 148 (3\%) & 159 (2\%) & 108 (3\%) \\ 
+    Primaire & 1,489 (40\%) & 1,862 (39\%) & 1,402 (37\%) & 1,552 (31\%) & 2,024 (31\%) & 1,135 (30\%) \\ 
+    Second. gl 1 & 697 (19\%) & 763 (16\%) & 636 (17\%) & 855 (17\%) & 746 (11\%) & 884 (24\%) \\ 
+    Second. tech. 1 & 1 (0\%) & 2 (0\%) & 3 (0\%) & 5 (0\%) & 6 (0\%) & 14 (0\%) \\ 
+    Second. gl 2 & 146 (4\%) & 174 (4\%) & 158 (4\%) & 197 (4\%) & 146 (2\%) & 316 (8\%) \\ 
+    Second. tech. 2 & 21 (1\%) & 27 (1\%) & 37 (1\%) & 40 (1\%) & 16 (0\%) & 116 (3\%) \\ 
+    Postsecondaire & 7 (0\%) & 5 (0\%) & 8 (0\%) & 18 (0\%) & 6 (0\%) & 63 (2\%) \\ 
+    Superieur & 55 (1\%) & 29 (1\%) & 35 (1\%) & 105 (2\%) & 35 (1\%) & 333 (9\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 1 \\ 
+Âge en année & 24 (20) & 23 (19) & 23 (19) & 23 (20) & 22 (19) & 25 (18) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 2 \\ 
+Individu accès à internet &  &  &  &  &  &  \\ 
+    Non & 3,478 (92\%) & 4,528 (94\%) & 3,432 (91\%) & 4,635 (94\%) & 6,288 (97\%) & 2,464 (66\%) \\ 
+    Oui & 286 (8\%) & 268 (6\%) & 319 (9\%) & 294 (6\%) & 221 (3\%) & 1,269 (34\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+Individu couverture maladie &  &  &  &  &  &  \\ 
+    Non & 3,664 (97\%) & 4,696 (98\%) & 3,633 (97\%) & 4,587 (93\%) & 6,242 (96\%) & 3,459 (93\%) \\ 
+    Oui & 100 (3\%) & 100 (2\%) & 118 (3\%) & 342 (7\%) & 267 (4\%) & 274 (7\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+Dormir la dernière nuit sous une moustiquaire &  &  &  &  &  &  \\ 
+    Non & 1,124 (30\%) & 1,066 (22\%) & 874 (23\%) & 1,146 (23\%) & 1,285 (20\%) & 1,845 (49\%) \\ 
+    Oui & 2,640 (70\%) & 3,730 (78\%) & 2,877 (77\%) & 3,783 (77\%) & 5,224 (80\%) & 1,888 (51\%) \\ 
+    Valeurs manquantes & 0 & 0 & 0 & 0 & 0 & 0 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD)\\
+\end{minipage}
+\end{table}
+
+\subsection{Tableau statistique de la base individu avec
+ponderation}\label{tableau-statistique-de-la-base-individu-avec-ponderation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Étape 1 : Convertissons les variables en facteurs pour créer un objet de conception}
+\NormalTok{tableau4}\OtherTok{\textless{}{-}}\NormalTok{ data\_individu }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(mstat, alfab, diplome, educ\_hi, age, internet, couvmal, moustiq, hhweight) }\OtherTok{{-}\textgreater{}}\NormalTok{ data\_processed}
+
+\CommentTok{\# Créons l\textquotesingle{}objet de conception avec les poids}
+\NormalTok{pondere }\OtherTok{\textless{}{-}} \FunctionTok{svydesign}\NormalTok{(}\AttributeTok{ids =} \SpecialCharTok{\textasciitilde{}}\DecValTok{1}\NormalTok{, }\AttributeTok{data =}\NormalTok{ data\_processed, }\AttributeTok{weights =} \SpecialCharTok{\textasciitilde{}}\NormalTok{hhweight)}
+
+\CommentTok{\# Étape 2 : avec l\textquotesingle{}objet pondere on génére un résumé pondéré}
+\NormalTok{pondere }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{tbl\_svysummary}\NormalTok{(}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      mstat }\SpecialCharTok{\textasciitilde{}} \StringTok{"Situation de famille"}\NormalTok{, }
+\NormalTok{      alfab }\SpecialCharTok{\textasciitilde{}} \StringTok{"Alphabetisation"}\NormalTok{,}
+\NormalTok{      diplome }\SpecialCharTok{\textasciitilde{}} \StringTok{"Diplome plus élevé"}\NormalTok{,}
+\NormalTok{      educ\_hi }\SpecialCharTok{\textasciitilde{}} \StringTok{"Niveau d\textquotesingle{}éducation achevé"}\NormalTok{, }
+\NormalTok{      age }\SpecialCharTok{\textasciitilde{}} \StringTok{"Age en année"}\NormalTok{, }
+\NormalTok{      internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu accès a internet"}\NormalTok{, }
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{, }
+\NormalTok{      moustiq }\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la dernière nuit sous une moustiquaire"}\NormalTok{),}
+    \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(age }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),}
+    \AttributeTok{digits =} \FunctionTok{everything}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{),  }
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+    \AttributeTok{missing\_text =} \StringTok{"valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label =} \StringTok{"Statistiques sur lces individus"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lc}
+\toprule
+Statistiques sur lces individus & \textbf{N = 7,662,764}\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Situation de famille &  \\ 
+    Célibataire & 4,677,347 (61\%) \\ 
+    Marié(e) monogame & 1,770,846 (23\%) \\ 
+    Marié(e) polygame & 551,974 (7\%) \\ 
+    Union libre & 128,356 (2\%) \\ 
+    Veuf(ve) & 349,193 (5\%) \\ 
+    Divorcé(e) & 55,475 (1\%) \\ 
+    Séparé(e) & 127,446 (2\%) \\ 
+    valeurs manquantes & 2,127 \\ 
+Alphabetisation &  \\ 
+    Non & 3,154,109 (41\%) \\ 
+    Oui & 4,508,655 (59\%) \\ 
+    valeurs manquantes & 0 \\ 
+Diplome plus élevé &  \\ 
+    Aucun & 5,270,727 (69\%) \\ 
+    CEPE / CEPD & 1,467,347 (19\%) \\ 
+    bepc & 505,217 (7\%) \\ 
+    cap & 20,995 (0\%) \\ 
+    bt & 7,199 (0\%) \\ 
+    bac & 226,510 (3\%) \\ 
+    DEUG, DUT, BTS & 39,513 (1\%) \\ 
+    Licence & 77,926 (1\%) \\ 
+    Maitrise & 27,309 (0\%) \\ 
+    Master/DEA/DESS & 13,564 (0\%) \\ 
+    Doctorat/Phd & 6,457 (0\%) \\ 
+    valeurs manquantes & 0 \\ 
+Niveau d'éducation achevé &  \\ 
+    Aucun & 2,687,414 (35\%) \\ 
+    Maternelle & 180,363 (2\%) \\ 
+    Primaire & 2,646,318 (35\%) \\ 
+    Second. gl 1 & 1,374,399 (18\%) \\ 
+    Second. tech. 1 & 9,611 (0\%) \\ 
+    Second. gl 2 & 372,738 (5\%) \\ 
+    Second. tech. 2 & 96,703 (1\%) \\ 
+    Postsecondaire & 47,133 (1\%) \\ 
+    Superieur & 247,594 (3\%) \\ 
+    valeurs manquantes & 492 \\ 
+Age en année & 23 (19) \\ 
+    valeurs manquantes & 2,127 \\ 
+Individu accès a internet &  \\ 
+    Non & 6,627,539 (86\%) \\ 
+    Oui & 1,035,225 (14\%) \\ 
+    valeurs manquantes & 0 \\ 
+Individu couverture maladie &  \\ 
+    Non & 7,301,111 (95\%) \\ 
+    Oui & 361,653 (5\%) \\ 
+    valeurs manquantes & 0 \\ 
+Dormir la dernière nuit sous une moustiquaire &  \\ 
+    Non & 2,368,297 (31\%) \\ 
+    Oui & 5,294,467 (69\%) \\ 
+    valeurs manquantes & 0 \\ 
+Ponderation menage & 328 (204, 492) \\ 
+    valeurs manquantes & 0 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD); Median (Q1, Q3)\\
+\end{minipage}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau4}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 27,482 x 9
+##    mstat           alfab diplome educ_hi   age internet couvmal moustiq hhweight
+##    <fct>           <fct> <fct>   <fct>   <dbl> <fct>    <fct>   <fct>      <dbl>
+##  1 Veuf(ve)        Oui   Aucun   Aucun      89 Non      Oui     Non         598.
+##  2 Célibataire     Oui   bepc    Second~    28 Oui      Non     Non         598.
+##  3 Célibataire     Oui   bac     Second~    28 Oui      Non     Non         598.
+##  4 Marié(e) monog~ Oui   bepc    Second~    38 Oui      Non     Oui         598.
+##  5 Marié(e) polyg~ Oui   Aucun   Primai~    54 Non      Non     Non         598.
+##  6 Célibataire     Oui   CEPE /~ Second~    18 Oui      Non     Non         598.
+##  7 Célibataire     Oui   bepc    Second~    28 Oui      Non     Non         598.
+##  8 Veuf(ve)        Oui   bepc    Second~    51 Non      Non     Oui         598.
+##  9 Célibataire     Oui   bac     Postse~    25 Non      Non     Oui         598.
+## 10 Célibataire     Oui   DEUG, ~ Postse~    28 Oui      Oui     Non         598.
+## # i 27,472 more rows
+\end{verbatim}
+
+\section{Statistiques avec la base
+menage}\label{statistiques-avec-la-base-menage}
+
+\subsection{Tableau Statistiques descriptives avec la base
+menage}\label{tableau-statistiques-descriptives-avec-la-base-menage}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau1\_m }\OtherTok{\textless{}{-}}\NormalTok{data\_menage }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{()}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{ (logem,eauboi\_ss, eauboi\_sp, elec\_ac, elec\_ur, elec\_ua, car, toit, mur, superf,grosrum,petitrum)}\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{tbl\_summary}\NormalTok{(}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(logem }\SpecialCharTok{\textasciitilde{}}\StringTok{"Type de logement"}\NormalTok{, }
+\NormalTok{            eauboi\_ss }\SpecialCharTok{\textasciitilde{}}\StringTok{"eau potable saison seche"}\NormalTok{,}
+\NormalTok{            eauboi\_sp }\SpecialCharTok{\textasciitilde{}}\StringTok{"eau potable saison des pluies"}\NormalTok{,}
+\NormalTok{            elec\_ac}\SpecialCharTok{\textasciitilde{}} \StringTok{"acces reseau electrique"}\NormalTok{,}
+\NormalTok{            elec\_ua}\SpecialCharTok{\textasciitilde{}} \StringTok{"utilise reseau electrique"}\NormalTok{,}
+\NormalTok{            elec\_ua}\SpecialCharTok{\textasciitilde{}} \StringTok{"utiliese reseau solaire"}\NormalTok{,}
+\NormalTok{            car }\SpecialCharTok{\textasciitilde{}} \StringTok{"Menage a voiture"}\NormalTok{,}
+\NormalTok{            toit }\SpecialCharTok{\textasciitilde{}}\StringTok{"toit du chef de manage"}\NormalTok{, }
+\NormalTok{            mur}\SpecialCharTok{\textasciitilde{}} \StringTok{"mur de la maison"}\NormalTok{, }
+\NormalTok{            superf }\SpecialCharTok{\textasciitilde{}}\StringTok{"superficie"}\NormalTok{, }
+\NormalTok{            grosrum }\SpecialCharTok{\textasciitilde{}}\StringTok{"gros rumunants"}\NormalTok{, }
+\NormalTok{            petitrum }\SpecialCharTok{\textasciitilde{}} \StringTok{"pétits rumunants"}\NormalTok{), }
+  \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(superf}\SpecialCharTok{\textasciitilde{}}\StringTok{"\{mean\} (\{sd\}"}\NormalTok{,petitrum}\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{, grosrum }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),}
+  \AttributeTok{digits =} \FunctionTok{everything}\NormalTok{()}\SpecialCharTok{\textasciitilde{}}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+  \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+  \AttributeTok{missing\_text =} \StringTok{"valeurs manquantes"}\NormalTok{)}\SpecialCharTok{\%\textgreater{}\%}\FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label=} \StringTok{"Caracteristique de l\textquotesingle{}habitat du CM"}\NormalTok{)}
+
+\NormalTok{tableau1\_m}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lc}
+\toprule
+Caracteristique de l'habitat du CM & \textbf{N = 6,171}\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Type de logement &  \\ 
+    Proprietaire titre & 558 (9\%) \\ 
+    Proprietaire sans titre & 2,544 (41\%) \\ 
+    Locataire & 1,487 (24\%) \\ 
+    Autre & 1,582 (26\%) \\ 
+    valeurs manquantes & 0 \\ 
+eau potable saison seche &  \\ 
+    Non & 2,190 (35\%) \\ 
+    Oui & 3,981 (65\%) \\ 
+    valeurs manquantes & 0 \\ 
+eau potable saison des pluies &  \\ 
+    Non & 2,698 (44\%) \\ 
+    Oui & 3,473 (56\%) \\ 
+    valeurs manquantes & 0 \\ 
+acces reseau electrique &  \\ 
+    Non & 4,354 (71\%) \\ 
+    Oui & 1,817 (29\%) \\ 
+    valeurs manquantes & 0 \\ 
+Utilise elec. reseau &  \\ 
+    Non & 3,606 (58\%) \\ 
+    Oui & 2,565 (42\%) \\ 
+    valeurs manquantes & 0 \\ 
+utiliese reseau solaire &  \\ 
+    Non & 5,818 (94\%) \\ 
+    Oui & 353 (6\%) \\ 
+    valeurs manquantes & 0 \\ 
+Menage a voiture &  \\ 
+    Non & 6,054 (98\%) \\ 
+    Oui & 117 (2\%) \\ 
+    valeurs manquantes & 0 \\ 
+toit du chef de manage &  \\ 
+    Non & 611 (10\%) \\ 
+    Oui & 5,560 (90\%) \\ 
+    valeurs manquantes & 0 \\ 
+mur de la maison &  \\ 
+    Non & 1,256 (20\%) \\ 
+    Oui & 4,915 (80\%) \\ 
+    valeurs manquantes & 0 \\ 
+superficie & 3 (24 \\ 
+    valeurs manquantes & 2,676 \\ 
+gros rumunants & 2 (14) \\ 
+    valeurs manquantes & 3,575 \\ 
+pétits rumunants & 6 (9) \\ 
+    valeurs manquantes & 3,575 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD; Mean (SD)\\
+\end{minipage}
+\end{table}
+
+\section{Fusion des deux bases}\label{fusion-des-deux-bases}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_fusion }\OtherTok{\textless{}{-}}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{left\_join}\NormalTok{(data\_individu, data\_menage, }\AttributeTok{by =} \StringTok{"hhid"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Structure de la base
+fusionnée}\label{structure-de-la-base-fusionnuxe9e}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{utils}\SpecialCharTok{::}\FunctionTok{str}\NormalTok{(data\_fusion)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tibble [27,482 x 85] (S3: tbl_df/tbl/data.frame)
+##  $ country.x     : chr [1:27482] "TGO" "TGO" "TGO" "TGO" ...
+##   ..- attr(*, "label")= chr "Pays"
+##   ..- attr(*, "format.stata")= chr "%3s"
+##  $ year          : num [1:27482] 2018 2018 2018 2018 2018 ...
+##   ..- attr(*, "label")= chr "Annee enquete"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ vague         : num [1:27482] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..- attr(*, "label")= chr "Vague"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ hhid          : num [1:27482] 101 101 101 103 104 104 104 105 105 106 ...
+##   ..- attr(*, "label")= chr "Idenfiant menage"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ grappe        : num [1:27482] 1 1 1 1 1 1 1 1 1 1 ...
+##   ..- attr(*, "label")= chr "Numero de grappe"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ menage        : num [1:27482] 1 1 1 3 4 4 4 5 5 6 ...
+##   ..- attr(*, "label")= chr "Numero du menage"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ numind        : num [1:27482] 1 2 4 1 1 2 3 1 2 1 ...
+##   ..- attr(*, "label")= chr "Numero individu"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ zae           : dbl+lbl [1:27482] 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5...
+##    ..@ label       : chr "Zone agroecologique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:5] 1 2 3 4 5
+##    .. ..- attr(*, "names")= chr [1:5] "Zone des plaines du nord" "Zone des montagnes du nord" "Zone des plaines du centre" "Zone cotiere du sud" ...
+##  $ region        : dbl+lbl [1:27482] 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6...
+##    ..@ label       : chr "Region residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Maritime" "Plateaux" "Centrale" "Kara" ...
+##  $ sousregion    : dbl+lbl [1:27482] 602, 602, 602, 602, 602, 602, 602, 602, 602, 602, 60...
+##    ..@ label       : chr "Prefecture residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:41] 101 102 103 104 105 106 107 201 202 203 ...
+##    .. ..- attr(*, "names")= chr [1:41] "golfe" "lacs" "BAS-MONO" "vo" ...
+##  $ milieu        : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Milieu residence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 1 2
+##    .. ..- attr(*, "names")= chr [1:2] "Urbain" "Rural"
+##  $ hhweight      : num [1:27482] 598 598 598 598 598 ...
+##   ..- attr(*, "label")= chr "Ponderation menage"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ resid         : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Resident"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sexe          : dbl+lbl [1:27482] 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1...
+##    ..@ label       : chr "Genre"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 1 2
+##    .. ..- attr(*, "names")= chr [1:2] "Masculin" "Féminin"
+##  $ age           : num [1:27482] 89 28 28 38 54 18 28 51 25 28 ...
+##   ..- attr(*, "label")= chr "Age en annees"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ lien          : dbl+lbl [1:27482] 1, 9, 9, 1, 1, 3, 3, 1, 3, 1, 1, 2, 3, 3, 1, 3, 1, 1...
+##    ..@ label       : chr "Lien de parente"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Chef de ménage" "Conjoint ( e )" "Fils, Fille" "Père, Mère" ...
+##  $ mstat         : dbl+lbl [1:27482] 5, 1, 1, 2, 3, 1, 1, 5, 1, 1, 2, 2, 1, 1, 6, 1, 7, 2...
+##    ..@ label       : chr "Situation de famille"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:7] 1 2 3 4 5 6 7
+##    .. ..- attr(*, "names")= chr [1:7] "Célibataire" "Marié(e) monogame" "Marié(e) polygame" "Union libre" ...
+##  $ religion      : dbl+lbl [1:27482] 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2...
+##    ..@ label       : chr "Religion"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:5] 1 2 3 4 5
+##    .. ..- attr(*, "names")= chr [1:5] "Musulman" "Chrétien" "Animiste" "Autre Réligion" ...
+##  $ nation        : dbl+lbl [1:27482]  8,  8,  8,  6,  8,  8,  8,  8,  8,  8,  8,  8,  8, ...
+##    ..@ label       : chr "Nationalité"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:12] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:12] "Benin" "Burkina Faso" "Côte d'Ivoire" "Guinée Bissau" ...
+##  $ agemar        : num [1:27482] NA NA NA 32 22 NA NA 20 NA NA ...
+##   ..- attr(*, "label")= chr "Age premier marriage"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ mal30j        : dbl+lbl [1:27482] 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0...
+##    ..@ label       : chr "Prob. sante 30 dern. jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ aff30j        : dbl+lbl [1:27482]  1, NA,  1,  1, 11, 11, NA, NA, NA, NA, NA, 14, NA, ...
+##    ..@ label       : chr "probleme sante"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:14] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:14] "Fièvre/Paludisme" "Diarrhée" "Accident/Blessure" "Problème dentaire" ...
+##  $ arrmal        : dbl+lbl [1:27482] 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Arret activite pour maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ durarr        : dbl+lbl [1:27482]  3, NA,  3, NA, NA, NA, NA, NA, NA, NA, NA,  2, NA, ...
+##    ..@ label       : chr "Duree arret activite pour maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:3] 1 2 3
+##    .. ..- attr(*, "names")= chr [1:3] "Moins d'une semaine" "Entre une et deux semaines" "Plus de deux semaines"
+##  $ con30j        : dbl+lbl [1:27482]  0, NA,  1,  0,  0,  1, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Consulte 30 dern. jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ hos12m        : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Hospitalisation 12 der. mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ couvmal       : dbl+lbl [1:27482] 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1...
+##    ..@ label       : chr "Indivu couverture maladie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ moustiq       : dbl+lbl [1:27482] 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0...
+##    ..@ label       : chr "Dormi moustiquire nuit dern."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ handit        : dbl+lbl [1:27482]  1,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0,  0, ...
+##    ..@ label       : chr "Handicap tout niveau"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ handig        : dbl+lbl [1:27482]  1,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0, ...
+##    ..@ label       : chr "Handicap majeur seul"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ alfab         : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Alphabetisation"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ scol          : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0...
+##    ..@ label       : chr "Freq. ecole 2017/18"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ educ_scol     : dbl+lbl [1:27482] NA, NA, NA, NA, NA,  3,  5, NA, NA, NA, NA, NA,  2, ...
+##    ..@ label       : chr "Niv. educ. actuel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:8] 1 2 3 4 5 6 7 8
+##    .. ..- attr(*, "names")= chr [1:8] "Maternelle" "Primaire" "Secondaire 1  (Post Primaire) générale" "Secondaire 1  (Post Primaire) technique" ...
+##  $ educ_hi       : dbl+lbl [1:27482] 1, 6, 6, 6, 3, 4, 6, 4, 8, 8, 1, 4, 3, 3, 3, 4, 9, 9...
+##    ..@ label       : chr "Niv. educ. acheve"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:9] 1 2 3 4 5 6 7 8 9
+##    .. ..- attr(*, "names")= chr [1:9] "Aucun" "Maternelle" "Primaire" "Second. gl 1" ...
+##  $ diplome       : dbl+lbl [1:27482]  0,  2,  5,  2,  0,  1,  2,  2,  5,  6,  0,  1,  0, ...
+##    ..@ label       : chr "Diplome plus eleve"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:11] 0 1 2 3 4 5 6 7 8 9 ...
+##    .. ..- attr(*, "names")= chr [1:11] "Aucun" "CEPE / CEPD" "bepc" "cap" ...
+##  $ telpor        : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1...
+##    ..@ label       : chr "Individu a telephone portable"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ internet      : dbl+lbl [1:27482] 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1...
+##    ..@ label       : chr "Individu a acces internet"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ activ7j       : dbl+lbl [1:27482] 5, 5, 1, 1, 1, 5, 5, 1, 2, 1, 1, 1, 5, 5, 1, 5, 5, 1...
+##    ..@ label       : chr "Situation activite 7 derniers jours"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Occupe" "Chomeur" "TF cherchant emploi" "TF cherchant pas" ...
+##  $ activ12m      : dbl+lbl [1:27482] 3, 3, 1, 1, 1, 3, 3, 1, 3, 1, 1, 1, 3, 3, 1, 3, 3, 1...
+##    ..@ label       : chr "Situation activite 12 derniers mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Occupe" "Trav. fam." "Non occupe" "Moins de 5 ans"
+##  $ branch        : dbl+lbl [1:27482] NA, NA,  8, 10, 11, NA, NA,  4, NA,  8, 10,  4, NA, ...
+##    ..@ label       : chr "Branche activite"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:11] 1 2 3 4 5 6 7 8 9 10 ...
+##    .. ..- attr(*, "names")= chr [1:11] "Agriculture" "Elevage/peche" "Indust. extr." "Autr. indust." ...
+##  $ sectins       : dbl+lbl [1:27482] NA, NA,  3,  3,  2, NA, NA,  3, NA,  2,  3,  3, NA, ...
+##    ..@ label       : chr "Sect. institutionnel empl. prin."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Etat/Collectivités locales" "Entreprise publique/ parapublique" "Entreprise Privée" "Entreprise associative" ...
+##  $ csp           : dbl+lbl [1:27482] NA, NA,  9,  9,  4, NA, NA,  9, NA,  2,  9,  9, NA, ...
+##    ..@ label       : chr "CSP empl. prin."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Cadre supérieur" "Cadre moyen/agent de maîtrise" "Ouvrier ou employé qualifié" "Ouvrier ou employé non qualifié" ...
+##  $ volhor        : num [1:27482] NA NA 600 875 NA ...
+##   ..- attr(*, "label")= chr "Horaire an. travail empl. prin."
+##   ..- attr(*, "format.stata")= chr "%9.0g"
+##  $ salaire       : num [1:27482] NA NA NA NA 0 NA NA NA NA 3420000 ...
+##   ..- attr(*, "label")= chr "Salaire an. empl. prin."
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ emploi_sec    : dbl+lbl [1:27482] 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "A un emploi secondaire 12 mois"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sectins_sec   : dbl+lbl [1:27482] NA, NA, NA, NA,  3, NA, NA, NA, NA, NA,  6, NA, NA, ...
+##    ..@ label       : chr "Secteur instit. emploi sec."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:6] 1 2 3 4 5 6
+##    .. ..- attr(*, "names")= chr [1:6] "Etat/Collectivités locales" "Entreprise publique/ parapublique" "Entreprise privée" "Entreprise associative" ...
+##  $ csp_sec       : dbl+lbl [1:27482] NA, NA, NA, NA,  9, NA, NA, NA, NA, NA,  4, NA, NA, ...
+##    ..@ label       : chr "CSP emploi sec."
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:10] 1 2 3 4 5 6 7 8 9 10
+##    .. ..- attr(*, "names")= chr [1:10] "Cadre supérieur" "Cadre moyen/agent de maîtrise" "Ouvrier ou employé qualifié" "Ouvrier ou employé non qualifié" ...
+##  $ volhor_sec    : num [1:27482] NA NA NA NA 720 NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Horaire an. travail emploi sec."
+##   ..- attr(*, "format.stata")= chr "%9.0g"
+##  $ salaire_sec   : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Salaire an. emploi sec."
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ bank          : dbl+lbl [1:27482] 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1...
+##    ..@ label       : chr "compte banque ou autre"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ serviceconsult: dbl+lbl [1:27482]  4, NA,  1,  4,  4,  1, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Service de santé consulté"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Hôpital/Clinique" "Dispensaire" "Autres" "Pas de consultation"
+##  $ persconsult   : dbl+lbl [1:27482]  4, NA,  2,  4,  4,  2, NA, NA, NA, NA, NA,  1, NA, ...
+##    ..@ label       : chr "Personnel de santé consulté"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Médecin" "Infirmier" "Autres" "Pas de consultation"
+##  $ country.y     : chr [1:27482] "TGO" "TGO" "TGO" "TGO" ...
+##   ..- attr(*, "format.stata")= chr "%3s"
+##  $ logem         : dbl+lbl [1:27482] 1, 1, 1, 3, 3, 3, 3, 3, 3, 4, 3, 3, 3, 3, 3, 3, 1, 3...
+##    ..@ label       : chr "Occupation logement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:4] 1 2 3 4
+##    .. ..- attr(*, "names")= chr [1:4] "Proprietaire titre" "Proprietaire sans titre" "Locataire" "Autre"
+##  $ mur           : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Mur en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ toit          : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "toit en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sol           : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Sol en materiaux definitifs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eauboi_ss     : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "eau potable saison seche"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eauboi_sp     : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "eau potable saison pluie"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ac       : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Acces reseau electrique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ur       : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Utilise elec. reseau"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ elec_ua       : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Utilise elec. solaire/groupe"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ ordure        : dbl+lbl [1:27482] 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1...
+##    ..@ label       : chr "Déchets évacués sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ toilet        : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Toilettes saines"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eva_toi       : dbl+lbl [1:27482] 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1...
+##    ..@ label       : chr "Excréments évacués sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ eva_eau       : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1...
+##    ..@ label       : chr "Eaux usées évacuées sainement"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ tv            : dbl+lbl [1:27482] 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+##    ..@ label       : chr "Menage a TV"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ fer           : dbl+lbl [1:27482] 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1...
+##    ..@ label       : chr "Menage a fer electrique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ frigo         : dbl+lbl [1:27482] 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1...
+##    ..@ label       : chr "Menage a frigo/congel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ cuisin        : dbl+lbl [1:27482] 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1...
+##    ..@ label       : chr "Menage a cuisiniere elec/gaz"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ ordin         : dbl+lbl [1:27482] 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Menage a ordinateur"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ decod         : dbl+lbl [1:27482] 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1...
+##    ..@ label       : chr "Menage a decodeur/antenne"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ car           : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1...
+##    ..@ label       : chr "Menage a voiture"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ superf        : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Superficie agricole"
+##   ..- attr(*, "format.stata")= chr "%12.0g"
+##  $ grosrum       : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr gros ruminants"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ petitrum      : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr petits ruminants"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ porc          : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr porcs"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ lapin         : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr lapins"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ volail        : num [1:27482] NA NA NA NA NA NA NA NA NA NA ...
+##   ..- attr(*, "label")= chr "Nbr volailles"
+##   ..- attr(*, "format.stata")= chr "%8.0g"
+##  $ sh_id_demo    : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Choc idio démographique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_natu    : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Choc covariant naturel"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_eco     : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Choc covariant économique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_id_eco     : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0...
+##    ..@ label       : chr "Choc idio économique"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_vio     : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Choc covariant violence"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+##  $ sh_co_oth     : dbl+lbl [1:27482] 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+##    ..@ label       : chr "Autres Chocs"
+##    ..@ format.stata: chr "%8.0g"
+##    ..@ labels      : Named num [1:2] 0 1
+##    .. ..- attr(*, "names")= chr [1:2] "Non" "Oui"
+\end{verbatim}
+
+\subsection{Tableau statistique avec la base
+fusionnée}\label{tableau-statistique-avec-la-base-fusionnuxe9e}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Statistiques descriptives sur la base fusionnée}
+\NormalTok{tableau\_fusion1 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(sexe, age, internet, couvmal, moustiq, logem, eauboi\_ss, elec\_ac, superf)}\SpecialCharTok{\%\textgreater{}\%}
+\FunctionTok{tbl\_summary}\NormalTok{(    }
+  \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      sexe }\SpecialCharTok{\textasciitilde{}} \StringTok{"Sexe"}\NormalTok{,}
+\NormalTok{      age }\SpecialCharTok{\textasciitilde{}} \StringTok{"Âge en années"}\NormalTok{,}
+\NormalTok{      internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"individu accès à internet"}\NormalTok{,}
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{,}
+\NormalTok{      moustiq }\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la dernière nuit sous une moustiquaire"}\NormalTok{,}
+\NormalTok{      logem }\SpecialCharTok{\textasciitilde{}} \StringTok{"Type de logement"}\NormalTok{,}
+\NormalTok{      eauboi\_ss }\SpecialCharTok{\textasciitilde{}} \StringTok{"eau potable en saison sèche"}\NormalTok{,}
+\NormalTok{      elec\_ac }\SpecialCharTok{\textasciitilde{}} \StringTok{"Accès au réseau électrique"}\NormalTok{,}
+\NormalTok{      superf }\SpecialCharTok{\textasciitilde{}} \StringTok{"Superficie"}\NormalTok{),}
+    \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(}\FunctionTok{all\_continuous}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),}
+    \AttributeTok{digits =} \FunctionTok{list}\NormalTok{(}\FunctionTok{all\_continuous}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \DecValTok{0}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+   \FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label =} \StringTok{"Statistiques descriptives sur la base fusionnée"}\NormalTok{)}
+
+\NormalTok{tableau\_fusion1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lc}
+\toprule
+Statistiques descriptives sur la base fusionnée & \textbf{N = 27,482}\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Sexe &  \\ 
+    Masculin & 13,165 (48\%) \\ 
+    Féminin & 14,315 (52\%) \\ 
+    Valeurs manquantes & 2 \\ 
+Âge en années & 23 (19) \\ 
+    Valeurs manquantes & 2 \\ 
+individu accès à internet &  \\ 
+    Non & 24,825 (90\%) \\ 
+    Oui & 2,657 (9.7\%) \\ 
+    Valeurs manquantes & 0 \\ 
+Individu couverture maladie &  \\ 
+    Non & 26,281 (96\%) \\ 
+    Oui & 1,201 (4.4\%) \\ 
+    Valeurs manquantes & 0 \\ 
+Dormir la dernière nuit sous une moustiquaire &  \\ 
+    Non & 7,340 (27\%) \\ 
+    Oui & 20,142 (73\%) \\ 
+    Valeurs manquantes & 0 \\ 
+Type de logement &  \\ 
+    Proprietaire titre & 2,902 (11\%) \\ 
+    Proprietaire sans titre & 13,731 (50\%) \\ 
+    Locataire & 4,776 (17\%) \\ 
+    Autre & 6,073 (22\%) \\ 
+    Valeurs manquantes & 0 \\ 
+eau potable en saison sèche &  \\ 
+    Non & 10,153 (37\%) \\ 
+    Oui & 17,329 (63\%) \\ 
+    Valeurs manquantes & 0 \\ 
+Accès au réseau électrique &  \\ 
+    Non & 20,340 (74\%) \\ 
+    Oui & 7,142 (26\%) \\ 
+    Valeurs manquantes & 0 \\ 
+Superficie & 3 (19) \\ 
+    Valeurs manquantes & 9,274 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}n (\%); Mean (SD)\\
+\end{minipage}
+\end{table}
+
+\subsection{Tableau statistiques de la base fusionnée stratefié par
+sexe}\label{tableau-statistiques-de-la-base-fusionnuxe9e-stratefiuxe9-par-sexe}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau\_stratifie }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{( sexe, age, internet, couvmal, moustiq, logem, eauboi\_ss, elec\_ac, superf)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{tbl\_summary}\NormalTok{(}
+    \AttributeTok{by =}\NormalTok{ sexe,}
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      age }\SpecialCharTok{\textasciitilde{}} \StringTok{"Âge en années"}\NormalTok{,}
+\NormalTok{      internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"individu accès à internet"}\NormalTok{,}
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{,}
+\NormalTok{      moustiq }\SpecialCharTok{\textasciitilde{}} \StringTok{"Dormir la nuit dernière sous une moustiquaire"}\NormalTok{,}
+\NormalTok{      logem }\SpecialCharTok{\textasciitilde{}} \StringTok{"Type de logement"}\NormalTok{,}
+\NormalTok{      eauboi\_ss }\SpecialCharTok{\textasciitilde{}} \StringTok{"Eau potable en saison sèche"}\NormalTok{,}
+\NormalTok{      elec\_ac }\SpecialCharTok{\textasciitilde{}} \StringTok{"Accès au réseau électrique"}\NormalTok{,}
+\NormalTok{      superf }\SpecialCharTok{\textasciitilde{}} \StringTok{"Superficie"}
+\NormalTok{    ),}
+    \AttributeTok{statistic =} \FunctionTok{list}\NormalTok{(}\FunctionTok{all\_continuous}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \StringTok{"\{mean\} (\{sd\})"}\NormalTok{),}
+    \AttributeTok{digits =} \FunctionTok{list}\NormalTok{(}\FunctionTok{all\_continuous}\NormalTok{() }\SpecialCharTok{\textasciitilde{}} \DecValTok{0}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}\AttributeTok{label =} \StringTok{"Statistiques stratifiées par sexe"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 2 missing rows in the "sexe" column have been removed.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tableau\_stratifie}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcc}
+\toprule
+Statistiques stratifiées par sexe & \textbf{Masculin}  N = 13,165\textsuperscript{\textit{1}} & \textbf{Féminin}  N = 14,315\textsuperscript{\textit{1}} \\ 
+\midrule\addlinespace[2.5pt]
+Âge en années & 22 (19) & 24 (20) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+individu accès à internet &  &  \\ 
+    Non & 11,549 (88\%) & 13,274 (93\%) \\ 
+    Oui & 1,616 (12\%) & 1,041 (7.3\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Individu couverture maladie &  &  \\ 
+    Non & 12,520 (95\%) & 13,759 (96\%) \\ 
+    Oui & 645 (4.9\%) & 556 (3.9\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Dormir la nuit dernière sous une moustiquaire &  &  \\ 
+    Non & 3,652 (28\%) & 3,686 (26\%) \\ 
+    Oui & 9,513 (72\%) & 10,629 (74\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Type de logement &  &  \\ 
+    Proprietaire titre & 1,364 (10\%) & 1,536 (11\%) \\ 
+    Proprietaire sans titre & 6,654 (51\%) & 7,077 (49\%) \\ 
+    Locataire & 2,328 (18\%) & 2,448 (17\%) \\ 
+    Autre & 2,819 (21\%) & 3,254 (23\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Eau potable en saison sèche &  &  \\ 
+    Non & 4,930 (37\%) & 5,223 (36\%) \\ 
+    Oui & 8,235 (63\%) & 9,092 (64\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Accès au réseau électrique &  &  \\ 
+    Non & 9,748 (74\%) & 10,592 (74\%) \\ 
+    Oui & 3,417 (26\%) & 3,723 (26\%) \\ 
+    Valeurs manquantes & 0 & 0 \\ 
+Superficie & 3 (20) & 3 (19) \\ 
+    Valeurs manquantes & 4,330 & 4,942 \\ 
+\bottomrule
+\end{tabular*}
+\begin{minipage}{\linewidth}
+\textsuperscript{\textit{1}}Mean (SD); n (\%)\\
+\end{minipage}
+\end{table}
+
+\subsection{Croisement de quelques
+variables}\label{croisement-de-quelques-variables}
+
+\subsubsection{Croisement de la variabe internet et
+region}\label{croisement-de-la-variabe-internet-et-region}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Cet tableau fait voir l\textquotesingle{}accès a internet selon les regions }
+
+\NormalTok{tableau\_croise1 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{tbl\_cross}\NormalTok{(}\AttributeTok{row =}\NormalTok{ region,  }
+    \AttributeTok{col =}\NormalTok{ internet, }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(region }\SpecialCharTok{\textasciitilde{}} \StringTok{"Region de residence"}\NormalTok{,}
+\NormalTok{    internet }\SpecialCharTok{\textasciitilde{}} \StringTok{"Accès à internet"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,}
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Accès à internet et region de residence**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Accès à internet}} &  \\ 
+\cmidrule(lr){2-4}
+\textbf{Accès à internet et region de residence} & \emph{Non} & \emph{Oui} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Region de residence} &  &  &  &  \\ 
+{\itshape     Maritime} & 3,478 (92\%) & 286 (7.6\%) & 0 (0\%) & 3,764 (100\%) \\ 
+{\itshape     Plateaux} & 4,528 (94\%) & 268 (5.6\%) & 0 (0\%) & 4,796 (100\%) \\ 
+{\itshape     Centrale} & 3,432 (91\%) & 319 (8.5\%) & 0 (0\%) & 3,751 (100\%) \\ 
+{\itshape     Kara} & 4,635 (94\%) & 294 (6.0\%) & 0 (0\%) & 4,929 (100\%) \\ 
+{\itshape     Savanes} & 6,288 (97\%) & 221 (3.4\%) & 0 (0\%) & 6,509 (100\%) \\ 
+{\itshape     Lomé commune} & 2,464 (66\%) & 1,269 (34\%) & 0 (0\%) & 3,733 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) \\ 
+{\bfseries Total} & 24,825 (90\%) & 2,657 (9.7\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable region et
+mstat}\label{croisement-de-la-variable-region-et-mstat}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ce croisement nous permet de comprendre les disparités regionales selon la situation de famille}
+
+\NormalTok{tableau\_croise2 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ mstat,  }
+    \AttributeTok{col =}\NormalTok{ region,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      region }\SpecialCharTok{\textasciitilde{}} \StringTok{"Région de résidence"}\NormalTok{,  }
+\NormalTok{      mstat }\SpecialCharTok{\textasciitilde{}} \StringTok{"Situation de famille"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Situation de famille et région de résidence**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccccccc}
+\toprule
+ & \multicolumn{7}{c}{\textbf{Région de résidence}} &  \\ 
+\cmidrule(lr){2-8}
+\textbf{Situation de famille et région de résidence} & \emph{Maritime} & \emph{Plateaux} & \emph{Centrale} & \emph{Kara} & \emph{Savanes} & \emph{Lomé commune} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Situation de famille} &  &  &  &  &  &  &  &  \\ 
+{\itshape     Célibataire} & 2,255 (13\%) & 2,851 (17\%) & 2,301 (14\%) & 2,936 (18\%) & 4,041 (24\%) & 2,332 (14\%) & 0 (0\%) & 16,716 (100\%) \\ 
+{\itshape     Marié(e) monogame} & 839 (13\%) & 1,123 (18\%) & 914 (14\%) & 1,050 (17\%) & 1,481 (23\%) & 916 (14\%) & 0 (0\%) & 6,323 (100\%) \\ 
+{\itshape     Marié(e) polygame} & 282 (13\%) & 411 (19\%) & 294 (13\%) & 494 (23\%) & 586 (27\%) & 118 (5.4\%) & 0 (0\%) & 2,185 (100\%) \\ 
+{\itshape     Union libre} & 71 (18\%) & 92 (24\%) & 18 (4.6\%) & 46 (12\%) & 65 (17\%) & 97 (25\%) & 0 (0\%) & 389 (100\%) \\ 
+{\itshape     Veuf(ve)} & 207 (16\%) & 202 (16\%) & 157 (12\%) & 290 (22\%) & 290 (22\%) & 151 (12\%) & 0 (0\%) & 1,297 (100\%) \\ 
+{\itshape     Divorcé(e)} & 20 (11\%) & 42 (23\%) & 22 (12\%) & 41 (23\%) & 24 (13\%) & 33 (18\%) & 0 (0\%) & 182 (100\%) \\ 
+{\itshape     Séparé(e)} & 90 (23\%) & 75 (19\%) & 45 (12\%) & 72 (19\%) & 22 (5.7\%) & 84 (22\%) & 0 (0\%) & 388 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 2 (100\%) & 0 (0\%) & 2 (100\%) \\ 
+{\bfseries Total} & 3,764 (14\%) & 4,796 (17\%) & 3,751 (14\%) & 4,929 (18\%) & 6,509 (24\%) & 3,733 (14\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable eauboi\_s et
+region.}\label{croisement-de-la-variable-eauboi_s-et-region.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ce croisement nous permet de comprendreles disparités regionales dans l\textquotesingle{}accès a l\textquotesingle{}eau potable}
+
+\NormalTok{tableau\_croise3 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ eauboi\_ss,  }
+    \AttributeTok{col =}\NormalTok{ region,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      region }\SpecialCharTok{\textasciitilde{}} \StringTok{"Région de résidence"}\NormalTok{,  }
+\NormalTok{      eauboi\_ss }\SpecialCharTok{\textasciitilde{}} \StringTok{"Accès à l\textquotesingle{}eau potable en saison seche"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Eau potable en saison seche et région de résidence**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccccccc}
+\toprule
+ & \multicolumn{7}{c}{\textbf{Région de résidence}} &  \\ 
+\cmidrule(lr){2-8}
+\textbf{Eau potable en saison seche et région de résidence} & \emph{Maritime} & \emph{Plateaux} & \emph{Centrale} & \emph{Kara} & \emph{Savanes} & \emph{Lomé commune} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Accès à l'eau potable en saison seche} &  &  &  &  &  &  &  &  \\ 
+{\itshape     Non} & 1,534 (15\%) & 1,888 (19\%) & 2,241 (22\%) & 1,185 (12\%) & 2,893 (28\%) & 412 (4.1\%) & 0 (0\%) & 10,153 (100\%) \\ 
+{\itshape     Oui} & 2,230 (13\%) & 2,908 (17\%) & 1,510 (8.7\%) & 3,744 (22\%) & 3,616 (21\%) & 3,321 (19\%) & 0 (0\%) & 17,329 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) \\ 
+{\bfseries Total} & 3,764 (14\%) & 4,796 (17\%) & 3,751 (14\%) & 4,929 (18\%) & 6,509 (24\%) & 3,733 (14\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable educ\_hi et couverture
+maladie}\label{croisement-de-la-variable-educ_hi-et-couverture-maladie}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ce croisement nous permet de verifier si le niveau d\textquotesingle{}education est correlé avec la couverture maladie universelle. On constate que plus le niveau d\textquotesingle{}eduction est élévé plus la proportion des individus couverent par la couverture maladie universelle est élévée}
+
+\NormalTok{tableau\_croise4 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ educ\_hi,  }
+    \AttributeTok{col =}\NormalTok{ couvmal,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      educ\_hi }\SpecialCharTok{\textasciitilde{}} \StringTok{"Niveau d\textquotesingle{}éducation achevé"}\NormalTok{,  }
+\NormalTok{      couvmal }\SpecialCharTok{\textasciitilde{}} \StringTok{"Individu couverture maladie"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Niveau d\textquotesingle{}education achevé et couverture maladie**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise4}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Individu couverture maladie}} &  \\ 
+\cmidrule(lr){2-4}
+\textbf{Niveau d'education achevé et couverture maladie} & \emph{Non} & \emph{Oui} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Niveau d'éducation achevé} &  &  &  &  \\ 
+{\itshape     Aucun} & 10,503 (99\%) & 150 (1.4\%) & 0 (0\%) & 10,653 (100\%) \\ 
+{\itshape     Maternelle} & 602 (91\%) & 57 (8.6\%) & 0 (0\%) & 659 (100\%) \\ 
+{\itshape     Primaire} & 9,058 (96\%) & 406 (4.3\%) & 0 (0\%) & 9,464 (100\%) \\ 
+{\itshape     Second. gl 1} & 4,326 (94\%) & 255 (5.6\%) & 0 (0\%) & 4,581 (100\%) \\ 
+{\itshape     Second. tech. 1} & 27 (87\%) & 4 (13\%) & 0 (0\%) & 31 (100\%) \\ 
+{\itshape     Second. gl 2} & 989 (87\%) & 148 (13\%) & 0 (0\%) & 1,137 (100\%) \\ 
+{\itshape     Second. tech. 2} & 232 (90\%) & 25 (9.7\%) & 0 (0\%) & 257 (100\%) \\ 
+{\itshape     Postsecondaire} & 81 (76\%) & 26 (24\%) & 0 (0\%) & 107 (100\%) \\ 
+{\itshape     Superieur} & 462 (78\%) & 130 (22\%) & 0 (0\%) & 592 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 1 (100\%) & 0 (0\%) & 0 (0\%) & 1 (100\%) \\ 
+{\bfseries Total} & 26,281 (96\%) & 1,201 (4.4\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable revenu et la variable
+car(possedé une
+voiture)}\label{croisement-de-la-variable-revenu-et-la-variable-carposseduxe9-une-voiture}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Cela nous permet de voir la possession de voiture selon le type de logement}
+
+\NormalTok{tableau\_croise5 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ logem,  }
+    \AttributeTok{col =}\NormalTok{ car,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      car }\SpecialCharTok{\textasciitilde{}} \StringTok{"Possedé une voiture"}\NormalTok{,  }
+\NormalTok{      logem}\SpecialCharTok{\textasciitilde{}} \StringTok{"Type de logement"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Type de logement et possession d\textquotesingle{}une voiture**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise5}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Possedé une voiture}} &  \\ 
+\cmidrule(lr){2-4}
+\textbf{Type de logement et possession d'une voiture} & \emph{Non} & \emph{Oui} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Type de logement} &  &  &  &  \\ 
+{\itshape     Proprietaire titre} & 2,545 (88\%) & 357 (12\%) & 0 (0\%) & 2,902 (100\%) \\ 
+{\itshape     Proprietaire sans titre} & 13,606 (99\%) & 125 (0.9\%) & 0 (0\%) & 13,731 (100\%) \\ 
+{\itshape     Locataire} & 4,691 (98\%) & 85 (1.8\%) & 0 (0\%) & 4,776 (100\%) \\ 
+{\itshape     Autre} & 6,014 (99\%) & 59 (1.0\%) & 0 (0\%) & 6,073 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) \\ 
+{\bfseries Total} & 26,856 (98\%) & 626 (2.3\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable region et alfab
+(alphabetisation)}\label{croisement-de-la-variable-region-et-alfab-alphabetisation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Ce croisement nouspermet de voir les taux d\textquotesingle{}alphabetisation selon les regions}
+
+\NormalTok{tableau\_croise6 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ alfab,  }
+    \AttributeTok{col =}\NormalTok{ region,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      region }\SpecialCharTok{\textasciitilde{}} \StringTok{"Région de résidence"}\NormalTok{,  }
+\NormalTok{      alfab }\SpecialCharTok{\textasciitilde{}} \StringTok{"Alphabetisation"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Alphabetisation et région de résidence**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise6}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccccccc}
+\toprule
+ & \multicolumn{7}{c}{\textbf{Région de résidence}} &  \\ 
+\cmidrule(lr){2-8}
+\textbf{Alphabetisation et région de résidence} & \emph{Maritime} & \emph{Plateaux} & \emph{Centrale} & \emph{Kara} & \emph{Savanes} & \emph{Lomé commune} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Alphabetisation} &  &  &  &  &  &  &  &  \\ 
+{\itshape     Non} & 1,535 (12\%) & 2,109 (17\%) & 1,734 (14\%) & 2,396 (19\%) & 3,980 (31\%) & 882 (7.0\%) & 0 (0\%) & 12,636 (100\%) \\ 
+{\itshape     Oui} & 2,229 (15\%) & 2,687 (18\%) & 2,017 (14\%) & 2,533 (17\%) & 2,529 (17\%) & 2,851 (19\%) & 0 (0\%) & 14,846 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) & 0 (NA\%) \\ 
+{\bfseries Total} & 3,764 (14\%) & 4,796 (17\%) & 3,751 (14\%) & 4,929 (18\%) & 6,509 (24\%) & 3,733 (14\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsubsection{Croisement de la variable diplome et
+sexe}\label{croisement-de-la-variable-diplome-et-sexe}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ce croisement nous permet de voir les  disparités educatives entre les sexes}
+
+\NormalTok{tableau\_croise7 }\OtherTok{\textless{}{-}}\NormalTok{ data\_fusion }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  labelled}\SpecialCharTok{::}\FunctionTok{to\_factor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{tbl\_cross}\NormalTok{(}
+    \AttributeTok{row =}\NormalTok{ sexe,  }
+    \AttributeTok{col =}\NormalTok{ diplome,  }
+    \AttributeTok{percent =} \StringTok{"row"}\NormalTok{,  }
+    \AttributeTok{label =} \FunctionTok{list}\NormalTok{(}
+\NormalTok{      sexe }\SpecialCharTok{\textasciitilde{}} \StringTok{"Sexe"}\NormalTok{,  }
+\NormalTok{      diplome }\SpecialCharTok{\textasciitilde{}} \StringTok{"Diplome le plus élevé"}\NormalTok{),}
+    \AttributeTok{missing =} \StringTok{"always"}\NormalTok{,  }
+    \AttributeTok{missing\_text =} \StringTok{"Valeurs manquantes"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{modify\_header}\NormalTok{(}
+    \AttributeTok{label =} \StringTok{"**Diplome et sexe**"}\NormalTok{,}
+    \AttributeTok{stat\_0 =} \StringTok{"**Effectif**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bold\_labels}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}  
+  \FunctionTok{italicize\_levels}\NormalTok{()}
+
+\NormalTok{tableau\_croise7}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[!t]
+\fontsize{12.0pt}{14.4pt}\selectfont
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccccccccccccc}
+\toprule
+ & \multicolumn{12}{c}{\textbf{Diplome le plus élevé}} &  \\ 
+\cmidrule(lr){2-13}
+\textbf{Diplome et sexe} & \emph{Aucun} & \emph{CEPE / CEPD} & \emph{bepc} & \emph{cap} & \emph{bt} & \emph{bac} & \emph{DEUG, DUT, BTS} & \emph{Licence} & \emph{Maitrise} & \emph{Master/DEA/DESS} & \emph{Doctorat/Phd} & \emph{Valeurs manquantes} & \textbf{Effectif} \\ 
+\midrule\addlinespace[2.5pt]
+{\bfseries Sexe} &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+{\itshape     Masculin} & 8,773 (67\%) & 2,684 (20\%) & 964 (7.3\%) & 57 (0.4\%) & 12 (<0.1\%) & 389 (3.0\%) & 58 (0.4\%) & 137 (1.0\%) & 60 (0.5\%) & 23 (0.2\%) & 8 (<0.1\%) & 0 (0\%) & 13,165 (100\%) \\ 
+{\itshape     Féminin} & 11,230 (78\%) & 2,238 (16\%) & 555 (3.9\%) & 15 (0.1\%) & 6 (<0.1\%) & 161 (1.1\%) & 36 (0.3\%) & 53 (0.4\%) & 11 (<0.1\%) & 5 (<0.1\%) & 5 (<0.1\%) & 0 (0\%) & 14,315 (100\%) \\ 
+{\itshape     Valeurs manquantes} & 2 (100\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 0 (0\%) & 2 (100\%) \\ 
+{\bfseries Total} & 20,005 (73\%) & 4,922 (18\%) & 1,519 (5.5\%) & 72 (0.3\%) & 18 (<0.1\%) & 550 (2.0\%) & 94 (0.3\%) & 190 (0.7\%) & 71 (0.3\%) & 28 (0.1\%) & 13 (<0.1\%) & 0 (0\%) & 27,482 (100\%) \\ 
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\end{document}
