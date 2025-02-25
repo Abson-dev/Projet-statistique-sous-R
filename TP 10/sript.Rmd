@@ -1,0 +1,354 @@
+---
+title: "Test_2025"
+author: "Albert ZINABA"
+date: "`r Sys.Date()`"
+output:
+  word_document: 
+    toc: true
+    toc_depth: 2
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# Liste des packages nécessaires
+packages <- c("readr", "haven", "summarytools", "janitor", "reshape2", "utils", "dplyr","tidyverse", "labelled", "cardx", "survey", "kableExtra","data.table",  "gtsummary")
+
+# Vérification et installation
+invisible(lapply(packages, function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, quiet = TRUE)  
+  }
+  if (!pkg %in% .packages()) {  
+    suppressMessages(library(pkg, character.only = TRUE))
+  }
+}))
+```
+
+# Importation des bases de données 
+
+```{r}
+mother_baseline <- haven::read_dta("../data/food_comp_mother_baseline.dta")
+mother_endline <- haven::read_dta("../data/food_comp_mother_endline.dta")
+child_baseline <- haven::read_dta("../data/food_comp_child_baseline.dta")
+child_endline <- haven::read_dta("../data/food_comp_child_endline.dta")
+base_menage <- haven::read_dta("../data/base_menage.dta")
+```
+
+# Structure des bases
+
+```{r}
+utils::str(mother_baseline)
+utils::str(mother_endline)
+utils::str(child_baseline)
+utils::str(child_endline)
+utils::str(base_menage)
+```
+
+# Partie 1 : Gestion et nettoyage des bases de données
+## 1.	VérifiONS la présence de doublons dans les bases de données Baseline, Endline et ménage en les si nécessaire.
+```{r}
+# Vérifions les doublons dans chaque base de données
+# Cherchons si il y a des doublons dans chaque base de donnée a travers la fonction "cherche_doub"; elle permet de détecter et d'analyser les doublons dans un jeu de données. Elle utilise la fonction `duplicated()` pour identifier les lignes répétées, compte le nombre de doublons trouvés, et affiche un message indiquant leur présence ou absence.
+ 
+cherche_doub <- function(data) {
+  duplicates <- data[duplicated(data), ]
+  if (nrow(duplicates) > 0) {
+    print(paste("Doublons trouvés :", nrow(duplicates)))
+    return(duplicates)
+  } else {
+    print("Aucun doublon trouvé.")
+    return(NULL)
+  }
+}
+
+# Appliquons la vérification des doublons
+cherche_doub(mother_baseline)
+cherche_doub(mother_endline)
+cherche_doub(child_baseline)
+cherche_doub(child_endline)
+cherche_doub(base_menage)
+
+```
+
+
+```{r}
+# Supprimer les doublons si nécessaire
+mother_baseline <- mother_baseline %>% distinct()
+mother_endline <- mother_endline %>% distinct()
+child_baseline <- child_baseline %>% distinct()
+child_endline <- child_endline %>% distinct()
+base_menage <- base_menage %>% distinct()
+```
+
+
+## 2. verifications de la coherence des noms ds variables 
+```{r}
+# Vérifier les noms des variables dans les bases de données
+nom_var1<-names(mother_baseline)
+print(nom_var1)
+```
+
+
+```{r}
+nom_var2<-names(mother_endline)
+print(nom_var2)
+```
+
+
+```{r}
+nom_var3<-names(child_baseline)
+print(nom_var3)
+```
+
+
+```{r}
+nom_var4<-names(child_endline)
+print(nom_var4)
+```
+
+
+```{r}
+# En comparant les noms des variables dans les bases de données, on observe des différences dans la base 'mother_baseline' qui contient des variables nommées V1 et V9 au lieu de energ_kcal et zinc_mg.
+
+# Renommons les variables dans mother_baseline en remplacant V1 par energ_kcal et V9 par zinc_mg
+mother_baseline <- mother_baseline %>%
+  rename(
+    energ_kcal = V1,
+    zinc_mg = V9    
+  )
+
+# Vérifions maintenant si les noms des variables après correction
+names(mother_baseline)
+```
+
+## 3. Gestion des données manquantes 
+```{r}
+# Vérifier les données manquantes
+# Les lignes de codes suivants verifient s'il y a des valeurs manquantes dans les base de données a travers la fonction 'is.na' pout trouver les valeurs manquantes et la fonction 'sum' pour les additions et donné le nombes de valeurs manquantes dans chaques base de données.
+
+val_manq1<-sum(is.na(mother_baseline))
+print(val_manq1)
+
+val_manq2<-sum(is.na(mother_endline))
+print(val_manq2)
+
+val_manq3<-sum(is.na(child_baseline))
+print(val_manq3)
+
+val_manq4<-sum(is.na(child_endline))
+print(val_manq4)
+
+val_manq5<-sum(is.na(base_menage))
+print(val_manq5)
+
+# Correction des données manquantes si possible
+# Noms remplacerons les NA par la moyenne pour les variables numériques dans chaquebase de donnée
+mother_baseline <- mother_baseline %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+mother_endline <- mother_endline %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+child_baseline <- child_baseline %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+child_endline <- child_endline %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+base_menage <- base_menage %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+```
+
+## 4. Consommation moyenne d'energie pour les mères a chaque repas
+
+```{r}
+cons_energ <- mother_baseline %>%
+  group_by(energ_kcal) %>%
+  summarise(avg_energy = mean(energ_kcal, na.rm = TRUE))
+
+print(cons_energ)
+```
+
+```{r}
+# Sauvegarder les bases de données nettoyées
+
+# A travers les codes suivants nous utilisons la fonction write_dta() du package haven pour sauvegarder les jeux de données nettoyés dans des fichiers au format .dta (format de fichier utilisé par Stata). Voici une explication ligne par ligne :
+  
+write_dta(mother_baseline, "mother_baseline_v1.dta")
+write_dta(mother_endline, "mother_endline_v1.dta")
+write_dta(child_baseline, "child_baseline_v1.dta")
+write_dta(child_endline, "child_endline_v1.dta")
+write_dta(base_menage, "base_menage_final.dta")
+```
+
+# Partie 2 Empilement et fusion des donnés
+
+# Chargement des base de données
+
+
+```{r}
+# Chargons les bases de données nettoyées
+mother_baseline<- read_dta("mother_baseline_v1.dta")
+child_baseline <- read_dta("child_baseline_v1.dta")
+```
+
+
+```{r}
+
+# Charger les données
+mother_baseline <- read_dta("mother_baseline_v1.dta")
+child_baseline <- read_dta("child_baseline_v1.dta")
+
+# Ajouter une colonne pour identifier les mères et les enfants
+mother_baseline <- mother_baseline %>% mutate(type = "mother")
+child_baseline <- child_baseline %>% mutate(type = "child")
+
+# Empiler les données
+baseline_data1 <- bind_rows(mother_baseline, child_baseline)
+baseline_data1
+```
+
+```{r}
+# Liste des variables à renommer
+cons_vars <- c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg", "iron_mg", "zinc_mg","vit_c_mg")
+
+# Ajouter le suffixe _b
+baseline_data <- baseline_data1 %>%
+  rename_with(~ paste0(., "_b"), all_of(cons_vars))
+```
+
+```{r}
+
+# Résumons les consommations journalières totales par individu
+baseline_summary <- baseline_data %>%
+  group_by(hhid, s1_q2, type) %>%
+  summarise(across(ends_with("_b"), sum, na.rm = TRUE), .groups = "drop")
+
+# Afficher le résultat
+print(baseline_summary)
+```
+
+```{r}
+#Sauvergarde de la base de donnée final
+# Sélectionner les colonnes nécessaires
+baseline_final <- baseline_summary %>%
+  select(hhid, s1_q2, energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b)
+
+# Sauvegarder
+write_dta(baseline_final, "baseline_final.dta")
+```
+
+## 2.Endline
+
+```{r}
+# Charger les données
+mother_endline <- read_dta("mother_endline_v1.dta")
+child_endline <- read_dta("child_endline_v1.dta")
+
+# Ajouter une colonne pour identifier les mères et les enfants
+mother_endline <- mother_endline %>% mutate(type = "mother")
+child_endline <- child_endline %>% mutate(type = "child")
+
+# Empiler les données
+endline_data <- bind_rows(mother_endline, child_endline)
+```
+
+
+```{r}
+# Ajout du suffixe _e
+endline_data <- endline_data %>%
+  rename_with(~ paste0(., "_e"), all_of(cons_vars))
+endline_data
+```
+
+
+
+```{r}
+# Résumons les consommations journalières totales par individu
+endline_summary <- endline_data %>%
+  group_by(hhid, s1_q2, type) %>%
+  summarise(across(ends_with("_e"), sum, na.rm = TRUE), .groups = "drop")
+
+# Afficher le résultat
+print(endline_summary)
+```
+
+
+```{r}
+#Sauvergarde de la base final
+# Sélectionner les colonnes nécessaires
+endline_final <- endline_summary %>%
+  select(hhid, s1_q2, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e)
+
+# Sauvegarder
+write_dta(endline_final, "endline_final.dta")
+```
+
+## 3. Fusion des deux bases 
+```{r}
+# Fusion des deux bases de données
+merged_data <- merge(baseline_final, endline_final, by = c("hhid", "s1_q2"))
+```
+
+## 4. Fusion des caracteristiques
+```{r}
+# Charger la base de données des ménages
+base_menage_final <- read_dta("base_menage_final.dta")
+
+# Fusionner avec les données précédentes
+final_data <- merge(merged_data, base_menage_final, by = "hhid")
+final_data
+```
+
+
+## 5.Sauvergarde de la base
+
+
+# Partie 3
+
+```{r}
+
+# Un tableau recapitulatif
+tableau <- mother_baseline %>%
+  select(s1_q2, energ_kcal, protein_g, lipid_tot_g, calcium_mg, iron_mg, vit_b6_mg, vit_b12_mcg, vit_c_mg) %>%  # Sélection des variables
+  tbl_summary(
+    by = s1_q2,  # Par groupe s1_q2
+    label = list(
+      energ_kcal ~ "Energie (kcal)", #
+      protein_g ~ "Protéines (g)",
+      lipid_tot_g ~ "Lipides totaux (g)",
+      calcium_mg ~ "Calcium (mg)",
+      iron_mg ~ "Fer (mg)",
+      vit_b6_mg ~ "Vitamine B6 (mg)",
+      vit_b12_mcg ~ "Vitamine B12 (mcg)",
+      vit_c_mg ~ "Vitamine C (mg)"
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",  # Moyenne et écart-type pour les variables continues
+      all_categorical() ~ "{n} ({p}%)"     # Effectif et pourcentage pour les variables catégorielles
+    ),
+    digits = list(all_continuous() ~ 0),   # Arrondir les valeurs continues à 0 décimale
+    missing_text = "Valeurs manquantes"    # Texte personnalisé pour les données manquantes
+  ) %>%
+  add_p() %>%  # Ajouter les tests de p-value
+  modify_header(label = "**Variable**") %>%  # Modifier l'en-tête de la colonne 'label'
+  bold_labels()  # Mettre en gras les noms des variables
+
+# Afficher le tableau
+tableau
+
+```
+
+
+
+
+
+
+
+
