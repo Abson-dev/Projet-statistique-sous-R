@@ -1,0 +1,302 @@
+---
+title: "Test Logiciel R"
+author: "Aissatou Sega DIALLO"
+date: "2025-02-25"
+output: 
+  word_document: default
+  output_dir: "./Sortie"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Test
+Ce test se divise en trois parties :
+*-Gestion et nettoyage des bases de données*,
+*-Empilement et fusion des données,*
+*-Statistiques descriptives avec gtsummary.*
+Les bases de données utilisées dans ce test proviennent d'enquêtes menées auprès des mères afin d'analyser la composition nutritionnelle de leur alimentation ainsi que celle de leurs enfants au cours des 24 dernières heures. Les données ont été recueillies à deux moments distincts : au début de l'étude (Baseline) et à la fin de l'étude (Endline).
+
+# Installation et chargement des packages
+
+Cette section assure la disponibilité des bibliothèques nécessaires.
+
+```{r results=FALSE, message=FALSE}
+
+Packages <- c("readr", "haven", "utils", "dplyr","labelled", "gtsummary","skimr")
+
+for (x in Packages) {
+  if (!requireNamespace(x, quietly = TRUE)) {
+    install.packages(x)
+  }
+  library(x, character.only = TRUE)
+}
+```
+
+#Importation des bases de données
+
+**Chargement des bases de données**
+```{r}
+#Chargement des bases sur l'alimentation de la mère
+mother_baseline<- haven::read_dta("../Données/food_comp_mother_baseline.dta")
+mother_endline<- haven::read_dta("../Données/food_comp_mother_endline.dta")
+
+#Chargement des bases sur l'alimentation de l'enfant
+child_baseline<- haven::read_dta("../Données/food_comp_child_baseline.dta")
+child_endline<- haven::read_dta("../Données/food_comp_child_endline.dta")
+
+#Chargement de la base ménage 
+Base_men<- haven::read_dta("../Données/base_menage.dta")
+
+```
+
+**Aperçu des jeux de données**
+```{r}
+# Mettre les bases dans une liste
+bases_list_init <- list(Base_men, mother_baseline, mother_endline, child_baseline, child_endline)
+
+# Appliquez str() à chaque base avec une boucle for
+for (base in bases_list_init) {
+  utils::str(base)
+}
+```
+
+#**Partie 1 : Gestion et nettoyage des bases de données**
+Dans cette première partie, nous allons effectuer une série d'opérations pour garantir la qualité des bases de données en les nettoyant et en les harmonisant. Cela comprend la vérification et la suppression des doublons, l'harmonisation des noms de variables, la gestion des valeurs manquantes, ainsi que le calcul de certaines statistiques descriptives.
+
+##1.Vérification et suppression des données
+```{r}
+#Suppression des doublons 
+for (i in 1:length(bases_list_init)) {
+  bases_list_init[[i]] <- bases_list_init[[i]] %>% distinct()
+}
+```
+
+##2.Harmonisation des variables
+```{r}
+# Vérification des noms de variables pour chaque base
+for (base in bases_list_init) {
+  print(colnames(base))
+}
+
+# Liste des bases de données Baseline et Endline
+baseline_list <- list(mother_baseline, child_baseline)  
+endline_list <- list(mother_endline, child_endline)    
+
+# Liste des noms de variables dans Baseline et Endline
+baseline_names <- lapply(baseline_list, colnames)
+endline_names <- lapply(endline_list, colnames)
+
+# Comparaison des noms de variables entre Baseline et Endline
+for (i in 1:length(baseline_list)) {
+  baseline_vars <- baseline_names[[i]]
+  endline_vars <- endline_names[[i]]
+  
+  # Si les noms des variables ne sont pas identiques, les renommer
+  if (!identical(baseline_vars, endline_vars)) {
+    # Créez une liste de correspondance des noms de variables à renommer 
+    rename_mapping <- setNames(baseline_vars, endline_vars)
+    
+    # Renommer les variables dans la base Endline
+    endline_list[[i]] <- endline_list[[i]] %>%
+      rename_with(~ rename_mapping[.], everything())  # Applique le renommage
+  }
+}
+```
+
+##3.Gestion des valeurs manquantes
+```{r}
+# Vérification des valeurs manquantes avec skim()
+for (base in bases_list_init) {
+  skim(base)
+}
+
+# Imputation des valeurs manquantes par la moyenne pour chaque base
+for (i in 1:length(bases_list_init)) {
+  bases_list_init[[i]] <- bases_list_init[[i]] %>% 
+    mutate(across(everything(), ~ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+}
+
+```
+
+##4.Consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base 
+```{r}
+# Calcul de la moyenne de consommation d'énergie
+moy_energie_mother <- mother_baseline %>%
+  group_by(s1_q0) %>%
+  summarise(moy_energie = mean(V1, na.rm = TRUE))
+
+print(moy_energie_mother)
+```
+
+##5.Renommage des bases corrigées
+```{r}
+data_names <- c("base_menage_final.dta", "mother_baseline_v1.dta", "mother_endline_v1.dta", "child_baseline_v1.dta", "child_endline_v1.dta")
+
+# Créer de nouvelles variables avec les noms souhaités
+for (i in 1:length(bases_list_init)) {
+  # Créer une nouvelle variable avec le nom correspondant
+  assign(data_names[i], bases_list_init[[i]]) 
+  # Enregistrer la base sous son nouveau nom
+  write_dta(get(data_names[i]), data_names[i])
+}
+```
+
+
+#**Partie 2 : Empilement et Fusion des données**
+Cette partie,après avoir vérifié et corrigé les possibles incohérences dans les bases de données , permettra de faire l'empilement et la fusion des jeux de données.
+
+##Utilisation des bases Baseline
+
+**Empilation des bases Baseline**
+```{r}
+#Empilation des bases mères et enfants
+mother_baseline_v1.dta <- mother_baseline_v1.dta %>%
+  rename(energ_kcal = V1,  # Renomme 'old_name_1' en 'new_name_1'
+         zinc_mg = V9)  # Renomme 'old_name_2' en 'new_name_2'
+
+baseline <- rbind(mother_baseline_v1.dta ,child_baseline_v1.dta)
+
+```
+
+**Renommage des variables**
+```{r}
+#Renommer les variables de consommation
+# rename(energ_kcal = V1) # Renomme la variable V1 en energ_kcal
+#rename(zinc_mg = V9) # Renomme la variable V9 en zinc_mg
+baseline <- baseline %>% 
+  rename_with(~paste0(., "_b"), 
+              .cols = energ_kcal:vit_c_mg)
+```
+
+**Création d'une base de données synthétisante**
+```{r}
+baseline_summary <- merge(
+  baseline %>% 
+    group_by(hhid) %>%
+    summarise(across(s1_q2:vit_c_mg_b, sum, na.rm = TRUE), .groups = "drop"),  # Ajout de .groups = "drop"
+  
+  baseline %>% 
+    select(hhid) %>% 
+    distinct(),
+  
+  by = c("hhid"),
+  all = TRUE
+)
+```
+
+**Sauvegarder les données dans une base finale**
+```{r}
+baseline_final <- baseline_summary %>% 
+  select(hhid, s1_q2, energ_kcal_b, protein_g_b, lipid_tot_g_b, 
+         calcium_mg_b, iron_mg_b, zinc_mg_b)
+write_dta(baseline_final, "baseline_final.dta")
+```
+
+##Utilisation des bases Endline
+**Empilation des bases et renommage**
+```{r}
+#Empilation des bases endline
+
+
+endline <- rbind(mother_endline_v1.dta ,child_endline_v1.dta)
+
+#Renommage des variables
+endline <- endline %>% 
+  rename_with(~paste0(., "_e"), 
+              .cols = energ_kcal:vit_c_mg)
+
+```
+
+**Création d'une base de données synthétisante**
+```{r}
+endline_summary <- endline %>% 
+  group_by(hhid) %>% 
+  summarise(across(s1_q2:vit_c_mg_e, sum, na.rm = TRUE), .groups = "drop")
+
+colnames(endline_summary)
+
+```
+
+**Sauvegarder les données dans une base finale**
+```{r}
+endline_final <- endline_summary %>% 
+  select(hhid, s1_q2, energ_kcal_e, protein_g_e, lipid_tot_g_e, 
+         calcium_mg_e, iron_mg_e, zinc_mg_e)
+write_dta(endline_final, "endline_final.dta")
+
+```
+
+##Fusion des bases Endline et Baseline
+```{r}
+#Fusion des bases Baseline ET Endline
+final_data <- left_join(baseline_final, endline_final, by = c("hhid", "s1_q2"))
+write_dta(final_data, "final_data.dta")
+```
+
+
+
+
+##Fusion avec les caractéristiques des ménages
+```{r}
+base_menage_final_selected <- base_menage_final.dta %>%
+  select(hhid, hhsize, regionid, communeid, villageid, poly, dependencyratio, hfias_score, T1)
+base_finale <- left_join(final_data, base_menage_final_selected, by = "hhid")
+write_dta(base_finale, "base_finale.dta")
+```
+
+#**Partie 3 : Statistiques descriptives avec le package gtsummary**
+
+**Création d'un tableau récapitulatif de consommation**
+```{r}
+# Création d'un tableau de statistiques descriptives
+table_summary <- base_finale %>%
+  select(energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b,
+         energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e) %>%
+  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})"),
+              missing = "no") %>%
+modify_header(label="Présentation de la consommation moyenne selon la période")
+table_summary
+
+```
+
+**Croisements avec certaines informations du ménage**
+
+```{r}
+#Consommation en nutriments selon le statut matrimonial (polygamie ou non)
+table_matrimonial <- base_finale %>%
+  select(poly, energ_kcal_b, protein_g_b, lipid_tot_g_b) %>%
+  tbl_summary(by = poly, statistic = all_continuous() ~ "{mean} ({sd})") %>%
+  modify_header(label="Consommation moyenne en début de période selon le régime matrimonial")
+table_matrimonial
+```
+
+```{r}
+#Consommation en nutriments selon la région
+table_region <- base_finale %>%
+  select(regionid, energ_kcal_b, protein_g_b, lipid_tot_g_b) %>%
+  tbl_summary(by = regionid, statistic = all_continuous() ~ "{mean} ({sd})") %>%
+  modify_header(label="Consommation moyenne en début de période selon le région")
+table_region
+```
+
+```{r}
+# Regroupement des tailles de ménage en classes
+base_finale <- base_finale %>% 
+  mutate(taille_menage_classe = case_when(
+    hhsize <= 2 ~ "Petite (1-2)",
+    hhsize <= 5 ~ "Moyenne (3-5)",
+    hhsize <= 8 ~ "Grande (6-8)",
+    TRUE ~ "Très grande (9+)")
+  )
+
+#Consommation en nutriments selon la taille du ménage
+table_size <- base_finale %>%
+  select(taille_menage_classe, energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b) %>%
+  tbl_summary(by = taille_menage_classe, statistic = all_continuous() ~ "{mean} ({sd})") %>%
+  modify_header(label="Consommation moyenne en début de période selon la taille du ménage")
+table_size
+```
+
