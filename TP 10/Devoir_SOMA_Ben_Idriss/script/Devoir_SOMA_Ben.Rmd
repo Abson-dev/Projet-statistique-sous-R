@@ -1,0 +1,714 @@
+---
+title: "Devoir de R"
+output:
+  word_document: default
+  html_document: default
+date: "2025-02-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Commencons par importer les librairies 
+
+```{r}
+# importation des librairies 
+library(haven)
+library(dplyr)
+library(gtsummary)
+
+```
+
+
+# Partie 1: Gestion et nettoyage des bases de données 
+
+```{r}
+child_baseline <- haven::read_dta("../Données/food_comp_child_baseline.dta")
+
+child_endline <- haven::read_dta("../Données/food_comp_child_endline.dta")
+
+mother_baseline <- haven::read_dta("../Données/food_comp_mother_baseline.dta")
+
+mother_endline <- haven::read_dta("../Données/food_comp_mother_endline.dta")
+
+menage <- haven::read_dta("../Données/food_comp_child_baseline.dta")
+
+```
+
+### organisation et structure des différentes bases 
+
+```{r}
+print(child_baseline)
+str(child_baseline)
+```
+
+```{r}
+print(child_endline)
+str(child_endline)
+```
+```{r}
+print(mother_baseline)
+str(mother_baseline)
+```
+```{r}
+
+print(mother_endline)
+str(mother_endline)
+
+```
+
+1. Verifions la presence de doublons dans chaque base 
+```{r}
+# Fonction pour vérifier et supprimer les doublons
+remove_duplicates <- function(data, key) {
+  if (any(duplicated(data[[key]]))) {
+    cat("Des doublons ont été trouvés dans", deparse(substitute(data)), "\n")
+    cat("Nombre de doublons:", sum(duplicated(data[[key]])), "\n")
+    data <- data %>% distinct(!!sym(key), .keep_all = TRUE)
+    cat("Les doublons ont été supprimés.\n")
+  } else {
+    cat("Aucun doublon trouvé dans", deparse(substitute(data)), "\n")
+  }
+  return(data)
+}
+
+# Vérifier et supprimer les doublons pour chaque jeu de données
+child_baseline <- remove_duplicates(child_baseline, "hhid")
+child_endline <- remove_duplicates(child_endline, "hhid")
+mother_baseline <- remove_duplicates(mother_baseline, "hhid")
+mother_endline <- remove_duplicates(mother_endline, "hhid")
+menage <- remove_duplicates(menage, "hhid")
+
+
+
+```
+
+Il n'y a pas de doublons dans une des bases 
+
+```{r}
+print("noms de colonnes de child_baseline" ) 
+colnames(child_baseline)
+print("noms de colonnes de child_endlineline" ) 
+colnames(child_endline)
+print("noms de colonnes de mother_baseline" ) 
+colnames(mother_baseline)
+print("noms de colonnes de mother_endline" ) 
+colnames(mother_endline)
+
+```
+Verifions que toutes les bases endline et baseline  ont le meme nom de colonnes 
+
+```{r}
+
+# Créer une liste des datasets
+datasets <- list(
+  child_baseline = child_baseline,
+  child_endline = child_endline,
+  mother_baseline = mother_baseline,
+  mother_endline = mother_endline,
+  menage = menage
+)
+
+# Extraire les noms de colonnes pour chaque dataset
+column_names <- lapply(datasets, colnames)
+
+# Vérifier si tous les datasets ont les mêmes colonnes
+all_equal <- Reduce(setequal, column_names)
+
+if (all_equal) {
+  cat("Toutes les bases ont les mêmes noms de colonnes.\n")
+} else {
+  cat("Les bases ont des différences dans les noms de colonnes.\n")
+}
+
+
+
+```
+### 3. Verifions si ya des données manquantes 
+
+```{r}
+
+# Créer une liste des datasets
+datasets <- list(
+  child_baseline = child_baseline,
+  child_endline = child_endline,
+  mother_baseline = mother_baseline,
+  mother_endline = mother_endline,
+  menage = menage
+)
+
+# Vérifier le nombre total de valeurs manquantes dans chaque base
+
+for (name in names(datasets)) {
+  missing_values <- sum(is.na(datasets[[name]]))
+  cat(name, "contient", missing_values, "valeurs manquantes.\n")
+}
+
+
+```
+
+On constate que les bases mother_baseline et  mother_endline contiennent plus de valeurs manquantes que les autres bases 
+
+### visualisation des données manquantes 
+
+```{r}
+child_baseline[!complete.cases(child_baseline), ]
+
+```
+
+```{r}
+child_endline[!complete.cases(child_baseline), ]
+
+```
+
+```{r}
+mother_baseline[!complete.cases(child_baseline), ]
+```
+
+```{r}
+mother_endline[!complete.cases(child_baseline), ]
+```
+4. la consommation moyenne d'énergie a chauqe repas dans la base .
+Pour cela nous allons utiliser mother_baseline 
+
+
+```{r}
+str(mother_baseline)
+```
+On voit que la variable V1 ici correpond a la consommation d'énergie en Kcal 
+
+```{r}
+# Calcul de la moyenne en excluant les valeurs manquantes
+mean_energy <- mean(mother_baseline$V1, na.rm = TRUE)
+
+# Affichage du résultat
+cat("La consommation d’énergie moyenne à chaque repas est de", round(mean_energy, 2), "kcal.\n")
+
+
+```
+### consommation moyenne après chaque repas 
+
+```{r}
+View(mother_baseline)
+```
+
+### consommation moyenne après chaque repas 
+
+```{r}
+
+
+# Moyenne de la consommation d’énergie par type de repas
+energy_per_meal <- mother_baseline %>%labelled::to_factor() %>% 
+  group_by(s1_q0) %>%
+  summarise(mean_energy = mean(V1, na.rm = TRUE))
+
+# Affichage du résultat
+print(energy_per_meal)
+
+
+```
+
+5. Corrigons les valeurs manquantes   des variables numeriques par leur moyenne  et  Sauvegardons maintenat les bases 
+
+```{r}
+# Fonction pour remplacer les valeurs manquantes par la moyenne de la colonne
+remplace_na_par_moyenne <- function(df) {
+  df %>%
+    mutate(across(where(is.double), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+}
+
+
+# Appliquer la fonction à chaque base de données
+mother_baseline <- remplace_na_par_moyenne(mother_baseline)
+mother_endline <- remplace_na_par_moyenne(mother_endline)
+child_baseline <- remplace_na_par_moyenne(child_baseline)
+child_endline <- remplace_na_par_moyenne(child_endline)
+menage <- remplace_na_par_moyenne(menage)
+
+
+# Sauvegarder les bases de données après correction
+write_dta(mother_baseline, "../Données/mother_baseline_v1.dta")
+write_dta(mother_endline, "../Données/mother_endline_v1.dta")
+write_dta(child_baseline, "../Données/child_baseline_v1.dta")
+write_dta(child_endline, "../Données/child_endline_v1.dta")
+write_dta(menage, "../Données/base_menage_final.dta")
+
+cat("Toutes les bases ont été enregistrées avec succès !")
+
+```
+
+
+
+
+```{r}
+verifier_na <- function(df, nom) {
+  missing_counts <- colSums(is.na(df))
+  missing_counts <- missing_counts[missing_counts > 0]  # Afficher uniquement les colonnes avec NA
+  if (length(missing_counts) > 0) {
+    cat("\n", nom, ": Variables avec des valeurs manquantes\n")
+    print(missing_counts)
+  } else {
+    cat( "Aucune valeur manquante \n")
+  }
+}
+
+# Appliquer la fonction sur toutes les bases
+verifier_na(mother_baseline, "mother_baseline")
+verifier_na(mother_endline, "mother_endline")
+verifier_na(child_baseline, "child_baseline")
+verifier_na(child_endline, "child_endline")
+verifier_na(menage, "menage")
+
+
+```
+
+On voit que toutes les valeurs manquantes ont été corrigées 
+```{r}
+nrow(child_baseline)
+nrow(child_endline)
+nrow(mother_baseline)
+nrow(menage)
+```
+
+
+
+# Partie 2 : Empilement  et fusion des données 
+
+1. Baseline 
+ii. Empilement des bases de données des mères et des enfants 
+
+on va d'abord importer les nouvelles bases 
+```{r}
+child_baseline <- haven::read_dta("../Données/child_baseline_v1.dta")
+
+child_endline <- haven::read_dta("../Données/child_endline_v1.dta")
+
+mother_baseline <- haven::read_dta("../Données/mother_baseline_v1.dta")
+
+mother_endline <- haven::read_dta("../Données/mother_endline_v1.dta")
+
+menage <- haven::read_dta("../Données/base_menage_final.dta")
+
+
+
+```
+
+
+
+
+```{r}
+mother_baseline_unique <- mother_baseline %>% distinct(hhid, .keep_all = TRUE)
+child_baseline_unique <- child_baseline %>% distinct(hhid, .keep_all = TRUE)
+
+colnames(mother_baseline)
+colnames(child_baseline)
+```
+
+```{r}
+merge_mother_child_baseline <- left_join(mother_baseline_unique, child_baseline_unique, by = "hhid")
+colnames(merge_mother_child_baseline)
+
+```
+
+```{r}
+
+```
+
+ii. Renommons  toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le 
+suffixe _b pour faire référence à l’enquête Baseline. 
+
+```{r}
+# Renommer les variables de consommation
+merge_mother_child_baseline <- merge_mother_child_baseline %>%
+  rename_with(~ paste0(., "_b"), energ_kcal:vit_c_mg.y)
+
+```
+
+```{r}
+colnames(merge_mother_child_baseline)
+
+
+```
+iii. Créez une base de données qui résume les consommations journalières totales par individu 
+(somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
+
+```{r}
+
+
+# Calculer les consommations totales par individu
+summary_data <- merge_mother_child_baseline %>%
+  group_by(hhid) %>%
+  summarise(
+    total_energy_kcal = sum(energ_kcal_b, na.rm = TRUE),
+    total_protein_g = sum(protein_g.x, protein_g.y_b, na.rm = TRUE),
+    total_lipid_g = sum(lipid_tot_g.x, lipid_tot_g.y_b, na.rm = TRUE),
+    total_calcium_mg = sum(calcium_mg.x, calcium_mg.y_b, na.rm = TRUE),
+    total_iron_mg = sum(iron_mg.x, iron_mg.y_b, na.rm = TRUE),
+    total_zinc_mg = sum(zinc_mg_b, na.rm = TRUE),
+    total_vit_b6_mg = sum(vit_b6_mg.x, vit_b6_mg.y_b, na.rm = TRUE),
+    total_vit_b12_mcg = sum(vit_b12_mcg.x, vit_b12_mcg.y_b, na.rm = TRUE),
+    total_vit_c_mg = sum(vit_c_mg.x, vit_c_mg.y_b, na.rm = TRUE)
+  )
+
+# Visualiser le résumé
+print(summary_data)
+
+
+
+```
+iv . Sauvegardez la base de données finale contenant seulement les hhid s1_q2 energ_kcal   
+protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ». 
+
+
+```{r}
+
+# Créer la base de données finale avec une ligne pour chaque ménage
+baseline_final <- merge_mother_child_baseline %>%
+  select(hhid, s1_q2.x, energ_kcal_b, protein_g.x, lipid_tot_g.x, calcium_mg.x, iron_mg.x, zinc_mg_b) %>%
+  rename(
+    s1_q2 = s1_q2.x,
+    energ_kcal = energ_kcal_b,
+    protein_g = protein_g.x,
+    lipid_tot_g = lipid_tot_g.x,
+    calcium_mg = calcium_mg.x,
+    iron_mg = iron_mg.x,
+    zinc_mg = zinc_mg_b
+  ) %>%
+  # Garder toutes les lignes, car nous avons déjà une ligne pour la mère et une pour l'enfant
+  # Nous ne filtrons pas ici, pour garder toutes les entrées
+  select(hhid, s1_q2, energ_kcal, protein_g, lipid_tot_g, calcium_mg, iron_mg, zinc_mg)
+
+write_dta(baseline_final, "../Données/baseline_final.dta")
+
+
+```
+
+```{r}
+print(baseline_final)
+```
+
+
+2. Endline 
+
+i. empilons toutes les bases des mères et des enfants 
+
+
+```{r}
+# importation des bases 
+mother_endline <- haven::read_dta("../Données/mother_endline_v1.dta")
+child_endline <- haven::read_dta("../Données/child_endline_v1.dta")
+
+
+```
+
+```{r}
+mother_endline_unique <- mother_endline %>% distinct(hhid, .keep_all = TRUE)
+child_endline_unique <- child_endline %>% distinct(hhid, .keep_all = TRUE)
+
+
+
+```
+
+```{r}
+merge_mother_child_endline <- left_join(
+  mother_endline_unique,
+  child_endline_unique,by="hhid"
+)
+
+
+```
+
+### affichons les noms des colonnes 
+
+```{r}
+merge_mother_child_endline
+colnames(merge_mother_child_endline)
+```
+ii. resumons les consommations journalières totales par individu 
+
+```{r}
+# Chargement des bibliothèques nécessaires
+library(dplyr)
+
+# Résumer les consommations journalières totales par individu
+endline_summary <- merge_mother_child_endline %>%
+  group_by(hhid) %>%
+  summarize(
+    energ_kcal = sum(energ_kcal.x, na.rm = TRUE) + sum(energ_kcal.y, na.rm = TRUE),
+    protein_g = sum(protein_g.x, na.rm = TRUE) + sum(protein_g.y, na.rm = TRUE),
+    lipid_tot_g = sum(lipid_tot_g.x, na.rm = TRUE) + sum(lipid_tot_g.y, na.rm = TRUE),
+    calcium_mg = sum(calcium_mg.x, na.rm = TRUE) + sum(calcium_mg.y, na.rm = TRUE),
+    iron_mg = sum(iron_mg.x, na.rm = TRUE) + sum(iron_mg.y, na.rm = TRUE),
+    zinc_mg = sum(zinc_mg.x, na.rm = TRUE) + sum(zinc_mg.y, na.rm = TRUE),
+    s1_q2 = first(s1_q2.x),  # Conserver la valeur de s1_q2 de la mère
+    .groups = "drop"  # Évite de garder le groupe après résumé
+  )
+
+# Vérifiez la structure de la base résumée
+print(endline_summary)
+
+
+
+```
+iii.  Sauvegardons  la base de données finale contenant seulement les hhid s1_q2 energ_kcal  
+protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « endline_final.dta ». 
+
+
+```{r}
+
+
+# Résumer les consommations journalières totales par individu
+endline_summary2 <- merge_mother_child_endline %>%
+  group_by(hhid) %>%
+  summarize(
+    energ_kcal = sum(energ_kcal.x, na.rm = TRUE) + sum(energ_kcal.y, na.rm = TRUE),
+    protein_g = sum(protein_g.x, na.rm = TRUE) + sum(protein_g.y, na.rm = TRUE),
+    lipid_tot_g = sum(lipid_tot_g.x, na.rm = TRUE) + sum(lipid_tot_g.y, na.rm = TRUE),
+    calcium_mg = sum(calcium_mg.x, na.rm = TRUE) + sum(calcium_mg.y, na.rm = TRUE),
+    iron_mg = sum(iron_mg.x, na.rm = TRUE) + sum(iron_mg.y, na.rm = TRUE),
+    zinc_mg = sum(zinc_mg.x, na.rm = TRUE) + sum(zinc_mg.y, na.rm = TRUE),
+    s1_q2 = first(s1_q2.x),  # Conserver la valeur de s1_q2 de la mère
+    .groups = "drop"  # Évite de garder le groupe après résumé
+  )
+
+# Créer une base de données finale contenant les informations pour chaque ménage
+endline_final <- endline_summary2 %>%
+  select(hhid, s1_q2, energ_kcal, protein_g, lipid_tot_g, calcium_mg, iron_mg, zinc_mg)
+
+# Sauvegarder la base de données finale sous le nom "endline_final.dta"
+write_dta(endline_final, "../Données/endline_final.dta")
+
+
+```
+
+```{r}
+print(endline_final)
+```
+
+3. 
+
+```{r}
+
+# Fonction pour nettoyer les noms de colonnes
+clean_column_names <- function(data) {
+  colnames(data) <- make.names(colnames(data), unique = TRUE) # Renomme les colonnes pour les rendre valides
+  return(data)
+}
+
+# Nettoyage des noms de colonnes
+baseline_final <- clean_column_names(baseline_final)
+endline_final <- clean_column_names(endline_final)
+
+# Afficher les nouveaux noms de colonnes
+cat("Nouveaux noms des colonnes dans baseline_final :\n")
+print(colnames(baseline_final))
+
+cat("Nouveaux noms des colonnes dans endline_final :\n")
+print(colnames(endline_final))
+
+# Fusion des bases de données sur hhid
+merged_data <- full_join(baseline_final, endline_final, by = "hhid")
+
+# Vérification du nombre d'observations
+n_baseline <- nrow(baseline_final)
+n_endline <- nrow(endline_final)
+n_merged <- nrow(merged_data)
+
+# Afficher le nombre d'observations
+cat("Nombre d'observations dans baseline_final :", n_baseline, "\n")
+cat("Nombre d'observations dans endline_final :", n_endline, "\n")
+cat("Nombre d'observations après fusion :", n_merged, "\n")
+
+# Sauvegarder la base de données fusionnée
+#write_dta(merged_data, "merged_data.dta")
+
+
+```
+
+4. En utilisant la base base_menage_final, fusionnez les informations sur les caractéristiques des 
+ménages telles que région, commune, village, statut matrimonial, taille du ménage, niveau 
+d’éducation du chef de ménage, le ratio de dépendance, score HFIAS, la variable de traitement T1. 
+
+```{r}
+       # Base de données fusionnée (Baseline et Endline)
+base_menage_final <- read_dta("../Données/base_menage_final.dta") # Base des caractéristiques des ménages
+colnames(base_menage_final)
+```
+
+
+```{r}
+# Fusion des données sur la colonne hhid
+final_data <- base_menage_final %>%
+  left_join(merged_data, by = "hhid") %>%  # Fusionner avec merged_data sur hhid
+  select(hhid, 
+         regionid, 
+         communeid, 
+         villageid, 
+         round, 
+         s1_q0, 
+         s1_q1, 
+         s1_q2, 
+         energ_kcal, 
+         protein_g, 
+         lipid_tot_g, 
+         calcium_mg, 
+         iron_mg, 
+         zinc_mg, 
+         vit_b6_mg, 
+         vit_b12_mcg, 
+         vit_c_mg)  # Sélection des colonnes spécifiées
+
+
+
+
+```
+
+```{r}
+print(final_data)
+```
+
+
+
+
+5) Sauvegarder la base de données finale sous le nom base_finale.dta.
+
+```{r}
+# Sauvegarder la base de données finale
+write_dta(final_data, "../Données/base_finale.dta")
+```
+
+# Partie 3 : Statistiques descriptives interessantes 
+
+On va sortir des statiques descriptives sur les bases child_baseline 
+
+```{r}
+colnames(child_baseline)
+```
+# -------------------------
+# Statistiques Descriptives de l'Énergie (energ_kcal)
+# -------------------------
+
+# Statistiques descriptives pour l'énergie
+
+
+
+
+```{r}
+
+energy_summary <- child_baseline %>%
+  select(energ_kcal) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Énergie (kcal)**")
+
+# Afficher le résumé
+print(energy_summary)
+
+
+```
+# -------------------------
+# Statistiques Descriptives des Protéines (protein_g)
+# -------------------------
+
+# Statistiques descriptives pour les protéines
+
+
+
+```{r}
+
+protein_summary <- child_baseline %>%
+  select(protein_g) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
+    missing = "no"
+  )
+
+# Afficher le résumé
+print(protein_summary)
+
+```
+
+# -------------------------
+# Statistiques Descriptives des Lipides (lipid_tot_g)
+# -------------------------
+
+# Statistiques descriptives pour les lipides
+
+
+```{r}
+
+lipid_summary <- child_baseline %>%
+  select(lipid_tot_g) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
+    missing = "no"
+  )
+
+# Afficher le résumé
+print(lipid_summary)
+
+```
+
+# -------------------------
+# Statistiques Descriptives des Vitamines
+# -------------------------
+
+# Statistiques descriptives pour les vitamines B6, B12 et C
+
+```{r}
+
+
+vitamin_summary <- child_baseline %>%
+  select(vit_b6_mg, vit_b12_mcg, vit_c_mg) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Vitamines**")  
+
+# Afficher le résumé
+print(vitamin_summary)
+
+
+```
+
+
+
+# -------------------------
+# Statistiques Descriptives Globales
+# -------------------------
+
+# Statistiques descriptives globales pour toutes les variables
+
+
+```{r}
+
+global_summary <- child_baseline %>% labelled::to_factor()%>% 
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}, max: {max}]"),
+    missing = "no"
+  ) %>%
+  modify_header(label = "**Statistiques Globales**")
+
+# Afficher le résumé
+print(global_summary)
+
+
+```
+
+
+# -------------------------
+# Fin
+# -------------------------
+
+
+
+
+
+
+
+
+
