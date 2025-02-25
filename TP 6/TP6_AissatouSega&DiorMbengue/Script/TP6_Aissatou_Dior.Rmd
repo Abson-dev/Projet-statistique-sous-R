@@ -1,0 +1,299 @@
+---
+title: "Aissatou_Dior"
+author: "Aissatou Sega DIALLO"
+date: "2025-02-23"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# installation et chargement des packages
+
+```{r}
+#vérifier et installer les packages nécessaires
+packages <- c("haven", "utils", "dplyr", "tidyverse", "gtsummary", "survey")
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+```
+
+## chargement des données
+
+```{r}
+# chargement de la base individus
+indiv<- haven::read_dta("../Données/ehcvm_individu_civ2021.dta")
+```
+
+# Statistique sans poids
+
+```{r}
+indiv %>% labelled::to_factor()%>%
+  select(sexe,age,lien,mstat,agemar,alfa2,scol,diplome,activ12m)%>%
+  tbl_summary(label=list(mstat~"Situation matrimoniale",
+                         sexe~"Sexe",
+                         age~"Age ",
+                         lien~"Lien de parenté avec le chef de ménage",
+                         agemar~"Age au premier mariage",
+                         alfa2~"Niveau d'alphabétisation",
+                         scol~"fréquente l'école en 2021",
+                         diplome~"Diplome le plus élevé",
+                         activ12m~"Situation active les 12 derniers mois"
+                         ),
+  statistic = list(age~"{mean} ({sd})",
+                   agemar~"{mean}({sd})"
+                   ),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "Les valeurs maquantes")%>%
+  modify_header(label= "Statistiques sur les individus")
+```
+
+#Statistiques avec poids
+
+```{r}
+# Conversion des variables en facteurs
+indiv %>%
+  labelled::to_factor() %>%
+  select(sexe, age, lien, mstat, agemar, alfa2, scol, diplome, activ12m, hhweight, hhid) -> objet_conception
+
+# Création de l'objet de conception avec les poids
+base_pondere <- svydesign(ids = ~hhid, 
+                          data = objet_conception, 
+                          weights = ~hhweight)
+
+# Résumé pondéré avec l'objet pondéré
+table_summary <- tbl_summary(
+  data = objet_conception,
+  label = list(
+    mstat ~ "Situation matrimoniale",
+    sexe ~ "Sexe",
+    age ~ "Age ",
+    lien ~ "Lien de parenté avec le chef de ménage",
+    agemar ~ "Age au premier mariage",
+    alfa2 ~ "Niveau d'alphabétisation",
+    scol ~ "Fréquente l'école en 2021",
+    diplome ~ "Diplôme le plus élevé",
+    activ12m ~ "Situation active les 12 derniers mois"
+  ),
+  statistic = list(
+    age ~ "{mean} ({sd})",
+    agemar ~ "{mean} ({sd})"
+  ),
+  digits = everything() ~ c(0),
+  missing = "always",
+  missing_text = "Les valeurs manquantes"
+)%>%
+  modify_header(label = "Statistiques sur les individus avec la pondération")
+
+table_summary
+```
+
+#Interprétation des résultats La pondération a un impact important sur les résultats, surtout si l'échantillon initial était biaisé en termes de certaines catégories (par exemple, les groupes d'âge, le sexe, ou les niveaux de scolarité).
+La pondération permet de rendre les résultats plus représentatifs de la population générale, et tu peux observer de légers ajustements dans les proportions des catégories.
+## Le sexe Le sexe est équilibré dans cette population, avec une légère prédominance de femmes (51%) par rapport aux hommes (49%).
+Cela reflète une distribution assez égale entre les sexes.
+## Age L'âge moyen des individus est relativement jeune, avec une forte variation, comme le montre l'écart-type important (19 ans).
+Cela indique une population diversifiée en termes d'âge, probablement composée de jeunes adultes, mais incluant aussi des personnes plus âgées.
+## Lien de parenté avec le chef du ménage Une grande proportion de la population est constituée de fils et filles (45%) vivant dans le ménage.
+Cela est suivi par le chef de ménage (20%) et les conjoints (16%).
+Cela suggère que l'échantillon est largement composé de personnes vivant avec leurs parents, ce qui est typique dans les sociétés où les jeunes adultes restent souvent dans le foyer familial.
+## Situation matrimoniale Une large majorité de la population est célibataire (64%), ce qui peut refléter une population jeune ou une tendance culturelle.
+Un nombre significatif est marié (monogamie : 22%, polygamie : 7%).
+La proportion élevée de célibataires peut aussi être influencée par le fait que beaucoup de jeunes adultes n'ont pas encore formé de foyer.
+La pondération ajuste cette proportion pour mieux refléter les tendances démographiques réelles, mais les résultats sont en accord avec ce qui serait attendu dans une population jeune.
+##Niveau d'alphabétisation Une majorité des individus (56%) ne sont pas alphabétisés, ce qui pourrait indiquer des lacunes dans l'accès à l'éducation, en particulier dans les zones rurales ou parmi les populations plus âgées.
+Cela peut aussi signaler des défis économiques ou d'infrastructures éducatives.
+##Fréquente l'école en 2021 La proportion de personnes qui ne fréquentent pas l'école en 2021 est élevée (73%), ce qui pourrait être dû à l'âge moyen relativement jeune, ainsi qu'à l'inaccessibilité ou à la sortie prématurée du système éducatif pour une grande partie de la population.
+Cependant, 27% fréquentent l'école, ce qui pourrait indiquer une population en âge scolaire ou en formation professionnelle.
+##Diplome le plus élevé Aucun diplôme (82%), CEPE (11%), BEP/CAP (4%), Bac et au-delà (3%) La grande majorité des individus (82%) n'ont pas de diplôme, ce qui souligne un faible niveau d'éducation dans cette population.
+Les titulaires de diplômes supérieurs (Bac et au-delà) sont peu nombreux, représentant seulement 3% de la population.
+Cela peut refléter des inégalités dans l'accès à l'éducation, notamment dans les zones rurales ou parmi les groupes socio-économiquement défavorisés.
+## Situation actives les 12 derniers mois Occupé (29%), Travail familial (12%), Non occupé (44%) La majorité de la population (44%) est inactive ou sans emploi, ce qui est élevé, mais cela peut être lié à l'âge relativement jeune de l'échantillon (23 ans en moyenne).
+Ceux qui travaillent dans le cadre familial représentent également 12% de l'échantillon, ce qui pourrait indiquer une activité informelle importante, non rémunérée.
+La pondération aide à ajuster ces résultats en tenant compte de l'ensemble des populations plus ou moins actives, en fonction des secteurs d'activité et des modes de travail (formels et informels).
+
+##Interprétation globale Les résultats avec pondération montrent une population principalement jeune, avec un faible niveau d'éducation et une proportion importante de personnes inactives ou non employées.
+L'utilisation de la pondération a permis d'ajuster les résultats pour mieux refléter la structure réelle des ménages et des groupes démographiques en Côte d'Ivoire.
+Cela permet de prendre en compte les biais potentiels dans l'échantillonnage, notamment en ce qui concerne l'éducation, l'âge et la situation professionnelle.
+
+Globalement, ces résultats soulignent les défis majeurs en matière d'éducation et d'emploi dans cette population.
+Ils mettent également en lumière l'importance des politiques publiques visant à améliorer l'accès à l'éducation, à l'alphabétisation, ainsi que la création d'opportunités d'emploi, en particulier dans les zones rurales ou les groupes défavorisés.
+
+#Analyse suivant ja jointure de la base ménage et individus
+
+```{r}
+#Chargement de la base ménage pour une jointure
+Menage<- haven::read_dta("../Données/ehcvm_menage_civ2021.dta")
+Base <- dplyr::left_join(indiv, Menage, by = "hhid")
+
+```
+
+##Analyse sans pondération
+
+```{r}
+#Tableaux de certaines variables
+Base%>% labelled::to_factor()%>%
+  select(region,milieu,sexe,lien,internet,educ_hi)%>%
+  tbl_summary(label = list(region~"Répartition par région",
+                           milieu~"Répartition par milieu",
+                           sexe~"Répartition par sexe",
+                           lien~"Répartition par le lien de parenté",
+                           internet~"Répartition selon l'accés à l'internet",
+                           educ_hi~"Répartition selon le niveau d'instruction"),
+              statistic = list(all_categorical()~"{n}({p}%)"),
+              missing = "always",
+              missing_text = "Les valeurs maquantes")%>%modify_header(label= "Statistiques sur les variables de la base mergée"
+)
+
+
+```
+
+```{r}
+#Conversion de certaines variables en facteurs pour le croisement
+Base_fac <- Base %>%
+  mutate(across(c(sexe, educ_hi, internet, region, milieu, couvmal), ~labelled::to_factor(.)))
+```
+
+```{r}
+#Education et accès à l'internet selon le sexe
+tbl_summary(Base_fac, by = sexe, percent = "column", include = c(educ_hi, internet), label = list(
+sexe = "Sexe",
+internet = "Accès à internet",
+educ_hi = "Education"
+)) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Sexe**")
+
+```
+
+#Niveau d'éducation selon le sexe ##Une proportion plus élevée de femmes (58%) que d'hommes (48%) n'a reçu aucune éducation.
+Cela met en évidence un désavantage éducatif pour les femmes.
+Les hommes ont une légère avance dans l'enseignement primaire et secondaire : 30% des hommes ont atteint le niveau primaire contre 27% des femmes.
+13% des hommes ont terminé le premier cycle du secondaire contre 9,6% des femmes.
+4,7% des hommes ont atteint le second cycle général contre 2,7% des femmes.
+Dans l'enseignement supérieur, les hommes sont aussi plus nombreux : 1,6% des hommes ont un niveau supérieur contre 0,7% des femmes.
+##Analyse : Ces résultats confirment une inégalité de genre dans l'éducation, les femmes ayant un taux d'abandon scolaire plus élevé et étant sous-représentées dans les niveaux d'éducation avancés.
+Cela peut être dû à des contraintes culturelles, économiques ou sociales qui limitent l'accès des filles à l'école et à l'enseignement supérieur.
+
+## Accès à Internet selon le sexe
+
+18% des hommes ont accès à Internet contre 11% des femmes.
+À l'inverse, 89% des femmes n'ont pas accès à Internet, contre 82% des hommes.
+##Analyse :
+
+L'accès à Internet est globalement faible pour les deux sexes, mais les femmes sont encore plus désavantagées.
+Cette fracture numérique de genre peut être liée à plusieurs facteurs : faible niveau d'instruction des femmes, contraintes économiques, et moins d'opportunités pour utiliser ou posséder un appareil numérique.
+Cela a des implications importantes, car un accès limité à Internet restreint l'accès à l'information, à l'éducation en ligne, aux opportunités économiques et aux services publics numériques.
+##Conclusion générale Les femmes sont plus touchées par l'analphabétisme et l'abandon scolaire.
+Elles sont aussi plus exclues de l'accès aux technologies numériques, ce qui accentue leur vulnérabilité économique et sociale.
+Il est crucial de renforcer les politiques d'inclusion éducative et numérique des femmes, en particulier en milieu rural.
+
+```{r}
+#Détention d'une couverture maladie selon la région et le milieu de résidence
+tbl_summary(Base_fac, by = couvmal, percent = "row", include = c(region, milieu), 
+            label = list(
+              region = "Région",
+              couvmal = "Couverture maladie",
+              milieu = "Milieu"
+            ),
+            digits = list(superf = c(0, 0, 0))) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Couverture maladie**")
+
+```
+
+#Couverture maladie par région ##Taux globalement faible : Seulement 2 248 personnes (3.5%) bénéficient d'une couverture maladie sur 64 491 individus.
+Grandes disparités régionales : Les régions les plus couvertes : Abidjan : 15% bénéficient d'une couverture maladie (le taux le plus élevé du pays).
+Grands-Ponts : 6.7%.
+Sud-Comoé : 5.6%.
+Gbêkê : 5.4%.
+Les régions les moins couvertes : Bounkani : 0.4% (quasi-absence de couverture).
+Hambol : 0.7%.
+Bagoué et Worodougou : 1%.
+##Analyse : Les grandes villes, en particulier Abidjan, ont un meilleur accès à l'assurance maladie, probablement grâce à la présence de structures de santé développées et d'un plus grand nombre de travailleurs du secteur formel.
+Les régions rurales et du Nord sont particulièrement défavorisées, avec des taux de couverture extrêmement faibles.
+## Couverture maladie par milieu (urbain/rural) Les habitants des zones urbaines sont nettement plus couverts (6.3%) que ceux des zones rurales (1.7%).
+##Analyse : Cela s'explique par le fait que l'emploi informel domine en milieu rural, et que les systèmes d'assurance maladie sont souvent liés aux emplois formels.
+Moins d'infrastructures médicales en milieu rural rend aussi l'adhésion à un régime d'assurance moins courante.
+##Conclusion générale La couverture maladie en Côte d'Ivoire est très faible, avec de fortes disparités régionales et entre les milieux urbains et ruraux.
+Les populations urbaines, surtout à Abidjan, sont mieux couvertes, tandis que les habitants des régions rurales, notamment dans le Nord, sont largement exclus du système de couverture maladie.
+Une extension des programmes d'assurance maladie est essentielle, notamment dans les zones rurales et les régions où la couverture est quasi inexistante.
+
+##Analyse prenant en compte la pondération
+
+```{r}
+#Activation de la pondération
+Base_pond <- svydesign(ids = ~1, weights = ~hhweight, data = Base_fac)
+
+```
+
+```{r}
+#Tableaux de certaines variables (avec pondération)
+Base_pond_df <- Base_pond$variables  # Extraction des données sous forme de dataframe
+Base_pond_df <- Base_pond_df %>%
+  mutate(across(where(is.labelled), labelled::to_factor)) %>%
+  mutate(across(c(region, milieu, sexe, lien, internet, educ_hi), as.character))
+
+Base_pond_df %>%
+  select(region, milieu, sexe, lien, internet, educ_hi) %>%
+  tbl_summary(
+    label = list(
+      region ~ "Répartition par région",
+      milieu ~ "Répartition par milieu",
+      sexe ~ "Répartition par sexe",
+      lien ~ "Répartition par le lien de parenté",
+      internet ~ "Répartition selon l'accès à l'internet",
+      educ_hi ~ "Répartition selon le niveau d'instruction"
+    ),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "always",
+    missing_text = "Les valeurs manquantes"
+  ) %>%
+  modify_header(stat_0 = "**Statistiques sur les variables de la base pondérée**")
+
+
+```
+
+Répartition par région Autonome d'Abidjan est la région la plus représentée avec 7% de la population.
+D'autres régions comme Na wa (4.1%), Marahoué (3.9%), Gôh (3.7%), et Guémon (3.7%) ont aussi une forte proportion.
+Les régions les moins représentées sont Bounkani (1.9%) et N'Zi (2.1%), bien que ces chiffres ne diminuent pas drastiquement dans le total.
+📌 Interprétation
+
+Les régions rurales occupent une grande place, comme on le voit avec des zones comme Haut-Sassandra, Poro, et San-Pedro.
+La dominance d'Abidjan pourrait être liée à sa forte urbanisation, mais d'autres régions comme Nawa et Marahoué font une présence significative.
+## Répartition par milieu 61% vivent en milieu rural, contre 39% en milieu urbain.
+📌 Interprétation
+
+Cette majorité rurale montre un contraste avec les données d'urbanisation actuelles en Afrique, suggérant que des zones rurales peuvent manquer de services et d'infrastructures.
+La distribution pourrait aussi influencer les disparités dans l'accès aux services comme l'éducation et la santé.
+## Répartition par sexe 51% de la population est féminine, et 49% est masculine.
+📌 Interprétation
+
+L'équilibre entre les sexes est presque parfait, ce qui montre une structure démographique relativement équilibrée.
+## Répartition par lien de parenté 45% des individus sont des fils ou filles du chef de ménage.
+20% sont des chefs de ménage eux-mêmes.
+Les enfants (fils et filles) représentent donc une proportion majeure dans les foyers, suivis par les conjoints (16%).
+📌 Interprétation
+
+Les structures familiales étendues sont bien présentes, avec beaucoup d'individus étant liés directement à un chef de ménage.
+Il est intéressant de noter que des domestiques ou parents du domestique sont très rares, indiquant que ce rôle est moins courant dans cette analyse.
+## Répartition selon l'accès à l'internet 86% des individus n'ont pas accès à Internet, alors que 14% ont un accès à Internet.
+📌 Interprétation
+
+L'accès à Internet reste limité, ce qui pourrait signifier que des efforts de connectivité doivent être augmentés, en particulier dans les zones rurales.
+Le faible taux d'accès à Internet est un indicateur important de la fracture numérique existant entre les populations urbaines et rurales.
+## Répartition selon le niveau d'instruction 53% de la population n'a aucun niveau d'instruction, ce qui indique un fort taux d'analphabétisme.
+28% ont une éducation primaire, tandis que des pourcentages plus faibles sont présents pour les niveaux secondaires et postsecondaires.
+Seuls 0.9% ont atteint le niveau postsecondaire.
+Les niveaux d'éducation supérieurs sont très faibles, à seulement 1.2%.
+##Interprétation
+
+Le faible taux d'instruction est préoccupant, car cela indique que beaucoup de personnes n'ont pas accès à une éducation de qualité.
+La faible proportion ayant accédé à l'enseignement supérieur pourrait être un obstacle pour la formation de la main-d'œuvre qualifiée et le développement économique.
+##Conclusion générale Les régions rurales sont les plus représentées dans l'échantillon, ce qui souligne le besoin de développement dans ces zones.
+Le faible accès à Internet et la faible instruction montrent des défis importants à surmonter pour améliorer l'inclusion numérique et éducative.
+Les structures familiales sont principalement basées sur des ménages multigénérationnels, avec une prédominance des enfants.

@@ -3,8 +3,3 @@
 .RData
 .Ruserdata
 
-# Ignore all CSV files
-*.csv
-
-# Ignore all DTA files
-*.dta
