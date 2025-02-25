@@ -1,0 +1,272 @@
+---
+title: "Paul_BALAFAI_Devoir"
+output:
+  word_document: default
+  html_document: default
+---
+
+chargement des packages
+
+```{r packages}
+#verifie si le package pacman est installé, sinon l'installe
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+#verifie si les packages sont installés, sinon les installe
+pacman::p_load(tidyverse, gtsummary,haven,labelled,survey,gt)
+
+```
+
+
+
+importation des bases
+```{r}
+#base de données de l'enquête
+baseline_mother <- haven::read_dta("../data/food_comp_mother_baseline.dta") %>% to_factor()
+baseline_child <- haven::read_dta("../data/food_comp_child_baseline.dta") %>% to_factor()
+endline_mother <- haven::read_dta("../data/food_comp_mother_endline.dta") %>% to_factor()
+endline_child <- haven::read_dta("../data/food_comp_child_endline.dta") %>% to_factor()
+base_menage <- haven::read_dta("../data/base_menage.dta") %>% to_factor()
+```
+
+
+
+# Partie 1 : Gestion et nettoyage des bases de données
+
+
+## 1.Vérification et suppression des doublons
+```{r}
+# Vérification et suppression des doublons
+baseline_mother <- baseline_mother %>% distinct()
+baseline_child <- baseline_child %>% distinct()
+endline_mother <- endline_mother %>% distinct()
+endline_child <- endline_child %>% distinct()
+base_menage <- base_menage %>% distinct()
+```
+
+
+## 2. Assurez-vous que les noms des variables sont cohérents entre les bases de données Baseline et Endline.
+```{r}
+# Harmonisation des noms de variables entre les bases de données
+colnames(baseline_child) == colnames(baseline_mother)
+#baseline mother a des variables differentes de baseline_child, ajustons les
+colnames(baseline_mother) <- colnames(baseline_child)
+
+colnames(endline_child) == colnames(endline_mother)
+#tout est ok pour les endline
+
+```
+
+
+## 3.Correction des données manquantes
+
+```{r}
+# Correction des données manquantes
+baseline_mother <- baseline_mother %>% mutate(across(everything(), ~replace_na(.x, 0)))
+baseline_child <- baseline_child %>% mutate(across(everything(), ~replace_na(.x, 0)))
+endline_mother <- endline_mother %>% mutate(across(everything(), ~replace_na(.x, 0)))
+endline_child <- endline_child %>% mutate(across(everything(), ~replace_na(.x, 0)))
+```
+
+
+## 4.Calcul de la consommation d'énergie moyenne
+
+```{r}
+# Calcul de la consommation d'énergie moyenne
+mean_energy_consumption <- baseline_mother %>% summarise(mean_energy = mean(energ_kcal, na.rm = TRUE))
+print(mean_energy_consumption)
+
+```
+
+
+## 5.Sauvegarde des bases de données modifiées
+```{r}
+# Sauvegarde des bases de données modifiées
+haven::write_dta(baseline_mother, "../data/mother_baseline_v1.dta")
+haven::write_dta(endline_mother, "../data/mother_endline_v1.dta")
+haven::write_dta(baseline_child, "../data/child_baseline_v1.dta")
+haven::write_dta(endline_child, "../data/child_endline_v1.dta")
+haven::write_dta(base_menage, "../data/menage_v1.dta")
+```
+
+
+
+
+# Partie 2 : Empilement et Fusion des données
+
+```{r}
+#importation des nouvelles bases
+
+baseline_mother_v1 <- haven::read_dta("../data/mother_baseline_v1.dta") %>% to_factor()
+baseline_child_v1 <- haven::read_dta("../data/child_baseline_v1.dta") %>% to_factor()
+endline_mother_v1 <- haven::read_dta("../data/mother_endline_v1.dta") %>% to_factor()
+endline_child_v1 <- haven::read_dta("../data/child_endline_v1.dta") %>% to_factor()
+```
+
+
+## 1.Empilement des données Baseline et Endline
+
+####  1.1 baseline
+```{r}
+# fusionner toutes les des données Baseline
+baseline_joint <- dplyr::full_join(x = baseline_mother_v1, y = baseline_child_v1, by = "hhid", suffix = c("",""))
+
+```
+
+
+```{r}
+
+baseline_joint <- baseline_joint %>%
+  rename_with(~ paste0(., "_b"), .cols = c("energ_kcal" , "protein_g","lipid_tot_g", "calcium_mg"  ,"iron_mg"   ,  "zinc_mg"   ,  "vit_b6_mg", "vit_b12_mcg", "vit_c_mg"   ))
+
+print(head(baseline_joint))
+```
+ii)
+```{r}
+# Somme des 4 repas par individu
+baseline_total <- baseline_joint %>%
+  group_by(hhid, s1_q0) %>%
+  summarise(across(ends_with("_b"), sum, na.rm = TRUE))
+```
+
+
+iii)
+```{r}
+# Sélection des variables requises
+baseline_final <- baseline_joint %>%
+  select(hhid, s1_q2, energ_kcal_b, protein_g_b, lipid_tot_g_b, 
+         calcium_mg_b, iron_mg_b, zinc_mg_b)
+
+# Sauvegarde
+haven::write_dta(baseline_final, "../data/baseline_final.dta")
+```
+
+####  1.2 endline
+
+i)
+```{r}
+endline_joint <- dplyr::full_join(x = endline_mother_v1, y = endline_child_v1, by = "hhid", suffix = c("",""))
+```
+```{r}
+endline_joint <- endline_joint %>%
+  rename_with(~ paste0(., "_e"), .cols = c("energ_kcal" , "protein_g","lipid_tot_g", "calcium_mg"  ,"iron_mg"   ,  "zinc_mg"   ,  "vit_b6_mg", "vit_b12_mcg", "vit_c_mg"   ))
+
+head(endline_joint)
+```
+
+
+ii)
+```{r}
+# Somme des 4 repas par individu
+endline_total <- endline_joint %>%
+  group_by(hhid, s1_q0) %>%
+  summarise(across(ends_with("_e"), sum, na.rm = TRUE))
+
+head(endline_total)
+```
+iii)
+```{r}
+
+endline_final <- endline_joint %>%
+  select(hhid, s1_q2, energ_kcal_e, protein_g_e, lipid_tot_g_e, 
+         calcium_mg_e, iron_mg_e, zinc_mg_e)
+
+haven::write_dta(endline_final, "../data/endline_final.dta")
+```
+
+
+3) Fusion des données Baseline et Endline
+```{r}
+# Fusion des données Baseline et Endline
+merged_data <- dplyr::full_join(x = baseline_final, y = endline_final, by = "hhid", suffix = c("_baseline", "_endline"))
+
+# sauvegarde de la base de données fusionnée
+haven::write_dta(merged_data, "../data/merged_data.dta")
+```
+
+4) Fusions de la base menage
+
+```{r}
+base_finale <- base_menage %>% dplyr::left_join(merged_data, by = "hhid")
+
+
+#sauvegarde de la base
+haven::write_dta(base_finale, "../data/base_finale.dta")
+```
+
+
+# Partie 3 :Statistiques descriptives avec le package gtsummary
+```{r}
+# Création d'un tableau descriptif pour les variables nutritionnelles
+base_finale %>%
+  select(energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e) %>%
+  tbl_summary() %>% modify_header(label = "Variables")
+```
+
+
+```{r}
+# Création d'un tableau descriptif pour les variables nutritionnelles
+tableau_nutrition <- base_finale %>%
+  select(energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e) %>%
+  tbl_summary(
+    by = NULL, # Pas de variable de regroupement
+    statistic = all_continuous() ~ "{mean} ({sd})", # Moyenne et écart-type
+    label = list(
+      energ_kcal_b ~ "energie (kcal) Baseline",
+      protein_g_b ~ "Proteines (g) Baseline",
+      lipid_tot_g_b ~ "Lipides totaux (g) Baseline",
+      calcium_mg_b ~ "Calcium (mg) Baseline",
+      iron_mg_b ~ "Fer (mg) Baseline",
+      zinc_mg_b ~ "Zinc (mg) Baseline",
+      energ_kcal_e ~ "energie (kcal) Endline",
+      protein_g_e ~ "Proteines (g) Endline",
+      lipid_tot_g_e ~ "Lipides totaux (g) Endline",
+      calcium_mg_e ~ "Calcium (mg) Endline",
+      iron_mg_e ~ "Fer (mg) Endline",
+      zinc_mg_e ~ "Zinc (mg) Endline"
+    )
+  ) %>%
+  modify_header(label = "Variables") %>%
+  as_gt() %>%
+  gt::tab_header(
+    title = "Tableau descriptif des variables nutritionnelles"
+  )
+tableau_nutrition
+
+```
+
+```{r}
+# Création d'un tableau descriptif pour les variables socio-démographiques
+tableau_socio_demo <- base_finale %>%
+  select( s1_q2, energ_kcal_b, energ_kcal_e) %>%
+  tbl_summary(
+    by = s1_q2, # Variable de regroupement
+    statistic = list(all_continuous() ~ "{mean} ({sd})"), # Moyenne et écart-type
+    label = list(
+      energ_kcal_b ~ "Energie (kcal) Baseline",
+      energ_kcal_e ~ "Energie (kcal) Endline"
+    )
+  ) %>%
+  modify_header(label = "Variables")
+
+print(tableau_socio_demo)
+```
+```{r}
+# Comparaison des variables nutritionnelles entre Baseline et Endline
+comparaison_nutrition <- base_finale %>%
+  select(energ_kcal_b, energ_kcal_e, protein_g_b, protein_g_e, lipid_tot_g_b, lipid_tot_g_e) %>%
+  tbl_summary(
+    by = NULL, # Pas de variable de regroupement
+    statistic = list(all_continuous() ~ "{mean} ({sd})"), # Moyenne et écart-type
+    label = list(
+      energ_kcal_b ~ "Energie (kcal) Baseline",
+      energ_kcal_e ~ "Energie (kcal) Endline",
+      protein_g_b ~ "Proteines (g) Baseline",
+      protein_g_e ~ "Proteines (g) Endline",
+      lipid_tot_g_b ~ "Lipides totaux (g) Baseline",
+      lipid_tot_g_e ~ "Lipides totaux (g) Endline"
+    )
+  ) %>%
+  modify_header(label = "Variables")
+
+print(comparaison_nutrition)
+```
+
