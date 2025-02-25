@@ -1,0 +1,117 @@
+---
+title: "TP2"
+author: "KAFANDO"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r}
+
+packages <- c("readr","haven","utils","dplyr")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+```
+
+#Chargement des bases
+
+```{r}
+## Base ménage
+
+base_men <-  utils::read.csv("../Données/ehcvm_menage_bfa2021.csv")
+base_ind <-  utils::read.csv("../Données/ehcvm_individu_bfa2021.csv")
+
+```
+
+*Structure des bases*
+
+La base ménage contient *47090  observations* sur *57  variables*.Parmi les variables, 12 sont de type numéric et 45 de type charactère.
+
+```{r}
+utils::str(base_ind)
+```
+La base indivdu contient *7176 observations* sur *39 variables*.Parmi les variables, 11 sont de type numéric et 28 de type charactère.
+
+```{r}
+utils::str(base_men)
+```
+
+
+*Visualisation des bases*
+
+```{r}
+#View(base_men) # ouvrir dans une fenetre
+#View(base_ind)
+
+base_men
+base_ind
+
+```
+# Quelques caractéristiques
+
+*Sexe du chef de ménage pour chaque individu*
+
+
+```{r}
+
+# Identifier le sexe du chef de ménage 
+
+resultats <- base_ind %>%
+              group_by(hhid) %>%                 # Regrouper par ID_menage
+              mutate(Sexe_chef = sexe[lien == "Chef de ménage"]) %>%      # Identifier le sexe du chef
+              ungroup()%>%                              # Désactiver le regroupement
+              select(hhid,pid,sexe,Sexe_chef)
+            
+print(resultats)
+
+```
+
+*Merge des bases*
+
+**Différents type de merge**
+  * - *inner_join()* :Conserve uniquement les lignes qui ont des correspondances dans les deux tables.
+  
+  * - *rigth_join()* : Conserve toutes les lignes de la deuxième table (droite) et ajoute les correspondances de la première table (gauche). Les valeurs manquantes sont remplies par NA.
+  
+  * - *left_join()* :Conserve toutes les lignes de la première table (gauche) et ajoute les correspondances de la deuxième table (droite). Les valeurs manquantes sont remplies par NA
+  
+  * - *full_join()* : Conserve toutes les lignes des deux tables, qu'il y ait correspondance ou non. Les valeurs manquantes sont remplies par NA.
+ 
+*Ici, l'objectif est de donner à chaque individu, le ménage corrrepondant*. Donc nous utiliserons la jointure gauche (left_join())
+
+```{r}
+
+base_merge <-  dplyr::left_join(base_ind,base_men, by = "hhid")
+base_merge
+
+```
+
+*Type de logement pour chaque individu*
+
+```{r}
+
+result <-  base_merge %>% 
+            select(pid,logem)
+result
+
+```
+
+
+```{r}
+
+```
+
+

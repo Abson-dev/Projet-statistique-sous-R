@@ -1,0 +1,109 @@
+---
+title: "Statistiques descriptives"
+author: "Ameth FAYE"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importation des librairies
+
+```{r importation_des_packages_nécessaires}
+
+packages <- c("haven","gtsummary","dplyr","labelled", "rlang")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # permet de Vérifier si le package est pas installé ou pas
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+## Importation des bases
+
+```{r importation_des_bases}
+menage <- haven::read_dta("../Datapath/ehcvm_menage_civ2021.dta")
+str(menage)
+head(menage)
+welfare <- haven::read_dta("../Datapath/ehcvm_welfare_civ2021.dta")
+str(welfare)
+head(welfare)
+
+```
+
+## Quelques statistiques descriptives
+
+```{r statistiques_descriptives}
+menage |>
+  dplyr::select(logem, mur, toit, sol) |>
+  gtsummary::tbl_summary()
+```
+
+```{r label_variable}
+menage |> labelled::to_factor() |> 
+  dplyr::select(logem, toit, sol) |> 
+  gtsummary::tbl_summary()
+```
+
+```{r graphique_titre}
+menage |> 
+  labelled::to_factor() |> 
+  dplyr::select(logem, toit, mur) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      logem ~ "Type de logement",
+      toit ~ "Toit de la maison du CM",
+      mur ~ "Mur de la maison du CM"
+    )
+  ) |> 
+  gtsummary::modify_header(label = "Caractéristiques de l'habitat du CM")
+```
+
+```{r statistiques_variables_continues}
+menage |> 
+  dplyr::select(superf, grosrum, petitrum) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      superf ~ "Superficie agricole",
+      grosrum ~ "Nombre de gros ruminants", 
+      petitrum ~ "Nombre de petits ruminants"
+    ), 
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    ), 
+    digits = everything() ~ c(0, 0, 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) |> 
+  gtsummary::modify_header(label = "Tableau avec les variables numériques")
+```
+
+```{r caracteristiques_cm}
+welfare |> 
+  labelled::to_factor() |> 
+  dplyr::select(hgender, hage, hmstat, heduc, hdiploma) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      hgender ~ "Genre du chef de ménage",
+      hage ~ "Âge du chef de ménage",
+      hmstat ~ "Situation matrimoniale du chef de ménage",
+      heduc ~ "Niveau d'éducation du chef de ménage",
+      hdiploma ~ "Diplôme du chef de ménage"
+    ),
+    statistic = list(
+      hage ~ "{mean} ({sd})"
+    ),
+    digits = list(hage ~ c(0)),
+    missing_text = "Valeur manquante"
+  ) |> 
+  gtsummary::modify_header(label = "Caractéristiques du CM")
+```

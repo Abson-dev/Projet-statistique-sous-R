@@ -1,0 +1,167 @@
+---
+title: "Statistiques descriptives"
+author: "ONANENA AMANA Jeanne De La Flèche"
+date: "2025-02-11"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, warning=FALSE}
+library(gtsummary)
+library(labelled)
+library(haven)
+library(dplyr)
+library(gt)
+```
+
+```{r données, warning=FALSE}
+#chargeons les bases de données
+data1 <- read_dta("ehcvm_menage_bfa2021.dta")
+data2 <- read_dta("ehcvm_welfare_2b_bfa2021.dta")
+```
+
+
+```{r selection des variables}
+names(data1)
+data1 %>%  select(logem, toit,sol) %>%  tbl_summary()
+
+```
+Le tableau précédent ne donne aucune information. Nous devons l'améliorer pour une interprétabilité.
+
+```{r codes basiques}
+###les tableaux doivent être explicites. Il est donc important de toujours labelliser les variables
+data1 %>% to_factor()%>%select(logem, toit,sol) %>%tbl_summary()
+```
+
+
+```{r modification du titre des tableaux}
+###lDescription
+data1 %>%
+  to_factor() %>% # Conversion des variables catégorielles en facteurs
+  select(logem, toit, sol) %>%
+  tbl_summary(
+    label = list(
+      logem ~ "Type de logement du chef de ménage",
+      toit ~ "Type de toit",
+      sol ~ "Type de sol"
+    )
+  )%>% modify_header(label ~ "Caractéristiques") 
+```
+
+
+```{r ajoutons des variables quantitatives}
+###lDescription
+data1 %>%
+  to_factor() %>% # Convertir les variables catégorielles en facteurs
+  select(logem, toit, sol, superf,grosrum) %>%
+  tbl_summary(
+    label = list(
+      logem ~ "Type de logement du chef de ménage",
+      toit ~ "Type de toit",
+      sol ~ "Type de sol",
+      superf~ "superficie",
+      grosrum~"Nombre de gros ruminants"
+    ), 
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})")
+  )
+```
+
+
+```{r sortons le tableau des statistiques descriptives de ces variables}
+# Description
+data1 %>%
+  to_factor() %>% 
+  select(superf,grosrum) %>%
+  tbl_summary(
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})")
+  )
+   
+```
+
+
+```{r gestion du nombre de chiffre après la virgule}
+# Description
+data1 %>%
+  to_factor() %>% 
+  select(superf,grosrum) %>%
+  tbl_summary(
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})"),digits = everything()~c(0,0) #everything on veut arrondir pour toutes les variables sinon on aurait pu spécifier avec une liste de variable// Pour ce cas, on a arrondi à 0 chiffre après la virgule
+  )
+```
+
+
+
+```{r gestions des NA dans le tableau}
+# Description
+# missing = always permet de toujours afficher les valeurs manquantes
+data1 %>%
+  to_factor() %>% 
+  select(superf,grosrum) %>%
+  tbl_summary(
+    statistic = list(grosrum~ "{mean}({sd})", superf~ "{mean}({sd})"),digits = everything()~c(0,0), 
+    missing = "always",
+    missing_text= "Missing",
+  )
+  
+```
+
+
+
+```{r tableaux avec la base walfare}
+data2 %>%
+  labelled::to_factor() %>%
+  select(hgender, hage, hmstat, heduc, hdiploma, hcsp) %>%  
+  tbl_summary(
+    label = list(
+      hgender = "Genre du chef du ménage",
+      hage = "Âge du chef du ménage",
+      hmstat = "Statut matrimonial",
+      heduc = "Niveau d'éducation",
+      hdiploma = "Diplôme obtenu",
+      hcsp = "Catégorie socio-professionnelle"
+    ),
+    missing = "ifany",  
+    statistic = list(
+      all_categorical() ~ "{n} ({p}%)",  
+      all_continuous() ~ "{mean} ({sd})"  
+    )
+  )%>% modify_header(label ~ "Caractéristiques") 
+
+```
+
+
+```{r tableau amélioré base walfare}
+tableau <- data2 %>%
+  labelled::to_factor() %>%  
+  select(hgender, hage, hmstat, heduc, hdiploma, hcsp) %>%  
+  tbl_summary(
+    label = list(
+      hgender = "Genre du chef du ménage",
+      hage = "Âge du chef du ménage",
+      hmstat = "Statut matrimonial",
+      heduc = "Niveau d'éducation",
+      hdiploma = "Diplôme obtenu",
+      hcsp = "Catégorie socio-professionnelle"
+    ),
+    missing = "ifany",  # Affichons les valeurs manquantes si elles existent
+    statistic = list(
+      all_categorical() ~ "{n} ({p}%)",  # Pour les variables qualitatives
+      all_continuous() ~ "{mean} ({sd})"  # Pour les variables quantitatives
+    )
+  ) %>% modify_header(label ~ "Caractéristiques") %>%
+  as_gt() %>%  # Conversion en tableau avec le package gt
+  tab_style(
+    style = list(cell_fill(color = "lightblue")),  
+    locations = cells_column_labels()  
+  )
+
+# Affichons tableau dans le Viewer
+tableau
+
+```
+

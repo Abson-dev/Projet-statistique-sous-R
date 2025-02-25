@@ -1,0 +1,116 @@
+---
+title: "Statistiques descriptives (TP4)"
+author: "Aissatou Sega DIALLO"
+date: "2025-02-24"
+output:
+  output_dir: "./Sorties"
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Installation et chargement des packages
+
+Cette section assure la disponibilité des bibliothèques nécessaires.
+
+```{r results=FALSE, message=FALSE}
+
+Packages <- c("readr", "haven", "utils", "dplyr","labelled", "gtsummary")
+
+for (x in Packages) {
+  if (!requireNamespace(x, quietly = TRUE)) {
+    install.packages(x)
+  }
+  library(x, character.only = TRUE)
+}
+```
+
+#Travail avec la base ménage
+
+## Importation des données
+
+**Chargement de la base principale**
+
+```{r}
+## Importation de la Base ménage 
+
+Base_men <- readr::read_csv("../Données/ehcvm_menage_bfa2021.csv")
+Base_men
+```
+
+**Aperçu de la structure des données**
+
+```{r}
+#Structure base
+utils::str(Base_men)
+```
+
+**Affichage des noms des variables**
+```{r}
+#Noms variables
+colnames(Base_men)
+```
+
+##Statistiques et sorties de tableaux
+
+**Sorties de tableau avec labélisation des variables**
+```{r}
+#Activation de la labélisation
+Base_men %>% labelled::to_factor() %>% select("logem","toit","sol") %>% tbl_summary()
+
+#Labélisation des variables
+Base_men %>% labelled::to_factor() %>% select("logem","toit","sol") %>% tbl_summary(label= list(logem ~ "Type de logement occupé",toit ~ "Type de toit",sol ~ "Type de sol"))
+```
+
+**Sorties de tableaux en changeant l'entete**
+```{r}
+#Modification de l'entete
+Base_men %>% labelled::to_factor() %>% select("logem","toit","sol") %>% tbl_summary(label= list(logem ~ "Type de logement occupé",toit ~ "Type de toit",sol ~ "Type de sol")) %>% modify_header(label="Description du logement")
+```
+
+**Statistiques**
+```{r}
+Base_men %>% labelled::to_factor() %>% select("logem","toit","sol","superf","grosrum","petitrum") %>% tbl_summary(label= list(logem ~ "Type de logement occupé",toit ~ "Type de toit",sol ~ "Type de sol"),statistic = list(superf ~ "{mean} ({sd})",
+                   grosrum ~ "{mean} ({sd})",
+                   petitrum ~ "{mean} ({sd})")) %>% modify_header(label="Description du logement")  %>% add_n() 
+```
+
+**Gestion des valeurs manquantes**
+```{r}
+Base_men %>% labelled::to_factor() %>% select("logem","toit","sol","superf","grosrum","petitrum") %>% tbl_summary(label= list(logem ~ "Type de logement occupé",toit ~ "Type de toit",sol ~ "Type de sol"),statistic = list(superf ~ "{mean} ({sd})",
+                   grosrum ~ "{mean} ({sd})",
+                   petitrum ~ "{mean} ({sd})"),missing = "always",
+                   missing_text = "valeurs manquantes") %>% modify_header(label="Description du logement")  %>% add_n() 
+```
+
+#Travail avec la base welfare
+
+**Chargement de la base**
+```{r}
+Base_wel <- readr::read_csv("../Données/ehcvm_welfare_2b_bfa2021.csv")
+Base_wel
+```
+
+**Aperçu de la base**
+```{r}
+utils::str(Base_wel)
+```
+
+**Affichage des noms des variables**
+```{r}
+colnames(Base_wel)
+```
+
+**Sorties de tableaux**
+```{r}
+Base_wel %>% labelled::to_factor() %>% select("hgender","hage","hmstat","heduc","hdiploma") %>% tbl_summary(label= list(hgender ~ "Sexe du Chef de ménage",hage ~ "Age du Chef de ménage",hmstat ~ "Situation matrimoniale",heduc ~ "Niveau d'education",hdiploma ~ "diplome le plus élévé"),statistic = list(hage ~ "{mean} ({sd})"),
+                   digits = list(hage ~ 2), 
+                   #digits = everything()~c(0,0,0)                   
+                   missing = "always",
+                   missing_text = "valeurs manquantes") %>% modify_header(label="Caractéristiques du Chef de ménage")  %>% add_n()
+```
+

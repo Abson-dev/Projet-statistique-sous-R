@@ -1,0 +1,144 @@
+---
+title: "Stat_desc_Burkina"
+author: "FOGWOUNG DJOUFACK Sarah-Laure"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+#Installation et importation des packages
+
+Dans cette section, nous installons tous les packages necessaires uniquement si ils ne sont pas encore installés
+
+```{r eval = FALSE}
+packages <- c("readr", "haven", "utils", "dplyr", "gtsummary", "labelled")
+
+for (package in packages) {
+  if (!require(package, character.only = TRUE)) {  
+    install.packages(package)  # Installe le package si nécessaire  
+    library(package, character.only = TRUE)  # Charge le package après installation  
+  }
+}
+
+```
+
+On charge les bibliothèques une fois qu'elles sont installées
+```{r}
+# Chargement des librairies si on avait deja installé (si on avait déjà fait run le chunck précédent, plus besoin de run celui-ci)
+library(readr)
+library(haven)
+library(utils)
+library(dplyr)
+library(gtsummary)
+library(labelled)
+```
+
+# Chargement des bases de données 
+
+```{r}
+## Base ménage
+base_men <-  utils::read.csv("../Donnees/ehcvm_menage_bfa2021.csv")
+base_men2 <- haven::read_dta("../Donnees/ehcvm_menage_bfa2021.dta")
+
+```
+
+# Affichage de tableau Version0 
+
+Ici, on cherche juste à afficher un tableau avec les variables logem, toit et mur. Avec tbl_summary on on affiche les effectifs et les pourcentages. En outre, la fonction to_factor de la librairie labelled est utilisée pour afficher les labels des modalités au lieu de leur code. 
+
+```{r}
+base_men2 %>%labelled::to_factor()%>%select(logem, toit, mur) %>% tbl_summary()
+```
+
+# Affichage de tableau Version1 
+
+Ici, on améliore le tableau en renommant les variables. Par ailleurs on modifie le nom de l'entête avec modify_header. 
+
+```{r}
+base_men2 %>%
+  labelled::to_factor()%>%
+  select(logem, toit, mur) %>%
+  tbl_summary(
+    label = list(
+      logem = "Type de logement CM",
+      toit = "Type de toiture",
+      mur = "Type de mur"
+    )
+  ) %>%
+  modify_header(label = "Caractéristiques de l'habitat")
+```
+
+# Variables continues  
+
+Ici, on considere maintenant des variables continues et on les applique la fonction tbl_summary comme précédemment. 
+
+```{r}
+base_men2 %>% labelled::to_factor()%>% select(grosrum, superf, petitrum) %>% tbl_summary()
+```
+
+# Affichage de tableau Version2 
+
+Ici, on calcule la moyenne et l'écart type des variables precedentes qu'on va afficher dans le tableau
+
+```{r}
+base_men2 %>%
+  labelled::to_factor()%>%
+  select(grosrum, superf, petitrum) %>%
+  tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      superf ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    )
+  )
+
+```
+
+# Affichage de tableau Version3: Gestion des missings
+
+Ici, on indique qu'on ne veut aucun chiffre après la virgule et donc ca arrondit les valeurs en entier. Aussi on signale les missing et on met comme label correspondants "manquants"
+
+```{r}
+base_men2 %>%
+  labelled::to_factor()%>%
+  select(grosrum, superf, petitrum) %>%
+  tbl_summary(
+    statistic = list(
+      grosrum ~ "{mean} ({sd})",
+      superf ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"),
+    digits = everything()~c(0,0,0),
+    missing="always",
+    missing_text="manquants",
+  )
+```
+
+# Avec la base pauvreté 
+
+Importation de la base 
+```{r}
+base_welfare <- haven::read_dta("../Donnees/ehcvm_welfare_2b_bfa2021.dta")
+```
+
+# Faisons les manipulations precedentes avec la base pauvreté 
+Variables à utiliser 
+hgender
+hmstat
+hage
+heduc
+hdiploma
+
+```{r}
+base_welfare %>%
+  labelled::to_factor()%>%
+  select(hgender, hmstat, hage, heduc, hdiploma) %>%
+  tbl_summary(label = list(
+      hgender = "Genre du CM",
+      hmstat = "Situation matrimoniale du CM",
+      hage = "Age du CM",
+      heduc = "Niveau d'éducation du CM",
+      hdiploma = "Diplôme du CM"),
+      digits = everything()~c(0,0,0,0,0),
+      missing="always",
+      missing_text="manquants") %>%
+  modify_header(label = "Caractéristiques")
+```

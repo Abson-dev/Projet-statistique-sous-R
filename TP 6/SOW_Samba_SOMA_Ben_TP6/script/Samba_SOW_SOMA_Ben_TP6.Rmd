@@ -1,0 +1,319 @@
+---
+title: "TP6-R"
+author: "Samba SOW et SOMA Ben Idriss"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Charger les bibliothèques
+
+```{r include=FALSE}
+packages <- c("readr","utils","haven","dplyr","survey","srvyr", "gtsummary", "labelled")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {  
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+
+1️⃣ Chargement des bases de données
+
+
+```{r include=FALSE}
+menage <- haven::read_dta("../bases/ehcvm_menage_ben2018.dta")
+individu <- haven::read_dta("../bases/ehcvm_individu_ben2018.dta")
+ponderation <- haven::read_dta("../bases/ehcvm_ponderations_ben2018.dta")
+```
+
+
+```{r}
+individu  <-  individu %>%
+  labelled::to_factor() 
+
+```
+
+2️⃣ Statistiques descriptives sur la base ménage
+
+🔹 2.1 Sans pondération
+
+```{r}
+menage %>% 
+  labelled::to_factor() %>%
+  select(logem,toit,sol,mur) %>% 
+  tbl_summary( label=list(
+             toit~"toit de la maison du chef",
+             mur~"mur de la maison ",
+             sol~"sol de la maison"
+             ),by=logem) %>% 
+  modify_header(label="Caractéristiques sur l'habitat des ménages en fonction du type de logement ")
+
+```
+
+
+```{r}
+menage %>%
+  labelled::to_factor()%>% 
+  select(logem, toit, sol, mur) %>%
+  tbl_summary(
+    by = logem,
+    label = list(
+      toit ~ "Type de toit",
+      sol ~ "Type de sol",
+      mur ~ "Type de mur"
+    )
+  ) %>%
+  modify_header(label = "**Caractéristiques de l'habitat en fonction du type de logement**")
+```
+
+🔹 2.2 Avec pondération 
+
+
+```{r}
+menage <- menage %>%
+  labelled::to_factor() 
+```
+
+
+```{r include=FALSE}
+colnames(ponderation)
+colnames(menage)
+colnames(individu)
+```
+
+Retrouvons la pondération de la base menage à travers la base individu en selectionnant le poids dans la base individu et en supprimant les doublons 
+
+```{r}
+
+base_poids = individu %>%  
+        select(hhid,hhweight) %>% 
+        distinct(hhid, .keep_all = TRUE)
+
+```
+
+## Joindre la base ménage avec la base base_poids
+```{r}
+menage_pond <- menage %>% 
+  left_join(base_poids, by="hhid")
+```
+
+
+## Définir le plan de sondage
+
+```{r include=FALSE}
+menage_pond <- menage_pond %>%
+  as_survey_design(ids = hhid, weights = hhweight)
+```
+
+
+```{r}
+menage_pond %>%
+  select(logem,eauboi_ss,eauboi_sp) %>% 
+  tbl_svysummary(
+    by = logem,
+    label = list(
+      eauboi_ss ~ "Eau potable (saison sèche)",
+      eauboi_sp ~ "Eau potable (saison pluvieuse)")) %>% 
+  modify_caption("**Accès à l'eau en fonction du type de logement (avec pondération)**")
+```
+
+
+```{r}
+menage_pond %>%
+  select(logem,elec_ac,elec_ur,elec_ua ) %>% 
+  tbl_svysummary(
+    by = logem, 
+    label = list(
+      elec_ac ~ "electricité reseau",
+      elec_ur ~ "reseau electrique"),
+    elec_ua~"solaire/groupe") %>%
+   modify_header(label="**Possession d'electricité par milieu (avec pondération)**")
+  
+```
+
+
+
+3️⃣ Statistiques descriptives sur la base individu 
+
+🔹 3.1 Sans pondération
+
+```{r}
+# Transformer en facteurs et créer une variable d'âge groupé
+individu_1 <- individu %>%
+  labelled::to_factor() %>%
+  mutate(age_group = case_when(
+    age < 18  ~ "0-17 ans",
+    age >= 18 & age < 35  ~ "18-34 ans",
+    age >= 35 & age < 60  ~ "35-59 ans",
+    age >= 60  ~ "60+ ans"
+  ))
+
+```
+
+
+```{r}
+individu_1 %>%
+  select(sexe, age_group) %>%
+  tbl_summary(
+    by = sexe,  # Croisement par sexe
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      age_group ~ "Tranche d'âge"
+    )
+  ) %>%
+  modify_header(label = "**Répartition des individus par sexe et groupe d'âge (Sans Pondération)**")
+
+```
+
+
+
+```{r}
+individu_1 %>%
+  select(milieu, bank) %>%
+  tbl_summary(
+    by = milieu,  # Croisement par milieu
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      bank ~ "Accès aux services bancaires"
+    )
+  ) %>%
+  modify_header(label = "**Accès aux services bancaires selon le milieu (Sans Pondération)**")
+
+```
+
+🔹 3.2 Avec pondération
+```{r}
+individu_1 <- individu_1 %>%
+  labelled::to_factor()
+```
+
+
+```{r}
+# Définir le plan de sondage
+individu_pond <- individu_1 %>%
+  as_survey_design(ids = numind, weights = hhweight)
+
+```
+
+
+```{r}
+# Tableau pondéré
+individu_pond %>%
+  select(sexe, age_group) %>%
+  tbl_svysummary(
+    by = sexe,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(age_group ~ "Tranche d'âge")) %>%
+  modify_caption("**Répartition des individus par sexe et groupe d'âge (Avec Pondération)**")
+
+```
+
+
+```{r}
+individu_pond %>%
+  select(milieu, bank) %>%
+  tbl_svysummary(
+    by = milieu,  # Croisement par milieu
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      bank ~ "Accès aux services bancaires"
+    )
+  ) %>%
+  modify_caption("**Accès aux services bancaires selon le milieu (Sans Pondération)**")
+```
+
+4️⃣ Statistiques descriptives sur la base individu mergee avec la base menage
+
+```{r}
+base <- individu %>%
+  left_join(menage, by = "hhid")
+```
+
+
+```{r include=FALSE}
+colnames(base)
+```
+
+🔹 4.1 Sans ponderation
+
+
+```{r}
+# Transformer en facteurs et créer une variable d'âge groupé
+base_1 <- base %>%
+  labelled::to_factor() %>%
+  mutate(age_group = case_when(
+    age < 18  ~ "0-17 ans",
+    age >= 18 & age < 35  ~ "18-34 ans",
+    age >= 35 & age < 60  ~ "35-59 ans",
+    age >= 60  ~ "60+ ans"
+  ))
+
+```
+
+
+```{r}
+base_1 %>%
+  select(sexe, age_group) %>%
+  tbl_summary(
+    by = sexe,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(age_group ~ "groupr d age")) %>%
+  modify_header(label="**Répartition des individus par sexe et par groupr d'âge (Sans Pondération)**")
+```
+
+
+```{r}
+base_1 %>%
+  select(milieu, diplome) %>%
+  tbl_summary(
+    by = milieu,  # Croisement par milieu
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      diplome ~ "diplôme obtenu"
+    )
+  ) %>%
+  modify_header(label="**Répartition des individus par milieu et par diplôme obtenu (Sans Pondération)**")
+```
+
+
+🔹 4.2 Avec ponderation
+
+## Définir le plan de sondage
+
+```{r}
+base_2 <- base %>% 
+ as_survey_design(ids = hhid, weights = hhweight)
+
+colnames(base_2)
+```
+
+
+
+```{r}
+base_2 %>%
+  select(sexe, region) %>%
+  tbl_svysummary(
+    by = sexe,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(region ~ "Région")) %>%
+  modify_caption("**Répartition des individus par sexe et par region (Avec Pondération)**")
+```
+
+
+
+```{r}
+base_2 %>%
+  select(milieu, educ_scol) %>%
+  tbl_svysummary(
+    by = milieu,  # Croisement par milieu
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      educ_scol ~ "Niveau d'éducation"
+    )
+  ) %>%
+  modify_caption("**le Niveau d'éducation selon le milieu (Sans Pondération)**")
+```
+
+
+

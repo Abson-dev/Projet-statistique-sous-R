@@ -1,0 +1,106 @@
+---
+title: "Statistiques descriptives"
+author: "Ahmadou Niass"
+date: "2025-02-11"
+output: pdf_document
+---
+
+```{r}
+# Installation des packages nécessaires
+packages <- c("haven", "gtsummary", "labelled", "dplyr")
+install_if_missing <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+invisible(lapply(packages, install_if_missing))
+
+# Chargement des bibliothèques
+library(haven)
+library(gtsummary)
+library(labelled)
+library(dplyr)
+```
+
+## Importation de la base
+
+```{r importation_base}
+menage <- haven::read_dta("../data/ehcvm_menage_civ2021.dta")
+welfare <- haven::read_dta("../data/ehcvm_welfare_civ2021.dta")
+head(welfare)
+head(menage)
+```
+
+## Sélection et description des variables
+
+```{r selection_variables}
+menage |> 
+  dplyr::select(logem, toit, sol) |> 
+  gtsummary::tbl_summary()
+```
+
+```{r labelisation_variables}
+menage |> 
+  labelled::to_factor() |> 
+  dplyr::select(logem, toit, sol) |> 
+  gtsummary::tbl_summary()
+```
+
+```{r modification_titre_tableau}
+menage |> 
+  labelled::to_factor() |> 
+  dplyr::select(logem, toit, mur) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      logem ~ "Type de logement",
+      toit ~ "Toit de la maison du CM",
+      mur ~ "Mur de la maison du CM"
+    )
+  ) |> 
+  gtsummary::modify_header(label = "Caractéristiques de l'habitat du CM")
+```
+
+## Statistiques sur les variables continues
+
+```{r statistiques_variables_continues}
+menage |> 
+  dplyr::select(superf, grosrum, petitrum) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      superf ~ "Superficie agricole",
+      grosrum ~ "Nombre de gros ruminants", 
+      petitrum ~ "Nombre de petits ruminants"
+    ), 
+    statistic = list(
+      superf ~ "{mean} ({sd})",
+      grosrum ~ "{mean} ({sd})",
+      petitrum ~ "{mean} ({sd})"
+    ), 
+    digits = everything() ~ c(0, 0, 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) |> 
+  gtsummary::modify_header(label = "Tableau avec les valeurs numériques")
+```
+
+## Caractéristiques du chef de ménage
+
+```{r caracteristiques_cm}
+welfare |> 
+  labelled::to_factor() |> 
+  dplyr::select(hgender, hage, hmstat, heduc, hdiploma) |> 
+  gtsummary::tbl_summary(
+    label = list(
+      hgender ~ "Genre du chef de ménage",
+      hage ~ "Âge du chef de ménage",
+      hmstat ~ "Situation matrimoniale du chef de ménage",
+      heduc ~ "Niveau d'éducation du chef de ménage",
+      hdiploma ~ "Diplôme du chef de ménage"
+    ),
+    statistic = list(
+      hage ~ "{mean} ({sd})"
+    ),
+    digits = list(hage ~ c(0)),
+    missing = "always",
+    missing_text = "Valeur manquante"
+  ) |> 
+  gtsummary::modify_header(label = "Caractéristiques du CM")
+```
