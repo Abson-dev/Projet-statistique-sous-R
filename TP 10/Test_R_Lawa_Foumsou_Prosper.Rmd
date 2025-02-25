@@ -1,0 +1,420 @@
+---
+title: "Test_R"
+author: "Lawa Foumsou Prosper"
+output: word_document
+---
+
+# Chargement de packages nécessaires
+
+```{r, results=FALSE, message=FALSE, include=FALSE}
+
+packages <- c("haven","utils","dplyr","tidyr","gtsummary","gt","labelled")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+# Chargement des bases
+
+Nous chargeons en premier lieu les bases qui seront utilisées lors du travail pratique.
+
+## Base ménage
+
+```{r, message=FALSE}
+base_men <- haven::read_dta("../data/base_menage.dta")
+colnames(base_men) # voir le nom des variables dans la base
+
+```
+
+La base ménage est composée de 1065 individus et 21 variables.
+
+```{r, message=FALSE}
+dim(base_men) # connaitre le nombre d'observations et de variables dans la base
+```
+
+## Base child baseline
+
+```{r, message=FALSE}
+base_child_baseline <- haven::read_dta("../data/food_comp_child_baseline.dta")
+colnames(base_men) # voir le nom des variables dans la base
+
+```
+
+La base child baseline est composée de 4256 individus et 17 variables.
+
+```{r, message=FALSE}
+dim(base_child_baseline) # connaitre le nombre d'observations et de variables dans la base
+```
+
+## Base child endline
+
+```{r, message=FALSE}
+base_child_endline <- haven::read_dta("../data/food_comp_child_endline.dta")
+colnames(base_child_endline) # voir le nom des variables dans la base
+```
+
+La base child endline est composée de 4256 individus et 17 variables.
+
+```{r, message=FALSE}
+dim(base_child_endline) # connaitre le nombre d'observations et de variables dans la base
+```
+
+## Base mother baseline
+
+```{r, message=FALSE}
+base_mother_baseline <- haven::read_dta("../data/food_comp_mother_baseline.dta")
+colnames(base_mother_baseline) # voir le nom des variables dans la base
+```
+
+La base mother baseline est composée de 4256 individus et 17 variables.
+
+```{r, message=FALSE}
+dim(base_mother_baseline) # connaitre le nombre d'observations et de variables dans la base
+```
+
+## Base mother endline
+
+```{r, message=FALSE}
+base_mother_endline <- haven::read_dta("../data/food_comp_mother_endline.dta") 
+colnames(base_mother_endline) # voir le nom des variables dans la base
+```
+
+La base mother endline est composée de 4256 individus et 17 variables.
+
+```{r, message=FALSE}
+dim(base_mother_baseline) # connaitre le nombre d'observations et de variables dans la base
+```
+
+# **Partie 1 : Gestion et nettoyage des bases de données**
+
+## Q1.
+
+Verifions s'il n'y a pas de valeurs manquantes dans les identifiants.
+
+```{r, message=FALSE}
+base_men[is.na(base_men$regionid) | 
+         is.na(base_men$communeid) | 
+         is.na(base_men$villageid) | 
+         is.na(base_men$hhid), ]
+```
+
+On remarque qu'il y a une valeur manquantes dans l'identifiant **communeid**.
+
+```{r, message=FALSE}
+base_men %>%
+  drop_na(regionid, communeid, villageid, hhid) %>%  # Ignore les NA
+  group_by(regionid, communeid, villageid, hhid) %>%
+  mutate(nb_line = n()) %>%
+  ungroup() %>%
+  filter(nb_line > 1) %>%
+  nrow()
+```
+
+On remarque qu'il y a deux observations avec doublons.
+
+```{r, message=FALSE}
+# Identification du nombre de duplication des ménages. 
+base_men %>% 
+  group_by(regionid, communeid, villageid, hhid) %>% 
+  mutate(nb_line=n()) %>% arrange(desc(nb_line)) %>% 
+   ungroup %>%
+  count(nb_line)
+```
+
+Dans la suite nous allons directement procéder à la suppression des doublons s'il existent.
+
+```{r, message=FALSE}
+# Suppression des doublons dans la base ménage
+base_men<-base_men %>% 
+   distinct(regionid, communeid, villageid, hhid, .keep_all = T)
+```
+
+```{r, message=FALSE}
+# Suppression des doublons dans la base base_child_baseline
+base_child_baseline<-base_child_baseline %>% 
+   distinct(regionid, communeid, villageid, hhid, .keep_all = T)
+```
+
+```{r, message=FALSE}
+# Suppression des doublons dans la base base_child_endline
+base_child_endline<-base_child_endline %>% 
+   distinct(regionid, communeid, villageid, hhid, .keep_all = T)
+```
+
+```{r, message=FALSE}
+# Suppression des doublons dans la base mother_baseline
+base_mother_baseline<-base_mother_baseline %>% 
+   distinct(regionid, communeid, villageid, hhid, .keep_all = T)
+```
+
+```{r}
+# Suppression des doublons dans la base mother_endline
+base_mother_endline<-base_mother_endline %>% 
+   distinct(regionid, communeid, villageid, hhid, .keep_all = T)
+```
+
+## Q2
+
+```{r, message=FALSE}
+# Récupérer les noms des variables
+var_base_child_baseline  <- names(base_child_baseline)
+var_base_child_endline   <- names(base_child_endline)
+var_base_mother_baseline <- names(base_mother_baseline)
+var_base_mother_endline  <- names(base_mother_endline)
+
+# Comparer les noms des variables pour les enfants
+diff_child_baseline_endline <- setdiff(var_base_child_baseline, var_base_child_endline)
+diff_child_endline_baseline <- setdiff(var_base_child_endline, var_base_child_baseline)
+
+# Comparer les noms des variables pour les mères
+diff_mother_baseline_endline <- setdiff(var_base_mother_baseline, var_base_mother_endline)
+diff_mother_endline_baseline <- setdiff(var_base_mother_endline, var_base_mother_baseline)
+
+# Afficher les différences
+cat("Variables présentes dans base_child_baseline mais absentes de base_child_endline :\n")
+print(diff_child_baseline_endline)
+
+cat("\nVariables présentes dans base_child_endline mais absentes de base_child_baseline :\n")
+print(diff_child_endline_baseline)
+
+cat("\nVariables présentes dans base_mother_baseline mais absentes de base_mother_endline :\n")
+print(diff_mother_baseline_endline)
+
+cat("\nVariables présentes dans base_mother_endline mais absentes de base_mother_baseline :\n")
+print(diff_mother_endline_baseline)
+```
+
+On remarque qu'il y a des variables dont les noms sont différents dans les base des mères.
+
+### Renommage des variables
+
+```{r, message=FALSE}
+# Renommer V1 en energ_kcal et V9 en zinc_mg dans base_mother_baseline
+base_mother_baseline <- base_mother_baseline %>%
+  rename(
+    energ_kcal = V1,
+    zinc_mg = V9
+  )
+
+# Vérifier si le renommage a bien été fait
+names(base_mother_baseline)
+```
+
+## Q3
+
+Fonction pour compter les nombre de valeurs manquantes pour chaque variable dans les différentes bases.
+
+```{r, message=FALSE}
+count_na <- function(df, df_name = "Base") {
+  missing_counts <- colSums(is.na(df))  # Compte le nombre de NA par colonne
+  missing_df <- data.frame(Variable = names(df), Missing_Count = missing_counts)
+  missing_df <- missing_df[order(-missing_df$Missing_Count), ]  # Trier par nombre de NA décroissant
+  
+  cat("\nNombre de valeurs manquantes par variable pour", df_name, ":\n")
+  print(missing_df)
+  
+  return(missing_df)
+}
+
+```
+
+```{r}
+na_base_men <- count_na(base_men, "base_men")
+na_baseline_mother <- count_na(base_mother_baseline, "base_mother_baseline")
+na_endline_mother  <- count_na(base_mother_endline, "base_mother_endline")
+na_baseline_child  <- count_na(base_child_baseline, "base_child_baseline")
+na_endline_child   <- count_na(base_child_endline, "base_child_endline")
+```
+
+On va juste supprimer les données manquantes dans chaque base. Vu qu'il n'y aura pas une extrapolation après et que le nombre de NA est relativement petit au vu du nombre total d'observation dans chaque base.
+
+## Q4
+
+```{r, message=FALSE}
+# Recalculer la moyenne par groupe
+consommation_moyenne_par_groupe <- base_mother_baseline %>%
+  group_by(s1_q0) %>%
+  summarise(consommation_moyenne = mean(energ_kcal, na.rm = TRUE))
+
+# Afficher le résultat
+print(consommation_moyenne_par_groupe)
+```
+
+## Q5
+
+On va sauvegarder les nouvelles bases en supprimant les données manquantes.
+
+```{r, message=FALSE}
+base_menage_final <- base_men %>% drop_na()
+mother_baseline_v1 <- base_mother_baseline %>% drop_na()
+mother_endline_V1 <- base_mother_endline %>% drop_na()
+child_baseline_v1 <- base_child_baseline %>% drop_na()
+child_endline_v1 <- base_child_endline %>% drop_na()
+```
+
+# **Partie 2 : Empilement et Fusion des données**
+
+## Baseline
+
+### Q1
+
+```{r, message=FALSE}
+# Empiler deux bases de données (base1 et base2)
+base1 <- bind_rows(mother_baseline_v1, child_baseline_v1)
+colnames(base1)
+```
+
+## Q2
+
+```{r, message=FALSE}
+# Identifier les indices des colonnes entre energ_kcal et vit_c_mcg
+start_col <- which(names(base1) == "energ_kcal")
+end_col <- which(names(base1) == "vit_c_mg")
+
+# Sélectionner les colonnes entre energ_kcal et vit_c_mcg
+cols_to_rename <- names(base1)[start_col:end_col]
+
+# Renommer ces colonnes en ajoutant le suffixe _b
+base1 <- base1 %>%
+  rename_with(~paste0(., "_b"), all_of(cols_to_rename))
+
+# Vérifier les premières lignes pour vérifier les changements
+colnames(base1)
+```
+
+## Q3
+
+```{r, message=FALSE}
+
+base2 <- base1 %>%
+  group_by(s1_q0) %>%  # Grouper par s1_q0
+  mutate(
+    sum_values = energ_kcal_b + protein_g_b + lipid_tot_g_b + 
+                 calcium_mg_b + iron_mg_b + zinc_mg_b + 
+                 vit_b6_mg_b + vit_b12_mcg_b + vit_c_mg_b
+  ) %>%
+  ungroup()  # Dé-grouper une fois le calcul effectué
+
+# Résultat
+colnames(base2)
+```
+
+## Q4
+
+```{r, message=FALSE}
+baseline_final <- base2 %>%
+  select(hhid, energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, 
+         iron_mg_b, zinc_mg_b, vit_b6_mg_b, vit_b12_mcg_b, vit_c_mg_b, sum_values)
+
+# Sauvegarder le fichier sous le nom 'baseline_final.dta'
+write_dta(baseline_final, "baseline_final.dta")
+dim(baseline_final)
+```
+
+## Endline
+
+### Q1
+
+```{r, message=FALSE}
+# Empiler deux bases de données (base1 et base2)
+base3 <- bind_rows(mother_endline_V1, child_endline_v1)
+dim(base3)
+colnames(base3)
+```
+
+### Q2
+
+```{r, message=FALSE}
+# Identifier les indices des colonnes entre energ_kcal et vit_c_mcg
+start_col <- which(names(base3) == "energ_kcal")
+end_col <- which(names(base3) == "vit_c_mg")
+
+# Sélectionner les colonnes entre energ_kcal et vit_c_mcg
+cols_to_rename <- names(base3)[start_col:end_col]
+
+# Renommer ces colonnes en ajoutant le suffixe _b
+base3 <- base3 %>%
+  rename_with(~paste0(., "_e"), all_of(cols_to_rename))
+
+# Vérifier les premières lignes pour vérifier les changements
+colnames(base3)
+
+```
+
+### Q3
+
+```{r, message=FALSE}
+base4 <- base3 %>%
+  group_by(s1_q0) %>%  # Grouper par s1_q0
+  mutate(
+    sum_values = energ_kcal_e + protein_g_e + lipid_tot_g_e + 
+                 calcium_mg_e + iron_mg_e + zinc_mg_e + 
+                 vit_b6_mg_e + vit_b12_mcg_e + vit_c_mg_e
+  ) %>%
+  ungroup()  # Dé-grouper une fois le calcul effectué
+
+# Résultat : afficher les noms des colonnes du dataframe
+colnames(base4)
+```
+
+### Q4
+
+```{r, message=FALSE}
+endline_final <- base4 %>%
+  select(hhid, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, 
+         iron_mg_e, zinc_mg_e, vit_b6_mg_e, vit_b12_mcg_e, vit_c_mg_e, sum_values)
+
+# Sauvegarder le fichier sous le nom 'baseline_final.dta'
+write_dta(endline_final, "baseline_final.dta")
+```
+
+```{r}
+colnames(baseline_final)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_finale1 <- baseline_final %>% left_join(endline_final, by="hhid")
+colnames(base_finale1)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_finale <- base_finale1 %>% left_join(base_menage_final, by="hhid")
+colnames(base_finale)
+```
+
+# **Partie 3 : Statistiques descriptives avec le package gtsummary**
+
+```{r, message=FALSE}
+
+base_finale %>%
+  labelled::to_factor() %>%
+  select(
+    energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b, 
+    vit_b6_mg_b, vit_b12_mcg_b, vit_c_mg_b, sum_values.x, energ_kcal_e, 
+    protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e, vit_b6_mg_e, 
+    vit_b12_mcg_e, vit_c_mg_e
+  ) %>%
+  tbl_summary(
+    digits = everything() ~ c(0, 0, 0, 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(
+    label = "**Taille de l'échantillon**"
+  ) %>%
+  as_gt() %>%
+  gt::tab_header(
+    title = "Caractéristiques du logement"
+  ) %>%
+  gt::tab_source_note(
+    source_note = "Source : Calcul des auteurs"
+  ) %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+```
