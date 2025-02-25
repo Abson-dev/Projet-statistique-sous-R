@@ -3,12 +3,13 @@ title: "Read code"
 author: "Groupe_1"
 date: "2025-02-18"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 
@@ -22,12 +23,19 @@ library(labelled)
 library(stringi)  # Pour mieux gérer les caractères spéciaux
 library(readxl)
 library(tidyr)
+library(here)
+
+wd <-setwd(here())
+
 ```
 
 # Chargement des bases
 
+On notera que le même fichier a été utilisé pour le Togo et pour la Guinée, quelques différences près.
 ```{r}
-#my_data <- read_dta("TGO/ehcvm_individu_tgo2021.dta")
+
+knitr::opts_knit$set(root.dir = wd)
+#my_data <- read_dta("Togo/ehcvm_individu_tgo2021.dta")
 
 my_data <- read_dta("GNB/ehcvm_individu_gnb2021.dta")
 
@@ -52,7 +60,7 @@ table(canton) ## Table of extent 0
 # Charger les données
 data_hdx <- readxl::read_excel("GNB/gnb_adminboundaries_tabulardata.xlsx", sheet = "ADM2")
 
-#data_hdx <- readxl::read_excel("TGO/tgo_adminboundaries_tabulardata.xlsx", sheet = "ADM2")
+#data_hdx <- readxl::read_excel("Togo/tgo_adminboundaries_tabulardata.xlsx", sheet = "ADM2")
 
 ## On prend en compte les cas de split (deux noms différents avec des /)
 data_hdx <- data_hdx %>%  separate_rows(ADM2_EN, sep="/")
@@ -158,6 +166,7 @@ A partir de là, avec la distance de Lenvenshtein, il est possible de ne retenir
 
 
 # Traitement du résultat : Normalisation si la distance est faible
+# Valide pour TOGO only
 
 my_data <- my_data %>%
   mutate(admin2 = case_when(
@@ -215,23 +224,23 @@ sum(is.na(my_data_merge$ADM2_PCODE))
 ```
 # Saving 
 ```{r}
-write.csv(my_data_merge, "TGO/TGO_output_database.csv")
+#write.csv(my_data_merge, "Togo/TGO_output_database.csv")
 
-#write.csv(my_data_merge, "GNB/GNB_output_database.csv")
+write.csv(my_data_merge, "GNB/GNB_output_database.csv")
 
 ```
 
 
 # ET SI ON FAISAIT UN PEU DE STATISTIQUE SPATIALE ???
 
-Nous allons procéder à des intersections en fonction des coorrdonnées. Dans notre cas, nous utilisons les shp et la base ménage
+Nous allons procéder à des intersections en fonction des coorrdonnées. Dans notre cas, nous utilisons les shp et la base ménage du TOGO.
 
 
 ```{r}
 library(sf)
 library(ggplot2)
 
-tgo_shp <- st_read("TGO/tgo_admbnda_adm3_inseed_20210107.shp")
+tgo_shp <- st_read("Togo/tgo_admbnda_adm3_inseed_20210107.shp")
 ```
 ```{r}
 colnames(tgo_shp)
@@ -241,7 +250,7 @@ colnames(tgo_shp)
 On s'interesse now aux ménages
 
 ```{r}
-data <- read_dta("TGO/s00_me_tgo2021.dta")
+data <- read_dta("Togo/s00_me_tgo2021.dta")
 
 names(data)
 
@@ -268,7 +277,9 @@ ggplot() +
 ```{r}
 points_mg<- st_join(data_spatial , tgo_shp, join = st_intersects)
 
-points_mg %>%  as.data.frame() 
+points_mg <- points_mg%>%  as.data.frame() 
+
+points_mg[1:5,] %>% kableExtra::kable()
 
 ```
 
