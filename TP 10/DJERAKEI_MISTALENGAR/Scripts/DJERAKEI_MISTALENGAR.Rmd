@@ -3,14 +3,9 @@ title: "Test de management et d’analyse des données avec R"
 author: "Djerakei MISTALENGAR"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
-  header-includes:
-   - \usepackage{float}
   word_document: default
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -32,7 +27,6 @@ for (pkg in packages) {
 
 ```
 
-
 ```{r}
 # Supprimer toutes les variables de l'environnement
 rm(list = ls())
@@ -40,18 +34,494 @@ rm(list = ls())
 
 ## Chargement des données
 
-```{r}
+```{r echo=TRUE}
 # Chargement des fichiers
 
 mbl <- haven::read_dta("../Données/food_comp_mother_baseline.dta")
 
 mel <- haven::read_dta("../Données/food_comp_mother_endline.dta")
 
-cbl <- haven::read_dta("../Données/food_comp_child_baseline.dta) ")
+
+str(mbl)
+str(mel)
+
+```
+
+
+```{r echo=TRUE}
+cbl <- haven::read_dta("../Données/food_comp_child_baseline.dta")
 
 cel <- haven::read_dta("../Données/food_comp_child_endline.dta")
 
+
+str(cbl)
+str(cel)
+```
+
+```{r echo=TRUE}
 men <- haven::read_dta("../Données/base_menage.dta")
+
+str(men)
+
+```
+
+## Partie 1 : Gestion et nettoyage des bases de données
+
+#### 1. Vérifiez la présence de doublons dans les bases de données Baseline, Endline et ménage. Supprimez les doublons si nécessaire.
+
+```{r echo=TRUE}
+colnames(mbl)
+
+View(mbl)
+```
+
+```{r echo=TRUE}
+
+# Fonction pour vérifier et supprimer les doublons
+clean_data <- function(df, key_vars) {
+  df <- df %>%
+    mutate(dupli = duplicated(df[key_vars]))  # Identifier les doublons
+  print(sum(df$dupli))  # Nombre de doublons
+  
+  df <- df %>%
+    distinct(across(all_of(key_vars)), .keep_all = TRUE)  # Supprimer les doublons
+  
+  return(df)
+}
 
 
 ```
+
+```{r echo=TRUE}
+mbl<-clean_data(mbl, "hhid")
+
+print(mbl)
+```
+
+```{r}
+mel<-clean_data(mel, "hhid")
+
+```
+
+```{r echo=TRUE}
+
+cbl<-clean_data(cbl, "hhid")
+
+cbl
+
+```
+
+```{r echo=TRUE}
+cel<-clean_data(cel, "hhid")
+
+```
+
+```{r echo=TRUE}
+# Vérification des noms de variables dans chaque base de données
+names(mbl)  # Baseline des mères
+names(mel)  # Endline des mères
+
+names(cbl)  # Baseline des enfants
+names(cel)  # Endline des enfants
+
+names(men)  # Base des ménages
+
+```
+
+#### 2. Assurez-vous que les noms des variables sont cohérents entre les bases de données Baseline et Endline
+
+```{r echo=TRUE}
+
+# Comparer les noms de variables pour identifier les différences
+
+# Comparer les noms entre Baseline et Endline pour les mères
+setdiff(names(mbl), names(mel))
+setdiff(names(mel), names(mbl))
+
+# Comparer les noms entre Baseline et Endline pour les enfants
+setdiff(names(cbl), names(cel))
+setdiff(names(cel), names(cbl))
+
+```
+
+```{r echo=TRUE}
+# Renommer la colonne 'V1' en 'energ_kcal'
+
+colnames(mel)[colnames(mel) == "V1"] <- "energ_kcal"
+
+colnames(mbl)[colnames(mbl) == "V1"] <- "energ_kcal"
+
+# Vérifier les noms des variables après renaming
+names(mbl)
+names(mel)
+
+```
+
+#### Veuillez vérifier soigneusement les données et corriger les données manquantes de certaines variables si possibles.
+
+```{r echo=TRUE}
+# Vérifier les données manquantes dans chaque base
+sum(is.na(mbl))  # Pour Baseline des mères
+sum(is.na(mel))  # Pour Endline des mères
+
+sum(is.na(cbl))  # Pour Baseline des enfants
+sum(is.na(cel))  # Pour Endline des enfants
+
+sum(is.na(men))  # Pour la base des ménages
+
+
+```
+
+```{r echo=TRUE}
+# Pour la base `mbl` (Baseline des mères), par exemple
+colSums(is.na(mbl))  # Compter les NA pour chaque variable
+colSums(is.na(mel))  # Idem pour la base `mel` (Endline des mères)
+
+# Répéter pour les autres bases
+colSums(is.na(cbl))
+colSums(is.na(cel))
+colSums(is.na(men))
+
+```
+
+```{r echo=TRUE}
+# Imputation par la médiane pour les nutriments
+mbl$protein_g[is.na(mbl$protein_g)] <- median(mbl$protein_g, na.rm = TRUE)
+mel$protein_g[is.na(mel$protein_g)] <- median(mel$protein_g, na.rm = TRUE)
+
+mbl$lipid_tot_g[is.na(mbl$lipid_tot_g)] <- median(mbl$lipid_tot_g, na.rm = TRUE)
+mel$lipid_tot_g[is.na(mel$lipid_tot_g)] <- median(mel$lipid_tot_g, na.rm = TRUE)
+
+# Imputation par 0 pour les variables de type 'absence de consommation' comme `s1_q0`
+mbl$s1_q0[is.na(mbl$s1_q0)] <- 0
+mel$s1_q0[is.na(mel$s1_q0)] <- 0
+
+# Vérification après traitement
+colSums(is.na(mbl))  # Vérifier les NA après traitement
+colSums(is.na(mel))
+
+```
+
+```{r echo=TRUE}
+# Imputation dans les données des enfants
+cbl$protein_g[is.na(cbl$protein_g)] <- median(cbl$protein_g, na.rm = TRUE)
+cel$protein_g[is.na(cel$protein_g)] <- median(cel$protein_g, na.rm = TRUE)
+
+# Imputation des valeurs manquantes pour les nutriments spécifiques
+cbl$calcium_mg[is.na(cbl$calcium_mg)] <- median(cbl$calcium_mg, na.rm = TRUE)
+cbl$iron_mg[is.na(cbl$iron_mg)] <- median(cbl$iron_mg, na.rm = TRUE)
+cbl$zinc_mg[is.na(cbl$zinc_mg)] <- median(cbl$zinc_mg, na.rm = TRUE)
+cbl$vit_b6_mg[is.na(cbl$vit_b6_mg)] <- median(cbl$vit_b6_mg, na.rm = TRUE)
+cbl$vit_b12_mcg[is.na(cbl$vit_b12_mcg)] <- median(cbl$vit_b12_mcg, na.rm = TRUE)
+cbl$vit_c_mg[is.na(cbl$vit_c_mg)] <- median(cbl$vit_c_mg, na.rm = TRUE)
+
+
+# Imputation par la médiane pour les variables avec des NA
+cbl$energ_kcal[is.na(cbl$energ_kcal)] <- median(cbl$energ_kcal, na.rm = TRUE)
+cel$calcium_mg[is.na(cel$calcium_mg)] <- median(cel$calcium_mg, na.rm = TRUE)
+# Imputation par la médiane pour les nutriments manquants
+cel$iron_mg[is.na(cel$iron_mg)] <- median(cel$iron_mg, na.rm = TRUE)
+cel$zinc_mg[is.na(cel$zinc_mg)] <- median(cel$zinc_mg, na.rm = TRUE)
+cel$vit_b6_mg[is.na(cel$vit_b6_mg)] <- median(cel$vit_b6_mg, na.rm = TRUE)
+cel$vit_b12_mcg[is.na(cel$vit_b12_mcg)] <- median(cel$vit_b12_mcg, na.rm = TRUE)
+cel$vit_c_mg[is.na(cel$vit_c_mg)] <- median(cel$vit_c_mg, na.rm = TRUE)
+
+
+cbl$lipid_tot_g[is.na(cbl$lipid_tot_g)] <- median(cbl$lipid_tot_g, na.rm = TRUE)
+cel$lipid_tot_g[is.na(cel$lipid_tot_g)] <- median(cel$lipid_tot_g, na.rm = TRUE)
+
+# Et répéter pour d'autres variables comme calcium, zinc, etc.
+
+
+# Imputation dans la base des ménages
+men$hhsize[is.na(men$hhsize)] <- median(men$hhsize, na.rm = TRUE)
+
+
+# Vérification après traitement
+colSums(is.na(cbl))  # Vérifier les NA après traitement
+colSums(is.na(cel))
+colSums(is.na(men))
+
+
+```
+
+#### 4. La consommation d'énergie moyenne à chaque repas pour l'ensemble des mères lors de l'enquête de base
+
+On va calculer la moyenne de la consommation d'énergie pour l'ensemble des repas dans l'enquête de base.
+
+```{r echo=TRUE}
+# Calculer la consommation moyenne d'énergie en ignorant les valeurs manquantes
+
+mean_energ <- mean(mbl$energ_kcal, na.rm = TRUE)
+
+# Afficher la moyenne
+mean_energ
+
+
+```
+
+```{r echo=TRUE}
+# Sauvegarder les changements dans les fichiers modifiés
+
+# Baseline des mères
+haven::write_dta(mbl, "../Données/mother_baseline_v1.dta")
+
+# Endline des mères
+haven::write_dta(mel, "../Données/mother_endline_v1.dta")   
+
+ # Baseline des enfants
+haven::write_dta(cbl, "../Données/child_baseline_v1.dta")
+
+# Endline des enfants
+haven::write_dta(cel, "../Données/child_endline_v1.dta")  
+
+ # Base des ménages
+haven::write_dta(men, "../Données/base_menage_final.dta")      
+
+```
+
+# Partie 2 : Empilement et Fusion des données
+
+## 1) Baseline
+
+### i) Empilez les bases de données
+
+
+```{r echo=TRUE}
+
+# Charger les bases de données à nouveau
+
+mbl <- haven::read_dta("../Données/mother_baseline_v1.dta")
+cbl <- haven::read_dta("../Données/child_baseline_v1.dta")
+
+
+```
+
+
+
+```{r echo=TRUE}
+# Effectuer un left join (on veut garder toutes les lignes de la mère)
+merged_data <- right_join(cbl, mbl, by = "hhid")
+
+
+# Voir
+View(merged_data)
+
+```
+
+### ii)	Renommage de toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _b pour faire référence à l’enquête Baseline.
+
+
+```{r echo=TRUE}
+
+merged_data <- merged_data %>%
+  rename_with(~ gsub("\\.x$", "_b", .), contains(c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg", "iron_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")))
+
+# Renommer les colonnes de consommation d'enfants avec le suffixe "_c" pour l'enquête Baseline
+
+
+merged_data <- merged_data %>%
+  rename_with(~ gsub("\\.y$", "_c", .), contains(c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg", "iron_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")))
+
+# Vérifier les noms de colonnes après renommage
+names(merged_data)
+
+
+```
+
+
+### iii)	Création d'une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
+
+```{r echo=TRUE}
+
+# Créer un résumé des consommations journalières totales
+summary_data <- merged_data %>%
+  mutate(
+    total_energ_kcal = energ_kcal_b + energ_kcal_c,
+    total_protein_g = protein_g_b + protein_g_c,
+    total_lipid_g = lipid_tot_g_b + lipid_tot_g_c,
+    total_calcium_mg = calcium_mg_b + calcium_mg_c,
+    total_iron_mg = iron_mg_b + iron_mg_c,
+    total_zinc_mg = zinc_mg,  
+    total_vit_b6_mg = vit_b6_mg_b + vit_b6_mg_c,
+    total_vit_b12_mcg = vit_b12_mcg_b + vit_b12_mcg_c,
+    total_vit_c_mg = vit_c_mg_b + vit_c_mg_c
+  ) %>%
+  select(hhid, total_energ_kcal, total_protein_g, total_lipid_g, total_calcium_mg, 
+         total_iron_mg, total_zinc_mg, total_vit_b6_mg, total_vit_b12_mcg, total_vit_c_mg)
+
+# Vérifier le résultat
+head(summary_data)
+
+# Sauvegarder la base de données résumée
+haven::write_dta(summary_data, "../Données/summary_daily_consumption.dta")
+
+```
+
+
+
+### iv)	Sauvegarde la base de données finale 
+
+```{r echo=TRUE}
+# Sélectionner les colonnes nécessaires
+baseline_final <- merged_data %>%
+  select(hhid, s1_q2.x, energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg) %>%
+  rename(
+    s1_q2 = s1_q2.x,
+    energ_kcal = energ_kcal_b,
+    protein_g = protein_g_b,
+    lipid_tot_g = lipid_tot_g_b,
+    calcium_mg = calcium_mg_b,
+    iron_mg = iron_mg_b
+  )
+
+# Vérifier le résultat
+head(baseline_final)
+
+# Sauvegarder la base de données finale
+haven::write_dta(baseline_final, "../Données/baseline_final.dta")
+
+```
+
+
+
+
+
+
+
+```{r echo=TRUE}
+# Charger les bases de données Endline
+mel <- haven::read_dta("../Données/mother_endline_v1.dta")
+cel <- haven::read_dta("../Données/child_endline_v1.dta")
+
+# Renommer les variables de consommation pour l'enquête Endline en ajoutant le suffixe "_e"
+mel <- mel %>%
+  rename(
+    energ_kcal_e = energ_kcal,
+    protein_g_e = protein_g,
+    lipid_tot_g_e = lipid_tot_g,
+    calcium_mg_e = calcium_mg,
+    iron_mg_e = iron_mg,
+    zinc_mg_e = zinc_mg,
+    vit_b6_mg_e = vit_b6_mg,
+    vit_b12_mcg_e = vit_b12_mcg,
+    vit_c_mg_e = vit_c_mg
+  )
+
+cel <- cel %>%
+  rename(
+    energ_kcal_e = energ_kcal,
+    protein_g_e = protein_g,
+    lipid_tot_g_e = lipid_tot_g,
+    calcium_mg_e = calcium_mg,
+    iron_mg_e = iron_mg,
+    zinc_mg_e = zinc_mg,
+    vit_b6_mg_e = vit_b6_mg,
+    vit_b12_mcg_e = vit_b12_mcg,
+    vit_c_mg_e = vit_c_mg
+  )
+
+# Empiler les données des mères et des enfants pour chaque ménage
+endline_merged <- bind_rows(mel, cel)
+
+# Vérifier la base fusionnée
+head(endline_merged)
+
+# Sauvegarder la base de données empilée sous le nom "endline_merged_mother_child.dta"
+haven::write_dta(endline_merged, "../Données/endline_merged_mother_child.dta")
+
+```
+
+
+
+
+## Endline
+
+
+```{r echo=TRUE}
+# Charger les bases de données des mères et des enfants
+mel <- haven::read_dta("../Données/mother_endline_v1.dta")
+cel <- haven::read_dta("../Données/child_endline_v1.dta")
+
+# Fusionner les bases de données des mères et des enfants sur "hhid" (identifiant du ménage)
+merged_endline <- right_join( cel,mel, by = "hhid")
+
+
+```
+
+```{r echo=TRUE}
+colnames(merged_endline)
+
+```
+
+
+
+
+
+### 3)	Fusionnez les données baseline_final.dta   et endline_final.dta
+
+```{r echo=TRUE}
+
+# Charger les deux bases de données
+baseline_data <- haven::read_dta("../Données/baseline_final.dta")
+endline_data <- haven::read_dta("../Données/endline_final.dta")
+
+# Fusionner les données Baseline et Endline par hhid
+merged_data <- left_join(baseline_data, endline_data, by = "hhid", suffix = c("_b", "_e"))
+
+# Vérifier le résultat de la fusion
+head(merged_data)
+
+# Sauvegarder la base de données fusionnée
+haven::write_dta(merged_data, "../Données/merged_baseline_endline.dta")
+
+
+```
+
+
+
+
+```{r echo=TRUE}
+
+# Charger la base
+base_menage <- read_dta("../Données/base_menage.dta")
+
+
+```
+
+```{r echo=TRUE}
+#Taille du menage
+base_household_size <- base_menage %>% 
+  select(hhid, hhsize) %>% 
+  distinct()
+
+```
+
+```{r echo=TRUE}
+# Education
+base_education_level <- base_menage %>% 
+  select(hhid, hh_primary) %>% 
+  distinct()
+
+```
+
+```{r echo=TRUE}
+
+# Ratio
+
+base_dependence_ratio <- base_menage %>% 
+  select(hhid, dependencyratio) %>% 
+  distinct()
+
+```
+
+```{r echo=TRUE}
+# sécurité alimentaire)
+
+base_HFIAS_score <- base_menage %>% 
+  select(hhid, hfias_score) %>% 
+  distinct()
+
+```
+
+
