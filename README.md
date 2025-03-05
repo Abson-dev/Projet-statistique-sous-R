@@ -90,6 +90,7 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 11: Developpement de package sur R
 - Theme 12: Questionnaire d'enquete avec R
 - Theme 13: Automatisation des rapports avec R : le package rmarkdown
+- Theme 14: Tableaux de bord avec R shiny
 
 - **Presentation: samedi 5 avril 2025**
 
