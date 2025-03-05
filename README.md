@@ -65,12 +65,15 @@ En utilisant les outputs du **TP 4**, faites des cartes en affichant des variabl
  - les departements/le 2e decoupage administratif du pays
  - les communes/le 3e decoupage administratif du pays
 
+**Echeance: lundi 10 mars 2025 a 23h59**
+
 ### TP 9
 
 **Pour les ISE 1 et ISEP 3**
 
 Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
 
+**Echeance: lundi 31 mars 2025 a 23h59**
 ### TP 10
 
 - Theme 1: Application de l'Intelligence Artificiel(IA) avec R
