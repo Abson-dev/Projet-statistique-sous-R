@@ -55,6 +55,8 @@ Vous devriez avoir un seul lien qui regroupe toutes les etapes d'harmonisation d
 
 ### TP 8
 
+**Pour les ISE 1**
+
 **Cartographie avec R**
 En utilisant les outputs du **TP 4**, faites des cartes en affichant des variables/indicateurs suivant:
  - les pays
@@ -63,8 +65,9 @@ En utilisant les outputs du **TP 4**, faites des cartes en affichant des variabl
  - les communes/le 3e decoupage administratif du pays
 
 ### TP 9
+
+**Pour les ISE 1 et ISEP 3**
 Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
-Pour ce faire
 
 ### TP 10
 
@@ -75,6 +78,12 @@ Pour ce faire
 - Theme 4: Suivie de la collecte des donnees avec R
 - Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
 - Theme 6: Le calcul parallele sur R
+- Theme 7: Traitement de donnees avec le package tidyverse
+- Theme 8: Le package janitor
+- Theme 9: Tableaux avec gtsummary
+- Theme 10: Le package reticulate: R et Python
+- Theme 11: Developpement de package sur R
+- Theme 12: Questionnaire d'enquete avec R
 
 ### TP 11
 
