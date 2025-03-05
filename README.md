@@ -90,6 +90,8 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 11: Developpement de package sur R
 - Theme 12: Questionnaire d'enquete avec R
 
+- **Presentation: samedi 5 avril 2025**
+
 ### TP 11 : Examen de 4 a 5h sur table avec les ordinateurs pour les ISE 1 et ISEP 3
 
 Vous aurez 4 a 5h pour faire votre examen final sur table avec les ordinateurs.
