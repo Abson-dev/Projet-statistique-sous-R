@@ -58,6 +58,7 @@ Vous devriez avoir un seul lien qui regroupe toutes les etapes d'harmonisation d
 **Pour les ISE 1**
 
 **Cartographie avec R**
+
 En utilisant les outputs du **TP 4**, faites des cartes en affichant des variables/indicateurs suivant:
  - les pays
  - les regions/le 1er decoupage administratif du pays
@@ -67,6 +68,7 @@ En utilisant les outputs du **TP 4**, faites des cartes en affichant des variabl
 ### TP 9
 
 **Pour les ISE 1 et ISEP 3**
+
 Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
 
 ### TP 10
@@ -85,7 +87,10 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 11: Developpement de package sur R
 - Theme 12: Questionnaire d'enquete avec R
 
-### TP 11
+### TP 11 : Examen de 4 a 5h sur table avec les ordinateurs pour les ISE 1 et ISEP 3
+
+Vous aurez 4 a 5h pour faire votre examen final sur table avec les ordinateurs.
+L'utilisation de ChatGPT, Gimini ou toute IA qui vous sera utile.
 
 
 
