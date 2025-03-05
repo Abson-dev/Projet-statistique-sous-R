@@ -92,9 +92,15 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 13: Automatisation des rapports avec R : le package rmarkdown
 - Theme 14: Tableaux de bord avec R shiny
 
-- **Presentation: samedi 5 avril 2025**
+ 
+ **Presentation: samedi 5 avril 2025**
 
-### TP 11 : Examen de 4 a 5h sur table avec les ordinateurs pour les ISE 1 et ISEP 3
+### TP 11 : Synthese des presentations
+
+Chacun.e fera une synthese des differentes presentations
+
+
+### TP 12 : Examen de 4 a 5h sur table avec les ordinateurs pour les ISE 1 et ISEP 3
 
 Vous aurez 4 a 5h pour faire votre examen final sur table avec les ordinateurs.
 L'utilisation de ChatGPT, Gimini ou toute IA qui vous sera utile.
