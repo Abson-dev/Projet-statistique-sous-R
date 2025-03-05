@@ -1,6 +1,20 @@
 # Projet-statistique-sous-R
  
 Le cours de Projet Statistique sous R et Python est dispense par Mr Hema Aboubacar, [Analyste de Recherche a IFPRI](https://www.ifpri.org/profile/aboubacar-hema/) depuis 2022 aux etudiants de l'[ENSAE - Dakar](https://www.ensae.sn/).
+Ce cours a pour but de permettre aux etudiant.e.s de maitriser l'exploration des donnees (EDA) avec R a savoir les etapes suivantes:
+
+1 - Comprendre le probleme
+     - Quel est l'objectif?
+     - Quelles sont les variables clees/importantes
+     - Y a t-il des contraintes specifiques?
+
+2 - Chargement des donnees
+     - Lecture du fichier (CSV, dta, Excel, SPSS, SQL, etc)
+     - Apercu des premieres lignes
+     - Verification de la dimension de la base
+     - Informations generales sur les colonnes/variables
+
+ **Encours de redaction**
 
 ## Data Credits
 
