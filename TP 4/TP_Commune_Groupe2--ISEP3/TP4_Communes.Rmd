@@ -169,7 +169,7 @@ data_BEN_fin <- merge(data_BEN, data_BEN_Pcode, by.x = "shapeName", by.y = "ADM2
 Enfin, nous associons les données géographiques (avec le code admin) aux enregistrements de la base EHCVM.
 
 ```{r benin-fusion-final, message=FALSE, warning=FALSE}
-data_merge_BEN <- right_join(data, data_BEN_fin, by = c("commune" = "shapeName"))
+data_merge_BEN <- right_join(data_BEN_fin, data, by = c("commune" = "shapeName"))
 
 # Affichage d'un aperçu du résultat
 head(data_merge_BEN)

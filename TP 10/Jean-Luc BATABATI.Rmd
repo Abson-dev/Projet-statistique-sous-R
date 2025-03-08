@@ -1,0 +1,462 @@
+---
+title: "Test de management et d’analyse des données avec R"
+author: "Jean-Luc BATABATI"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+# Installation et importation des packages
+
+Avant toute chose, nous veillerons à installer tous les packages qui servirons dans la suite puis les charger.
+
+```{r, warning=FALSE, message=FALSE}
+
+packages <- c("readr","haven","utils","dplyr", "kableExtra", 
+              "gtsummary", "labelled", "survey", "cardx", "Hmisc")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+```
+
+
+# Chargement des bases
+
+Nous importons ici les deux bases baseline et endline puis la base ménage.
+
+```{r}
+# Importation de la base de données baseline pour enfant
+C_baseline  <-haven::read_dta("../data/food_comp_child_baseline.dta")
+```
+
+```{r}
+# Importation d la base de données baseline pour mère
+M_baseline  <-haven::read_dta("../data/food_comp_mother_baseline.dta")
+```
+
+```{r}
+# Importatin de la base endline pour enfant
+C_endline  <-haven::read_dta("../data/food_comp_child_endline.dta")
+```
+
+```{r}
+# Importation de la base endline pour mère
+M_endline  <-haven::read_dta("../data/food_comp_mother_endline.dta")
+```
+
+```{r}
+#Importation de la base ménage
+Base_men <-  haven::read_dta("../data/base_menage.dta")
+```
+
+
+# Structure des bases
+
+La base ménage contient `r nrow(Base_men)` observations et `r ncol(Base_men)` variables.
+La base endline pour mère contient `r nrow(M_endline)` observations et `r ncol(M_endline)` variables.
+La base base endline pour enfant contient `r nrow(C_endline)` observations et `r ncol(C_endline)` variables.
+La base baseline pour mère contient `r nrow(M_baseline)` observations et `r ncol(M_baseline)` variables.
+La base baseline pour enfant contient `r nrow(C_baseline)` observations et `r ncol(C_baseline)` variables.
+
+
+# Partie 1 : Gestion et nettoyage des bases de données
+
+
+## 1-	Vérifions la présence de doublons dans les bases de données Baseline, Endline et ménage et supprimons les doublons si nécessaire
+
+### Vérification des doublons dans la base ménage
+Dans cette base la clé d'identification est l'ID du ménage. Donc nous allons vérifier si un ID ne se repète pas
+
+```{r}
+# On regroupe suivant l'ID du ménage et on filtre pour ceux qui sont supéieur à 1
+Base_men %>%
+  group_by(hhid) %>%
+  filter(n() > 1)
+
+```
+
+```{r}
+# On peut tout simplement compter les occurences
+Base_men %>%
+  count(hhid, sort = TRUE)
+
+```
+
+On constate que le ménage avec l'ID 4953484948 se repète deux fois. Donc nous allons supprimer une observation
+
+### Suppression des doublons dans la base ménage en gardant les premières 
+
+```{r}
+# Selection unique
+Base_men <- Base_men %>% distinct()
+```
+
+Dans les bases suivantes nous vérifierons les doublons sur toutes les colonnes
+
+### Vérification des doublons dans la base baseline pour mère
+
+```{r}
+# Somme des doublons
+sum(duplicated(M_baseline))  
+
+```
+Dans la base baseline pour mère, il n'y a pas de doublons.
+
+### Vérification des doublons dans la base baseline pour enfant
+
+```{r}
+sum(duplicated(C_baseline))  
+
+```
+Dans la base baseline pour enfant, il n'y a pas de doublons.
+
+### Vérification des doublons dans la base endline pour mère
+
+```{r}
+sum(duplicated(M_endline))  
+
+```
+Dans la base endline pour mère, il n'y a pas de doublons.
+
+### Vérification des doublons dans la base baseline pour enfant
+
+```{r}
+sum(duplicated(C_endline))  
+
+```
+Dans la base endline pour enfant, il n'y a pas de doublons.
+
+
+## 2- Vérification de la cohérence des noms des variables. Apportons les corrections si nécessaire
+
+### Nom des colonnes dans chaque base
+
+```{r}
+print("Noms des colonnes de la Base baseline pour enfant")
+colnames(C_baseline)
+print("Noms des colonnes de la Base baseline pour mère")
+colnames(M_baseline)
+print("Noms des colonnes de la Base endline pour enfant")
+colnames(C_endline)
+print("Noms des colonnes de la Base endline pour mère")
+colnames(M_endline)
+```
+### Vérifions si les noms sont les mêmes, même si l’ordre est différent
+Je m'assure que les varaibles de la base baseline pour enfant sont les même avec les autres bases. Cette commande renvois true si c'est le cas.
+
+#### Cohérence entre base baseline pour enfant et endline pour enfant
+
+```{r}
+# Cohérence des variables entre base baseline pour enfant et endline pour enfant
+setequal(names(C_baseline), names(C_endline))
+```
+On a true. Donc les variables sont les mêmes.
+
+#### Cohérence entre base baseline pour enfant et baseline pour mère
+
+```{r}
+setequal(names(C_baseline), names(M_baseline))
+```
+On a false. Donc il y a une différence. Essayons de détecter la différence avant de renommer la variable.
+
+```{r}
+# Vérifions la différence
+setdiff(names(C_baseline), names(M_baseline))
+setdiff(names(M_baseline), names(C_baseline))
+
+```
+On constate que les variables "energ_kcal" et "zinc_mg" sont dans la base basline pour enfant mais absentes dans la base baseline pour mère. De même, les variables "V1" et "V9" sont dans la base baseline pour mère mais absentes dans la base basline pour enfant. Nous allons renommer celles de la base baseline pour mère pour assurer la cohérence.
+
+```{r}
+# Renommer les variables différentes
+M_baseline <- M_baseline %>% rename(
+  energ_kcal = V1,
+  zinc_mg = V9
+)
+```
+
+
+#### Cohérence entre base baseline pour enfant et endline pour mère
+
+```{r}
+setequal(names(C_baseline), names(M_endline))
+```
+On a true. Donc les variables sont les mêmes.
+
+
+## 3-	Certaines variables peuvent contenir des données manquantes, cependant suivant une logique bien établie, il est possible de corriger ces données manquantes. Veuillez vérifier soigneusement les données et corriger les données manquantes de certaines variables si possibles.
+
+### Valeurs manquantes pour la base ménages
+
+```{r}
+# Compter les valeurs manquantes
+sum(is.na(Base_men))
+colSums(is.na(Base_men))
+
+```
+On a une valeur manquante pour la base ménage. Il s'agit de la variable communeid. Nous avons pas les moyens pour corriger cette valeur.
+
+
+### Valeurs manquantes pour la base baseline pour enfant
+
+```{r}
+sum(is.na(C_baseline))
+colSums(is.na(C_baseline))
+
+```
+Ici nous avons 3474 valeurs manquantes. On peut aussi voir la répartition de ces valeurs manquantes 
+
+### Valeurs manquantes pour la base baseline pour mère
+
+```{r}
+sum(is.na(M_baseline))
+colSums(is.na(M_baseline))
+
+```
+
+Ici nous avons 6090 valeurs manquantes. On peut aussi voir la répartition de ces valeurs manquantes 
+
+### Valeurs manquantes pour la base endline pour enfant
+
+```{r}
+sum(is.na(C_endline))
+colSums(is.na(C_endline))
+
+```
+
+Ici nous avons 4788 valeurs manquantes. On peut aussi voir la répartition de ces valeurs manquantes 
+
+### Valeurs manquantes pour la base endline pour mère
+
+```{r}
+sum(is.na(M_endline))
+colSums(is.na(M_endline))
+
+```
+Ici nous avons 5976 valeurs manquantes. On peut aussi voir la répartition de ces valeurs manquantes.
+
+## 4.	Consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base
+
+```{r}
+M_baseline %>%
+  group_by(s1_q0) %>%
+  summarise(Energie_moy = mean(energ_kcal, na.rm = TRUE))
+
+```
+
+
+## 5- Sauvegarde des données sous un autre nom
+
+
+```{r}
+write_dta(C_endline, "../data/child_endline_v1.dta")
+write_dta(M_endline, "../data/mother_endline_v1.dta")
+write_dta(C_baseline, "../data/child_baseline_v1.dta")
+write_dta(M_baseline, "../data/mother_baseline_v1.dta")
+write_dta(Base_men, "../data/base_menage_final.dta")
+
+```
+
+### Importation des nouvelles base
+
+```{r}
+child_endline_v1 <-  haven::read_dta("../data/child_endline_v1.dta")
+mother_endline_v1 <-  haven::read_dta("../data/mother_endline_v1.dta")
+child_baseline_v1 <-  haven::read_dta("../data/child_baseline_v1.dta")
+mother_baseline_v1 <-  haven::read_dta("../data/mother_baseline_v1.dta")
+base_menage_final <-  haven::read_dta("../data/base_menage_final.dta")
+
+```
+
+
+
+# Partie 2 : Empilement et Fusion des données
+
+### 1- i) Empilons les bases de données des mères (mother_baseline_v1.dta) et des enfants (child_baseline_v1.dta) 
+
+```{r}
+# Ici nous allons faire un appends étant donné que les variables sont les même
+baseline <- rbind(child_baseline_v1, mother_baseline_v1)
+```
+
+### 1- ii)	Renommons toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _b pour faire référence à l’enquête Baseline
+
+```{r}
+baseline <- baseline %>%
+  rename_with(~ paste0(., "_b"), 
+              .cols = energ_kcal:vit_c_mg)
+
+```
+
+### 1- iii)	Créeons une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
+
+
+```{r, warning=FALSE, message=FALSE}
+# Sélectionner uniquement les variables à sommer
+variables <- c("energ_kcal_b", "protein_g_b", "lipid_tot_g_b", 
+                      "calcium_mg_b", "iron_mg_b", "zinc_mg_b")
+
+# Vérifier si toutes les variables existent dans la base
+variables <- intersect(variables, names(baseline))
+
+# Agréger les données par hhid en sommant les valeurs
+baseline2 <- baseline %>%
+  group_by(hhid, s1_q2) %>%
+  summarise(across(all_of(variables), sum, na.rm = TRUE))
+
+
+```
+
+
+
+### 1-iv)	Sauvegarde la base de données finale contenant seulement les hhid s1_q2 energ_kcal   protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ».
+
+
+```{r}
+# Sélectionner uniquement les variables nécessaires
+baseline2 <- baseline2 %>%
+  select(hhid, s1_q2, energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b)
+
+# Sauvegarder la base de données sous le nom 'baseline_final.dta'
+write_dta(baseline2, "../data/baseline_final.dta")
+```
+
+
+## 2)	Endline
+### 2-i)	Empilons les bases de données des mères (mother_endline_v1.dta) et des enfants (child_endline_v1.dta) 
+```{r}
+# Ici nous allons faire un appends étant donné que les variables sont les même
+endline <- rbind(child_endline_v1, mother_endline_v1)
+```
+
+
+#### Renommons toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _e pour faire référence à l’enquête Endline.
+
+```{r}
+endline <- endline %>%
+  rename_with(~ paste0(., "_e"), 
+              .cols = energ_kcal:vit_c_mg)
+
+```
+
+
+### ii)	Créeons une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande collapse
+
+```{r, warning=FALSE, message=FALSE}
+# Sélectionner uniquement les variables à sommer
+variables <- c("energ_kcal_e", "protein_g_e", "lipid_tot_g_e", 
+                      "calcium_mg_e", "iron_mg_e", "zinc_mg_e")
+
+# Vérifier si toutes les variables existent dans la base
+variables <- intersect(variables, names(endline))
+
+# Agréger les données par hhid en sommant les valeurs
+endline2 <- endline %>%
+  group_by(hhid, s1_q2) %>%
+  summarise(across(all_of(variables), sum, na.rm = TRUE))
+
+
+```
+
+
+### iii)	Sauvegardons la base de données finale contenant seulement les hhid s1_q2 energ_kcal  protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « endline_final.dta ». 
+
+```{r}
+# Sélectionner uniquement les variables nécessaires
+endline2 <- endline2 %>%
+  select(hhid, s1_q2, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e)
+
+# Sauvegarder la base de données sous le nom 'baseline_final.dta'
+write_dta(endline2, "../data/endline_final.dta")
+```
+
+
+## 3)	Fusionnez les données baseline_final.dta   et endline_final.dta. La base de données résultant de cette fusion doit comporter le même nombre d’observations que les bases baseline_final.dta et endline_final.dta.
+
+## Importation des deux base
+
+
+```{r}
+endline_final <-  haven::read_dta("../data/endline_final.dta")
+baseline_final <-  haven::read_dta("../data/baseline_final.dta")
+```
+
+
+## Fusion des deux bases
+
+```{r}
+Base <- baseline_final %>%
+  dplyr::left_join(endline_final, by = c("hhid", "s1_q2"))
+
+```
+
+
+
+### 4)	En utilisant la base base_menage_final, fusionnez les informations sur les caractéristiques des ménages
+
+```{r}
+base_menage_final<- base_menage_final %>%
+  rename(
+    S1_Q2=s1_q2
+  )
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+Base_finale <- base_menage_final %>%
+  dplyr::left_join(Base, by = "hhid")
+```
+
+
+
+# Partie 3 : Statistiques descriptives avec le package gtsummary
+
+
+
+```{r, results='asis'}
+
+Base_finale %>%
+  labelled::to_factor() %>%
+  distinct(hhid, .keep_all = TRUE) %>%
+  select(regionid, hhsize, poly, hh_primary, s1_q4a, s2_q1) %>%
+  tbl_summary(
+    label = list(
+      regionid ~ "Région",
+      hhsize ~ "Taille du ménage",
+      s1_q4a ~ "Age du CM",
+      hh_primary ~ "Niveau d'éducation du CM",
+      poly ~ "CM polygame"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Caractéristiques des ménages et des CM")
+
+
+
+```
+
+
+```{r, results='asis'}
+
+Base_finale %>%
+  labelled::to_factor() %>%
+  select(regionid, s1_q2, energ_kcal_b, protein_g_b , lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e) %>%
+  tbl_summary(label = list(
+      regionid ~ "Région"),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Alimentation et nutrition ")
+
+
+
+```
+
+
+
