@@ -89,17 +89,18 @@ L'approche utilisée pour le Bénin est basée sur un nettoyage simple et une fu
 
 Nous utilisons les librairies suivantes :
 
-- **dplyr** : pour la manipulation des données (filtrage, transformation, fusion, etc.).
-- **stringi** et **stringr** : pour le traitement et la manipulation des chaînes de caractères (nettoyage, remplacement, etc.).
+- **dplyr** : pour la manipulation des données (filtrage, transformation, fusion, suppression des colonnes problématiques, etc.).
 - **sf** : pour la manipulation des données spatiales (lecture des shapefiles, analyses géographiques).
-- **haven** : pour la lecture des fichiers de données au format Stata (.dta).
-- **labelled** : pour convertir les variables possédant des labels en facteurs.
 - **readxl** : pour la lecture des fichiers Excel.
+- **haven** : pour la lecture et l'écriture des fichiers de données au format Stata (.dta).
+- **labelled** : pour convertir les variables possédant des labels en facteurs.
+- **fuzzyjoin** : pour réaliser une jointure floue basée sur la distance de Levenshtein, permettant d'harmoniser les noms de communes malgré d'éventuelles différences typographiques.
 
 ```{r libraries, message=FALSE, warning=FALSE}
 library(dplyr)
 library(stringi)
 library(stringr)
+library(fuzzyjoin)
 library(sf)
 library(haven)
 library(labelled)
@@ -109,21 +110,21 @@ library(readxl)
 
 # I : Le Bénin
 
-
 ## Présentation du processus pour le Bénin
 
-Pour le Bénin, nous disposons de trois sources de données :
-1. **Shapefile** : Contient les limites administratives (communes).
-2. **Fichier Excel** : Renferme des informations complémentaires, notamment les codes admin.
+Pour le Bénin, nous disposons de trois sources de données :  
+1. **Shapefile** : Contient les limites administratives (communes).  
+2. **Fichier Excel** : Renferme des informations complémentaires, notamment les codes admin.  
 3. **Base EHCVM (Stata)** : Contient les données des enquêtes individuelles.
 
-**Objectif** : Fusionner ces sources pour associer à chaque commune de la base EHCVM le code admin extrait des données géographiques.
+**Objectif** : Fusionner ces sources pour associer, à chaque commune de la base EHCVM, le code admin extrait des données géographiques. Pour pallier les éventuelles différences d’orthographes (erreurs typographiques, accents…), nous utilisons une jointure floue basée sur la distance de Levenshtein.
 
-### Étape 1 : Chargement et préparation des données
 
-Nous commençons par charger l'ensemble des données.
+## Étape 1 : Chargement et préparation des données
 
-```{r benin-chargement, message=FALSE, warning=FALSE}
+Nous commençons par charger l’ensemble des données. La conversion des variables labellisées en facteurs facilite par la suite le merge.
+
+```{r}
 # Chargement des données du Bénin
 
 # Shapefile des communes
@@ -136,46 +137,69 @@ data_BEN_Pcode <- read_excel("data/Benin/shapefiles/ben_adminboundaries_tabulard
 # Base EHCVM (format Stata)
 data <- read_dta("data/Benin/ehcvm/ehcvm_individu_ben2021.dta")
 
-# Conversion des variables labellisées en facteurs pour faciliter le merge
+# Conversion des variables labellisées en facteurs
 data <- to_factor(data)
 ```
 
-### Étape 2 : Nettoyage des noms de communes
+## Étape 2 : Nettoyage des noms de communes
 
-Pour assurer une correspondance correcte entre les bases, nous normalisons les noms en :
+Afin d’assurer une correspondance correcte entre les bases, nous normalisons les noms en :
 - Remplaçant les caractères accentués (É, È, é, è) par leur équivalent non accentué.
 - Convertissant tous les noms en minuscules.
 
-```{r benin-nettoyage}
-# Remplacer les caractères accentués par leur équivalent sans accent
+```{r}
+# Nettoyage pour la base EHCVM
 data$commune <- gsub("[ÉÈéè]", "e", data$commune)
 data <- data %>% mutate(commune = tolower(commune))
 
-# Pour le shapefile, on met en minuscule le nom des communes
+# Nettoyage pour le shapefile et le fichier Excel
 data_BEN <- data_BEN %>% mutate(shapeName = tolower(shapeName))
 data_BEN_Pcode <- data_BEN_Pcode %>% mutate(ADM2_FR = tolower(ADM2_FR))
 ```
 
-### Étape 3 : Fusion des données géographiques
 
-Nous fusionnons le shapefile avec le fichier Excel afin d'associer les informations complémentaires (codes admin) aux limites géographiques.
+## Étape 3 : Fusion des données géographiques
 
-```{r benin-fusion-shapefile, message=FALSE, warning=FALSE}
+Nous fusionnons le shapefile avec le fichier Excel afin d’associer les informations complémentaires (codes admin) aux limites administratives.
+
+```{r}
 data_BEN_fin <- merge(data_BEN, data_BEN_Pcode, by.x = "shapeName", by.y = "ADM2_FR")
 ```
 
-### Étape 4 : Fusion finale avec la base EHCVM
+## Étape 4 : Fusion finale avec la base EHCVM via une jointure floue
 
-Enfin, nous associons les données géographiques (avec le code admin) aux enregistrements de la base EHCVM.
+Afin de corriger les différences éventuelles d’orthographe entre les noms de communes dans la base EHCVM et dans les données géographiques, nous utilisons une jointure floue. La fonction `stringdist_left_join` du package **fuzzyjoin** permet de calculer la distance de Levenshtein entre les chaînes et de sélectionner, pour chaque commune, le match présentant la distance minimale.
 
-```{r benin-fusion-final, message=FALSE, warning=FALSE}
-data_merge_BEN <- right_join(data_BEN_fin, data, by = c("commune" = "shapeName"))
+```{r}
+data_merge_BEN <- stringdist_left_join(
+  data_BEN_fin, data, 
+  by = c("shapeName" = "commune"), 
+  method = "lv", 
+  max_dist = 5,         # Valeur ajustable selon la tolérance souhaitée
+  distance_col = "distance"
+)
 
-# Affichage d'un aperçu du résultat
-head(data_merge_BEN)
+# Pour chaque commune de la base EHCVM, ne conserver que la correspondance avec la distance minimale
+data_merge_BEN <- data_merge_BEN %>%
+  group_by(commune) %>%
+  filter(distance == min(distance)) %>%
+  ungroup()
 ```
 
-> Si, dans la base EHCVM, une commune est identifiée sous le nom "cotonou", la procédure ci-dessus permettra de lui associer le code admin présent dans le shapefile fusionné.
+> **Remarque :** Par exemple, si la base EHCVM recense une commune sous le nom « cotonou » alors que le shapefile la nomme « cotounou » (ou une variante proche), la jointure floue permet d’identifier le meilleur match en tenant compte de la distance de Levenshtein.
+
+## Étape 5 : Préparation de la base finale et exportation
+
+La base fusionnée contient une variable `geometry` qui n’est pas requise pour une utilisation ultérieure dans Stata ainsi que toute variable de type `list`. Nous les retirons avant d’exporter la base au format Stata.
+
+```{r}
+# Suppression de la variable geometry
+data_merge_BEN <- st_drop_geometry(data_merge_BEN)
+data_merge_BEN <- data_merge_BEN %>% select_if(~ !is.list(.))
+
+# Exportation de la base finale au format Stata
+write_dta(data_merge_BEN, "Outputs/data_final_BEN.dta")
+```
 
 # II : Le Sénégal
 
