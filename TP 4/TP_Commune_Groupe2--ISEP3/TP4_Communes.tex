@@ -196,22 +196,23 @@ Nous utilisons les librairies suivantes :
 \tightlist
 \item
   \textbf{dplyr} : pour la manipulation des données (filtrage,
-  transformation, fusion, etc.).
-\item
-  \textbf{stringi} et \textbf{stringr} : pour le traitement et la
-  manipulation des chaînes de caractères (nettoyage, remplacement,
+  transformation, fusion, suppression des colonnes problématiques,
   etc.).
 \item
   \textbf{sf} : pour la manipulation des données spatiales (lecture des
   shapefiles, analyses géographiques).
 \item
-  \textbf{haven} : pour la lecture des fichiers de données au format
-  Stata (.dta).
+  \textbf{readxl} : pour la lecture des fichiers Excel.
+\item
+  \textbf{haven} : pour la lecture et l'écriture des fichiers de données
+  au format Stata (.dta).
 \item
   \textbf{labelled} : pour convertir les variables possédant des labels
   en facteurs.
 \item
-  \textbf{readxl} : pour la lecture des fichiers Excel.
+  \textbf{fuzzyjoin} : pour réaliser une jointure floue basée sur la
+  distance de Levenshtein, permettant d'harmoniser les noms de communes
+  malgré d'éventuelles différences typographiques.
 \end{itemize}
 
 \begin{Shaded}
@@ -219,6 +220,7 @@ Nous utilisons les librairies suivantes :
 \FunctionTok{library}\NormalTok{(dplyr)}
 \FunctionTok{library}\NormalTok{(stringi)}
 \FunctionTok{library}\NormalTok{(stringr)}
+\FunctionTok{library}\NormalTok{(fuzzyjoin)}
 \FunctionTok{library}\NormalTok{(sf)}
 \FunctionTok{library}\NormalTok{(haven)}
 \FunctionTok{library}\NormalTok{(labelled)}
@@ -233,20 +235,26 @@ Nous utilisons les librairies suivantes :
 \subsection{Présentation du processus pour le
 Bénin}\label{pruxe9sentation-du-processus-pour-le-buxe9nin}}
 
-Pour le Bénin, nous disposons de trois sources de données : 1.
-\textbf{Shapefile} : Contient les limites administratives (communes). 2.
-\textbf{Fichier Excel} : Renferme des informations complémentaires,
-notamment les codes admin. 3. \textbf{Base EHCVM (Stata)} : Contient les
-données des enquêtes individuelles.
+Pour le Bénin, nous disposons de trois sources de données :\\
+1. \textbf{Shapefile} : Contient les limites administratives
+(communes).\\
+2. \textbf{Fichier Excel} : Renferme des informations complémentaires,
+notamment les codes admin.\\
+3. \textbf{Base EHCVM (Stata)} : Contient les données des enquêtes
+individuelles.
 
-\textbf{Objectif} : Fusionner ces sources pour associer à chaque commune
-de la base EHCVM le code admin extrait des données géographiques.
+\textbf{Objectif} : Fusionner ces sources pour associer, à chaque
+commune de la base EHCVM, le code admin extrait des données
+géographiques. Pour pallier les éventuelles différences d'orthographes
+(erreurs typographiques, accents\ldots), nous utilisons une jointure
+floue basée sur la distance de Levenshtein.
 
 \hypertarget{uxe9tape-1-chargement-et-pruxe9paration-des-donnuxe9es}{%
-\subsubsection{Étape 1 : Chargement et préparation des
+\subsection{Étape 1 : Chargement et préparation des
 données}\label{uxe9tape-1-chargement-et-pruxe9paration-des-donnuxe9es}}
 
-Nous commençons par charger l'ensemble des données.
+Nous commençons par charger l'ensemble des données. La conversion des
+variables labellisées en facteurs facilite par la suite le merge.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -259,7 +267,7 @@ Nous commençons par charger l'ensemble des données.
 
 \begin{verbatim}
 ## Reading layer `geoBoundaries-BEN-ADM2' from data source 
-##   `D:\Projet statistique sous R\Cours\TP4_Communes\data\Benin\shapefiles\geoBoundaries-BEN-ADM2.shp' 
+##   `D:\Projet statistique sous R\Projet-statistique-sous-R\TP 4\TP_Commune_Groupe2--ISEP3\data\Benin\shapefiles\geoBoundaries-BEN-ADM2.shp' 
 ##   using driver `ESRI Shapefile'
 ## Simple feature collection with 77 features and 5 fields
 ## Geometry type: POLYGON
@@ -277,38 +285,38 @@ Nous commençons par charger l'ensemble des données.
 \CommentTok{\# Base EHCVM (format Stata)}
 \NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{read\_dta}\NormalTok{(}\StringTok{"data/Benin/ehcvm/ehcvm\_individu\_ben2021.dta"}\NormalTok{)}
 
-\CommentTok{\# Conversion des variables labellisées en facteurs pour faciliter le merge}
+\CommentTok{\# Conversion des variables labellisées en facteurs}
 \NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{to\_factor}\NormalTok{(data)}
 \end{Highlighting}
 \end{Shaded}
 
 \hypertarget{uxe9tape-2-nettoyage-des-noms-de-communes}{%
-\subsubsection{Étape 2 : Nettoyage des noms de
+\subsection{Étape 2 : Nettoyage des noms de
 communes}\label{uxe9tape-2-nettoyage-des-noms-de-communes}}
 
-Pour assurer une correspondance correcte entre les bases, nous
+Afin d'assurer une correspondance correcte entre les bases, nous
 normalisons les noms en : - Remplaçant les caractères accentués (É, È,
 é, è) par leur équivalent non accentué. - Convertissant tous les noms en
 minuscules.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Remplacer les caractères accentués par leur équivalent sans accent}
+\CommentTok{\# Nettoyage pour la base EHCVM}
 \NormalTok{data}\SpecialCharTok{$}\NormalTok{commune }\OtherTok{\textless{}{-}} \FunctionTok{gsub}\NormalTok{(}\StringTok{"[ÉÈéè]"}\NormalTok{, }\StringTok{"e"}\NormalTok{, data}\SpecialCharTok{$}\NormalTok{commune)}
 \NormalTok{data }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{commune =} \FunctionTok{tolower}\NormalTok{(commune))}
 
-\CommentTok{\# Pour le shapefile, on met en minuscule le nom des communes}
+\CommentTok{\# Nettoyage pour le shapefile et le fichier Excel}
 \NormalTok{data\_BEN }\OtherTok{\textless{}{-}}\NormalTok{ data\_BEN }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{shapeName =} \FunctionTok{tolower}\NormalTok{(shapeName))}
 \NormalTok{data\_BEN\_Pcode }\OtherTok{\textless{}{-}}\NormalTok{ data\_BEN\_Pcode }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{ADM2\_FR =} \FunctionTok{tolower}\NormalTok{(ADM2\_FR))}
 \end{Highlighting}
 \end{Shaded}
 
 \hypertarget{uxe9tape-3-fusion-des-donnuxe9es-guxe9ographiques}{%
-\subsubsection{Étape 3 : Fusion des données
+\subsection{Étape 3 : Fusion des données
 géographiques}\label{uxe9tape-3-fusion-des-donnuxe9es-guxe9ographiques}}
 
 Nous fusionnons le shapefile avec le fichier Excel afin d'associer les
-informations complémentaires (codes admin) aux limites géographiques.
+informations complémentaires (codes admin) aux limites administratives.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -316,46 +324,62 @@ informations complémentaires (codes admin) aux limites géographiques.
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{uxe9tape-4-fusion-finale-avec-la-base-ehcvm}{%
-\subsubsection{Étape 4 : Fusion finale avec la base
-EHCVM}\label{uxe9tape-4-fusion-finale-avec-la-base-ehcvm}}
+\hypertarget{uxe9tape-4-fusion-finale-avec-la-base-ehcvm-via-une-jointure-floue}{%
+\subsection{Étape 4 : Fusion finale avec la base EHCVM via une jointure
+floue}\label{uxe9tape-4-fusion-finale-avec-la-base-ehcvm-via-une-jointure-floue}}
 
-Enfin, nous associons les données géographiques (avec le code admin) aux
-enregistrements de la base EHCVM.
+Afin de corriger les différences éventuelles d'orthographe entre les
+noms de communes dans la base EHCVM et dans les données géographiques,
+nous utilisons une jointure floue. La fonction
+\texttt{stringdist\_left\_join} du package \textbf{fuzzyjoin} permet de
+calculer la distance de Levenshtein entre les chaînes et de
+sélectionner, pour chaque commune, le match présentant la distance
+minimale.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{data\_merge\_BEN }\OtherTok{\textless{}{-}} \FunctionTok{right\_join}\NormalTok{(data, data\_BEN\_fin, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"commune"} \OtherTok{=} \StringTok{"shapeName"}\NormalTok{))}
+\NormalTok{data\_merge\_BEN }\OtherTok{\textless{}{-}} \FunctionTok{stringdist\_left\_join}\NormalTok{(}
+\NormalTok{  data\_BEN\_fin, data, }
+  \AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"shapeName"} \OtherTok{=} \StringTok{"commune"}\NormalTok{), }
+  \AttributeTok{method =} \StringTok{"lv"}\NormalTok{, }
+  \AttributeTok{max\_dist =} \DecValTok{5}\NormalTok{,         }\CommentTok{\# Valeur ajustable selon la tolérance souhaitée}
+  \AttributeTok{distance\_col =} \StringTok{"distance"}
+\NormalTok{)}
 
-\CommentTok{\# Affichage d\textquotesingle{}un aperçu du résultat}
-\FunctionTok{head}\NormalTok{(data\_merge\_BEN)}
+\CommentTok{\# Pour chaque commune de la base EHCVM, ne conserver que la correspondance avec la distance minimale}
+\NormalTok{data\_merge\_BEN }\OtherTok{\textless{}{-}}\NormalTok{ data\_merge\_BEN }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(commune) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(distance }\SpecialCharTok{==} \FunctionTok{min}\NormalTok{(distance)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-## # A tibble: 6 x 77
-##   country  year vague  hhid grappe menage numind zae          zaemil departement
-##   <chr>   <dbl> <dbl> <dbl>  <dbl>  <dbl>  <dbl> <fct>        <fct>  <fct>      
-## 1 BEN      2021     2  1005      1      5      1 Transition,~ Trans~ alibori    
-## 2 BEN      2021     2  1005      1      5      2 Transition,~ Trans~ alibori    
-## 3 BEN      2021     2  1005      1      5      3 Transition,~ Trans~ alibori    
-## 4 BEN      2021     2  1005      1      5      4 Transition,~ Trans~ alibori    
-## 5 BEN      2021     2  1005      1      5      5 Transition,~ Trans~ alibori    
-## 6 BEN      2021     2  1005      1      5      8 Transition,~ Trans~ alibori    
-## # i 67 more variables: commune <chr>, arrondissement <fct>, milieu <fct>,
-## #   hhweight <dbl>, resid <fct>, sexe <fct>, age <dbl>, lien <fct>,
-## #   mstat <fct>, religion <fct>, ethnie <fct>, nation <fct>, agemar <dbl>,
-## #   ea <chr>, em <chr>, ej <chr>, mal30j <fct>, aff30j <fct>, arrmal <dbl>,
-## #   durarr <fct>, con30j <fct>, hos12m <fct>, couvmal <dbl>, moustiq <dbl>,
-## #   handit <fct>, handig <fct>, serviceconsult <fct>, persconsult <fct>,
-## #   alfa <dbl>, alfa2 <dbl>, scol <dbl>, educ_scol <fct>, educ_hi <fct>, ...
-\end{verbatim}
-
 \begin{quote}
-Si, dans la base EHCVM, une commune est identifiée sous le nom
-``cotonou'', la procédure ci-dessus permettra de lui associer le code
-admin présent dans le shapefile fusionné.
+\textbf{Remarque :} Par exemple, si la base EHCVM recense une commune
+sous le nom « cotonou » alors que le shapefile la nomme « cotounou » (ou
+une variante proche), la jointure floue permet d'identifier le meilleur
+match en tenant compte de la distance de Levenshtein.
 \end{quote}
+
+\hypertarget{uxe9tape-5-pruxe9paration-de-la-base-finale-et-exportation}{%
+\subsection{Étape 5 : Préparation de la base finale et
+exportation}\label{uxe9tape-5-pruxe9paration-de-la-base-finale-et-exportation}}
+
+La base fusionnée contient une variable \texttt{geometry} qui n'est pas
+requise pour une utilisation ultérieure dans Stata ainsi que toute
+variable de type \texttt{list}. Nous les retirons avant d'exporter la
+base au format Stata.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Suppression de la variable geometry}
+\NormalTok{data\_merge\_BEN }\OtherTok{\textless{}{-}} \FunctionTok{st\_drop\_geometry}\NormalTok{(data\_merge\_BEN)}
+\NormalTok{data\_merge\_BEN }\OtherTok{\textless{}{-}}\NormalTok{ data\_merge\_BEN }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select\_if}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \SpecialCharTok{!}\FunctionTok{is.list}\NormalTok{(.))}
+
+\CommentTok{\# Exportation de la base finale au format Stata}
+\FunctionTok{write\_dta}\NormalTok{(data\_merge\_BEN, }\StringTok{"Outputs/data\_final\_BEN.dta"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{ii-le-suxe9nuxe9gal}{%
 \section{II : Le Sénégal}\label{ii-le-suxe9nuxe9gal}}

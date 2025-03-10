@@ -1,0 +1,1738 @@
+"produitID","produitNom","uniteID","uniteNom","tailleID","tailleNom","poids"
+1,"Riz local brisé",100,"Kg",0,"taille unique",1000
+1,"Riz local brisé",108,"Boite de tomate/Pot",3,"Grand",1997.5
+1,"Riz local brisé",108,"Boite de tomate/Pot",1,"Petit",521.5
+1,"Riz local brisé",108,"Boite de tomate/Pot",7,"Tres petit",222
+1,"Riz local brisé",108,"Boite de tomate/Pot",2,"Moyen",935
+1,"Riz local brisé",136,"Sac (25 Kg)",0,"taille unique",25000
+1,"Riz local brisé",138,"Sac (50 Kg)",0,"taille unique",50000
+1,"Riz local brisé",139,"Sachets",2,"Moyen",926
+2,"Riz local entier",100,"Kg",0,"taille unique",1000
+2,"Riz local entier",108,"Boite de tomate/Pot",3,"Grand",1940
+2,"Riz local entier",108,"Boite de tomate/Pot",1,"Petit",471
+2,"Riz local entier",108,"Boite de tomate/Pot",7,"Tres petit",217.5
+2,"Riz local entier",108,"Boite de tomate/Pot",2,"Moyen",912
+2,"Riz local entier",136,"Sac (25 Kg)",0,"taille unique",25000
+2,"Riz local entier",138,"Sac (50 Kg)",0,"taille unique",50000
+2,"Riz local brisé",139,"Sachets",2,"Moyen",926
+3,"Riz importé brisé",100,"Kg",0,"taille unique",1000
+3,"Riz importé brisé",108,"Boite de tomate/Pot",2,"Moyen",934.5
+3,"Riz importé brisé",108,"Boite de tomate/Pot",1,"Petit",455
+3,"Riz importé brisé",108,"Boite de tomate/Pot",3,"Grand",1897
+3,"Riz importé brisé",108,"Boite de tomate/Pot",7,"Tres petit",224
+3,"Riz importé brisé",136,"Sac (25 Kg)",0,"taille unique",25000
+3,"Riz importé brisé",138,"Sac (50 Kg)",0,"taille unique",50000
+4,"Riz importé entier",100,"Kg",0,"taille unique",1000
+4,"Riz importé entier",108,"Boite de tomate/Pot",1,"Petit",229
+4,"Riz importé entier",108,"Boite de tomate/Pot",2,"Moyen",887
+4,"Riz importé entier",108,"Boite de tomate/Pot",3,"Grand",1390
+4,"Riz importé entier",136,"Sac (25 Kg)",0,"taille unique",25000
+4,"Riz importé entier",138,"Sac (50 Kg)",0,"taille unique",50000
+5,"Maïs en épi",143,"tas",2,"Moyen",1590
+5,"Maïs en épi",143,"tas",3,"Grand",3180
+5,"Maïs en épi",143,"tas",1,"Petit",795
+5,"Maïs en épi",147,"unité (gousse, carcasse etc.)",2,"Moyen",389
+5,"Maïs en épi",147,"unité (gousse, carcasse etc.)",1,"Petit",218.5
+5,"Maïs en épi",147,"unité (gousse, carcasse etc.)",3,"Grand",552
+6,"Maïs en grain",100,"Kg",0,"taille unique",1000
+6,"Maïs en grain",108,"Boite de tomate/Pot",7,"Très petit",208
+6,"Maïs en grain",108,"Boite de tomate/Pot",2,"Moyen",964
+6,"Maïs en grain",108,"Boite de tomate/Pot",1,"Petit",439
+6,"Maïs en grain",108,"Boite de tomate/Pot",3,"Grand",1677
+6,"Maïs en grain",115,"Calebasse",2,"Moyen",500
+6,"Maïs en grain",115,"Calebasse",1,"Petit",250
+6,"Maïs en grain",115,"Calebasse",3,"Grand",1000
+6,"Maïs en grain",129,"paquet",1,"Petit",262.5
+6,"Maïs en grain",129,"paquet",2,"Moyen",517
+6,"Maïs en grain",135,"Sac (100 Kg)",0,"taille unique",100000
+6,"Maïs en grain",138,"Sac (50 Kg)",0,"taille unique",50000
+6,"Maïs en grain",139,"Sachets",2,"Moyen",231
+6,"Maïs en grain",139,"Sachets",1,"Petit",121
+6,"Maïs en grain",139,"Sachets",3,"Grand",472
+7,"Mil",100,"Kg",0,"taille unique",1000
+7,"Mil",108,"Boite de tomate/Pot",1,"Petit",470
+7,"Mil",108,"Boite de tomate/Pot",2,"Moyen",1056
+7,"Mil",108,"Boite de tomate/Pot",7,"Tres petit",216
+7,"Mil",108,"Boite de tomate/Pot",3,"Grand",1749
+7,"Mil",133,"Sac",2,"Moyen",50000
+7,"Mil",133,"Sac",3,"Grand",80000
+7,"Mil",135,"Sac (100 Kg)",0,"taille unique",100000
+7,"Mil",136,"Sac (25 Kg)",0,"taille unique",25000
+7,"Mil",138,"Sac (50 Kg)",0,"taille unique",50000
+7,"Mil",139,"Sachets",2,"Moyen",999
+7,"Mil",139,"Sachets",3,"Grand",1002.5
+7,"Mil",139,"Sachets",1,"Petit",659
+8,"Sorgho",100,"Kg",0,"taille unique",1000
+8,"Sorgho",108,"Boite de tomate/Pot",3,"Grand",1688
+8,"Sorgho",108,"Boite de tomate/Pot",1,"Petit",470
+8,"Sorgho",108,"Boite de tomate/Pot",2,"Moyen",896
+8,"Sorgho",133,"Sac",3,"Grand",100000
+8,"Sorgho",133,"Sac",2,"Moyen",50000
+8,"Sorgho",133,"Sac",1,"Petit",10000
+8,"Sorgho",138,"Sac (50 Kg)",0,"taille unique",50000
+8,"Sorgho",139,"Sachets",3,"Grand",1729
+8,"Sorgho",139,"Sachets",1,"Petit",376
+8,"Sorgho",139,"Sachets",2,"Moyen",1473.5
+9,"Blé",100,"Kg",0,"taille unique",1000
+9,"Blé",108,"Boite de tomate/Pot",2,"Moyen",873.5
+9,"Blé",108,"Boite de tomate/Pot",3,"Grand",1812
+9,"Blé",108,"Boite de tomate/Pot",1,"Petit",212.5
+9,"Blé",139,"Sachets",1,"Petit",476
+9,"Blé",139,"Sachets",2,"Moyen",1887
+10,"Fonio",100,"Kg",0,"taille unique",1000
+10,"Fonio",108,"Boite de tomate/Pot",1,"Petit",414
+10,"Fonio",108,"Boite de tomate/Pot",2,"Moyen",960
+10,"Fonio",115,"Calebasse",2,"Moyen",780
+10,"Fonio",129,"paquet",3,"Grand",937
+10,"Fonio",129,"paquet",1,"Petit",234.25
+10,"Fonio",129,"paquet",2,"Moyen",468.5
+10,"Fonio",139,"Sachets",2,"Moyen",916
+10,"Fonio",139,"Sachets",1,"Petit",449
+11,"Autres céréales",100,"Kg",0,"taille unique",1000
+11,"Autres céréales",108,"Boite de tomate/Pot",3,"Grand",1749
+11,"Autres céréales",108,"Boite de tomate/Pot",7,"Tres petit",216
+11,"Autres céréales",108,"Boite de tomate/Pot",1,"Petit",470
+11,"Autres céréales",108,"Boite de tomate/Pot",2,"Moyen",1056
+11,"Autres céréales",115,"Calebasse",1,"Petit",100
+11,"Autres céréales",115,"Calebasse",2,"Moyen",250
+11,"Autres céréales",115,"Calebasse",3,"Grand",500
+11,"Autres céréales",135,"Sac (100 Kg)",0,"taille unique",100000
+11,"Autres céréales",136,"Sac (25 Kg)",0,"taille unique",25000
+11,"Autres céréales",138,"Sac (50 Kg)",0,"taille unique",50000
+11,"Autres céréales",139,"Sachets",2,"Moyen",999
+11,"Autres céréales",139,"Sachets",1,"Petit",659
+11,"Autres céréales",139,"Sachets",3,"Grand",1998
+12,"Farine de maïs",100,"Kg",0,"taille unique",1000
+12,"Farine de maïs",108,"Boite de tomate/Pot",1,"Petit",106
+12,"Farine de maïs",108,"Boite de tomate/Pot",3,"Grand",1421
+12,"Farine de maïs",108,"Boite de tomate/Pot",2,"Moyen",710.5
+12,"Farine de maïs",123,"cup/gobelet",1,"Petit",51
+12,"Farine de maïs",123,"cup/gobelet",3,"taille unique",114
+12,"Farine de maïs",123,"cup/gobelet",2,"Moyen",101
+12,"Farine de maïs",129,"paquet",0,"taille unique",1000
+12,"Farine de maïs",133,"sac",0,"taille unique",40000
+12,"Farine de maïs",138,"Sac (50 Kg)",0,"taille unique",50000
+12,"Farine de maïs",139,"Sachets",3,"Grand",346
+12,"Farine de maïs",139,"Sachets",1,"Petit",93
+12,"Farine de maïs",139,"Sachets",2,"Moyen",160.5
+13,"semoule de mais",100,"Kg",0,"taille unique",1000
+13,"semoule de mais",108,"Boite de tomate/Pot",2,"Moyen",354
+13,"semoule de mais",108,"Boite de tomate/Pot",3,"Grand",651
+13,"semoule de mais",108,"Boite de tomate/Pot",1,"Petit",134
+13,"semoule de mais",123,"cup/gobelet",1,"Petit",94
+13,"semoule de mais",123,"cup/gobelet",3,"Grand",562.8
+13,"semoule de mais",123,"cup/gobelet",2,"Moyen",230
+13,"semoule de mais",139,"Sachets",3,"Grand",944
+13,"semoule de mais",139,"Sachets",1,"Petit",238
+13,"semoule de mais",139,"Sachets",2,"Moyen",487
+14,"Farine de mil",100,"Kg",0,"taille unique",1000
+14,"Farine de mil",108,"Boite de tomate/Pot",1,"Petit",91
+14,"Farine de mil",108,"Boite de tomate/Pot",3,"Grand",415
+14,"Farine de mil",108,"Boite de tomate/Pot",2,"Moyen",254
+14,"Farine de mil",123,"cup/gobelet",1,"Petit",31
+14,"Farine de mil",123,"cup/gobelet",2,"Moyen",81
+14,"Farine de mil",123,"cup/gobelet",3,"Grand",94
+14,"Farine de mil",125,"Louche traditionnelle",1,"Petit",33
+14,"Farine de mil",125,"Louche traditionnelle",2,"Moyen",83.5
+14,"Farine de mil",125,"Louche traditionnelle",3,"Grand",167
+14,"Farine de mil",139,"Sachets",1,"Petit",201
+14,"Farine de mil",139,"Sachets",2,"Moyen",452
+14,"Farine de mil",139,"Sachets",3,"Grand",1004
+14,"Farine de mil",139,"Sachets",7,"Tres petit",39
+14,"Farine de mil",562,"cornet",2,"Moyen",89
+15,"semoule de mil",125,"Louche traditionnelle",1,"Petit",33
+15,"semoule de mil",125,"Louche traditionnelle",2,"Moyen",83.5
+15,"semoule de mil",125,"Louche traditionnelle",3,"Grand",167
+15,"semoule de mil",100,"Kg",0,"taille unique",1000
+15,"semoule de mil",108,"Boite de tomate/Pot",3,"Grand",651
+15,"semoule de mil",108,"Boite de tomate/Pot",1,"Petit",134
+15,"semoule de mil",108,"Boite de tomate/Pot",2,"Moyen",354
+15,"semoule de mil",123,"cup/gobelet",1,"Petit",94
+15,"semoule de mil",123,"cup/gobelet",2,"Moyen",230
+15,"semoule de mil",123,"cup/gobelet",3,"Grand",562.8
+15,"semoule de mil",125,"Louche traditionnelle",0,"taille unique",21
+15,"semoule de mil",139,"Sachets",3,"Grand",625
+15,"semoule de mil",139,"Sachets",1,"Petit",160
+15,"semoule de mil",139,"Sachets",2,"Moyen",380
+15,"semoule de mil",562,"cornet",2,"Moyen",226.5
+15,"semoule de mil",562,"cornet",1,"Petit",100
+16,"Farine de blé local ou importé",100,"Kg",0,"taille unique",1000
+16,"Farine de blé local ou importé",138,"Sac (50 Kg)",0,"taille unique",50000
+16,"Farine de blé local ou importé",139,"Sachets",2,"Moyen",243.5
+16,"Farine de blé local ou importé",139,"Sachets",1,"Petit",120
+16,"Farine de blé local ou importé",139,"Sachets",3,"Grand",1000
+16,"Farine de blé local ou importé",564,"cuillère à soupe",0,"taille unique",19
+17,"semoule de blé ",100,"Kg",0,"taille unique",1000
+17,"semoule de blé ",139,"Sachets",1,"Petit",211
+17,"semoule de blé ",139,"Sachets",2,"Moyen",355
+17,"semoule de blé ",139,"Sachets",3,"Grand",915
+18,"Autres farines de céréales",100,"Kg",0,"taille unique",1000
+18,"Autres farines de céréales",108,"Boite de tomate/Pot",3,"Grand",1421
+18,"Autres farines de céréales",108,"Boite de tomate/Pot",1,"Petit",106
+18,"Autres farines de céréales",108,"Boite de tomate/Pot",2,"Moyen",710.5
+18,"Autres farines de céréales",123,"cup/gobelet",2,"Moyen",101
+18,"Autres farines de céréales",123,"cup/gobelet",3,"taille unique",114
+18,"Autres farines de céréales",123,"cup/gobelet",1,"Petit",51
+18,"Autres farines de céréales",129,"paquet",0,"taille unique",1000
+18,"Autres farines de céréales",133,"sac",0,"taille unique",40000
+18,"Autres farines de céréales",138,"Sac (50 Kg)",0,"taille unique",50000
+18,"Autres farines de céréales",139,"Sachets",2,"Moyen",160.5
+18,"Autres farines de céréales",139,"Sachets",3,"Grand",346
+18,"Autres farines de céréales",139,"Sachets",1,"Petit",93
+19,"Autres semoules de céréales",100,"Kg",0,"taille unique",1000
+19,"Autres semoules de céréales",108,"Boite de tomate/Pot",3,"Grand",651
+19,"Autres semoules de céréales",108,"Boite de tomate/Pot",2,"Moyen",354
+19,"Autres semoules de céréales",108,"Boite de tomate/Pot",1,"Petit",134
+19,"Autres semoules de céréales",129,"paquet",1,"Petit",199
+19,"Autres semoules de céréales",129,"paquet",2,"Moyen",433.5
+19,"Autres semoules de céréales",129,"paquet",3,"Grand",199
+19,"Autres semoules de céréales",139,"Sachets",3,"Grand",784.5
+19,"Autres semoules de céréales",139,"Sachets",2,"Moyen",433.5
+19,"Autres semoules de céréales",139,"Sachets",1,"Petit",199
+20,"Pâtes alimentaires",100,"Kg",0,"taille unique",1000
+20,"Pâtes alimentaires",108,"Boite de tomate/Pot",3,"Grand",568
+20,"Pâtes alimentaires",108,"Boite de tomate/Pot",2,"Moyen",284
+20,"Pâtes alimentaires",108,"Boite de tomate/Pot",1,"Petit",142
+20,"Pâtes alimentaires",129,"paquet",3,"Grand",5000
+20,"Pâtes alimentaires",129,"paquet",2,"Moyen",500
+20,"Pâtes alimentaires",129,"paquet",1,"Petit",250
+20,"Pâtes alimentaires",133,"sac",1,"petit",3000
+20,"Pâtes alimentaires",133,"sac",2,"moyen",5000
+20,"Pâtes alimentaires",139,"Sachets",3,"Grand",1000
+20,"Pâtes alimentaires",139,"Sachets",2,"Moyen",500
+20,"Pâtes alimentaires",139,"Sachets",1,"Petit",111
+21,"Pain moderne",139,"Sachets",3,"Grand",1670
+21,"Pain moderne",139,"Sachets",1,"Petit",409
+21,"Pain moderne",139,"Sachets",2,"Moyen",889
+21,"Pain moderne",568,"miche",2,"Moyen",170
+21,"Pain moderne",568,"miche",1,"Petit",120.5
+21,"Pain moderne",568,"miche",3,"Grand",205
+21,"Pain moderne",569,"demi-miche",1,"Petit",75.5
+21,"Pain moderne",569,"demi-miche",2,"Moyen",97
+21,"Pain moderne",570,"tiers de miche",2,"Moyen",54
+21,"Pain moderne",570,"tiers de miche",1,"Petit",36
+21,"Pain moderne",571,"quart de miche",2,"Moyen",78
+21,"Pain moderne",571,"quart de miche",1,"Petit",50
+22,"Pain traditionnel",139,"Sachets",2,"Moyen",793
+22,"Pain traditionnel",139,"Sachets",1,"Petit",770
+22,"Pain traditionnel",568,"miche",2,"Moyen",171
+22,"Pain traditionnel",568,"miche",3,"Grand",231
+22,"Pain traditionnel",568,"miche",1,"Petit",125
+22,"Pain traditionnel",569,"demi-miche",3,"Grand",168.5
+22,"Pain traditionnel",569,"demi-miche",2,"Moyen",108.5
+22,"Pain traditionnel",569,"demi-miche",1,"Petit",62.5
+22,"Pain traditionnel",570,"tiers de miche",2,"Moyen",87
+22,"Pain traditionnel",570,"tiers de miche",1,"Petit",58
+22,"Pain traditionnel",571,"quart de miche",0,"taille unique",54
+23,"Croissants",147,"unité (gousse, carcasse etc.)",1,"Petit",76
+23,"Croissants",147,"unité (gousse, carcasse etc.)",2,"Moyen",134
+24,"Biscuits",129,"paquet",2,"Moyen",2000
+24,"Biscuits",129,"paquet",1,"Petit",80
+24,"Biscuits",129,"paquet",3,"Grand",4040
+24,"Biscuits",139,"Sachets",2,"Moyen",100
+24,"Biscuits",139,"Sachets",3,"Grand",200
+24,"Biscuits",139,"Sachets",1,"Petit",40
+25,"Gâteaux",126,"morceau",3,"Grand",245
+25,"Gâteaux",126,"morceau",1,"Petit",30.5
+25,"Gâteaux",126,"morceau",2,"Moyen",129
+25,"Gâteaux",129,"paquet",2,"Moyen",40
+25,"Gâteaux",129,"paquet",1,"Petit",26
+25,"Gâteaux",129,"paquet",3,"Grand",61.5
+25,"Gâteaux",139,"Sachets",1,"Petit",95.5
+25,"Gâteaux",139,"Sachets",2,"Moyen",156
+25,"Gâteaux",147,"unité (gousse, carcasse etc.)",1,"Petit",30.5
+25,"Gâteaux",147,"unité (gousse, carcasse etc.)",2,"Moyen",84
+25,"Gâteaux",147,"unité (gousse, carcasse etc.)",3,"Grand",146
+26,"Beignets, galettes",100,"Kg",0,"taille unique",1000
+26,"Beignets, galettes",139,"Sachets",2,"Moyen",129
+26,"Beignets, galettes",139,"Sachets",3,"Grand",209
+26,"Beignets, galettes",139,"Sachets",1,"Petit",75
+26,"Beignets, galettes",147,"unité (gousse, carcasse etc.)",7,"Tres petit",8
+26,"Beignets, galettes",147,"unité (gousse, carcasse etc.)",1,"Petit",30
+26,"Beignets, galettes",147,"unité (gousse, carcasse etc.)",3,"Grand",100.5
+26,"Beignets, galettes",147,"unité (gousse, carcasse etc.)",2,"Moyen",45
+27,"Viande de bœuf",100,"Kg",0,"taille unique",1000
+27,"Viande de bœuf",143,"tas",1,"Petit",90.5
+27,"Viande de bœuf",143,"tas",3,"Grand",636.5
+27,"Viande de bœuf",143,"tas",2,"Moyen",210.5
+27,"Viande de bœuf",147,"unité (gousse, carcasse etc.)",1,"Petit",50000
+27,"Viande de bœuf",147,"unité (gousse, carcasse etc.)",2,"Moyen",100000
+27,"Viande de bœuf",147,"unité (gousse, carcasse etc.)",3,"Grand",200000
+28,"Viande de chameau",100,"Kg",0,"taille unique",1000
+28,"Viande de chameau",147,"unité (gousse, carcasse etc.)",2,"Moyen",6000
+29,"Viande de mouton",100,"Kg",0,"taille unique",1000
+29,"Viande de mouton",143,"tas",3,"Grand",1309
+29,"Viande de mouton",143,"tas",1,"Petit",81
+29,"Viande de mouton",143,"tas",2,"Moyen",278
+29,"Viande de mouton",147,"unité (gousse, carcasse etc.)",2,"Moyen",15000
+29,"Viande de mouton",147,"unité (gousse, carcasse etc.)",1,"Petit",8000
+29,"Viande de mouton",147,"unité (gousse, carcasse etc.)",3,"Grand",26000
+30,"Viande de chèvre",100,"Kg",0,"taille unique",1000
+30,"Viande de chèvre",143,"tas",2,"Moyen",278
+30,"Viande de chèvre",143,"tas",3,"Grand",1309
+30,"Viande de chèvre",143,"tas",1,"Petit",81
+30,"Viande de chèvre",147,"unité (gousse, carcasse etc.)",1,"Petit",10000
+30,"Viande de chèvre",147,"unité (gousse, carcasse etc.)",3,"Grand",40000
+30,"Viande de chèvre",147,"unité (gousse, carcasse etc.)",2,"Moyen",14000
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",100,"Kg",0,"taille unique",1000
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",143,"tas",3,"Grand",1110
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",143,"tas",1,"Petit",117
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",143,"tas",2,"Moyen",301
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",567,"lakhass",1,"Petit",104
+31,"Abats rouges (foie, rognon,  poumon,  cœur, rate, etc.)",567,"lakhass",2,"Moyen",249
+32,"Viande de porc",100,"Kg",0,"taille unique",1000
+32,"Viande de porc",143,"tas",1,"Petit",81
+32,"Viande de porc",143,"tas",3,"Grand",1309
+32,"Viande de porc",143,"tas",2,"Moyen",278
+32,"Viande de porc",147,"unité (gousse, carcasse etc.)",3,"Grand",26000
+32,"Viande de porc",147,"unité (gousse, carcasse etc.)",1,"Petit",8000
+32,"Viande de porc",147,"unité (gousse, carcasse etc.)",2,"Moyen",15000
+33,"Poulet sur pied",147,"unité (gousse, carcasse etc.)",2,"Moyen",1338
+33,"Poulet sur pied",147,"unité (gousse, carcasse etc.)",3,"Grand",2318
+33,"Poulet sur pied",147,"unité (gousse, carcasse etc.)",1,"Petit",833.5
+34,"Viande de poulet",100,"Kg",0,"taille unique",1000
+34,"Viande de poulet",139,"Sachets",2,"Moyen",994
+34,"Viande de poulet",147,"unité (gousse, carcasse etc.)",1,"Petit",1238.5
+34,"Viande de poulet",147,"unité (gousse, carcasse etc.)",2,"Moyen",1723
+34,"Viande de poulet",147,"unité (gousse, carcasse etc.)",3,"Grand",2500
+35,"Viande d'autres volailles domestiques",100,"Kg",0,"taille unique",1000
+35,"Viande d'autres volailles domestiques",139,"Sachets",2,"Moyen",994
+35,"Viande d'autres volailles domestiques",147,"unité (gousse, carcasse etc.)",2,"Moyen",1723
+35,"Viande d'autres volailles domestiques",147,"unité (gousse, carcasse etc.)",1,"Petit",1238.5
+35,"Viande d'autres volailles domestiques",147,"unité (gousse, carcasse etc.)",3,"Grand",2500
+36,"Charcuterie (jambon, saucisson), conserves de viandes",107,"Boite",2,"Moyen",320
+36,"Charcuterie (jambon, saucisson), conserves de viandes",107,"Boite",1,"Petit",120
+36,"Charcuterie (jambon, saucisson), conserves de viandes",107,"Boite",3,"Grand",853.3
+36,"Charcuterie (jambon, saucisson), conserves de viandes",139,"Sachet",3,"Grand",450
+36,"Charcuterie (jambon, saucisson), conserves de viandes",139,"Sachet",2,"moyen",200
+36,"Charcuterie (jambon, saucisson), conserves de viandes",139,"Sachet",1,"petit",100
+37,"Viande séchée (boeuf, mouton, chameau)",100,"Kg",0,"taille unique",1000
+38,"Gibiers",100,"Kg",0,"taille unique",1000
+38,"Gibiers",143,"tas",2,"Moyen",200
+39,"Autres viandes n.d.a.",100,"kg",0,"taille unique",1000
+39,"Autres viandes n.d.a.",147,"unité (gousse, carcasse etc.)",1,"Petit",9000
+39,"Autres viandes n.d.a.",147,"unité (gousse, carcasse etc.)",3,"Grand",33000
+39,"Autres viandes n.d.a.",147,"unité (gousse, carcasse etc.)",2,"Moyen",14500
+40,"Poisson frais: yaboye ou obo (sardinelle)",100,"Kg",0,"taille unique",1000
+40,"Poisson frais: yaboye ou obo (sardinelle)",143,"tas",2,"Moyen",719
+40,"Poisson frais: yaboye ou obo (sardinelle)",143,"tas",3,"Grand",1161
+40,"Poisson frais: yaboye ou obo (sardinelle)",143,"tas",1,"Petit",411
+40,"Poisson frais: yaboye ou obo (sardinelle)",147,"unité (gousse, carcasse etc.)",2,"Moyen",265
+40,"Poisson frais: yaboye ou obo (sardinelle)",147,"unité (gousse, carcasse etc.)",3,"Grand",500
+40,"Poisson frais: yaboye ou obo (sardinelle)",147,"unité (gousse, carcasse etc.)",1,"Petit",158
+41,"Poisson frais: thiof- seudeu (baracouda)",100,"Kg",0,"taille unique",1000
+41,"Poisson frais: thiof- seudeu (baracouda)",126,"morceau",2,"Moyen",610.5
+41,"Poisson frais: thiof- seudeu (baracouda)",126,"morceau",3,"Grand",1674.5
+41,"Poisson frais: thiof- seudeu (baracouda)",126,"morceau",1,"Petit",282
+41,"Poisson frais: thiof- seudeu (baracouda)",143,"tas",1,"Petit",462
+41,"Poisson frais: thiof- seudeu (baracouda)",143,"tas",2,"Moyen",750.5
+41,"Poisson frais: thiof- seudeu (baracouda)",147,"unité (gousse, carcasse etc.)",2,"Moyen",978
+41,"Poisson frais: thiof- seudeu (baracouda)",147,"unité (gousse, carcasse etc.)",3,"Grand",2390
+41,"Poisson frais: thiof- seudeu (baracouda)",147,"unité (gousse, carcasse etc.)",7,"Tres petit",227
+41,"Poisson frais: thiof- seudeu (baracouda)",147,"unité (gousse, carcasse etc.)",1,"Petit",548
+42,"Poisson frais: wass",100,"Kg",0,"taille unique",1000
+42,"Poisson frais: wass",125,"Louche traditionnelle",3,"Grand",781.7
+42,"Poisson frais: wass",125,"Louche traditionnelle",1,"Petit",387
+42,"Poisson frais: wass",125,"Louche traditionnelle",2,"Moyen",550
+42,"Poisson frais: wass",128,"panier",3,"Grand",1075
+42,"Poisson frais: wass",143,"tas",3,"Grand",885.5
+42,"Poisson frais: wass",143,"tas",7,"Tres petit",326
+42,"Poisson frais: wass",143,"tas",1,"Petit",508
+42,"Poisson frais: wass",143,"tas",2,"Moyen",726
+42,"Poisson frais: wass",147,"unité (gousse, carcasse etc.)",1,"Petit",227
+42,"Poisson frais: wass",147,"unité (gousse, carcasse etc.)",2,"Moyen",500
+42,"Poisson frais: wass",147,"unité (gousse, carcasse etc.)",3,"Grand",700
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",100,"Kg",0,"taille unique",1000
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",126,"morceau",2,"Moyen",610.5
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",126,"morceau",3,"Grand",1674.5
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",126,"morceau",1,"Petit",282
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",128,"panier",3,"Grand",1075
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",143,"tas",7,"Tres petit",326
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",143,"tas",2,"Moyen",750.5
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",143,"tas",3,"Grand",885.5
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",143,"tas",1,"Petit",462
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",147,"unité (gousse, carcasse etc.)",2,"Moyen",978
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",147,"unité (gousse, carcasse etc.)",1,"Petit",548
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",147,"unité (gousse, carcasse etc.)",3,"Grand",2390
+43,"Autre Poisson frais type 4 (dorade, youfouf, rouget, siket [capitaine], thiarumbekh [mollette], …..)",147,"unité (gousse, carcasse etc.)",7,"Tres petit",227
+44,"Poisson fumé: Kethiakh (sardinelle)",100,"Kg",0,"taille unique",1000
+44,"Poisson fumé: Kethiakh (sardinelle)",139,"Sachets",1,"Petit",66
+44,"Poisson fumé: Kethiakh (sardinelle)",139,"Sachets",3,"Grand",210
+44,"Poisson fumé: Kethiakh (sardinelle)",139,"Sachets",2,"Moyen",136
+44,"Poisson fumé: Kethiakh (sardinelle)",143,"tas",1,"Petit",67
+44,"Poisson fumé: Kethiakh (sardinelle)",143,"tas",2,"Moyen",133
+44,"Poisson fumé: Kethiakh (sardinelle)",143,"tas",3,"Grand",287
+44,"Poisson fumé: Kethiakh (sardinelle)",147,"unité (gousse, carcasse etc.)",3,"Grand",140.5
+44,"Poisson fumé: Kethiakh (sardinelle)",147,"unité (gousse, carcasse etc.)",1,"Petit",48
+44,"Poisson fumé: Kethiakh (sardinelle)",147,"unité (gousse, carcasse etc.)",2,"Moyen",78.5
+44,"Poisson fumé: Kethiakh (sardinelle)",562,"cornet",2,"Moyen",124
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",100,"Kg",0,"taille unique",1000
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",139,"Sachets",1,"Petit",55
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",139,"Sachets",3,"Grand",233
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",139,"Sachets",2,"Moyen",123
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",143,"tas",3,"Grand",458
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",143,"tas",1,"Petit",112
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",143,"tas",2,"Moyen",241.5
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",147,"unité (gousse, carcasse etc.)",1,"Petit",100
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",147,"unité (gousse, carcasse etc.)",3,"Grand",413.5
+45,"Autre Poisson fumé (Con fumé, yaboye ou obo fumé, etc)",147,"unité (gousse, carcasse etc.)",2,"Moyen",220
+46,"Poisson séché (tambadiang, con,",100,"Kg",0,"taille unique",1000
+46,"Poisson séché (tambadiang, con,",108,"Boite de tomate/Pot",1,"Petit",217
+46,"Poisson séché (tambadiang, con,",108,"Boite de tomate/Pot",3,"Grand",868
+46,"Poisson séché (tambadiang, con,",108,"Boite de tomate/Pot",2,"Moyen",434
+46,"Poisson séché (tambadiang, con,",126,"morceau",1,"Petit",35
+46,"Poisson séché (tambadiang, con,",126,"morceau",3,"Grand",308
+46,"Poisson séché (tambadiang, con,",126,"morceau",2,"Moyen",110
+46,"Poisson séché (tambadiang, con,",139,"Sachets",2,"Moyen",123
+46,"Poisson séché (tambadiang, con,",139,"Sachets",1,"Petit",55
+46,"Poisson séché (tambadiang, con,",139,"Sachets",3,"Grand",233
+46,"Poisson séché (tambadiang, con,",143,"tas",3,"Grand",288
+46,"Poisson séché (tambadiang, con,",143,"tas",1,"Petit",86.5
+46,"Poisson séché (tambadiang, con,",143,"tas",2,"Moyen",151
+46,"Poisson séché (tambadiang, con,",147,"unité (gousse, carcasse etc.)",2,"Moyen",244
+46,"Poisson séché (tambadiang, con,",147,"unité (gousse, carcasse etc.)",1,"Petit",137
+46,"Poisson séché (tambadiang, con,",147,"unité (gousse, carcasse etc.)",7,"Tres petit",48
+46,"Poisson séché (tambadiang, con,",147,"unité (gousse, carcasse etc.)",3,"Grand",1099
+47,"Crabes",100,"Kg",0,"taille unique",1000
+47,"Crabes",143,"tas",1,"Petit",133
+47,"Crabes",143,"tas",3,"Grand",454
+47,"Crabes",143,"tas",2,"Moyen",212
+47,"Crabes",147,"unité (gousse, carcasse etc.)",1,"Petit",125
+47,"Crabes",147,"unité (gousse, carcasse etc.)",2,"Moyen",250
+47,"Crabes",147,"unité (gousse, carcasse etc.)",3,"Grand",500
+48,"Crevettes fraiches",100,"Kg",0,"taille unique",1000
+48,"Crevettes fraiches",143,"Tas",1,"Petit",52.5
+48,"Crevettes fraiches",143,"Tas",3,"Grand",384
+48,"Crevettes fraiches",143,"Tas",2,"Moyen",143.5
+49,"Crevettes séchées",100,"Kg",0,"taille unique",1000
+49,"Crevettes séchées",139,"Sachets",2,"Moyen",500
+49,"Crevettes séchées",139,"Sachets",3,"Grand",1000
+49,"Crevettes séchées",139,"Sachets",1,"Petit",250
+49,"Crevettes séchées",139,"Sachets",7,"Tres Petit",100
+49,"Crevettes séchées",143,"Tas",1,"Petit",52.5
+49,"Crevettes séchées",143,"Tas",2,"Moyen",143.5
+49,"Crevettes séchées",143,"Tas",3,"Grand",384
+49,"Crevettes séchées",147,"unité (gousse, carcasse etc.)",1,"Petit",7
+49,"Crevettes séchées",147,"unité (gousse, carcasse etc.)",2,"Moyen",27
+50,"Autres fruits de mer",100,"Kg",0,"taille unique",1000
+50,"Autres fruits de mer",139,"Sachets",7,"Tres Petit",100
+50,"Autres fruits de mer",139,"Sachets",1,"Petit",250
+50,"Autres fruits de mer",139,"Sachets",3,"Grand",1000
+50,"Autres fruits de mer",139,"Sachets",2,"Moyen",500
+50,"Autres fruits de mer",143,"Tas",2,"Moyen",143.6
+50,"Autres fruits de mer",143,"Tas",1,"Petit",53.5
+50,"Autres fruits de mer",143,"Tas",3,"Grand",384
+51,"Conserve de poisson",107,"boîte",1,"petit",125
+51,"Conserve de poisson",107,"boîte",3,"Grand",425
+51,"Conserve de poisson",107,"boîte",2,"Moyen",200
+52,"Lait frais",101,"Litre",0,"taille unique",1000
+52,"Lait frais",108,"Boite de tomate/Pot",3,"Grand",998
+52,"Lait frais",108,"Boite de tomate/Pot",2,"Moyen",499
+52,"Lait frais",108,"Boite de tomate/Pot",1,"Petit",233
+52,"Lait frais",113,"Bouteilles",0,"taille unique",500
+52,"Lait frais",123,"cup/gobelet",2,"Moyen",143
+52,"Lait frais",125,"Louche traditionnelle",2,"Moyen",109
+52,"Lait frais",125,"Louche traditionnelle",1,"Petit",32
+52,"Lait frais",139,"Sachets",3,"Grand",340
+52,"Lait frais",139,"Sachets",1,"Petit",92
+52,"Lait frais",139,"Sachets",2,"Moyen",190
+52,"Lait frais",142,"seau",2,"Moyen",3400
+52,"Lait frais",565,"quart de litre",0,"taille unique",250
+52,"Lait frais",566,"demi litre",0,"taille unique",500
+52,"Lait frais",993,"bouteille de 1,5 litre",0,"taille unique",1500
+52,"Lait frais",996,"bouteille de 1 litre",0,"taille unique",998.5
+52,"Lait frais",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+53,"Lait caillé, yaourt",101,"Litre",0,"taille unique",1000
+53,"Lait caillé, yaourt",108,"Boite de tomate/Pot",1,"Petit",422
+53,"Lait caillé, yaourt",108,"Boite de tomate/Pot",3,"Grand",1649
+53,"Lait caillé, yaourt",108,"Boite de tomate/Pot",2,"Moyen",717.5
+53,"Lait caillé, yaourt",113,"Bouteilles",0,"taille unique",1148
+53,"Lait caillé, yaourt",123,"cup/gobelet",0,"taille unique",342
+53,"Lait caillé, yaourt",125,"Louche traditionnelle",3,"Grand",164
+53,"Lait caillé, yaourt",125,"Louche traditionnelle",1,"Petit",40.5
+53,"Lait caillé, yaourt",125,"Louche traditionnelle",2,"Moyen",67
+53,"Lait caillé, yaourt",139,"Sachets",1,"Petit",168
+53,"Lait caillé, yaourt",139,"Sachets",3,"Grand",378
+53,"Lait caillé, yaourt",139,"Sachets",2,"Moyen",229
+53,"Lait caillé, yaourt",142,"seau",0,"taille unique",2709
+53,"Lait caillé, yaourt",993,"Bouteille 1,5L",0,"taille unique",1500
+53,"Lait caillé, yaourt",996,"Bouteille 1L",0,"taille unique",1000
+54,"Lait concentré sucré",107,"boîte",0,"taille unique",1000
+55,"Lait concentré non-sucré",107,"boîte",2,"moyen",390
+55,"Lait concentré non-sucré",107,"boîte",1,"petit",170
+55,"Lait concentré non-sucré",113,"Bouteille",0,"taille unique",185
+56,"Lait en poudre",100,"Kg",0,"taille unique",1000
+56,"Lait en poudre",118,"carton",3,"Grand",4000
+56,"Lait en poudre",118,"carton",1,"Petit",1500
+56,"Lait en poudre",118,"carton",2,"Moyen",2500
+56,"Lait en poudre",129,"paquet",3,"Grand",1000
+56,"Lait en poudre",129,"paquet",1,"Petit",25
+56,"Lait en poudre",129,"paquet",2,"Moyen",500
+56,"Lait en poudre",133,"sac",1,"Petit",12500
+56,"Lait en poudre",136,"Sac (25 Kg)",0,"taille unique",25000
+56,"Lait en poudre",139,"Sachets",7,"Tres petit",25
+56,"Lait en poudre",139,"Sachets",2,"Moyen",250
+56,"Lait en poudre",139,"Sachets",1,"Petit",160
+56,"Lait en poudre",139,"Sachets",3,"Grand",500
+56,"Lait en poudre",563,"cuillère à café",0,"taille unique",13
+56,"Lait en poudre",564,"cuillÃ¨re Ã  soupe",0,"taille unique",19
+56,"Lait en poudre",989,"sac (10 kg)",0,"taille unique",10000
+57,"Fromage",100,"Kg",0,"taille unique",1000
+57,"Fromage",107,"BoÃ®te",2,"Moyen",360
+57,"Fromage",107,"BoÃ®te",1,"Petit",120
+57,"Fromage",126,"morceau",1,"Petit",70
+57,"Fromage",139,"Sachets",2,"Moyen",1000
+57,"Fromage",139,"Sachets",3,"Grand",3000
+57,"Fromage",139,"Sachets",1,"Petit",250
+57,"Fromage",147,"unité fromage industriel",0,"taille unique",15
+58,"Lait et farines- céréales pour bébé",107,"boîte",0,"taille unique",400
+58,"Lait et farines- céréales pour bébé",129,"paquet",0,"taille unique",800
+58,"Lait et farines- céréales pour bébé",139,"Sachet",0,"taille unique",50
+58,"Lait et farines- céréales pour bébé",564,"cuillÃ¨re Ã  soupe",0,"taille unique",30
+59,"Autre produits latiers",100,"kg",0,"taille unique",1000
+59,"Autre produits latiers",101,"Litre",0,"taille unique",1000
+60,"Oeufs",139,"Sachets",1,"Petit",176.5
+60,"Oeufs",143,"tas",1,"Petit",134
+60,"Oeufs",143,"tas",2,"Moyen",185
+60,"Oeufs",147,"unité (gousse, carcasse etc.)",3,"Grand",84
+60,"Oeufs",147,"unité (gousse, carcasse etc.)",2,"Moyen",63
+60,"Oeufs",147,"unité (gousse, carcasse etc.)",1,"Petit",50
+60,"Oeufs",573,"demi tablette",0,"taille unique",100
+60,"Oeufs",577,"tablette (30)",0,"taille unique",1830
+61,"Beurre",100,"Kg",0,"taille unique",1000
+61,"Beurre",126,"morceau",1,"Petit",10.5
+61,"Beurre",126,"morceau",2,"Moyen",29.5
+61,"Beurre",126,"morceau",3,"Grand",77
+61,"Beurre",131,"Pot",2,"Moyen",1000
+61,"Beurre",131,"Pot",1,"Petit",500
+61,"Beurre",139,"Sachets",1,"Petit",25
+61,"Beurre",139,"Sachets",2,"Moyen",52
+61,"Beurre",139,"Sachets",3,"Grand",98
+61,"Beurre",142,"seau",3,"Grand",5000
+61,"Beurre",142,"seau",2,"Moyen",2500
+61,"Beurre",563,"cuillÃ¨re Ã  cafÃ©",0,"taille unique",21
+61,"Beurre",564,"cuillÃ¨re Ã  soupe",0,"taille unique",53
+61,"Beurre",572,"tablette",2,"Moyen",500
+61,"Beurre",572,"tablette",1,"Petit",200
+61,"Beurre",573,"demi tablette",2,"Moyen",250
+61,"Beurre",573,"demi tablette",1,"Petit",100
+62,"Beurre de karité",100,"Kg",0,"taille unique",1000
+62,"Beurre de karité",108,"Boite de tomate/Pot",2,"Moyen",241
+62,"Beurre de karité",108,"Boite de tomate/Pot",3,"Grand",461
+62,"Beurre de karité",108,"Boite de tomate/Pot",1,"Petit",113
+62,"Beurre de karité",111,"boule (dankk)",1,"Petit",34
+62,"Beurre de karité",111,"boule (dankk)",2,"Moyen",62
+62,"Beurre de karité",111,"boule (dankk)",7,"Tres petit",10
+62,"Beurre de karité",111,"boule (dankk)",3,"Grand",119
+62,"Beurre de karité",113,"Bouteilles",1,"Petit",309
+62,"Beurre de karité",113,"Bouteilles",2,"Moyen",894
+62,"Beurre de karité",126,"morceau",2,"Moyen",64.5
+62,"Beurre de karité",126,"morceau",1,"Petit",15
+62,"Beurre de karité",126,"morceau",3,"Grand",169
+62,"Beurre de karité",139,"Sachets",2,"Moyen",268
+62,"Beurre de karité",139,"Sachets",3,"Grand",500
+62,"Beurre de karité",139,"Sachets",7,"Tres petit",53
+62,"Beurre de karité",139,"Sachets",1,"Petit",196
+62,"Beurre de karité",564,"cuillÃ¨re Ã  soupe",0,"taille unique",109
+62,"Beurre de karité",996,"bouteille de 1 litre",0,"taille unique",985.5
+62,"Beurre de karité",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+63,"Huile de palme rouge",101,"Litre",0,"taille unique",1000
+63,"Huile de palme rouge",108,"Boite de tomate/Pot",7,"Tres petit",58
+63,"Huile de palme rouge",108,"Boite de tomate/Pot",2,"Moyen",450.5
+63,"Huile de palme rouge",108,"Boite de tomate/Pot",3,"Grand",1033.5
+63,"Huile de palme rouge",108,"Boite de tomate/Pot",1,"Petit",162
+63,"Huile de palme rouge",113,"Bouteilles",1,"Petit",235
+63,"Huile de palme rouge",113,"Bouteilles",2,"Moyen",909
+63,"Huile de palme rouge",123,"cup/gobelet",0,"taille unique",57.5
+63,"Huile de palme rouge",125,"Louche traditionnelle",0,"taille unique",107
+63,"Huile de palme rouge",139,"Sachets",3,"Grand",225
+63,"Huile de palme rouge",139,"Sachets",1,"Petit",96.5
+63,"Huile de palme rouge",139,"Sachets",2,"Moyen",114
+63,"Huile de palme rouge",565,"quart de litre",0,"taille unique",237.5
+63,"Huile de palme rouge",566,"demi litre",0,"taille unique",430
+63,"Huile de palme rouge",996,"bouteille de 1 litre",0,"taille unique",1000
+63,"Huile de palme rouge",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+63,"Huile de palme rouge",1001,"12,5cl(demi walatt)",0,"taille unique",113.5
+64,"Huile d'arachide",101,"Litre",0,"taille unique",1000
+64,"Huile d'arachide",108,"Boite de tomate/Pot",2,"Moyen",202.5
+64,"Huile d'arachide",108,"Boite de tomate/Pot",1,"Petit",96
+64,"Huile d'arachide",113,"Bouteilles",3,"Grand",232
+64,"Huile d'arachide",113,"Bouteilles",2,"Moyen",187
+64,"Huile d'arachide",113,"Bouteilles",1,"Petit",90
+64,"Huile d'arachide",139,"Sachets",3,"Grand",232
+64,"Huile d'arachide",139,"Sachets",1,"Petit",117
+64,"Huile d'arachide",139,"Sachets",2,"Moyen",161.5
+64,"Huile d'arachide",148,"verre",0,"taille unique",58.5
+64,"Huile d'arachide",565,"quart de litre",0,"taille unique",250
+64,"Huile d'arachide",566,"demi litre",0,"taille unique",430
+64,"Huile d'arachide",995,"bouteille de 5 litres",0,"taille unique",5000
+64,"Huile d'arachide",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+64,"Huile d'arachide",1000,"Bouteille de 20l",0,"taille unique",20000
+64,"Huile d'arachide",1001,"12,5cl(demi walatt)",0,"taille unique",125
+64,"Huile d'arachide",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+65,"Huile d’arachide (ségal)",101,"Litre",0,"taille unique",1000
+65,"Huile d’arachide (ségal)",108,"Boite de tomate/Pot",1,"Petit",162
+65,"Huile d’arachide (ségal)",108,"Boite de tomate/Pot",3,"Grand",1033.5
+65,"Huile d’arachide (ségal)",108,"Boite de tomate/Pot",2,"Moyen",450.5
+65,"Huile d’arachide (ségal)",123,"cup/gobelet",0,"taille unique",57.5
+65,"Huile d’arachide (ségal)",565,"quart de litre",0,"taille unique",250
+65,"Huile d’arachide (ségal)",566,"demi litre",0,"taille unique",430
+65,"Huile d’arachide (ségal)",995,"bouteille de 5 litres",0,"taille unique",5000
+65,"Huile d’arachide (ségal)",996,"bouteille de 1 litre",0,"taille unique",1000
+65,"Huile d’arachide (ségal)",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+65,"Huile d’arachide (ségal)",1000,"Bouteille de 20l",0,"taille unique",20000
+65,"Huile d’arachide (ségal)",1001,"12,5cl(demi walatt)",0,"taille unique",125
+65,"Huile d’arachide (ségal)",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+66,"Huile de soja",101,"Litre",0,"taille unique",1000
+66,"Huile de soja",108,"Boite de tomate/Pot",2,"Moyen",194
+66,"Huile de soja",108,"Boite de tomate/Pot",1,"Petit",104
+66,"Huile de soja",108,"Boite de tomate/Pot",3,"Grand",356
+66,"Huile de soja",113,"Bouteilles",2,"Moyen",245
+66,"Huile de soja",113,"Bouteilles",1,"Petit",88
+66,"Huile de soja",113,"Bouteilles",3,"Grand",706
+66,"Huile de soja",139,"Sachets",0,"taille unique",250
+66,"Huile de soja",565,"quart de litre",0,"taille unique",250
+66,"Huile de soja",566,"demi litre",0,"taille unique",430
+66,"Huile de soja",995,"bouteille de 5 litres",0,"taille unique",5000
+66,"Huile de soja",996,"bouteille de 1 litre",0,"taille unique",1000
+66,"Huile de soja",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+66,"Huile de soja",1000,"Bouteille de 20l",0,"taille unique",20000
+66,"Huile de soja",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+67,"Huile de coton",101,"Litre",0,"taille unique",1000
+67,"Huile de coton",113,"Bouteilles",2,"Moyen",181
+67,"Huile de coton",113,"Bouteilles",1,"Petit",118
+67,"Huile de coton",139,"Sachets",2,"Moyen",181
+67,"Huile de coton",148,"verre",0,"taille unique",58.5
+67,"Huile de coton",565,"quart de litre",0,"taille unique",250
+67,"Huile de coton",566,"demi litre",0,"taille unique",430
+67,"Huile de coton",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+67,"Huile de coton",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+68,"Huile de palme raffinée",101,"Litre",0,"taille unique",1000
+68,"Huile de palme raffinée",123,"cup/gobelet",0,"taille unique",57.5
+68,"Huile de palme raffinée",125,"Louche traditionnelle",0,"taille unique",107
+68,"Huile de palme raffinée",565,"quart de litre",0,"taille unique",250
+68,"Huile de palme raffinée",566,"demi litre",0,"taille unique",430
+68,"Huile de palme raffinée",995,"bouteille de 5 litres",0,"taille unique",5000
+68,"Huile de palme raffinée",996,"bouteille de 1 litre",0,"taille unique",1000
+68,"Huile de palme raffinée",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+68,"Huile de palme raffinée",1000,"Bouteille de 20l",0,"taille unique",20000
+68,"Huile de palme raffinée",1001,"12,5cl(demi walatt)",0,"taille unique",125
+68,"Huile de palme raffinée",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+69,"Noix de palme",100,"Kg",0,"Taille unique",1000
+69,"Noix de palme",108,"Boite de tomate/Pot",3,"Grand",1528
+69,"Noix de palme",108,"Boite de tomate/Pot",1,"Petit",291
+69,"Noix de palme",108,"Boite de tomate/Pot",2,"Moyen",546
+69,"Noix de palme",111,"boule (dankk)",2,"Moyen",33
+69,"Noix de palme",111,"boule (dankk)",1,"Petit",17
+69,"Noix de palme",111,"boule (dankk)",3,"Grand",42.5
+69,"Noix de palme",107,"Boite",1,"Petit",291
+69,"Noix de palme",107,"Boîte",3,"Grand",1528
+69,"Noix de palme",107,"Boîte",2,"Moyen",546
+69,"Noix de palme",132,"regime",1,"Petit",448
+69,"Noix de palme",132,"regime",3,"Grand",1338
+69,"Noix de palme",132,"regime",2,"Moyen",746
+69,"Noix de palme",142,"seau",2,"Moyen",3024.3375
+69,"Noix de palme",142,"seau",1,"Petit",1087.5
+69,"Noix de palme",142,"seau",3,"Grand",5162.725
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",101,"Litre",0,"taille unique",1000
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",565,"quart de litre",0,"taille unique",250
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",566,"demi litre",0,"taille unique",430
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",995,"bouteille de 5 litres",0,"taille unique",5000
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",996,"bouteille de 1 litre",0,"taille unique",1000
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",1000,"Bouteille de 20l",0,"taille unique",20000
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",1001,"12,5cl(demi walatt)",0,"taille unique",125
+70,"Autres huiles n.d.a. (maïs, DIW NIOR, etc.)",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+71,"Autre volaille sur pied",100,"kg",0,"Taille unique",1000
+71,"Mangue",139,"Sachets",1,"Petit",58
+71,"Mangue",139,"Sachets",3,"Grand",282
+71,"Mangue",139,"Sachets",2,"Moyen",154
+71,"Mangue",142,"seau",2,"Moyen",5625
+71,"Mangue",142,"seau",1,"Petit",2080
+71,"Mangue",142,"seau",3,"Grand",21090
+71,"Mangue",147,"unité (gousse, carcasse etc.)",2,"Moyen",205
+71,"Mangue",147,"unité (gousse, carcasse etc.)",1,"Petit",185
+71,"Mangue",147,"unité (gousse, carcasse etc.)",3,"Grand",351
+72,"Ananas",100,"Kg",0,"taille unique",1000
+72,"Ananas",108,"Boite de tomate/Pot",2,"Moyen",565
+72,"Ananas",108,"Boite de tomate/Pot",1,"Petit",250
+72,"Ananas",147,"unité (gousse, carcasse etc.)",2,"Moyen",669
+72,"Ananas",147,"unité (gousse, carcasse etc.)",3,"Grand",1501
+72,"Ananas",147,"unité (gousse, carcasse etc.)",1,"Petit",344
+72,"Ananas",578,"tranche",0,"taille unique",65
+73,"Orange",100,"Kg",0,"taille unique",1000
+73,"Orange",109,"bol",0,"taille unique",1146
+73,"Orange",139,"Sachets",3,"Grand",1561
+73,"Orange",139,"Sachets",1,"Petit",389
+73,"Orange",139,"Sachets",2,"Moyen",776.5
+73,"Orange",142,"seau",1,"Petit",1500
+73,"Orange",142,"seau",3,"Grand",7121
+73,"Orange",142,"seau",2,"Moyen",4171.5
+73,"Orange",143,"tas",3,"Grand",1364
+73,"Orange",143,"tas",1,"Petit",401
+73,"Orange",143,"tas",2,"Moyen",601
+73,"Orange",147,"unité (gousse, carcasse etc.)",2,"Moyen",201.5
+73,"Orange",147,"unité (gousse, carcasse etc.)",1,"Petit",112
+73,"Orange",147,"unité (gousse, carcasse etc.)",3,"Grand",297
+74,"Citrons",579,"verre à thé",0,"taille unique",60
+74,"Citrons",100,"Kg",0,"taille unique",1000
+74,"Citrons",101,"Litre",0,"taille unique",1000
+74,"Citrons",109,"bol",2,"Moyen",1560
+74,"Citrons",113,"Bouteilles",1,"Petit",281
+74,"Citrons",113,"Bouteilles",2,"Moyen",1079
+74,"Citrons",139,"Sachets",3,"Grand",732
+74,"Citrons",139,"Sachets",2,"Moyen",191
+74,"Citrons",139,"Sachets",1,"Petit",34
+74,"Citrons",143,"tas",3,"Grand",283
+74,"Citrons",143,"tas",1,"Petit",79
+74,"Citrons",143,"tas",2,"Moyen",144.5
+74,"Citrons",147,"unité (gousse, carcasse etc.)",2,"Moyen",103
+74,"Citrons",147,"unité (gousse, carcasse etc.)",3,"Grand",243.5
+74,"Citrons",147,"unité (gousse, carcasse etc.)",1,"Petit",42
+74,"Citrons",996,"bouteille de 1 litre",0,"taille unique",1000
+75,"Autres agrumes",100,"Kg",0,"taille unique",1000
+75,"Autres agrumes",147,"unité",2,"moyen",201.5
+75,"Autres agrumes",147,"unité",1,"Petit",112
+75,"Autres agrumes",147,"unité",3,"Grand",297
+76,"Banane douce",100,"Kg",0,"taille unique",1000
+76,"Banane douce",132,"regime",1,"Petit",448
+76,"Banane douce",132,"regime",3,"Grand",1338
+76,"Banane douce",132,"regime",2,"Moyen",746
+76,"Banane douce",143,"tas",2,"Moyen",479
+76,"Banane douce",143,"tas",1,"Petit",236
+76,"Banane douce",143,"tas",3,"Grand",791
+76,"Banane douce",147,"unité (gousse, carcasse etc.)",7,"Tres petit",63
+76,"Banane douce",147,"unité (gousse, carcasse etc.)",3,"Grand",231
+76,"Banane douce",147,"unité (gousse, carcasse etc.)",2,"Moyen",135
+76,"Banane douce",147,"unité (gousse, carcasse etc.)",1,"Petit",95.5
+77,"Avocats",100,"Kg",0,"taille unique",1000
+77,"Avocats",143,"tas",2,"Moyen",499
+77,"Avocats",147,"unité (gousse, carcasse etc.)",1,"Petit",185.5
+77,"Avocats",147,"unité (gousse, carcasse etc.)",2,"Moyen",306
+78,"Pastèque",100,"Kg",0,"taille unique",1000
+78,"Pastèque, Melon",139,"Sachets",3,"Grand",276
+78,"Pastèque",139,"Sachets",2,"Moyen",138
+78,"Pastèque, Melon",139,"Sachets",1,"Petit",69
+78,"Pastèque",143,"tas",3,"Grand",1168
+78,"Pastèque",143,"tas",1,"Petit",340
+78,"Pastèque",147,"unité (gousse, carcasse etc.)",3,"Grand",4684
+78,"Pastèque",147,"unité (gousse, carcasse etc.)",1,"Petit",596.5
+78,"Pastèque",147,"unité (gousse, carcasse etc.)",2,"Moyen",2260
+78,"Pastèque",578,"tranche",3,"Grand",403
+78,"Pastèque",578,"tranche",2,"Moyen",223.5
+78,"Pastèque",578,"tranche",1,"Petit",542
+79,"Melon",100,"Kg",0,"taille unique",1000
+79,"Melon",139,"Sachets",2,"Moyen",138
+79,"Melon",139,"Sachets",3,"Grand",276
+79,"Melon",139,"Sachets",1,"Petit",69
+79,"Melon",143,"Tas",1,"Petit",753
+79,"Melon",143,"Tas",2,"Moyen",1649
+79,"Melon",147,"unité (gousse, carcasse etc.)",1,"Petit",246.5
+79,"Melon",147,"unité (gousse, carcasse etc.)",3,"Grand",1161
+79,"Melon",147,"unité (gousse, carcasse etc.)",2,"Moyen",512
+80,"Dattes",100,"Kg",0,"taille unique",1000
+80,"Dattes",139,"Sachets",3,"Grand",473
+80,"Dattes",139,"Sachets",1,"Petit",45
+80,"Dattes",139,"Sachets",2,"Moyen",251
+80,"Dattes",143,"tas",1,"Petit",18.5
+80,"Dattes",561,"barquette",2,"Moyen",500
+80,"Dattes",561,"barquette",1,"Petit",260
+81,"Noix de coco",126,"morceau",3,"Grand",38
+81,"Noix de coco",126,"morceau",1,"Petit",19
+81,"Noix de coco",126,"morceau",2,"Moyen",34
+81,"Noix de coco",139,"Sachets",2,"Moyen",64
+81,"Noix de coco",139,"Sachets",1,"Petit",34
+81,"Noix de coco",147,"unité (gousse, carcasse etc.)",7,"Tres petit",23
+81,"Noix de coco",147,"unité (gousse, carcasse etc.)",3,"Grand",713
+81,"Noix de coco",147,"unité (gousse, carcasse etc.)",1,"Petit",336
+81,"Noix de coco",147,"unité (gousse, carcasse etc.)",2,"Moyen",512
+81,"Noix de coco",578,"tranche",1,"Petit",21
+81,"Noix de coco",578,"tranche",2,"Moyen",61
+83,"Pomme",100,"Kg",0,"taille unique",1000
+83,"Pomme",139,"Sachets",3,"Grand",647.301437371663
+83,"Pomme",139,"Sachets",2,"Moyen",270.900121359223
+83,"Pomme",139,"Sachets",1,"Petit",65.7333333333333
+83,"Pomme",142,"seau",2,"Moyen",3024.3375
+83,"Pomme",142,"seau",1,"Petit",1087.5
+83,"Pomme",142,"seau",3,"Grand",5162.725
+83,"Pomme",143,"tas",2,"Moyen",435.725
+83,"Pomme",143,"tas",3,"Grand",988.9
+83,"Pomme",143,"tas",1,"Petit",290.725
+83,"Pomme",147,"unité (gousse, carcasse etc.)",1,"Petit",81.2
+83,"Pomme",147,"unité (gousse, carcasse etc.)",3,"Grand",215.325
+83,"Pomme",147,"unité (gousse, carcasse etc.)",2,"Moyen",146.0875
+84,"Papaye",100,"Kg",0,"taille unique",1000
+84,"Papaye",142,"seau",3,"Grand",8901.25
+84,"Papaye",142,"seau",1,"Petit",1875
+84,"Papaye",142,"seau",2,"Moyen",5214.375
+84,"Papaye",143,"tas",3,"Grand",1705
+84,"Papaye",143,"tas",2,"Moyen",751.25
+84,"Papaye",143,"tas",1,"Petit",501.25
+84,"Papaye",147,"unité (gousse, carcasse etc.)",3,"Grand",371.25
+84,"Papaye",147,"unité (gousse, carcasse etc.)",2,"Moyen",251.875
+84,"Papaye",147,"unité (gousse, carcasse etc.)",1,"Petit",140
+85,"Fruit de baobab (bouye)",100,"Kg",0,"taille unique",1000
+85,"Fruit de baobab (bouye)",139,"Sachets",7,"Tres petit",32.8666666666667
+85,"Fruit de baobab (bouye)",139,"Sachets",1,"Petit",65.7333333333333
+85,"Fruit de baobab (bouye)",139,"Sachets",2,"Moyen",270.900121359223
+85,"Fruit de baobab (bouye)",139,"Sachets",3,"Grand",647.301437371663
+85,"Fruit de baobab (bouye)",147,"Unité (gousse etc)",1,"Petit",175
+85,"Fruit de baobab (bouye)",147,"Unité (gousse etc)",2,"moyen",250
+85,"Fruit de baobab (bouye)",147,"Unité (gousse etc)",3,"Grand",325
+86,"Néré",100,"Kg",0,"taille unique",1000
+86,"Néré",147,"Unité (gousse etc)",1,"Petit",10
+86,"Néré",147,"Unité (gousse etc)",2,"moyen",20
+86,"Néré",147,"Unité (gousse etc)",3,"Grand",26
+87,"Autres Fruits",100,"Kg",0,"taille unique",1000
+87,"Autres Fruits",139,"Sachets",7,"Tres petit",32.8666666666667
+87,"Autres Fruits",139,"Sachets",1,"Petit",65.7333333333333
+87,"Autres Fruits",139,"Sachets",2,"Moyen",270.900121359223
+87,"Autres Fruits",139,"Sachets",3,"Grand",647.301437371663
+87,"Autres Fruits",147,"Unité (gousse etc)",1,"Petit",100
+87,"Autres Fruits",147,"Unité (gousse etc)",2,"moyen",150
+87,"Autres Fruits",147,"Unité (gousse etc)",3,"Grand",175
+88,"Salade (laitue, batavia, etc )",143,"tas",2,"Moyen",477
+88,"Salade (laitue, batavia, etc )",143,"tas",3,"Grand",899.5
+88,"Salade (laitue, batavia, etc )",143,"tas",1,"Petit",202
+88,"Salade (laitue, batavia, etc )",147,"unité (gousse, carcasse etc.)",2,"Moyen",290
+88,"Salade (laitue, batavia, etc )",147,"unité (gousse, carcasse etc.)",1,"Petit",136.5
+88,"Salade (laitue, batavia, etc )",147,"unité (gousse, carcasse etc.)",3,"Grand",466
+89,"Choux",100,"Kg",0,"taille unique",1000
+89,"Choux",126,"Morceau",1,"petit",102
+89,"Choux",126,"Morceau",3,"grand",323
+89,"Choux",126,"Morceau",2,"moyen ",197
+89,"Choux",133,"Sac",1,"petit",24500
+89,"Choux",133,"Sac",3,"grand",64000
+89,"Choux",133,"Sac",2,"moyen",50000
+89,"Choux",143,"tas",2,"moyen",3402.5
+89,"Choux",143,"tas",1,"petit",1568.5
+89,"Choux",143,"tas",3,"grand",5180
+89,"Choux",147,"unité (gousse)",1,"petit",391.5
+89,"Choux",147,"unité (gousse)",3,"grand",1000
+89,"Choux",147,"unité (gousse)",2,"moyen",578
+90,"Carotte",100,"Kg",0,"taille unique",1000
+90,"Carotte",126,"morceau",1,"Petit",63
+90,"Carotte",126,"morceau",2,"Moyen",173
+90,"Carotte",138,"Sac (50 Kg)",0,"taille unique",50000
+90,"Carotte",139,"Sachets",1,"Petit",109
+90,"Carotte",139,"Sachets",2,"Moyen",145
+90,"Carotte",142,"seau",1,"Petit",4800
+90,"Carotte",142,"seau",2,"Moyen",10650
+90,"Carotte",143,"tas",1,"Petit",244
+90,"Carotte",143,"tas",3,"Grand",2154
+90,"Carotte",143,"tas",2,"Moyen",1006
+90,"Carotte",147,"unité (gousse, carcasse etc.)",2,"Moyen",215
+90,"Carotte",147,"unité (gousse, carcasse etc.)",1,"Petit",99
+90,"Carotte",147,"unité (gousse, carcasse etc.)",3,"Grand",477
+90,"Carotte",578,"tranche",2,"Moyen",79
+90,"Carotte",578,"tranche",1,"Petit",25
+90,"Carotte",578,"tranche",3,"Grand",170.5
+91,"Haricot vert",100,"Kg",0,"taille unique",1000
+91,"Haricot vert",139,"Sachets",1,"Petit",61
+91,"Haricot vert",139,"Sachets",2,"Moyen",124
+91,"Haricot vert",139,"Sachets",3,"Grand",168
+91,"Haricot vert",143,"tas",1,"Petit",82
+91,"Haricot vert",143,"tas",2,"Moyen",171
+91,"Haricot vert",143,"tas",3,"Grand",364
+92,"Concombre",100,"Kg",0,"taille unique",1000
+92,"Concombre",126,"morceau",1,"Petit",12
+92,"Concombre",126,"morceau",3,"Grand",177.5
+92,"Concombre",126,"morceau",2,"Moyen",116
+92,"Concombre",139,"Sachets",1,"Petit",98
+92,"Concombre",143,"tas",3,"Grand",935
+92,"Concombre",143,"tas",2,"Moyen",499
+92,"Concombre",143,"tas",1,"Petit",285
+92,"Concombre",147,"unité (gousse, carcasse etc.)",1,"Petit",123
+92,"Concombre",147,"unité (gousse, carcasse etc.)",2,"Moyen",227
+92,"Concombre",147,"unité (gousse, carcasse etc.)",3,"Grand",343
+93,"Aubergine",100,"Kg",0,"taille unique",1000
+93,"Aubergine",126,"morceau",2,"Moyen",277
+93,"Aubergine",126,"morceau",1,"Petit",128
+93,"Aubergine",126,"morceau",3,"Grand",717
+93,"Aubergine",133,"Sac",1,"Petit",50000
+93,"Aubergine",133,"Sac",2,"Moyen",80000
+93,"Aubergine",142,"seau",1,"Petit",3082
+93,"Aubergine",143,"tas",2,"Moyen",1172.5
+93,"Aubergine",143,"tas",1,"Petit",237
+93,"Aubergine",143,"tas",3,"Grand",2542
+93,"Aubergine",147,"unité (gousse, carcasse etc.)",3,"Grand",690
+93,"Aubergine",147,"unité (gousse, carcasse etc.)",2,"Moyen",383
+93,"Aubergine",147,"unité (gousse, carcasse etc.)",1,"Petit",168
+93,"Aubergine",578,"tranche",1,"Petit",81
+93,"Aubergine",578,"tranche",3,"Grand",162
+93,"Aubergine",578,"tranche",2,"Moyen",54
+94,"Aubergine",100,"Kg",0,"taille unique",1000
+94,"Courge/Courgette",126,"morceau",2,"Moyen",277
+94,"Courge/Courgette",126,"morceau",1,"Petit",128
+94,"Courge/Courgette",126,"morceau",3,"Grand",717
+94,"Courge/Courgette",143,"Tas",3,"Grand",2216
+94,"Courge/Courgette",143,"Tas",1,"Petit",134
+94,"Courge/Courgette",143,"Tas",2,"Moyen",475
+94,"Courge/Courgette",147,"unité (gousse, carcasse etc.)",2,"Moyen",505
+94,"Courge/Courgette",147,"unité (gousse, carcasse etc.)",1,"Petit",188
+94,"Courge/Courgette",147,"unité (gousse, carcasse etc.)",3,"Grand",1059
+94,"Courge/Courgette",578,"tranche",1,"Petit",81
+94,"Courge/Courgette",578,"tranche",3,"Grand",162
+94,"Courge/Courgette",578,"tranche",2,"Moyen",54
+95,"Poivron frais",100,"Kg",0,"taille unique",1000
+95,"Poivron frais",143,"tas",3,"Grand",936
+95,"Poivron frais",143,"tas",1,"Petit",99
+95,"Poivron frais",143,"tas",2,"Moyen",236
+95,"Poivron frais",147,"unité (gousse, carcasse etc.)",2,"Moyen",75
+95,"Poivron frais",147,"unité (gousse, carcasse etc.)",1,"Petit",37
+95,"Poivron frais",147,"unité (gousse, carcasse etc.)",3,"Grand",150
+95,"Poivron frais",578,"tranche",2,"Moyen",43
+95,"Poivron frais",578,"tranche",1,"Petit",21
+96,"Tomate fraîche",100,"Kg",0,"taille unique",1000
+96,"Tomate fraîche",105,"bassine",0,"taille unique",25000
+96,"Tomate fraîche",108,"Boite de tomate/Pot",3,"Grand",1528
+96,"Tomate fraîche",108,"Boite de tomate/Pot",1,"Petit",291
+96,"Tomate fraîche",108,"Boite de tomate/Pot",2,"Moyen",546
+96,"Tomate fraîche",109,"bol",3,"Grand",7556
+96,"Tomate fraîche",109,"bol",1,"Petit",1285.5
+96,"Tomate fraîche",109,"bol",2,"Moyen",3300
+96,"Tomate fraîche",126,"morceau",2,"Moyen",481
+96,"Tomate fraîche",128,"panier",2,"Moyen",35000
+96,"Tomate fraîche",128,"panier",1,"Petit",23856
+96,"Tomate fraîche",139,"Sachets",1,"Petit",193
+96,"Tomate fraîche",139,"Sachets",2,"Moyen",396
+96,"Tomate fraîche",139,"Sachets",3,"Grand",667.5
+96,"Tomate fraîche",142,"seau",2,"Moyen",7356
+96,"Tomate fraîche",142,"seau",1,"Petit",3976
+96,"Tomate fraîche",143,"tas",1,"Petit",113
+96,"Tomate fraîche",143,"tas",3,"Grand",499.5
+96,"Tomate fraîche",143,"tas",2,"Moyen",237
+96,"Tomate fraîche",147,"unité (gousse, carcasse etc.)",3,"Grand",172
+96,"Tomate fraîche",147,"unité (gousse, carcasse etc.)",2,"Moyen",117
+96,"Tomate fraîche",147,"unité (gousse, carcasse etc.)",1,"Petit",68
+97,"Tomate séchée",100,"Kg",0,"taille unique",1000
+97,"Tomate séchée",108,"Boite de tomate/Pot",2,"Moyen",762
+98,"Gombo frais",100,"Kg",0,"taille unique",1000
+98,"Gombo frais",108,"Boite de tomate/Pot",2,"Moyen",205
+98,"Gombo frais",108,"Boite de tomate/Pot",1,"Petit",143
+98,"Gombo frais",139,"Sachets",1,"Petit",88
+98,"Gombo frais",139,"Sachets",3,"Grand",481
+98,"Gombo frais",139,"Sachets",2,"Moyen",256
+98,"Gombo frais",142,"seau",2,"Moyen",4100
+98,"Gombo frais",143,"tas",3,"Grand",156
+98,"Gombo frais",143,"tas",1,"Petit",32
+98,"Gombo frais",143,"tas",2,"Moyen",61
+98,"Gombo frais",147,"unité (gousse, carcasse etc.)",3,"Grand",114
+98,"Gombo frais",147,"unité (gousse, carcasse etc.)",2,"Moyen",54
+98,"Gombo frais",147,"unité (gousse, carcasse etc.)",1,"Petit",20
+99,"Gombo sec",100,"Kg",0,"taille unique",1000
+99,"Gombo sec",108,"Boite de tomate/Pot",2,"Moyen",180
+99,"Gombo sec",108,"Boite de tomate/Pot",3,"Grand",487
+99,"Gombo sec",108,"Boite de tomate/Pot",1,"Petit",72.5
+99,"Gombo sec",115,"Calebasse",0,"taille unique",294.5
+99,"Gombo sec",123,"cup/gobelet",3,"Grand",87
+99,"Gombo sec",123,"cup/gobelet",1,"Petit",48
+99,"Gombo sec",139,"Sachets",1,"Petit",21
+99,"Gombo sec",139,"Sachets",3,"Grand",628
+99,"Gombo sec",139,"Sachets",2,"Moyen",183
+99,"Gombo sec",142,"seau",1,"Petit",158
+99,"Gombo sec",142,"seau",3,"Grand",276
+100,"Oignon frais",100,"Kg",0,"taille unique",1000
+100,"Oignon frais",108,"Boite de tomate/Pot",2,"Moyen",642
+100,"Oignon frais",122,"filet (1 kg)",0,"taille unique",1000
+100,"Oignon frais",126,"morceau",2,"Moyen",65
+100,"Oignon frais",126,"morceau",1,"Petit",32.5
+100,"Oignon frais",126,"morceau",3,"Grand",130
+100,"Oignon frais",133,"sac",0,"taille unique",42500
+100,"Oignon frais",136,"Sac (25 Kg)",0,"taille unique",25000
+100,"Oignon frais",139,"Sachets",1,"Petit",224
+100,"Oignon frais",139,"Sachets",2,"Moyen",1000
+100,"Oignon frais",139,"Sachets",3,"Grand",3150
+100,"Oignon frais",143,"tas",2,"Moyen",253
+100,"Oignon frais",143,"tas",3,"Grand",995.5
+100,"Oignon frais",143,"tas",1,"Petit",148
+100,"Oignon frais",147,"unité (gousse, carcasse etc.)",3,"Grand",167
+100,"Oignon frais",147,"unité (gousse, carcasse etc.)",2,"Moyen",120
+100,"Oignon frais",147,"unité (gousse, carcasse etc.)",1,"Petit",68
+100,"Oignon frais",986,"filet (5 kg)",0,"taille unique",5000
+100,"Oignon frais",987,"filet (2,5 kg)",0,"taille unique",2500
+101,"Ail",100,"Kg",0,"taille unique",1000
+101,"Ail",118,"carton",3,"Grand",10000
+101,"Ail",139,"Sachets",1,"Petit",13
+101,"Ail",139,"Sachets",2,"Moyen",128
+101,"Ail",139,"Sachets",3,"Grand",239
+101,"Ail",143,"tas",1,"Petit",12
+101,"Ail",143,"tas",2,"Moyen",112
+101,"Ail",147,"unité (gousse, carcasse etc.)",1,"Petit",15
+101,"Ail",147,"unité (gousse, carcasse etc.)",2,"Moyen",34.5
+101,"Ail",147,"unité (gousse, carcasse etc.)",3,"Grand",45
+101,"Ail",578,"tranche",2,"Moyen",21
+101,"Ail",578,"tranche",1,"Petit",12
+101,"Ail",578,"tranche",3,"Grand",31
+102,"Feuilles d'oseille (bissap)",100,"Kg",0,"taille unique",1000
+102,"Feuilles d'oseille (bissap)",105,"bassine",3,"Grand",4000
+102,"Feuilles d'oseille (bissap)",108,"Boite de tomate/Pot",2,"Moyen",208
+102,"Feuilles d'oseille (bissap)",108,"Boite de tomate/Pot",3,"Grand",440
+102,"Feuilles d'oseille (bissap)",108,"Boite de tomate/Pot",1,"Petit",80
+102,"Feuilles d'oseille (bissap)",109,"bol",2,"Moyen",208
+102,"Feuilles d'oseille (bissap)",109,"bol",3,"Grand",241
+102,"Feuilles d'oseille (bissap)",143,"tas",3,"Grand",375.5
+102,"Feuilles d'oseille (bissap)",143,"tas",1,"Petit",28
+102,"Feuilles d'oseille (bissap)",143,"tas",2,"Moyen",110.5
+103,"Feuilles de baobab - laalo",100,"Kg",0,"taille unique",1000
+103,"Feuilles de baobab - laalo",108,"Boite de tomate/Pot",7,"Tres petit",35
+103,"Feuilles de baobab - laalo",108,"Boite de tomate/Pot",1,"Petit",224
+103,"Feuilles de baobab - laalo",108,"Boite de tomate/Pot",2,"Moyen",353.5
+103,"Feuilles de baobab - laalo",108,"Boite de tomate/Pot",3,"Grand",845.5
+103,"Feuilles de baobab - laalo",113,"Bouteilles",0,"taille unique",256
+103,"Feuilles de baobab - laalo",125,"Louche traditionnelle",0,"taille unique",33.5
+103,"Feuilles de baobab - laalo",139,"Sachets",3,"Grand",257
+103,"Feuilles de baobab - laalo",139,"Sachets",2,"Moyen",68.5
+103,"Feuilles de baobab - laalo",139,"Sachets",1,"Petit",22
+104,"Feuilles de haricot - niébé",108,"Boite de tomate/Pot",1,"Petit",66.5
+104,"Feuilles de haricot - niébé",108,"Boite de tomate/Pot",2,"Moyen",152
+104,"Feuilles de haricot - niébé",139,"Sachets",2,"Moyen",542.5
+104,"Feuilles de haricot - niébé",139,"Sachets",1,"Petit",137
+104,"Feuilles de haricot - niébé",143,"tas",1,"Petit",62.5
+104,"Feuilles de haricot - niébé",143,"tas",3,"Grand",420
+104,"Feuilles de haricot - niébé",143,"tas",2,"Moyen",258
+105,"Feuilles nébédaye (moringa)",108,"Boite de tomate/Pot",2,"Moyen",117
+105,"Feuilles nébédaye (moringa)",108,"Boite de tomate/Pot",3,"Grand",179
+105,"Feuilles nébédaye (moringa)",108,"Boite de tomate/Pot",1,"Petit",48
+105,"Feuilles nébédaye (moringa)",139,"Sachets",3,"Grand",69
+105,"Feuilles nébédaye (moringa)",139,"Sachets",1,"Petit",12
+105,"Feuilles nébédaye (moringa)",139,"Sachets",2,"Moyen",32
+105,"Feuilles nébédaye (moringa)",143,"tas",1,"Petit",25
+105,"Feuilles nébédaye (moringa)",143,"tas",2,"Moyen",65
+105,"Feuilles nébédaye (moringa)",105,"bassine",3,"Grand",4000
+105,"Feuilles nébédaye (moringa)",105,"bassine",2,"Moyen",2000
+105,"Feuilles nébédaye (moringa)",105,"bassine",1,"Petit",1000
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",108,"Boite de tomate/Pot",1,"Petit",85
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",139,"Sachets",2,"Moyen",37
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",139,"Sachets",1,"Petit",6
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",139,"Sachets",3,"Grand",249
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",143,"tas",2,"Moyen",335
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",143,"tas",1,"Petit",62
+106,"Feuilles de manioc, feuilles de taro et, autres feuilles",147,"unité (gousse, carcasse etc.)",1,"Petit",153
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",100,"Kg",0,"taille unique",1000
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",105,"bassine",3,"Grand",4000
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",105,"bassine",2,"Moyen",2000
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",105,"bassine",1,"Petit",1000
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",108,"Boite de tomate/Pot",2,"Moyen",208
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",108,"Boite de tomate/Pot",1,"Petit",80
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",108,"Boite de tomate/Pot",3,"Grand",440
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",109,"bol",2,"Moyen",208
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",109,"bol",3,"Grand",241
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",109,"bol",1,"Petit",179.51867219917
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",143,"tas",2,"Moyen",110.5
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",143,"tas",1,"Petit",28
+107,"Autre légumes frais n.d.a (y compris les fleurs blanches de bissap)",143,"tas",3,"Grand",375.5
+108,"Concentré de tomate",100,"Kg",0,"taille unique",1000
+108,"Concentré de tomate",108,"Boite de tomate/Pot",3,"Grand",2000
+108,"Concentré de tomate",108,"Boite de tomate/Pot",2,"Moyen",800
+108,"Concentré de tomate",108,"Boite de tomate/Pot",1,"Petit",400
+108,"Concentré de tomate",139,"Sachets",1,"Petit",47
+108,"Concentré de tomate",139,"Sachets",3,"Grand",166.5
+108,"Concentré de tomate",139,"Sachets",2,"Moyen",85
+108,"Concentré de tomate",142,"seau",2,"Moyen",2000
+108,"Concentré de tomate",564,"cuillere a soupe",0,"taille unique",42.5
+109,"Petits pois",107,"Boite",1,"Petit",400
+109,"Petits pois",107,"Boite",2,"Moyen",800
+109,"Petits pois",108,"Boite de tomate/Pot",1,"Petit",400
+109,"Petits pois",108,"Boite de tomate/Pot",2,"Moyen",800
+109,"Petits pois",108,"Boite de tomate/Pot",3,"Grand",800
+109,"Petits pois",139,"Sachets",2,"Moyen",332
+109,"Petits pois",139,"Sachets",1,"Petit",132
+109,"Petits pois",139,"Sachets",3,"Grand",332
+110,"Petit pois secs",100,"Kg",0,"taille unique",1000
+110,"Petit pois secs",107,"Boite",1,"Petit",400
+110,"Petit pois secs",107,"Boite",2,"Moyen",800
+110,"Petit pois secs",108,"Boite de tomate/Pot",2,"Moyen",800
+110,"Petit pois secs",108,"Boite de tomate/Pot",1,"Petit",400
+110,"Petit pois secs",139,"Sachets",1,"Petit",249
+110,"Petit pois secs",139,"Sachets",3,"Grand",960.5
+110,"Petit pois secs",139,"Sachets",2,"Moyen",500
+110,"Petit pois secs",139,"Sachets",7,"Tres petit",146
+111,"Autres légumes secs n.d.a",100,"Kg",0,"taille unique",1000
+111,"Autres légumes secs n.d.a",107,"Boite",3,"Grand",1006
+111,"Autres légumes secs n.d.a",107,"Boite",1,"Petit",214.5
+111,"Autres légumes secs n.d.a",107,"Boite",2,"Moyen",482
+111,"Autres légumes secs n.d.a",108,"Boite de tomate/Pot",3,"Grand",1752
+111,"Autres légumes secs n.d.a",108,"Boite de tomate/Pot",2,"Moyen",723
+111,"Autres légumes secs n.d.a",108,"Boite de tomate/Pot",1,"Petit",364
+111,"Autres légumes secs n.d.a",123,"cup/gobelet",2,"Moyen",236
+111,"Autres légumes secs n.d.a",139,"Sachets",1,"Petit",126
+111,"Autres légumes secs n.d.a",139,"Sachets",2,"Moyen",446
+111,"Autres légumes secs n.d.a",139,"Sachets",7,"Tres petit",48
+111,"Autres légumes secs n.d.a",139,"Sachets",3,"Grand",973.5
+111,"Autres légumes secs n.d.a",579,"verre a  the",0,"taille unique",103
+112,"Niébé-Haricots secs",100,"Kg",0,"taille unique",1000
+112,"Niébé-Haricots secs",107,"Boite",3,"Grand",1006
+112,"Niébé-Haricots secs",107,"Boite",1,"Petit",214.5
+112,"Niébé-Haricots secs",107,"Boite",2,"Moyen",482
+112,"Niébé-Haricots secs",108,"Boite de tomate/Pot",3,"Grand",1752
+112,"Niébé-Haricots secs",108,"Boite de tomate/Pot",2,"Moyen",723
+112,"Niébé-Haricots secs",108,"Boite de tomate/Pot",1,"Petit",364
+112,"Niébé-Haricots secs",123,"cup/gobelet",2,"Moyen",236
+112,"Niébé-Haricots secs",133,"sac",3,"Grand",50000
+112,"Niébé-Haricots secs",139,"Sachets",2,"Moyen",446
+112,"Niébé-Haricots secs",139,"Sachets",3,"Grand",973.5
+112,"Niébé-Haricots secs",139,"Sachets",1,"Petit",126
+112,"Niébé-Haricots secs",139,"Sachets",7,"Tres petit",48
+112,"Niébé-Haricots secs",579,"verre a  the",0,"taille unique",103
+113,"Arachides fraîches en coques",100,"Kg",0,"taille unique",1000
+113,"Arachides fraîches en coques",108,"Boite de tomate/Pot",3,"Grand",979
+113,"Arachides fraîches en coques",108,"Boite de tomate/Pot",2,"Moyen",776
+113,"Arachides fraîches en coques",108,"Boite de tomate/Pot",1,"Petit",252.5
+113,"Arachides fraîches en coques",139,"Sachets",3,"Grand",1009
+113,"Arachides fraîches en coques",139,"Sachets",1,"Petit",41
+113,"Arachides fraîches en coques",139,"Sachets",2,"Moyen",93
+113,"Arachides fraîches en coques",579,"verre a  the",0,"taille unique",30
+114,"Arachides séchées en coques",100,"Kg",0,"taille unique",1000
+114,"Arachides séchées en coques",108,"Boite de tomate/Pot",3,"Grand",758
+114,"Arachides séchées en coques",108,"Boite de tomate/Pot",2,"Moyen",362
+114,"Arachides séchées en coques",108,"Boite de tomate/Pot",1,"Petit",185
+114,"Arachides séchées en coques",115,"Calebasse",0,"taille unique",521
+114,"Arachides séchées en coques",133,"sac",2,"Moyen",50000
+114,"Arachides séchées en coques",139,"Sachets",2,"Moyen",185
+114,"Arachides séchées en coques",139,"Sachets",3,"Grand",483
+114,"Arachides séchées en coques",139,"Sachets",1,"Petit",97
+114,"Arachides séchées en coques",139,"Sachets",7,"Tres petit",40
+114,"Arachides séchées en coques",148,"verre",0,"taille unique",27
+114,"Arachides séchées en coques",562,"cornet",1,"Petit",37
+114,"Arachides séchées en coques",579,"verre a  the",0,"taille unique",42
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",100,"Kg",0,"taille unique",1000
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",107,"Boite",1,"Petit",395
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",107,"Boite",3,"Grand",413
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",108,"Boite de tomate/Pot",2,"Moyen",552
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",108,"Boite de tomate/Pot",3,"Grand",1571
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",108,"Boite de tomate/Pot",1,"Petit",271
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",108,"Boite de tomate/Pot",7,"Tres petit",103
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",115,"Calebasse",0,"taille unique",1061
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",123,"cup/gobelet",2,"Moyen",24
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",125,"Louche traditionnelle",0,"taille unique",54.5
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",133,"sac",3,"Grand",50000
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",139,"Sachets",3,"Grand",980.5
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",139,"Sachets",2,"Moyen",485
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",139,"Sachets",1,"Petit",211
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",139,"Sachets",7,"Tres petit",107
+115,"Arachides décortiquées (fraîches et sèches) ou pilées (noflaye)",579,"verre a the",0,"taille unique",34
+116,"Arachides pilées",100,"Kg",0,"taille unique",1000
+116,"Arachides pilées",108,"Boite de tomate/Pot",1,"Petit",134
+116,"Arachides pilées",108,"Boite de tomate/Pot",3,"Grand",651
+116,"Arachides pilées",108,"Boite de tomate/Pot",2,"Moyen",354
+116,"Arachides pilées",125,"Louche traditionnelle",0,"taille unique",21
+116,"Arachides pilées",139,"Sachets",2,"Moyen",138
+116,"Arachides pilées",139,"Sachets",1,"Petit",75
+116,"Arachides pilées",139,"Sachets",3,"Grand",284
+116,"Arachides pilées",115,"Calebasse",0,"taille unique",1750
+116,"Arachides pilées",579,"verre a the",0,"taille unique",40.5
+117,"Arachide grillée",100,"Kg",0,"taille unique",1000
+117,"Arachide grillée",108,"Boite de tomate/Pot",1,"Petit",44
+117,"Arachide grillée",108,"Boite de tomate/Pot",2,"Moyen",61
+117,"Arachide grillée",139,"Sachets",2,"Moyen",64
+117,"Arachide grillée",139,"Sachets",1,"Petit",28
+117,"Arachide grillée",139,"Sachets",3,"Grand",342.5
+117,"Arachide grillée",148,"verre",0,"taille unique",42
+117,"Arachide grillée",562,"cornet",1,"Petit",6
+117,"Arachide grillée",562,"cornet",3,"Grand",78.5
+117,"Arachide grillée",562,"cornet",2,"Moyen",32
+117,"Arachide grillée",579,"verre a the",0,"taille unique",40.5
+118,"Pâte d'arachide",100,"Kg",0,"taille unique",1000
+118,"Pâte d'arachide",113,"Bouteilles",2,"Moyen",26000
+118,"Pâte d'arachide",113,"Bouteilles",1,"Petit",26000
+118,"Pâte d'arachide",139,"Sachets",1,"Petit",115
+118,"Pâte d'arachide",139,"Sachets",2,"Moyen",225
+118,"Pâte d'arachide",139,"Sachets",3,"Grand",496
+118,"Pâte d'arachide",142,"seau",1,"Petit",4939.5
+118,"Pâte d'arachide",142,"seau",3,"Grand",20000
+118,"Pâte d'arachide",142,"seau",2,"Moyen",10000
+118,"Pâte d'arachide",564,"cuillÃ¨re Ã  soupe",1,"Petit",35
+120,"Sésame",108,"Boite de tomate/Pot",2,"Moyen",1068
+120,"Sésame",108,"Boite de tomate/Pot",1,"Petit",410
+121,"Noix de cajou",131,"Pot",0,"taille unique",200
+121,"Noix de cajou",139,"Sachet",1,"petit",50
+121,"Noix de cajou",139,"Sachet",2,"moyen",100
+121,"Noix de cajou",139,"Sachet",3,"Grand",200
+122,"Noix de karité",100,"Kg",0,"taille unique",1000
+122,"Noix de karité",108,"Boite de tomate/Pot",1,"Petit",150
+122,"Noix de karité",108,"Boite de tomate/Pot",2,"Moyen",250
+122,"Noix de karité",108,"Boite de tomate/Pot",3,"Grand",480
+122,"Noix de karité",126,"morceau",1,"Petit",13
+122,"Noix de karité",139,"Sachets",2,"Moyen",60
+122,"Noix de karité",147,"unité (gousse, carcasse etc.)",1,"Petit",25
+123,"Manioc",100,"Kg",0,"taille unique",1000
+123,"Manioc",126,"morceau",1,"Petit",101
+123,"Manioc",126,"morceau",3,"Grand",307.5
+123,"Manioc",126,"morceau",2,"Moyen",169.5
+123,"Manioc",143,"tas",3,"Grand",1675
+123,"Manioc",143,"tas",1,"Petit",245
+123,"Manioc",143,"tas",2,"Moyen",997.5
+123,"Manioc",147,"unité (gousse, carcasse etc.)",1,"Petit",173
+123,"Manioc",147,"unité (gousse, carcasse etc.)",2,"Moyen",333
+123,"Manioc",147,"unité (gousse, carcasse etc.)",3,"Grand",758
+124,"Igname",100,"Kg",0,"taille unique",1000
+124,"Igname",126,"morceau",1,"Petit",100.5
+124,"Igname",126,"morceau",2,"Moyen",211
+124,"Igname",126,"morceau",3,"Grand",497
+124,"Igname",147,"unité (gousse, carcasse etc.)",1,"Petit",210.5
+124,"Igname",147,"unité (gousse, carcasse etc.)",2,"Moyen",373
+125,"Plantain",100,"Kg",0,"taille unique",1000
+125,"Plantain",143,"tas",3,"Grand",1130
+125,"Plantain",143,"tas",1,"Petit",214
+125,"Plantain",143,"tas",2,"Moyen",519
+125,"Plantain",147,"unité (gousse, carcasse etc.)",1,"Petit",231
+125,"Plantain",147,"unité (gousse, carcasse etc.)",2,"Moyen",437
+126,"Pomme de terre",100,"Kg",0,"taille unique",1000
+126,"Pomme de terre",136,"Sac (25 Kg)",0,"taille unique",25000
+126,"Pomme de terre",139,"Sachet",1,"petit",450
+126,"Pomme de terre",139,"Sachet",3,"Grand",2500
+126,"Pomme de terre",139,"Sachet",2,"moyen",1000
+126,"Pomme de terre",143,"tas",2,"Moyen",335
+126,"Pomme de terre",143,"tas",3,"Grand",998
+126,"Pomme de terre",143,"tas",1,"Petit",177.5
+126,"Pomme de terre",147,"unité (gousse, carcasse etc.)",1,"Petit",58.5
+126,"Pomme de terre",147,"unité (gousse, carcasse etc.)",3,"Grand",246.5
+126,"Pomme de terre",147,"unité (gousse, carcasse etc.)",2,"Moyen",113.5
+127,"Taro (diabéré), macabo",100,"Kg",0,"taille unique",1000
+127,"Taro (diabéré), macabo",142,"seau",1,"Petit",2509
+127,"Taro (diabéré), macabo",142,"seau",2,"Moyen",7090
+127,"Taro (diabéré), macabo",143,"tas",3,"Grand",926
+127,"Taro (diabéré), macabo",143,"tas",2,"Moyen",366
+127,"Taro (diabéré), macabo",143,"tas",1,"Petit",114
+127,"Taro (diabéré), macabo",147,"unité (gousse, carcasse etc.)",3,"Grand",420.5
+127,"Taro (diabéré), macabo",147,"unité (gousse, carcasse etc.)",7,"Tres petit",45
+127,"Taro (diabéré), macabo",147,"unité (gousse, carcasse etc.)",2,"Moyen",179
+127,"Taro (diabéré), macabo",147,"unité (gousse, carcasse etc.)",1,"Petit",100.5
+128,"Patate douce",100,"Kg",0,"taille unique",1000
+128,"Patate douce",105,"bassine",2,"Moyen",20000
+128,"Patate douce",105,"bassine",1,"Petit",18865
+128,"Patate douce",109,"bol",3,"Grand",6705
+128,"Patate douce",126,"morceau",3,"Grand",573.5
+128,"Patate douce",126,"morceau",2,"Moyen",351
+128,"Patate douce",126,"morceau",1,"Petit",116
+128,"Patate douce",135,"Sac (100 Kg)",0,"taille unique",100000
+128,"Patate douce",142,"seau",1,"Petit",3000
+128,"Patate douce",142,"seau",3,"Grand",10000
+128,"Patate douce",142,"seau",2,"Moyen",4802
+128,"Patate douce",143,"tas",3,"Grand",2770
+128,"Patate douce",143,"tas",1,"Petit",302
+128,"Patate douce",143,"tas",2,"Moyen",1510
+128,"Patate douce",147,"unité (gousse, carcasse etc.)",2,"Moyen",480
+128,"Patate douce",147,"unité (gousse, carcasse etc.)",1,"Petit",185
+128,"Patate douce",147,"unité (gousse, carcasse etc.)",3,"Grand",847
+129,"Autres tubercules n.d.a",100,"Kg",0,"taille unique",1000
+129,"Autres tubercules n.d.a",126,"morceau",2,"Moyen",351
+129,"Autres tubercules n.d.a",126,"morceau",1,"Petit",116
+129,"Autres tubercules n.d.a",126,"morceau",3,"Grand",573.5
+129,"Autres tubercules n.d.a",136,"Sac (25 Kg)",0,"taille unique",25000
+129,"Autres tubercules n.d.a",143,"tas",1,"Petit",177.5
+129,"Autres tubercules n.d.a",143,"tas",2,"Moyen",335
+129,"Autres tubercules n.d.a",143,"tas",3,"Grand",998
+129,"Autres tubercules n.d.a",147,"unité (gousse, carcasse etc.)",3,"Grand",246.5
+129,"Autres tubercules n.d.a",147,"unité (gousse, carcasse etc.)",2,"Moyen",113.5
+129,"Autres tubercules n.d.a",147,"unité (gousse, carcasse etc.)",1,"Petit",58.5
+130,"Farines de manioc",100,"Kg",0,"taille unique",1000
+130,"Farines de manioc",139,"Sachets",2,"Moyen",629
+130,"Farines de manioc",143,"tas",0,"taille unique",30
+131,"Gari, tapioca",100,"Kg",0,"taille unique",1000
+131,"Gari, tapioca",139,"Sachets",3,"Grand",915.5
+131,"Gari, tapioca",139,"Sachets",2,"Moyen",433
+131,"Gari, tapioca",139,"Sachets",1,"Petit",126
+132,"Attiéke",100,"Kg",0,"taille unique",1000
+132,"Attiéke",139,"Sachets",2,"Moyen",500
+132,"Attiéke",139,"Sachets",1,"Petit",322
+132,"Attiéke",139,"Sachets",3,"Grand",800
+133,"Fruit de Kapokier",100,"Kg",0,"taille unique",1000
+134,"Sucre poudre ",100,"Kg",0,"taille unique",1000
+134,"Sucre (poudre ou morceaux)",133,"sac",3,"Grand",50000
+134,"Sucre poudre ",133,"sac",1,"Petit",5000
+134,"Sucre (poudre ou morceaux)",133,"sac",2,"Moyen",25000
+134,"Sucre poudre ",138,"Sac (50 Kg)",0,"taille unique",50000
+134,"Sucre poudre ",139,"Sachets",2,"Moyen",470
+134,"Sucre poudre ",139,"Sachets",3,"Grand",953
+134,"Sucre poudre ",139,"Sachets",1,"Petit",121
+134,"Sucre poudre ",147,"unité (gousse, carcasse etc.)",2,"Moyen",6
+134,"Sucre poudre ",147,"unité (gousse, carcasse etc.)",1,"Petit",4
+134,"Sucre poudre ",147,"unité (gousse, carcasse etc.)",3,"Grand",8
+134,"Sucre poudre ",579,"verre a  the",0,"taille unique",72.5
+134,"Sucre poudre ",999,"paquet (1 kg)",0,"taille unique",1000
+135,"Sucre morceaux",100,"Kg",0,"taille unique",1000
+135,"Sucre morceaux",139,"Sachets",2,"Moyen",38
+135,"Sucre morceaux",139,"Sachets",1,"Petit",18
+135,"Sucre morceaux",139,"Sachets",3,"Grand",159.5
+135,"Sucre morceaux",147,"unité (gousse, carcasse etc.)",1,"Petit",4.5
+135,"Sucre morceaux",147,"unité (gousse, carcasse etc.)",3,"Grand",7.9
+135,"Sucre morceaux",147,"unité (gousse, carcasse etc.)",2,"Moyen",5.9
+135,"Sucre morceaux",999,"Paquet (1 kg)",0,"taille unique",1000
+136,"Miel",100,"Kg",0,"taille unique",1000
+136,"Miel",101,"Litre",0,"taille unique",1000
+136,"Miel",108,"Boite de tomate/Pot",2,"Moyen",356.5
+136,"Miel",108,"Boite de tomate/Pot",3,"Grand",1247
+136,"Miel",108,"Boite de tomate/Pot",7,"Tres petit",43
+136,"Miel",108,"Boite de tomate/Pot",1,"Petit",87
+136,"Miel",113,"Bouteilles",1,"Petit",84
+136,"Miel",113,"Bouteilles",2,"Moyen",250
+136,"Miel",113,"Bouteilles",3,"Grand",675
+136,"Miel",139,"Sachets",2,"Moyen",97
+136,"Miel",139,"Sachets",1,"Moyen",48.5
+136,"Miel",139,"Sachets",3,"Grand",194
+136,"Miel",564,"cuillÃ¨re Ã  soupe",0,"taille unique",10
+136,"Miel",995,"bouteille de 5 litres",0,"taille unique",5000
+136,"Miel",996,"bouteille de 1 litre",0,"taille unique",1000
+136,"Miel",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+137,"Chocolat à croquer, pâte à tartiner",131,"pot",3,"Grand",1000
+137,"Chocolat à croquer, pâte à tartiner",131,"pot",2,"moyen",500
+137,"Chocolat à croquer, pâte à tartiner",131,"pot",1,"petit",250
+137,"Chocolat à croquer, pâte à tartiner",139,"sachet",0,"taille unique",15
+137,"Chocolat à croquer, pâte à tartiner",142,"Seau",0,"taille unique",5000
+137,"Chocolat à croquer, pâte à tartiner",563,"cuillere a cafe",0,"taille unique",15
+137,"Chocolat à croquer, pâte à tartiner",564,"cuillere a  soupe",0,"taille unique",30
+138,"Caramel, bonbons, confiseries, etc",100,"Kg",0,"taille unique",1000
+138,"Caramel, bonbons, confiseries, etc",129,"paquet",2,"Moyen",600
+138,"Caramel, bonbons, confiseries, etc",129,"paquet",3,"Grand",800
+138,"Caramel, bonbons, confiseries, etc",129,"paquet",1,"Petit",450
+138,"Caramel, bonbons, confiseries, etc",139,"sachet",3,"Grand",800
+138,"Caramel, bonbons, confiseries, etc",139,"sachet",2,"Moyen",600
+138,"Caramel, bonbons, confiseries, etc",139,"sachet",1,"Petit",450
+138,"Caramel, bonbons, confiseries, etc",147,"unité ",3,"Grand",20
+138,"Caramel, bonbons, confiseries, etc",147,"unité ",1,"Petit",5
+138,"Caramel, bonbons, confiseries, etc",147,"unité ",2,"Moyen",10
+139,"Sel",100,"Kg",0,"taille unique",1000
+139,"Sel",107,"Boite",1,"Petit",264
+139,"Sel",107,"Boite",2,"Moyen",582
+139,"Sel",107,"Boite",3,"Grand",2044
+139,"Sel",108,"Boite de tomate/Pot",2,"Moyen",1803
+139,"Sel",108,"Boite de tomate/Pot",1,"Petit",798
+139,"Sel",108,"Boite de tomate/Pot",7,"Tres petit",365
+139,"Sel",108,"Boite de tomate/Pot",3,"Grand",2204.5
+139,"Sel",129,"paquet",0,"taille unique",454
+139,"Sel",133,"sac",1,"Petit",5465
+139,"Sel",133,"sac",2,"Moyen",10000
+139,"Sel",133,"sac",3,"Grand",19000
+139,"Sel",136,"Sac (25 Kg)",0,"taille unique",25000
+139,"Sel",139,"Sachets",3,"Grand",2362
+139,"Sel",139,"Sachets",7,"Tres petit",193
+139,"Sel",139,"Sachets",2,"Moyen",1006
+139,"Sel",139,"Sachets",1,"Petit",468
+139,"Sel",142,"seau",1,"Petit",1912
+139,"Sel",564,"cuillere a soupe",0,"taille unique",20
+140,"Piment",100,"Kg",0,"taille unique",1000
+140,"Piment",107,"Boite",1,"Petit",126
+140,"Piment",107,"Boîte",3,"Grand",504
+140,"Piment",107,"Boîte",2,"Moyen",252
+140,"Piment",108,"Boite de tomate/Pot",2,"Moyen",132
+140,"Piment",108,"Boite de tomate/Pot",1,"Petit",39
+140,"Piment",108,"Boite de tomate/Pot",3,"Grand",716
+140,"Piment",113,"Bouteilles",0,"taille unique",350
+140,"Piment",139,"Sachets",2,"Moyen",91
+140,"Piment",139,"Sachets",1,"Petit",15
+140,"Piment",139,"Sachets",3,"Grand",170
+140,"Piment",143,"tas",7,"Tres petit",28
+140,"Piment",143,"tas",3,"Grand",833
+140,"Piment",143,"tas",2,"Moyen",312
+140,"Piment",143,"tas",1,"Petit",128.5
+140,"Piment",147,"unité (gousse, carcasse etc.)",2,"Moyen",16
+140,"Piment",147,"unité (gousse, carcasse etc.)",1,"Petit",9
+140,"Piment",147,"unité (gousse, carcasse etc.)",3,"Grand",26
+141,"Piment frais",100,"Kg",0,"taille unique",1000
+141,"Piment frais",107,"Boite",1,"Petit",126
+141,"Piment frais",107,"Boîte",2,"Moyen",52
+141,"Piment frais",107,"Boîte",3,"Grand",104
+141,"Piment frais",108,"Boite de tomate/Pot",2,"Moyen",132
+141,"Piment frais",108,"Boite de tomate/Pot",3,"Grand",716
+141,"Piment frais",108,"Boite de tomate/Pot",1,"Petit",39
+141,"Piment frais",113,"Bouteilles",0,"taille unique",350
+141,"Piment frais",139,"Sachets",1,"Petit",15
+141,"Piment frais",139,"Sachets",3,"Grand",170
+141,"Piment frais",139,"Sachets",2,"Moyen",91
+141,"Piment frais",143,"Tas",3,"Grand",169
+141,"Piment frais",143,"Tas",1,"Petit",24.5
+141,"Piment frais",143,"Tas",2,"Moyen",61
+141,"Piment frais",147,"unité (gousse, carcasse etc.)",3,"Grand",28
+141,"Piment frais",147,"unité (gousse, carcasse etc.)",1,"Petit",8
+141,"Piment frais",147,"unité (gousse, carcasse etc.)",2,"Moyen",12
+142,"Gingembre",100,"Kg",0,"taille unique",1000
+142,"Gingembre",108,"Boite de tomate/Pot",2,"Moyen",214
+142,"Gingembre",108,"Boite de tomate/Pot",3,"Grand",457
+142,"Gingembre",108,"Boite de tomate/Pot",1,"Petit",106
+142,"Gingembre",139,"Sachets",1,"Petit",56
+142,"Gingembre",139,"Sachets",2,"Moyen",98
+142,"Gingembre",139,"Sachets",3,"Grand",169
+142,"Gingembre",143,"tas",1,"Petit",35
+142,"Gingembre",143,"tas",3,"Grand",136
+142,"Gingembre",143,"tas",2,"Moyen",69
+142,"Gingembre",147,"unité (gousse, carcasse etc.)",1,"Petit",10.5
+142,"Gingembre",147,"unité (gousse, carcasse etc.)",2,"Moyen",26
+142,"Gingembre",147,"unité (gousse, carcasse etc.)",3,"Grand",40
+143,"Gingembre moulu",100,"Kg",0,"taille unique",1000
+143,"Gingembre moulu",108,"Boite de tomate/Pot",1,"Petit",91
+143,"Gingembre moulu",108,"Boite de tomate/Pot",3,"Grand",415
+143,"Gingembre moulu",108,"Boite de tomate/Pot",2,"Moyen",254
+143,"Gingembre moulu",139,"Sachets",1,"Petit",5
+143,"Gingembre moulu",139,"Sachets",2,"Moyen",41
+143,"Gingembre moulu",139,"Sachets",3,"Grand",168.1
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",109,"bol",0,"taille unique",1000
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",139,"Sachets",3,"Grand",1000
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",139,"Sachets",1,"Petit",15
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",139,"Sachets",2,"Moyen",75
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",274,"Cube",1,"petit",4
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",274,"Cube",2,"moyen",10
+144,"Cube alimentaire (Maggi, Jumbo, ) et bouillon en poudre",572,"tablette ",0,"taille unique",600
+145,"Arôme (Maggi, Jumbo, etc.)",113,"Bouteille",1,"petit",135
+145,"Arôme (Maggi, Jumbo, etc.)",113,"Bouteille",2,"moyen",250
+145,"Arôme (Maggi, Jumbo, etc.) ",139,"Sachet",0,"taille unique",10
+146,"Soumbala (nététou)",100,"Kg",0,"taille unique",1000
+146,"Soumbala (nététou)",108,"Boite de tomate/Pot",2,"Moyen",238
+146,"Soumbala (nététou)",108,"Boite de tomate/Pot",3,"Grand",495
+146,"Soumbala (nététou)",108,"Boite de tomate/Pot",1,"Petit",125
+146,"Soumbala (nététou)",111,"boule (dankk)",2,"Moyen",33
+146,"Soumbala (nététou)",111,"boule (dankk)",1,"Petit",17
+146,"Soumbala (nététou)",111,"boule (dankk)",3,"Grand",42.5
+146,"Soumbala (nététou)",139,"Sachets",3,"Grand",414.5
+146,"Soumbala (nététou)",139,"Sachets",2,"Moyen",228
+146,"Soumbala (nététou)",139,"Sachets",1,"Petit",31
+146,"Soumbala (nététou)",143,"tas",2,"Moyen",38
+146,"Soumbala (nététou)",143,"tas",3,"Grand",76
+146,"Soumbala (nététou)",143,"tas",1,"Petit",19
+146,"Soumbala (nététou)",147,"unité (gousse, carcasse etc.)",1,"Petit",14
+146,"Soumbala (nététou)",147,"unité (gousse, carcasse etc.)",2,"Moyen",21
+146,"Soumbala (nététou)",147,"unité (gousse, carcasse etc.)",3,"Grand",39
+147,"Mayonnaise",131,"Pot",1,"petit",235
+147,"Mayonnaise",131,"Pot",3,"Grand",1000
+147,"Mayonnaise",131,"Pot",2,"moyen",470
+147,"Mayonnaise",139,"Sachet",1,"Petit",65
+147,"Mayonnaise",139,"Sachet",2,"Moyen",125
+147,"Mayonnaise",139,"Sachet",3,"Grand",240.384615384615
+147,"Mayonnaise",142,"Seau",2,"moyen",5000
+147,"Mayonnaise",142,"seau",3,"Grand",5000
+147,"Mayonnaise",142,"Seau",1,"petit",2500
+147,"Mayonnaise",563,"cuillièreà café",0,"taille unique",17
+147,"Mayonnaise",564,"cuillÃ¨re Ã  soupe",0,"taille unique",32
+148,"Vinaigre de citron",100,"Kg",0,"taille unique",1000
+148,"Vinaigre de citron",101,"Litre",0,"taille unique",1000
+148,"Vinaigre de citron",113,"Bouteilles",1,"Petit",269
+148,"Vinaigre -moutarde",113,"Bouteilles",3,"Grand",3814.75464684015
+148,"Vinaigre de citron",113,"Bouteilles",2,"Moyen",1013
+148,"Vinaigre de citron",131,"pot",2,"Moyen",1062
+148,"Vinaigre de citron",131,"pot",1,"Petit",370
+148,"Vinaigre -moutarde",131,"pot",3,"Grand",3048.22702702703
+148,"Vinaigre de citron",139,"Sachets",1,"Petit",19
+148,"Vinaigre de citron",139,"Sachets",2,"Moyen",46
+148,"Vinaigre de citron",139,"Sachets",3,"Grand",90
+148,"Vinaigre de citron",142,"seau",2,"Moyen",5000
+148,"Vinaigre -moutarde",142,"seau",1,"Petit",1250
+148,"Vinaigre -moutarde",142,"seau",3,"Grand",5000
+148,"Vinaigre de citron",564,"cuillere a  soupe",0,"taille unique",35
+148,"Vinaigre de citron",579,"verre à thé",0,"taille unique",60
+148,"Vinaigre de citron",996,"bouteille de 1 litre",0,"taille unique",1000
+148,"Vinaigre de citron",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+148,"Vinaigre de citron",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+149,"Autres vinaigres",100,"Kg",0,"taille unique",1000
+149,"Autres vinaigres",101,"Litre",0,"taille unique",1000
+149,"Autres vinaigres",113,"Bouteilles",1,"Petit",269
+149,"Autres vinaigres",113,"Bouteilles",3,"Grand",3814.75464684015
+149,"Autres vinaigres",113,"Bouteilles",2,"Moyen",1013
+149,"Autres vinaigres",131,"pot",1,"Petit",370
+149,"Autres vinaigres",131,"pot",2,"Moyen",1062
+149,"Autres vinaigres",131,"pot",3,"Grand",3048.22702702703
+149,"Autres vinaigres",139,"Sachets",3,"Grand",90
+149,"Autres vinaigres",139,"Sachets",2,"Moyen",46
+149,"Autres vinaigres",139,"Sachets",1,"Petit",19
+149,"Autres vinaigres",142,"seau",3,"Grand",5000
+149,"Autres vinaigres",142,"seau",2,"Moyen",2500
+149,"Autres vinaigres",142,"seau",1,"Petit",1250
+149,"Autres vinaigres",564,"cuillere a  soupe",0,"taille unique",35
+149,"Autres vinaigres",579,"verre à thé",0,"taille unique",60
+149,"Autres vinaigres",996,"bouteille de 1 litre",0,"taille unique",1000
+149,"Autres vinaigres",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+149,"Autres vinaigres",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+150,"Moutarde",100,"Kg",0,"taille unique",1000
+150,"Moutarde",113,"Bouteilles",3,"Grand",1002.5
+150,"Moutarde",113,"Bouteilles",2,"Moyen",560
+150,"Moutarde",113,"Bouteilles",1,"Petit",344
+150,"Moutarde",131,"Pot",1,"Petit",370
+150,"Moutarde",131,"Pot",2,"Moyen",823
+150,"Moutarde",131,"Pot",3,"Grand",1226.5
+150,"Moutarde",139,"Sachets",2,"Moyen",75
+150,"Moutarde",139,"Sachets",1,"Petit",28
+150,"Moutarde",139,"Sachets",3,"Grand",115
+150,"Moutarde",564,"cuillÃ¨re Ã  soupe",0,"taille unique",36.5
+150,"Moutarde",996,"bouteille de 1 litre",0,"taille unique",1000
+150,"Moutarde",997,"Bouteille de 50 cl (demi litre)",0,"taille unique",368
+150,"Moutarde",1002,"Bouteille de 25 cl (quart de litre)",0,"taille unique",340
+151,"Poivre",100,"Kg",0,"taille unique",1000
+151,"Poivre",101,"Litre",0,"taille unique",1000
+151,"Poivre",139,"sachet",1,"petit",6
+151,"Poivre",139,"sachet",3,"Grand",118
+151,"Poivre",139,"sachet",2,"moyen",23
+151,"Poivre",564,"cuillere a  soupe",0,"taille unique",35
+152,"Autres Condiments (Poivre, ...)",100,"Kg",0,"taille unique",1000
+152,"Autres Condiments (Poivre, ...)",101,"Litre",0,"taille unique",1000
+152,"Autres Condiments (Poivre, ...)",139,"sachet",2,"moyen",23
+152,"Autres Condiments (Poivre, ...)",139,"sachet",3,"Grand",118
+152,"Autres Condiments (Poivre, ...)",139,"sachet",1,"petit",6
+152,"Autres Condiments (Poivre, ...)",564,"cuillÃ¨re Ã  soupe",0,"taille unique",35
+153,"Noix de cola",100,"Kg",0,"taille unique",1000
+153,"Noix de cola",139,"Sachets",3,"Grand",724
+153,"Noix de cola",139,"Sachets",2,"Moyen",265.5
+153,"Noix de cola",139,"Sachets",1,"Petit",61
+153,"Noix de cola",143,"tas",2,"Moyen",45
+153,"Noix de cola",143,"tas",3,"Grand",67
+153,"Noix de cola",143,"tas",1,"Petit",29
+153,"Noix de cola",147,"unité (gousse, carcasse etc.)",1,"Petit",13
+153,"Noix de cola",147,"unité (gousse, carcasse etc.)",2,"Moyen",23
+153,"Noix de cola",147,"unité (gousse, carcasse etc.)",3,"Grand",43
+154,"Autres produits alimentaires",100,"Kg",0,"taille unique",1000
+155,"Café",100,"Kg",0,"taille unique",1000
+155,"Café",107,"boîte",3,"Grand",200
+155,"Café",107,"boîte",2,"moyen",100
+155,"Café",107,"boîte",1,"petit",50
+155,"Café",139,"Sachet",3,"Grand",260
+155,"Café",139,"Sachet",2,"moyen",100
+155,"Café",139,"Sachet",1,"petit",2
+155,"Café",563,"cuillere a  cafe",0,"taille unique",21
+155,"Café",579,"verre a  the",0,"taille unique",72.5
+156,"Café soluble",100,"Kg",0,"taille unique",1000
+156,"Café soluble",107,"Boite",1,"Petit",50
+156,"Café soluble",107,"Boite",2,"Moyen",200
+156,"Café soluble",107,"Boite",3,"Grand",289
+156,"Café soluble",139,"Sachets",2,"Moyen",204
+156,"Café soluble",139,"Sachets",3,"Grand",500
+156,"Café soluble",139,"Sachets",1,"Petit",3
+156,"Café soluble",563,"cuillere a  cafe",0,"taille unique",21
+156,"Café soluble",579,"verre a  the",0,"taille unique",72.5
+157,"Thé",100,"Kg",0,"taille unique",1000
+157,"Thé",129,"paquet",2,"moyen",250
+157,"Thé",129,"paquet",1,"petit",25
+157,"Thé",129,"paquet",3,"Grand",625
+157,"Thé",139,"sachet",3,"Grand",250
+157,"Thé",139,"sachet",1,"petit",50
+157,"Thé",139,"sachet",2,"moyen",125
+157,"Thé",579,"verre a the",0,"taille unique",72.5
+158,"Chocolat en poudre",131,"Pot",2,"moyen",500
+158,"Chocolat en poudre",131,"Pot",1,"petit",250
+158,"Chocolat en poudre",131,"Pot",3,"Grand",1000
+158,"Chocolat en poudre",139,"Sachet",0,"taille unique",50
+158,"Chocolat en poudre",563,"cuillere a  cafe",0,"taille unique",15
+158,"Chocolat en poudre",564,"cuillere a  soupe",0,"taille unique",30
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",101,"Litre",0,"taille unique",1000
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",129,"paquet",2,"moyen",250
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",129,"paquet",3,"Grand",1250
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",129,"paquet",1,"petit",25
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",139,"Sachet",2,"Moyen",349
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",139,"Sachet",1,"petit",72
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",143,"tas",3,"Grand",375.5
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",143,"tas",2,"Moyen",110.5
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",143,"tas",1,"Petit",28
+159,"Autres tisanes et infusions n.d.a. (quinquelibat, citronelle, etc.)",579,"verre a the",0,"taille unique",72.5
+160,"Jus de fruits (orange, bissap, etc.)",101,"litre",0,"taille unique",1000
+160,"Jus de fruits (orange, bissap, etc.)",124,"Canette",0,"taille unique",240
+160,"Jus de fruits (orange, bissap, etc.)",127,"Brique carton",0,"taille unique",1000
+160,"Jus de fruits (orange, bissap, etc.)",139,"Sachet",2,"moyen",200
+160,"Jus de fruits (orange, bissap, etc.)",139,"Sachet",3,"Grand",300
+160,"Jus de fruits (orange, bissap, etc.)",139,"sachet",1,"petit",100
+160,"Jus de fruits (orange, bissap, etc.)",994,"Bouteille de 1l",0,"taille unique",1000
+160,"Jus de fruits (orange, bissap, etc.)",996,"bouteille de 1 litre",0,"taille unique",998.5
+160,"Jus de fruits (orange, bissap, etc.)",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+160,"Jus de fruits (orange, bissap, etc.)",1002,"bouteille de 25 cl (quart de litre)",0,"taille unique",250
+160,"Jus de fruits (orange, bissap, etc.)",1003,"Bouteille de 33cl",0,"taille unique",330
+161," Eau minérale- filtrée",139,"Sachet",1,"petit",240
+161," Eau minérale- filtrée",139,"Sachet",3,"Grand",9750
+161," Eau minérale- filtrée",139,"Sachet",2,"moyen",390
+161," Eau minérale- filtrée",991,"Bouteille de 5L",0,"taille unique",5000
+161," Eau minérale- filtrée",992,"Bouteille de 10L",0,"taille unique",10000
+161," Eau minérale- filtrée",993,"Bouteille de 1,5 L",0,"taille unique",1500
+161," Eau minérale- filtrée",997,"Bouteille de 50 cl",0,"taille unique",500
+161," Eau minérale- filtrée",1000,"Bouteille de 19L",0,"taille unique",19000
+161," Eau minérale- filtrée",1003,"Bouteille de 33cl",0,"taille unique",500
+162,"Boissons gazeuses (coca, etc.)",124,"Canette",0,"taille unique",330
+162,"Boissons gazeuses (coca, etc.)",993,"Bouteille de 1,5l",0,"taille unique",1500
+162,"Boissons gazeuses (coca, etc.)",994,"Bouteille de 1l",0,"taille unique",1000
+162,"Boissons gazeuses (coca, etc.)",997,"Bouteille de 50cl",0,"taille unique",500
+162,"Boissons gazeuses (coca, etc.)",1002,"Bouteille de 25cl",0,"taille unique",250
+163,"Jus en poudre",139,"Sachet",3,"Grand",220
+163,"Jus en poudre",139,"Sachet",2,"moyen",100
+163,"Jus en poudre",139,"Sachet",1,"petit",45
+164,"Bières et vins traditionnels (soumsoum, sung, vin de palme, vin de cajou, etc)",101,"Litre",0,"taille unique",1000
+164,"Bières et vins traditionnels (soumsoum, sung, vin de palme, vin de cajou, etc)",113,"Bouteilles",3,"Grand",1012
+164,"Bières et vins traditionnels (soumsoum, sung, vin de palme, vin de cajou, etc)",113,"Bouteilles",2,"Moyen",629
+164,"Bières et vins traditionnels (soumsoum, sung, vin de palme, vin de cajou, etc)",113,"Bouteilles",1,"Petit",330
+164,"Bières et vins traditionnels (soumsoum, sung, vin de palme, vin de cajou, etc)",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+165,"Bières industrielles",101,"Litre",0,"taille unique",1000
+165,"Bières industrielles",124,"Canette",0,"taille unique",330
+165,"Bières industrielles",996,"bouteille de 1 litre",0,"taille unique",1000
+165,"Bières industrielles",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+165,"Bières industrielles",1002,"bouteille de 25 cl (quart litre)",0,"taille unique",250
+165,"Bières industrielles",1003,"Bouteille de 33cl",0,"taille unique",330
+169,"Céréales de petit déjeuner",100,"Kg",0,"taille unique",1000
+169,"Céréales de petit déjeuner",129,"paquet",4,"tres grand",1000
+169,"Céréales de petit déjeuner",129,"paquet",2,"Moyen",250
+169,"Céréales de petit déjeuner",129,"paquet",3,"Grand",500
+169,"Céréales de petit déjeuner",129,"paquet",1,"Petit",125
+169,"Céréales de petit déjeuner",139,"Sachets",2,"Moyen",250
+169,"Céréales de petit déjeuner",139,"Sachets",4,"tres grand",1000
+169,"Céréales de petit déjeuner",139,"Sachets",1,"Petit",125
+169,"Céréales de petit déjeuner",139,"Sachets",3,"Grand",500
+169,"Céréales de petit déjeuner",108,"Boite de tomate/Pot",3,"Grand",1997.5
+169,"Céréales de petit déjeuner",108,"Boite de tomate/Pot",1,"Petit",521.5
+169,"Céréales de petit déjeuner",108,"Boite de tomate/Pot",7,"Tres petit",222
+169,"Céréales de petit déjeuner",108,"Boite de tomate/Pot",2,"Moyen",935
+169,"Céréales de petit déjeuner",115,"Calebasse",2,"Moyen",500
+169,"Céréales de petit déjeuner",115,"Calebasse",1,"Petit",250
+169,"Céréales de petit déjeuner",115,"Calebasse",3,"Grand",1000
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",100,"Kg",0,"taille unique",1000
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",143,"tas",1,"Petit",117
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",143,"tas",3,"Grand",1110
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",143,"tas",2,"Moyen",301
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",273,"Yéll",2,"Moyen",1123
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",273,"Yéll",1,"Petit",170
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",273,"Yéll",3,"Grand",2246
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",567,"lakhass",1,"Petit",104
+170,"Abats blancs (pieds, tête, etc.) et tripes (estomac, intestins, etc.)",567,"lakhass",2,"Moyen",249
+171,"Autre volaille sur pied",100,"kg",0,"Taille unique",1000
+171,"Autre volaille sur pied",147,"unité (gousse, carcasse etc.)",3,"Grand",2318
+171,"Autre volaille sur pied",147,"unité (gousse, carcasse etc.)",1,"Petit",833.5
+171,"Autre volaille sur pied",147,"unité (gousse, carcasse etc.)",2,"Moyen",1338
+172,"Con fumé",100,"Kg",0,"taille unique",1000
+172,"Con fumé",126,"morceau",1,"Petit",125
+172,"Con fumé",126,"morceau",2,"Moyen",250
+172,"Con fumé",126,"morceau",3,"Grand",500
+172,"Con fumé",139,"Sachets",3,"Grand",233
+172,"Con fumé",139,"Sachets",2,"Moyen",123
+172,"Con fumé",139,"Sachets",1,"Petit",55
+172,"Con fumé",143,"tas",3,"Grand",458
+172,"Con fumé",143,"tas",1,"Petit",112
+172,"Con fumé",143,"tas",2,"Moyen",241.5
+172,"Con fumé",147,"unité (gousse, carcasse etc.)",2,"Moyen",3000
+172,"Con fumé",147,"unité (gousse, carcasse etc.)",3,"Grand",5000
+172,"Con fumé",147,"unité (gousse, carcasse etc.)",1,"Petit",1500
+172,"Con fumé",562,"cornet",2,"Moyen",124
+173,"Escargots",100,"Kg",0,"taille unique",1000
+173,"Escargots",126,"morceau",3,"Grand",308
+173,"Escargots",126,"morceau",1,"Petit",35
+173,"Escargots",126,"morceau",2,"Moyen",110
+173,"Escargots",139,"Sachets",1,"Petit",250
+173,"Escargots",139,"Sachets",3,"Grand",1000
+173,"Escargots",139,"Sachets",2,"Moyen",500
+173,"Escargots",143,"tas",1,"Petit",86.5
+173,"Escargots",143,"tas",3,"Grand",288
+173,"Escargots",143,"tas",2,"Moyen",151
+173,"Escargots",147,"unité (gousse, carcasse etc.)",3,"Grand",25
+173,"Escargots",147,"unité (gousse, carcasse etc.)",2,"Moyen",15
+173,"Escargots",147,"unité (gousse, carcasse etc.)",1,"Petit",7
+174,"Lait frais non industriel (méwou rate non fermenté)",101,"Litre",0,"taille unique",1000
+174,"Lait frais non industriel (méwou rate non fermenté)",107,"Boite",1,"Petit",233
+174,"Lait frais non industriel (méwou rate non fermenté)",107,"Boite",2,"Moyen",499
+174,"Lait frais non industriel (méwou rate non fermenté)",107,"Boite",3,"Grand",998
+174,"Lait frais non industriel (méwou rate non fermenté)",108,"Boite de tomate/Pot",2,"Moyen",499
+174,"Lait frais non industriel (méwou rate non fermenté)",108,"Boite de tomate/Pot",3,"Grand",998
+174,"Lait frais non industriel (méwou rate non fermenté)",108,"Boite de tomate/Pot",1,"Petit",233
+174,"Lait frais non industriel (méwou rate non fermenté)",113,"Bouteilles",0,"taille unique",500
+174,"Lait frais non industriel (méwou rate non fermenté)",115,"Calebasse",0,"taille unique",2500
+174,"Lait frais non industriel (méwou rate non fermenté)",123,"cup/gobelet",3,"Grand",286
+174,"Lait frais non industriel (méwou rate non fermenté)",123,"cup/gobelet",2,"Moyen",143
+174,"Lait frais non industriel (méwou rate non fermenté)",123,"cup/gobelet",1,"Petit",71.5
+174,"Lait frais non industriel (méwou rate non fermenté)",125,"Louche traditionnelle",1,"Petit",32
+174,"Lait frais non industriel (méwou rate non fermenté)",125,"Louche traditionnelle",3,"Grand",371.28125
+174,"Lait frais non industriel (méwou rate non fermenté)",125,"Louche traditionnelle",2,"Moyen",109
+174,"Lait frais non industriel (méwou rate non fermenté)",139,"Sachets",1,"Petit",92
+174,"Lait frais non industriel (méwou rate non fermenté)",139,"Sachets",3,"Grand",392.391304347826
+174,"Lait frais non industriel (méwou rate non fermenté)",139,"Sachets",2,"Moyen",190
+174,"Lait frais non industriel (méwou rate non fermenté)",142,"seau",3,"Grand",6800
+174,"Lait frais non industriel (méwou rate non fermenté)",142,"seau",1,"Petit",1700
+174,"Lait frais non industriel (méwou rate non fermenté)",142,"seau",2,"Moyen",3400
+174,"Lait frais non industriel (méwou rate non fermenté)",565,"quart de litre",0,"taille unique",250
+174,"Lait frais non industriel (méwou rate non fermenté)",566,"demi litre",0,"taille unique",500
+174,"Lait frais non industriel (méwou rate non fermenté)",993,"bouteille de 1,5 litre",0,"taille unique",1500
+174,"Lait frais non industriel (méwou rate non fermenté)",996,"bouteille de 1 litre",0,"taille unique",998.5
+174,"Lait frais non industriel (méwou rate non fermenté)",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+175,"Huile de karité",101,"Litre",0,"taille unique",1000
+175,"Huile de karité",108,"Boite de tomate/Pot",2,"Moyen",450.5
+175,"Huile de karité",108,"Boite de tomate/Pot",7,"Tres petit",58
+175,"Huile de karité",108,"Boite de tomate/Pot",3,"Grand",1033.5
+175,"Huile de karité",108,"Boite de tomate/Pot",1,"Petit",162
+175,"Huile de karité",113,"Bouteilles",1,"Petit",235
+175,"Huile de karité",113,"Bouteilles",2,"Moyen",909
+175,"Huile de karité",123,"cup/gobelet",0,"taille unique",57.5
+175,"Huile de karité",125,"Louche traditionnelle",0,"taille unique",107
+175,"Huile de karité",139,"Sachets",2,"Moyen",114
+175,"Huile de karité",139,"Sachets",1,"Petit",96.5
+175,"Huile de karité",139,"Sachets",3,"Grand",225
+175,"Huile de karité",565,"quart de litre",0,"taille unique",237.5
+175,"Huile de karité",566,"demi litre",0,"taille unique",430
+175,"Huile de karité",996,"bouteille de 1 litre",0,"taille unique",1000
+175,"Huile de karité",997,"bouteille de 50 cl (demi litre)",0,"taille unique",500
+175,"Huile de karité",1001,"12,5cl(demi walatt)",0,"taille unique",113.5
+175,"Huile de karité",111,"boule (dankk)",1,"Petit",34
+175,"Huile de karité",111,"boule (dankk)",2,"Moyen",62
+175,"Huile de karité",111,"boule (dankk)",3,"Grand",124
+175,"Huile de karité",579,"verre à thé",0,"taille unique",72.5
+175,"Huile de karité",564,"cuillère à soupe",0,"taille unique",19
+176,"Goyave",100,"Kg",0,"taille unique",1000
+176,"Goyave",126,"Morceau",2,"moyen ",25.3285714285714
+176,"Goyave",126,"Morceau",1,"petit",13.1142857142857
+176,"Goyave",126,"Morceau",3,"grand",41.5285714285714
+176,"Goyave",142,"seau",3,"Grand",3204.45
+176,"Goyave",142,"seau",1,"Petit",675
+176,"Goyave",142,"seau",2,"Moyen",1877.175
+176,"Goyave",143,"tas",1,"Petit",180.45
+176,"Goyave",143,"tas",2,"Moyen",270.45
+176,"Goyave",143,"tas",3,"Grand",613.8
+176,"Goyave",147,"unité (gousse, carcasse etc.)",3,"Grand",133.65
+176,"Goyave",147,"unité (gousse, carcasse etc.)",2,"Moyen",90.675
+176,"Goyave",147,"unité (gousse, carcasse etc.)",1,"Petit",50.4
+177,"Champignon frais",100,"Kg",0,"taille unique",1000
+177,"Champignon frais",122,"filet (1 kg)",0,"taille unique",500
+177,"Champignon frais",126,"morceau",3,"Grand",65
+177,"Champignon frais",126,"morceau",1,"Petit",16.25
+177,"Champignon frais",126,"morceau",2,"Moyen",32.5
+177,"Champignon frais",133,"sac",0,"taille unique",21250
+177,"Champignon frais",136,"Sac (25 Kg)",0,"taille unique",12500
+177,"Champignon frais",139,"Sachets",3,"Grand",1575
+177,"Champignon frais",139,"Sachets",1,"Petit",112
+177,"Champignon frais",139,"Sachets",2,"Moyen",500
+177,"Champignon frais",143,"tas",1,"Petit",74
+177,"Champignon frais",143,"tas",3,"Grand",497.75
+177,"Champignon frais",143,"tas",2,"Moyen",126.5
+177,"Champignon frais",147,"unité (gousse, carcasse etc.)",1,"Petit",34
+177,"Champignon frais",147,"unité (gousse, carcasse etc.)",2,"Moyen",60
+177,"Champignon frais",147,"unité (gousse, carcasse etc.)",3,"Grand",83.5
+177,"Champignon frais",986,"filet (5 kg)",0,"taille unique",2500
+177,"Champignon frais",987,"filet (2,5 kg)",0,"taille unique",1250
+178,"Pate de manioc",100,"Kg",0,"taille unique",1000
+178,"Pate de manioc",109,"bol",1,"Petit",106
+178,"Pate de manioc",109,"bol",2,"Moyen",1421
+178,"Pate de manioc",109,"bol",3,"Grand",710.5
+178,"Pate de manioc",143,"tas",1,"Petit",212
+178,"Pate de manioc",143,"tas",3,"Grand",1421
+178,"Pate de manioc",143,"tas",2,"Moyen",710.5
+179,"Poisson séché en condiment",100,"Kg",0,"taille unique",1000
+179,"Poisson séché en condiment",108,"Boite de tomate/Pot",2,"Moyen",434
+179,"Poisson séché en condiment",108,"Boite de tomate/Pot",1,"Petit",217
+179,"Poisson séché en condiment",108,"Boite de tomate/Pot",3,"Grand",868
+179,"Poisson séché en condiment",109,"bol",1,"Petit",179.51867219917
+179,"Poisson séché en condiment",109,"bol",2,"Moyen",208
+179,"Poisson séché en condiment",109,"bol",3,"Grand",241
+179,"Poisson séché en condiment",111,"boule (dankk)",2,"Moyen",33
+179,"Poisson séché en condiment",111,"boule (dankk)",1,"Petit",17
+179,"Poisson séché en condiment",111,"boule (dankk)",3,"Grand",42.5
+179,"Poisson séché en condiment",126,"morceau",3,"Grand",308
+179,"Poisson séché en condiment",126,"morceau",1,"Petit",35
+179,"Poisson séché en condiment",126,"morceau",2,"Moyen",110
+179,"Poisson séché en condiment",139,"Sachets",1,"Petit",55
+179,"Poisson séché en condiment",139,"Sachets",3,"Grand",233
+179,"Poisson séché en condiment",139,"Sachets",2,"Moyen",123
+179,"Poisson séché en condiment",143,"tas",3,"Grand",288
+179,"Poisson séché en condiment",143,"tas",1,"Petit",86.5
+179,"Poisson séché en condiment",143,"tas",2,"Moyen",151
+179,"Poisson séché en condiment",147,"unité (gousse, carcasse etc.)",1,"Petit",137
+179,"Poisson séché en condiment",147,"unité (gousse, carcasse etc.)",2,"Moyen",244
+179,"Poisson séché en condiment",147,"unité (gousse, carcasse etc.)",7,"Tres petit",48
+179,"Poisson séché en condiment",147,"unité (gousse, carcasse etc.)",3,"Grand",1099
+180,"Thé soluble ou infusion",100,"Kg",0,"taille unique",1000
+180,"Thé soluble ou infusion",107,"boîte",1,"petit",50
+180,"Thé soluble ou infusion",107,"boîte",3,"Grand",200
+180,"Thé soluble ou infusion",107,"boîte",2,"moyen",100
+180,"Thé soluble ou infusion",129,"paquet",1,"petit",25
+180,"Thé soluble ou infusion",129,"paquet",3,"Grand",625
+180,"Thé soluble ou infusion",129,"paquet",2,"moyen",250
+180,"Thé soluble ou infusion",139,"sachet",1,"petit",50
+180,"Thé soluble ou infusion",139,"sachet",2,"moyen",125
+180,"Thé soluble ou infusion",139,"sachet",3,"Grand",312.5
+180,"Thé soluble ou infusion",579,"verre à thé",0,"taille unique",72.5

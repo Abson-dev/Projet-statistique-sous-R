@@ -1,0 +1,198 @@
+---
+title: "DEVOIR R"
+author: "Cheikh Oumar DIALLO"
+date: "2025-02-25"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#importation des packages
+```{r}
+
+library(haven)
+library(dplyr)
+library(tidyverse)
+library(gtsummary)
+```
+# chargement des bases
+```{r}
+menage<- haven::read_dta("../data/base_menage.dta")
+fbschil<- haven::read_dta("../data/food_comp_child_baseline.dta")
+fendchil<- haven::read_dta("../data/food_comp_child_endline.dta")
+fbasemth<- haven::read_dta("../data/food_comp_mother_baseline.dta")
+fdmth<- haven::read_dta("../data/food_comp_mother_endline.dta")
+
+```
+#verification des doublons dans la base baseline
+```{r}
+# Identifier les lignes dupliquées
+doublons <- fbschil %>%
+  group_by_all() %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+# Afficher les doublons
+doublons
+
+```
+#verification des doublons dans la base endeline
+```{r}
+# Identifier les lignes dupliquées
+doublons <-fendchil %>%
+  group_by_all() %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+# Afficher les doublons
+doublons
+
+```
+#verification des doublons dans la base menage
+```{r}
+# Identifier les lignes dupliquées
+doublons <-menage %>%
+  group_by_all() %>%
+  filter(n() > 1) %>%
+  ungroup()
+
+# Afficher les doublons
+doublons
+```
+#suppression des doublons dans la Base ménage
+```{r}
+# Lire le fichier .dta
+menage <-haven::read_dta("../data/base_menage.dta")
+
+# Supprimer les doublons
+menage_sans_doublons <- distinct(menage)
+
+# Sauvegarder la base sans doublons
+write_dta(menage_sans_doublons, "menage_sans_doublons.dta")
+
+# Confirmation
+cat("menage sans doublons enregistrée sous 'menage_sans_doublons.dta'")
+```
+#comparaison des noms des variables entre baseline et Endline
+```{r}
+# Lire les deux bases .dta
+fbschil<- haven::read_dta("../data/food_comp_child_baseline.dta")
+fendchil<- haven::read_dta("../data/food_comp_child_endline.dta")
+
+# Comparer les noms des variables
+if (setequal(names(fbschil), names(fendchil))) {
+  cat("Les noms des variables sont identiques.\n")
+} else {
+  cat("Les noms des variables ne sont pas identiques.\n")
+
+  # Afficher les variables différentes
+  cat("Variables présentes uniquement dans fbschil :\n")
+  print(setdiff(names(fbschil), names(fendchil)))
+
+  cat("Variables présentes uniquement dans fendchil :\n")
+  print(setdiff(names(fendchil), names(fbschil)))
+
+  # Harmoniser les colonnes (ajouter les colonnes manquantes avec NA)
+  for (var in setdiff(names(fbschil), names(fendchil))) {
+    fendchil[[var]] <- NA
+  }
+  for (var in setdiff(names(fendchil), names(fbschil))) {
+    fbschil[[var]] <- NA
+  }
+
+  # Réordonner les colonnes pour qu'elles soient dans le même ordre
+  fendchil <- fendchil[, names(fbschil)]
+
+  cat("Les noms des variables ont été harmonisés.\n")
+}
+
+```
+# calcul de la consommation moyenne
+```{r}
+# Calcul de la consommation d'énergie moyenne
+conso_energie_moyenne <- fbasemth %>%
+  summarise(energie_moyenne = mean(protein_g, na.rm = TRUE))
+# Affichage du résultat
+print(conso_energie_moyenne)
+
+```
+
+## Exploration des données
+
+```{r}
+# Afficher les noms des variables
+colnames(fbasemth)
+
+# Aperçu des premières lignes
+tibble::glimpse(fbasemth)
+```
+
+## Calcul de la consommation d'énergie moyenne par repas
+
+```{r}
+# Calcul de la consommation d'énergie moyenne
+conso_energie_moyenne <- fbasemth %>%
+  summarise(energie_moyenne = mean(protein_g, na.rm = TRUE))
+
+# Affichage du résultat
+print(conso_energie_moyenne)
+```
+#Sauvegarde des nouvelles bases
+```{r}
+# i) Sauvegarder les changements pour food_comp_mother_baseline.dta
+write_dta(fbasemth, "mother_baseline_v1.dta")
+
+# ii) Sauvegarder les changements pour food_comp_mother_endline.dta
+write_dta(fdmth, "mother_endline_v1.dta")
+
+# iii) Sauvegarder les changements pour food_comp_child_baseline.dta
+write_dta(fbschil, "child_baseline_v1.dta")
+
+# iv) Sauvegarder les changements pour food_comp_child_endline.dta
+write_dta(fendchil, "child_endline_v1.dta")
+
+# v) Sauvegarder les changements pour base_menage.dta
+write_dta(menage_sans_doublons, "base_menage_final.dta")
+```
+#Fusion des basées 
+```{r}
+#baseline
+# Jointure complète entre les bases des mères et des enfants sur l'identifiant du ménage
+bfinal <- full_join(fbschil, fbschil, by = "hhid")
+# Aperçu du résultat
+head(bfinal)
+```
+#renommer les variables
+```{r}
+# Renommer toutes les colonnes de consommation en ajoutant le suffixe _b
+bfinal <- bfinal %>%
+  rename_with(~ paste0(., "_b"), .cols = matches("energ_kcal|protein_g|lipid_tot_g|calcium_mg|iron_mg|vit_b6_mg|vit_b12_mcg|vit_c_mcg"))
+
+# Vérifier les nouveaux noms des colonnes
+colnames(bfinal)
+```
+# Base endline
+```{r}
+#basendeline
+# Jointure complète entre les bases des mères et des enfants sur l'identifiant du ménage
+bfinal2 <- full_join(fdmth, fendchil, by = "hhid")
+# Aperçu du résultat
+head(bfinal2)
+```
+#renomage des variables
+```{r}
+# Renommer toutes les colonnes de consommation en ajoutant le suffixe _e
+bfinal2 <- bfinal2 %>%
+  rename_with(~ paste0(., "_e"), .cols = matches("energ_kcal|protein_g|lipid_tot_g|calcium_mg|iron_mg|vit_b6_mg|vit_b12_mcg|vit_c_mcg"))
+
+# Vérifier les nouveaux noms des colonnes
+colnames(bfinal2)
+```
+
+
+
+
+

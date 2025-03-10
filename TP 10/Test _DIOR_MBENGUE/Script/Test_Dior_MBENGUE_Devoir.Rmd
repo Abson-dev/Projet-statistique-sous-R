@@ -29,24 +29,26 @@ fm_endline<-haven::read_dta("../data/food_comp_mother_endline.dta")
 #Vérification de l'existence de doublon
 ```{r}
 #base ménage
-duplicated(men)
 sum(duplicated(men))
+head(duplicated(men), 1)
 
 #base food_comp_child_baseline
-duplicated(fc_baseline)
 sum(duplicated(fc_baseline))
+head(duplicated(fc_baseline), 1)
+
 
 #base food_comp_child_endline
-duplicated(fc_endline)
 sum(duplicated(fc_endline))
+head(duplicated(fc_endline), 1)
 
 #base food_comp_mother_baseline
-duplicated(fm_baseline)
+
 sum(duplicated(fm_baseline))
+head(duplicated(fm_baseline), 1)
 
 # base food_comp_mother_endline
-duplicated(fm_endline)
 sum(duplicated(fm_endline))
+head(duplicated(fm_endline), 1)
 
 ```
 #Supression des doublons dans la base ménage
