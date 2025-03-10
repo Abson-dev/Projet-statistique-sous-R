@@ -1,0 +1,471 @@
+---
+title: "Travail Pratique 8"
+author: "LAWA Prosper et CHEICK Oumar"
+output: html_document
+---
+
+```{r, results=FALSE, message=FALSE, include=FALSE}
+# Installation des packages
+packages <- c("readr", "readxl", "dplyr", "utils","gtsummary")
+install_if_missing <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+invisible(lapply(packages, install_if_missing))
+
+# Charger les packages
+library(readr)
+library(haven)
+library(spData)
+library(mapsf)
+library(sf)       # Pour les données spatiales
+library(tmap)    # for static and interactive maps
+library(ggplot2)
+library(readxl)  
+library(dplyr)
+library(utils)
+library(gtsummary)
+library(leaflet)  # Créer des cartes interactives.
+library(raster)   # Manipuler et analyser des données raster
+library(terra)    # Pour la gestion des données raster et vectorielles
+library(leaflet.extras)
+library(viridis)  # Générer des palettes de couleurs
+library(exactextractr)  #   Calculer des statistiques sur des raster 
+library(ggspatial)
+```
+
+# Base Mali
+
+Dans cette partie nous nous intéresserons à la représentation spatiale des données de l'echvm 2021 du Mali. Nous représenterons d'abord les cartes au niveau régional, départemental puis communal.
+
+```{r, message=FALSE, include=FALSE}
+base <- read_csv("../donnees/TP5_G3_FinalMergedData.csv") # charger de la base
+```
+
+```{r, message=FALSE, include=FALSE}
+str(base)
+```
+
+```{r, message=FALSE, include=FALSE}
+dim(base)
+```
+
+```{r, message=FALSE, include=FALSE}
+colnames(base)
+```
+
+## Cartes au niveau régional
+
+```{r, message=FALSE, warning=FALSE}
+# chargement du shapfile du Mali niveau régional
+shp1 <- st_read("../donnees/mli_admbnda_adm1_1m_gov_20211220.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, include=FALSE, warning=FALSE}
+colnames(shp1)
+```
+
+### Jointure entre la base du TP4 et le shapefile
+
+Calculons la moyenne de quelques variables pertinentes par régions pour la représentation. Nous déterminerons l'age moyen par région, l'age moyen au premier mariage par région, le volume horaire de travail moyen par région et enfin le salaire moyen par région.
+
+```{r, message=FALSE, warning=FALSE}
+base_moy <- base %>% 
+  group_by(admin1Name_fr) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin1Name_fr,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+Jointure de la base contenant les variables aggrégées selon la moyenne au niveau régional et du shapefile niveau région.
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_shp <- left_join(shp1,base_moy, by = c("ADM1_FR" = "admin1Name_fr"))
+```
+
+### Age moyen par région
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_shp$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Âge moyen :</b>", sprintf("%.2f", age_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+### Volume horaire moyen emploi principal par région
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_shp$volhor_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(volhor_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Volume horaire/an moyen :</b>", sprintf("%.2f", volhor_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp$volhor_moyen,
+    title = "Volume horaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+### Age moyen au premier mariage par région
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp$agemar_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(agemar_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", agemar_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp$agemar_moyen,
+    title = "Age moyen au premier mariage par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+### Salaire moyen emploi principal par région
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp$salaire_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(salaire_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", salaire_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp$salaire_moyen,
+    title = "Salaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveau préfecture
+
+```{r, message=FALSE, warning=FALSE}
+shp2 <- st_read("../donnees/mli_admbnda_adm2_1m_gov_20211220.shp", quiet= TRUE)
+names(shp2)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy2 <- base %>% 
+  group_by(admin2Name_fr) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin2Name_fr,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_shp2 <- left_join(shp2,base_moy2, by = c("ADM2_FR" = "admin2Name_fr"))
+```
+
+### Age moyen par préfecture
+
+```{r, message=FALSE, warning=FALSE}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp2) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Préfecture :</b>", ADM2_FR, "<br>",
+                   "<b>Âge moyen :</b>", sprintf("%.2f", age_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp2$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveaux communes
+
+```{r, message=FALSE, warning=FALSE}
+shp3 <- st_read("../donnees/mli_admbnda_adm3_1m_gov_20211220.shp", quiet= TRUE)
+names(shp3)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy3 <- base %>% 
+  group_by(admin3Pcode) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin3Pcode,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_shp3 <- left_join(shp3,base_moy3, by = c("ADM3_PCODE" = "admin3Pcode"))
+```
+
+### Age moyen par commune
+
+```{r}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp3$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp3) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM3_FR, "<br>",
+                   "<b>Âge moyen :</b>", sprintf("%.2f", age_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp3$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+# Base Sénégal
+
+```{r, message=FALSE, include=FALSE}
+base_SN <- read_dta("../donnees/data_final_SEN.dta") # charger de la base
+```
+
+```{r, message=FALSE, include=FALSE}
+str(base_SN)
+```
+
+```{r, message=FALSE, include=FALSE}
+colnames(base_SN)
+```
+
+## Cartes au niveau régional
+
+```{r, message=FALSE, warning=FALSE}
+# chargement des shapfiles du Mali niveau régional
+shp_SN1 <- st_read("../donnees/sen_admbnda_adm1_anat_20240520.shp", quiet= TRUE)
+names(shp_SN1)
+```
+
+```{r, message=FALSE, warning=FALSE}
+leaflet(shp_SN1) %>%
+  addTiles() %>%  # Ajoute la couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = "blue", fillOpacity = 0.5,
+    popup = ~ADM1_FR 
+  ) %>%
+  addResetMapButton() %>%  # Bouton pour recentrer la carte
+  addFullscreenControl()   # Mode plein écran
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy <- base_SN %>% 
+  group_by(ADM1_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM1_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_shp1 <- left_join(shp_SN1,base_moy, by = "ADM1_FR")
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_shp1$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp1) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Âge moyen :</b>", sprintf("%.2f", age_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp1$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_shp1$volhor_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp1) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(volhor_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Volume horaire/an moyen :</b>", sprintf("%.2f", volhor_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp1$volhor_moyen,
+    title = "Volume horaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp1$agemar_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp1) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(agemar_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", agemar_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp1$agemar_moyen,
+    title = "Age moyen au premier mariage par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_shp1$salaire_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_shp1) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(salaire_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", salaire_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_shp1$salaire_moyen,
+    title = "Salaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveau préfecture
+
+```{r, message=FALSE, warning=FALSE}
+shp4 <- st_read("../donnees/sen_admbnda_adm2_anat_20240520.shp", quiet= TRUE)
+names(shp4)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moySN2 <- base_SN %>% 
+  group_by(ADM2_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM2_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moySN_shp2 <- left_join(shp4,base_moySN2, by = "ADM2_FR")
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moySN_shp2$agemar_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moySN_shp2) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(agemar_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM2_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", agemar_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moySN_shp2$agemar_moyen,
+    title = "Age moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveau communes
+
+```{r, message=FALSE, warning=FALSE}
+shp5 <- st_read("../donnees/sen_admbnda_adm3_anat_20240520.shp", quiet= TRUE)
+names(shp5)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moySN3 <- base_SN %>% 
+  group_by(ADM3_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM3_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moySN_shp3 <- left_join(shp5,base_moySN3, by = "ADM3_FR")
+```
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moySN_shp3$agemar_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moySN_shp3) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(agemar_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM3_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", sprintf("%.2f", agemar_moyen)) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moySN_shp3$agemar_moyen,
+    title = "Age moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
