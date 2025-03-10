@@ -1,0 +1,770 @@
+---
+title: 'TP8 : CARTOGRAPHIE AVEC R'
+author: "ALBERT ZINABA et DJERAKEI MISTALENGAR"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Connexion internet requise:
+
+Les cartes interactives générées dans ce document utilisent des
+bibliothèques JavaScript (telles que leaflet) qui nécessitent une
+connexion Internet pour fonctionner correctement. Il faut être connecté
+à Internet pour visualiser les cartes interactives.
+
+#### Installation et chargement des packages
+
+```{r message=FALSE, warning=FALSE}
+
+# Liste des packages nécessaires
+
+packages <- c("sf", "ggplot2", "tmap", "leaflet", "RColorBrewer", "viridis", 
+              "viridisLite", "rnaturalearth", "readr", "haven", "utils", 
+              "dplyr", "ggspatial")
+
+# Vérification et installation
+invisible(lapply(packages, function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, quiet = TRUE)  
+  }
+  if (!pkg %in% .packages()) {  
+    suppressMessages(library(pkg, character.only = TRUE))
+  }
+}))
+
+```
+
+```{r}
+# Supprimer toutes les variables de l'environnement
+rm(list = ls())
+```
+
+#### Introduction
+
+Ce document R Markdown présente une analyse géospatiale des données de
+l'enquête EHCVM (Enquête harmonisée sur les Conditions de Vie des
+Ménages) au Burkina Faso. L'analyse est divisée en deux parties
+principales : la première partie se concentre sur la visualisation des
+données des ménages à différents niveaux administratifs (régions,
+départements, communes), tandis que la deuxième partie se concentre sur
+la création de cartes administratives du Burkina Faso à partir de
+fichiers shapefile.
+
+# Partie I : Analyse des données des ménages
+
+```{r echo=FALSE, include=FALSE}
+
+# Chargement de la base
+
+base <- haven::read_dta("../Donnees/EHCVM_HDX_Burkina.dta")
+
+
+```
+
+```{r}
+#  Convertir toutes les variables `labelled` en `factor`
+base <- base %>%
+  mutate(across(where(is.labelled), ~ as_factor(.)))
+
+# Aperçu dela base
+head(base)
+```
+
+Les valeurs manquantes dans les colonnes de coordonnées (latitude et
+longitude) sont vérifiées et les lignes correspondantes sont supprimées.
+Les variables étiquetées sont converties en facteurs pour faciliter
+l'analyse.
+
+```{r}
+# Vérifier les valeurs manquantes dans les colonnes de coordonnées
+
+sum(is.na(base$GPS__Longitude))  # Nombre de valeurs manquantes dans GPS__Longitude
+
+sum(is.na(base$GPS__Latitude))   # Nombre de valeurs manquantes dans GPS__Latitude
+
+# Option 1 : Supprimer les lignes avec des coordonnées manquantes
+base_clean <- base %>%
+  filter(!is.na(GPS__Longitude) & !is.na(GPS__Latitude))
+
+
+# Convertir en objet géospatial après nettoyage
+base_sf <- st_as_sf(base_clean, coords = c("GPS__Longitude", "GPS__Latitude"), crs = 4326)
+
+# Aperçu de l'objet géospatial
+head(base_sf)
+```
+
+Visualisation des données par niveau administratif.
+
+#### Agrégation par régions
+
+```{r}
+
+regions <- base_sf %>%
+  group_by(ADM1_FR) %>%
+  summarise(n = n()) %>%
+  st_centroid()  # Calculer les centroïdes pour placer les points
+
+# Palette de couleurs pour les régions
+pal_regions <- colorNumeric("viridis", regions$n)
+
+# Carte dynamique par département
+leaflet(regions) %>%
+  addTiles() %>%  # Ajouter un fond de carte OpenStreetMap
+  addCircleMarkers(
+    radius = ~sqrt(n) * 2,  # Taille proportionnelle au nombre de ménages
+    color = ~pal_regions(n),  # Couleur en fonction du nombre de ménages
+    stroke = FALSE,  # Pas de contour
+    fillOpacity = 0.8,  # Opacité des points
+    popup = ~paste(  # Popup avec des informations supplémentaires
+      "<b>Régions:</b> ", ADM1_FR, "<br>",
+      "<b>Nombre de ménages:</b> ", n
+    )
+  ) %>%
+  addLegend(  # Ajouter une légende
+    position = "bottomright",
+    pal = pal_regions,
+    values = ~n,
+    title = "Nombre de ménages"
+  ) %>%
+  setView(lng = -1.5, lat = 12.5, zoom = 6 )%>% addScaleBar()  # Centrer la carte sur le Burkina Faso
+
+```
+
+#### Agrégation par département
+
+```{r}
+
+departements <- base_sf %>%
+  group_by(ADM2_FR) %>%
+  summarise(n = n()) %>%
+  st_centroid()  # Calculer les centroïdes pour placer les points
+
+# Palette de couleurs pour les départements
+pal_departements <- colorNumeric("viridis", departements$n)
+
+# Carte dynamique par département
+leaflet(departements) %>%
+  addTiles() %>%  # Ajouter un fond de carte OpenStreetMap
+  addCircleMarkers(
+    radius = ~sqrt(n) * 2,  # Taille proportionnelle au nombre de ménages
+    color = ~pal_departements(n),  # Couleur en fonction du nombre de ménages
+    stroke = FALSE,  # Pas de contour
+    fillOpacity = 0.8,  # Opacité des points
+    popup = ~paste(  # Popup avec des informations supplémentaires
+      "<b>Département:</b> ", ADM2_FR, "<br>",
+      "<b>Nombre de ménages:</b> ", n
+    )
+  ) %>%
+  addLegend(  # Ajouter une légende
+    position = "bottomright",
+    pal = pal_departements,
+    values = ~n,
+    title = "Nombre de ménages"
+  ) %>%
+  setView(lng = -1.5, lat = 12.5, zoom = 6 )%>% addScaleBar()  # Centrer la carte sur le Burkina Faso
+```
+
+#### Agrégation par commune
+
+```{r}
+communes <- base_sf %>%
+  group_by(ADM3_FR) %>%
+  summarise(n = n()) %>%
+  st_centroid()  # Calculer les centroïdes pour placer les points
+
+# Palette de couleurs pour les communes
+pal_communes <- colorNumeric("plasma", communes$n)
+
+# Carte dynamique par commune
+leaflet(communes) %>%
+  addTiles() %>%  # Ajouter un fond de carte OpenStreetMap
+  addCircleMarkers(
+    radius = ~sqrt(n) * 2,  # Taille proportionnelle au nombre de ménages
+    color = ~pal_communes(n),  # Couleur en fonction du nombre de ménages
+    stroke = FALSE,  # Pas de contour
+    fillOpacity = 0.8,  # Opacité des points
+    popup = ~paste(  # Popup avec des informations supplémentaires
+      "<b>Commune:</b> ", ADM3_FR, "<br>",
+      "<b>Nombre de ménages:</b> ", n
+    )
+  ) %>%
+  addLegend(  # Ajouter une légende
+    position = "bottomright",
+    pal = pal_communes,
+    values = ~n,
+    title = "Nombre de ménages"
+  ) %>%
+  setView(lng = -1.5, lat = 12.5, zoom = 6) %>% addScaleBar()  # Centrer la carte sur le Burkina Faso
+```
+
+#### Carte par milieu de résidence (urbain/rural - s00q04).
+
+Cette carte montre la répartition des ménages entre urbain et rural.
+
+```{r}
+
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q04))
+
+# Création d'une palette de couleurs
+pal_milieu <- colorFactor(c("blue", "green"), domain = c("Rural", "Urbain")) 
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_milieu(s00q04),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Milieu:", ifelse(s00q04 == 1, "Urbain", "Rural"))
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_milieu,
+    values = ~s00q04,
+    labels = c("Urbain", "Rural"),
+    title = "Milieu de résidence"
+  )
+```
+
+#### Carte des types de ménages (s00q07a).
+
+Cette carte affiche les types de ménages présents dans la base de
+données.
+
+```{r}
+
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q07a))
+
+# Palette de couleurs pour les types de ménages
+pal_type_menage <- colorFactor("viridis", domain = unique(base_sf$s00q07a))
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_type_menage(s00q07a),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Type de ménage:", s00q07a)
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_type_menage,
+    values = ~s00q07a,
+    title = "Type de ménage"
+  )
+```
+
+#### Carte des ménages récemment installés (s00q07b).
+
+Cette carte montre les ménages vivant dans la localité depuis moins de 5
+ans.
+
+```{r}
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q07b))
+
+# Palette de couleurs
+pal_migration <- colorFactor(c("red", "green"), domain = c("Oui", "Non"))  # 1 = Oui, 2 = Non
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_migration(s00q07b),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Installation récente:", ifelse(s00q07b == 1, "Oui", "Non"))
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_migration,
+    values = ~s00q07b,
+    labels = c("Oui", "Non"),
+    title = "Moins de 5 ans dans la localité"
+  )
+```
+
+Carte des ménages ayant fui un conflit ou une catastrophe (s00q07c)
+Cette carte montre les ménages ayant quitté leur ancienne localité à
+cause d'un conflit ou d'une catastrophe naturelle.
+
+```{r}
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q07c))
+
+# Palette de couleurs
+pal_conflit <- colorFactor(c("green", "red"), domain = c("Oui", "Non"))  # 1 = Oui, 2 = Non
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_conflit(s00q07c),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_conflit,
+    values = ~s00q07c,
+    labels = c("Oui", "Non"),
+    title = "Départ pour conflit/catastrophe"
+  )
+```
+
+Carte des ménages ayant participé aux enquêtes précédentes (s00q07d2)
+Cette carte identifie les ménages qui ont déjà été interviewés dans une
+enquête antérieure.
+
+```{r}
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q07d2))
+
+# Palette de couleurs
+pal_ancien_menage <- colorFactor(c("purple", "orange"), domain = c("Oui", "Non"))  
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_ancien_menage(s00q07d2),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_ancien_menage,
+    values = ~s00q07d2,
+    labels = c("Oui", "Non"),
+    title = "Interviewé en 2018/2019"
+  )
+
+```
+
+Carte des résultats des interviews (s00q08) Cette carte permet de
+visualiser le statut des interviews réalisées.
+
+```{r}
+# Recoder correctement les modalities
+
+base_sf$s00q08 <- recode(base_sf$s00q08,
+                         "Rempli, mÃ©nage sÃ©lectionnÃ©" = "Ménage sélectionné",
+                         "Rempli, mÃ©nage de remplacement" = "Ménage de remplacement")
+```
+
+```{r}
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q08))
+
+# Palette de couleurs
+pal_resultat <- colorFactor("plasma", domain = unique(base_sf$s00q08))
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_resultat(s00q08),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Résultat de l'interview:", s00q08)
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_resultat,
+    values = ~s00q08,
+    title = "Résultat de l'interview"
+  )
+```
+
+#### Carte croisant la migration récente (s00q07b) et la raison du départ (s00q07c).
+
+L'objectif est de voir si les ménages récemment installés l'ont fait à
+cause de conflits ou de catastrophes naturelles.
+
+```{r warning=FALSE}
+
+# Création d'une variable combinée pour croiser les deux variables (migration récente et raison du départ)
+
+base_sf <- base_sf %>%
+  mutate(
+    migration_raison = case_when(
+      s00q07b == "Oui" & s00q07c == "Oui" ~ "Migration récente - Conflit",
+      s00q07b == "Oui" & s00q07c == "Non" ~ "Migration récente - Catastrophe naturelle",
+      s00q07b == "Non" & s00q07c == "Oui" ~ "Migration ancienne - Conflit",
+      s00q07b == "Non" & s00q07c == "Non" ~ "Migration ancienne - Catastrophe naturelle",
+      TRUE ~ "Inconnu"
+    ),
+    migration_raison = factor(migration_raison, levels = c(
+      "Migration récente - Conflit", "Migration récente - Catastrophe naturelle",
+      "Migration ancienne - Conflit", "Migration ancienne - Catastrophe naturelle",
+      "Inconnu"
+    ))
+  )
+
+# Vérification de la répartition des catégories
+print(table(base_sf$migration_raison))  # Affiche la distribution des catégories
+
+# Palette de couleurs avec des couleurs distinctes pour chaque combinaison
+pal_migration_raison <- colorFactor(
+  c("green", "blue", "orange", "red"),
+  domain = levels(base_sf$migration_raison)  # Assurez-vous que chaque catégorie a une couleur distincte
+)
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_migration_raison(migration_raison),
+    radius = 5,  # Ajustez la taille des points pour les rendre plus visibles
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Migration et Raison du départ:", migration_raison)  # Afficher la catégorie au survol
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_migration_raison,
+    values = ~migration_raison,
+    title = "Migration et Raisons du départ"
+  )
+
+```
+
+#### Carte croisant la participation aux enquêtes précédentes (s00q07d) et le résultat de l'interview (s00q08).
+
+L'objectif est de voir si les ménages déjà interrogés en 2018/2019 ont
+des résultats d'interview différents dans cette enquête.
+
+```{r}
+# Vérification et nettoyage
+base_sf <- base_sf %>% filter(!is.na(s00q07d), !is.na(s00q08))
+
+# Création d'une variable combinée
+base_sf <- base_sf %>%
+  mutate(
+    ancien_menage_resultat = paste("Enquête 2018/2019:", ifelse(s00q07d == 1, "Oui", "Non"), "- Résultat:", s00q08)
+  )
+
+# Palette de couleurs
+pal_enquete_resultat <- colorFactor("plasma", domain = unique(base_sf$ancien_menage_resultat))
+
+# Carte interactive
+leaflet(base_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    color = ~pal_enquete_resultat(ancien_menage_resultat),
+    radius = 3,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste("Catégorie:", ancien_menage_resultat)
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_enquete_resultat,
+    values = ~ancien_menage_resultat,
+    title = "Participation et Résultat"
+  )
+```
+
+#### Carte des proportions de ménages urbains/ruraux par région.
+
+```{r}
+
+# Vérification et nettoyage des données
+base_sf <- base_sf %>% filter(!is.na(s00q04), !is.na(ADM1_FR))
+
+# Agrégation des données : Nombre total de ménages par région et par milieu
+base_agg <- base_sf %>%
+  group_by(ADM1_FR, s00q04) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(milieu = ifelse(s00q04 == 1, "Urbain", "Rural"))  # Conversion en texte
+
+# Calcul des proportions (%)
+base_agg <- base_agg %>%
+  group_by(ADM1_FR) %>%
+  mutate(total = sum(n), proportion = round((n / total) * 100, 1)) %>%
+  ungroup()
+
+# Création d'une palette de couleurs
+pal_milieu_region <- colorFactor(c("blue", "green"), domain = base_agg$s00q04)
+
+# Carte interactive avec proportions
+leaflet(base_agg) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = jitter(rep(-1.5, nrow(base_agg))),  # Position fictive (ajustez selon les coordonnées)
+    lat = jitter(rep(12.5, nrow(base_agg))),  # Idéalement, utilisez les centroïdes des régions
+    color = ~pal_milieu_region(s00q04),
+    radius = ~sqrt(n) * 2,  # Taille proportionnelle au nombre de ménages
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste0(
+      "<b>Région:</b> ", ADM1_FR, "<br>",
+      "<b>Milieu:</b> ", s00q04, "<br>",
+      "<b>Ménages:</b> ", n, "<br>",
+      "<b>Proportion:</b> ", proportion, " %"
+    )
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_milieu_region,
+    values = ~s00q04,
+    title = "Milieu (Urbain/Rural)"
+  )
+```
+
+#### Proportions de ménages urbains/ruraux par département.
+
+```{r}
+
+# Vérification et nettoyage des données
+base_sf <- base_sf %>% filter(!is.na(s00q04), !is.na(ADM2_FR))
+
+# Agrégation des données : Nombre total de ménages par département et par milieu
+base_agg <- base_sf %>%
+  group_by(ADM2_FR, s00q04) %>%
+  summarise(n = n(), .groups = "drop") 
+# Calcul des proportions (%)
+base_agg <- base_agg %>%
+  group_by(ADM2_FR) %>%
+  mutate(total = sum(n), proportion = round((n / total) * 100, 1)) %>%
+  ungroup()
+
+# Création d'une palette de couleurs
+pal_milieu_departement <- colorFactor(c("red", "green"), domain = base_agg$s00q04)
+
+# Carte interactive avec proportions
+leaflet(base_agg) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = jitter(rep(-1.5, nrow(base_agg))),  # Position fictive (ajustez selon les coordonnées)
+    lat = jitter(rep(12.5, nrow(base_agg))),  # Idéalement, utilisez les centroïdes des départements
+    color = ~pal_milieu_departement(s00q04),
+    radius = ~sqrt(n) * 2,  # Taille proportionnelle au nombre de ménages
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    popup = ~paste0(
+      "<b>Département:</b> ", ADM2_FR, "<br>",
+      "<b>Milieu:</b> ", s00q04, "<br>",
+      "<b>Ménages:</b> ", n, "<br>",
+      "<b>Proportion:</b> ", proportion, " %"
+    )
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = pal_milieu_departement,
+    values = ~s00q04,
+    title = "Milieu (Urbain/Rural)"
+  )
+
+```
+
+# Partie II : Cartes administratives du Burkina Faso
+
+```{r}
+#Charger les fichiers pour les cartes 
+
+shapefile_pays<- sf::st_read("../Donnees/BFA_adm/BFA_adm0.shp")
+shapefile_regions <- st_read("../Donnees/BFA_adm/BFA_adm1.shp")
+shapefile_provinces <- st_read("../Donnees/BFA_adm/BFA_adm2.shp")
+shapefile_communes<- st_read("../Donnees/BFA_adm/BFA_adm3.shp")
+
+# Verification des noms
+colnames(shapefile_pays)
+colnames(shapefile_regions)
+colnames(shapefile_provinces)
+colnames(shapefile_communes)
+```
+
+#### Carte du Burkina Faso
+
+Nous utilisons les packages ggplot2 et geom_sf() pour tracer une carte
+du Burkina Faso à partir d'un shapefile.
+
+```{r warning=FALSE}
+
+# La carte avec ggplot2
+carte_pays <- ggplot() +
+  geom_sf(data = shapefile_pays, fill = "lightblue", color = "black", size = 0.4) +
+  annotation_north_arrow(
+    location = "tl", which_north = "true",
+    style = north_arrow_fancy_orienteering() ) +
+  annotation_scale(
+    location = "br", width_hint = 0.3 ) +
+  labs(
+    title = "Carte du Burkina Faso",
+    caption = "Auteurs : A. Zinaba & M. Djerakei") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "darkblue", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, color = "black", hjust = 0.5),
+    plot.caption = element_text(size = 10, face = "italic", color = "gray40"),
+    panel.border = element_rect(color = "black", fill = NA, size = 1),
+    panel.grid.major = element_line(color = "gray90", linetype = "dashed"))
+
+# Afficher la carte
+carte_pays
+
+```
+
+#### Creation de la carte des regions du Burkina Faso, premier découpage administratif.
+
+Nous créons une carte des régions du Burkina Faso en attribuant une
+couleur unique à chaque région, et affichons les noms des régions avec
+des éléments visuels comme une boussole et une échelle.
+
+```{r warning=FALSE}
+
+
+# Génération d'une palette de couleurs unique pour chaque région
+nb_regions <- length(unique(shapefile_regions$NAME_1))
+palette_regions <- setNames(viridis_pal(option = "D")(nb_regions), unique(shapefile_regions$NAME_1))
+
+# Création de  la carte
+carte_regions <- ggplot() +
+  # Remplissage des régions avec des couleurs uniques
+  geom_sf(data = shapefile_regions, aes(fill = NAME_1), color = "black", size = 0.3) +
+  
+  # Ajout des noms des régions
+  geom_sf_label(data = shapefile_regions, aes(label = NAME_1), color = "black", size = 3, fill = "white") +
+  
+  # Ajout d'une boussole en haut à gauche
+  annotation_north_arrow(
+    location = "tl", which_north = "true",
+    style = north_arrow_fancy_orienteering() ) +
+  annotation_scale(
+    location = "br", width_hint = 0.3) +
+
+  # Légendes
+  labs(
+    title = "Carte des régions du Burkina Faso",
+    subtitle = "",
+    caption = "Auteurs : A. Zinaba & M. Djerakei",
+    fill = "Régions") +
+
+  scale_fill_manual(values = palette_regions) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "darkblue", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, color = "black", hjust = 0.5),
+    plot.caption = element_text(size = 10, face = "italic", color = "gray40"),
+    legend.position = "right",
+    panel.grid.major = element_line(color = "gray90", linetype = "dashed"))
+
+# Afficher la carte
+carte_regions
+
+```
+
+#### Creation de la carte des provinces du Burkina Faso, deuxième decoupage administratif.
+
+Nous créons une carte des provinces du Burkina Faso en utilisant ggplot2
+et un fichier shapefile. Une couleur unique est attribué à chaque
+province via la palette viridis. Des étiquettes pour les noms des
+provinces, une boussole sont ajoutés.
+
+```{r warning=FALSE}
+
+# Une palette de couleurs unique pour chaque province
+nb_provinces <- length(unique(shapefile_provinces$NAME_2))
+palette_provinces <- setNames(viridis_pal(option = "D")(nb_provinces), unique(shapefile_provinces$NAME_2))
+
+# Création de la carte avec ggplot2
+carte_provinces <- ggplot() +
+  geom_sf(data = shapefile_provinces, aes(fill = NAME_2), color = "black", size = 0.3) +
+  
+  # Ajout des noms des provinces
+  geom_sf_label(data = shapefile_provinces, aes(label = NAME_2), color = "black", size = 2, fill = "white") +
+  
+  # Ajout d'une boussole en haut à gauche
+  annotation_north_arrow(
+    location = "tl", which_north = "true",
+    style = north_arrow_fancy_orienteering()) +
+
+  # Ajout d'une échelle en bas à droite
+  annotation_scale(
+    location = "br", width_hint = 0.3) +
+  
+  # Légende et titres
+  labs(
+    title = "Provinces du Burkina Faso",
+    subtitle = "",
+    caption = "Auteurs : A. Zinaba & M. Djerakei",
+    fill = "Provinces") +
+
+  # Palette de couleurs pour les provinces
+  scale_fill_manual(values = palette_provinces) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "darkblue", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, color = "black", hjust = 0.5),
+    plot.caption = element_text(size = 10, face = "italic", color = "gray40"),
+    legend.position = "right",
+    panel.grid.major = element_line(color = "gray90", linetype = "dashed"))
+
+# Afficher la carte
+carte_provinces
+
+```
+
+#### Creation de la carte des communes troisieme decoupage adminitratif.
+
+Nous créons une carte des communes du Burkina Faso, en les regroupant
+par région. Nous ajoutons une colonne "region" dans le shapefile pour
+associer chaque commune à sa région, puis génère une palette de couleurs
+unique pour chaque région pour une meilleure visibilité.
+
+```{r}
+
+# Ajouter une colonne pour le regroupement 
+shapefile_communes$region <- shapefile_communes$NAME_1  # Utiliser la colonne des régions
+
+# Génération d'une palette de couleurs unique pour chaque région
+palette_regions <- setNames(viridis(length(unique(shapefile_communes$region))), unique(shapefile_communes$region))
+
+# Créons la carte avec un regroupement par région
+carte_communes_regroupees <- ggplot(shapefile_communes) +
+  geom_sf(aes(fill = region), color = "black", size = 0.1) + # Remplir avec la variable région
+  scale_fill_manual(values = palette_regions, name = "Région") + # Utiliser la palette de couleurs générée
+  labs(title = "Carte des communes du Burkina Faso de chaque région",
+       subtitle = "",
+       caption = "Auteurs : A. Zinaba & M. Djerakei") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"), 
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(size = 10),  
+    legend.title = element_text(size = 10), 
+    legend.text = element_text(size = 8), 
+    legend.key.size = unit(0.5, "cm") 
+  )
+
+carte_communes_regroupees
+```
+
+#### Conclusion
+
+Ce document fournit une analyse géospatiale des données des ménages au
+Burkina Faso, en utilisant des cartes interactives pour visualiser les
+données à différents niveaux administratifs. Les cartes permettent de
+mieux comprendre la répartition des ménages, leurs caractéristiques, et
+les dynamiques de migration et de résidence. La deuxième partie du
+document se concentre sur la création de cartes administratives du
+Burkina Faso, en utilisant des fichiers shapefile pour représenter les
+différents niveaux administratifs.
