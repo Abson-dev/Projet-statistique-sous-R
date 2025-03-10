@@ -30,7 +30,7 @@ for (pkg in packages) {
 ```{r}
 # Chargement des fichiers
 
-ind <- haven::read_dta("./Données/ehcvm_individu_sen2021.dta")
+ind <- haven::read_dta("../Données/ehcvm_individu_sen2021.dta")
 
 ```
 
@@ -99,7 +99,7 @@ La comparaison entre les deux tableaux met en évidence l'impact de la pondérat
 
 ```{r}
 
-men <- haven::read_dta("./Données/ehcvm_menage_sen2021.dta")
+men <- haven::read_dta("../Données/ehcvm_menage_sen2021.dta")
 
 men_ind <- left_join(ind, men, by = "hhid")
 

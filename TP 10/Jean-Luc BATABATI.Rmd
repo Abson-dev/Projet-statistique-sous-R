@@ -242,10 +242,11 @@ Ici nous avons 5976 valeurs manquantes. On peut aussi voir la répartition de ce
 ## 4.	Consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base
 
 ```{r}
-M_baseline %>% summarise(Energie_moy = mean(energ_kcal, na.rm = TRUE))
+M_baseline %>%
+  group_by(s1_q0) %>%
+  summarise(Energie_moy = mean(energ_kcal, na.rm = TRUE))
 
 ```
-La consommation d’énergie moyenne à chaque repas pour l’ensemble des mères est de 714,7165
 
 
 ## 5- Sauvegarde des données sous un autre nom

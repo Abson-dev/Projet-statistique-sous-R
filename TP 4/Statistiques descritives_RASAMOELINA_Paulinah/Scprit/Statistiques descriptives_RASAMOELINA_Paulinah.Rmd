@@ -16,6 +16,14 @@ library(gtsummary)
 library(haven)
 ```
 
+```{r}
+#test   
+
+#test  
+
+```
+
+
 ## R Markdown
 ```{r}
 basemenage <- haven::read_dta("../Données/ehcvm_menage_ner2021.dta")

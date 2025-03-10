@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.2.11)  18 FEB 2025 14:45
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2025.2.11)  10 MAR 2025 15:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1072,101 +1072,68 @@ LaTeX Font Info:    Font shape `TU/FranklinGothicDemiCond(0)/m/it' will be
 LaTeX Font Info:    Font shape `TU/Cambria(0)/m/n' will be
 (Font)              scaled to size 24.88pt on input line 178.
 LaTeX Font Info:    Font shape `TU/CourierNew(0)/m/n' will be
-(Font)              scaled to size 11.03928pt on input line 218.
+(Font)              scaled to size 11.03928pt on input line 219.
 LaTeX Font Info:    Font shape `TU/CourierNew(0)/b/n' will be
-(Font)              scaled to size 10.52856pt on input line 219.
+(Font)              scaled to size 10.52856pt on input line 220.
 LaTeX Font Info:    Font shape `TU/Cambria(0)/m/n' will be
-(Font)              scaled to size 20.74pt on input line 234.
+(Font)              scaled to size 20.74pt on input line 236.
 LaTeX Font Info:    Font shape `TU/Cambria(0)/b/n' will be
-(Font)              scaled to size 20.74pt on input line 234.
-LaTeX Font Info:    Font shape `TU/Cambria(0)/m/n' will be
-(Font)              scaled to size 17.28pt on input line 247.
-LaTeX Font Info:    Font shape `TU/CourierNew(0)/m/it' will be
-(Font)              scaled to size 11.03928pt on input line 253.
+(Font)              scaled to size 20.74pt on input line 236.
 
 
 [1]
-Overfull \hbox (113.21371pt too wide) in paragraph at lines 269--269
-[]\TU/CourierNew(0)/m/n/10 ##   `D:\Projet statistique sous R\Cours\TP4_Communes\data\Benin\shapefiles\geoBoundaries-
+LaTeX Font Info:    Font shape `TU/CourierNew(0)/m/it' will be
+(Font)              scaled to size 11.03928pt on input line 261.
+
+Overfull \hbox (77.8823pt too wide) in paragraph at lines 277--277
+[]\TU/CourierNew(0)/m/n/10 ##   `D:\Projet statistique sous R\Projet-statistique-sous-R\TP 4\TP_Commune_Groupe2-
  []
 
 
-Overfull \hbox (16.0523pt too wide) in paragraph at lines 269--269
+Overfull \hbox (16.0523pt too wide) in paragraph at lines 277--277
 []\TU/CourierNew(0)/m/n/10 ## Bounding box:  xmin: 0.774575 ymin: 6.225748 xmax: 3.851701 ymax: 12.40861[] 
- []
-
-
-Overfull \hbox (29.3018pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ##   country  year vague  hhid grappe menage numind zae          zaemil departement[] 
  []
 
 
 
 [2]
-Overfull \hbox (9.42776pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## # i 67 more variables: commune <chr>, arrondissement <fct>, milieu <fct>,[] 
- []
-
-
-Overfull \hbox (11.63602pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## #   mstat <fct>, religion <fct>, ethnie <fct>, nation <fct>, agemar <dbl>,[] 
- []
-
-
-Overfull \hbox (13.84427pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## #   ea <chr>, em <chr>, ej <chr>, mal30j <fct>, aff30j <fct>, arrmal <dbl>,[] 
- []
-
-
-Overfull \hbox (18.26068pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## #   durarr <fct>, con30j <fct>, hos12m <fct>, couvmal <dbl>, moustiq <dbl>,[] 
- []
-
-
-Overfull \hbox (2.80312pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## #   handit <fct>, handig <fct>, serviceconsult <fct>, persconsult <fct>,[] 
- []
-
-
-Overfull \hbox (22.67712pt too wide) in paragraph at lines 352--352
-[]\TU/CourierNew(0)/m/n/10 ## #   alfa <dbl>, alfa2 <dbl>, scol <dbl>, educ_scol <fct>, educ_hi <fct>, ...[] 
- []
-
+LaTeX Font Info:    Font shape `TU/Cambria(0)/m/n' will be
+(Font)              scaled to size 17.28pt on input line 401.
 
 
 [3]
-Overfull \vbox (0.79688pt too high) detected at line 515
- []
-
-
 
 [4]
-Overfull \vbox (1.66728pt too high) detected at line 708
- []
-
-
 
 [5]
-Underfull \vbox (badness 10000) detected at line 708
+Underfull \vbox (badness 10000) detected at line 732
  []
 
 
-Underfull \vbox (badness 10000) detected at line 708
+Underfull \vbox (badness 10000) detected at line 732
  []
 
 
 
 [6]
-Underfull \vbox (badness 10000) detected at line 708
+Underfull \vbox (badness 10000) detected at line 732
  []
 
 
-Underfull \vbox (badness 10000) detected at line 708
+Underfull \vbox (badness 10000) detected at line 732
  []
 
 
 
 [7]
+Underfull \vbox (badness 10000) detected at line 732
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 732
+ []
+
+
 
 [8]
 
@@ -1180,12 +1147,12 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 17923 strings out of 475846
- 329764 string characters out of 5773306
- 891917 words of memory out of 5000000
- 40609 multiletter control sequences out of 15000+600000
+ 17925 strings out of 475846
+ 329853 string characters out of 5773306
+ 889016 words of memory out of 5000000
+ 40611 multiletter control sequences out of 15000+600000
  562630 words of font info for 100 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 90i,5n,116p,1201b,473s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,5n,116p,1201b,364s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on TP4_Communes.pdf (10 pages).
