@@ -3,8 +3,8 @@ title: 'TP8 : CARTOGRAPHIE AVEC R'
 author: "ALBERT ZINABA et DJERAKEI MISTALENGAR"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 editor_options:
   markdown:
     wrap: 72
@@ -61,7 +61,7 @@ fichiers shapefile.
 
 # Partie I : Analyse des données des ménages
 
-```{r echo=FALSE, include=FALSE}
+```{r}
 
 # Chargement de la base
 
