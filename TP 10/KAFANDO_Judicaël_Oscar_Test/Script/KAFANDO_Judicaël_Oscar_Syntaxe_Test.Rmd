@@ -1,0 +1,630 @@
+---
+title: "Untitled"
+author: "KAFANDO"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# PARTIE 0 : 
+
+## **Installation et importation des packages**
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+## Importation des bases
+
+
+```{r}
+##
+base_menage <-  haven::read_dta("../Données/base_menage.dta") # Importation de la base ménage
+
+
+food_comp_child_baseline <-  haven::read_dta("../Données/food_comp_child_baseline.dta") # Importation de la base food_comp_child_baseline
+
+food_comp_child_endline <-  haven::read_dta("../Données/food_comp_child_endline.dta") # Importation de la base food_comp_child_endline
+
+food_comp_mother_baseline <-  haven::read_dta("../Données/food_comp_mother_baseline.dta") # Importation de la base food_comp_mother_baseline
+
+food_comp_mother_endline <-  haven::read_dta("../Données/food_comp_mother_endline.dta") # Importation de la base food_comp_mother_endline
+
+```
+
+## Analyse des bases
+
+**Structure de chaque base**
+```{r}
+utils::str(base_menage) # Structure de la base ménage
+
+utils::str(food_comp_child_baseline) # Structure de la base food_comp_child_baseline
+
+utils::str(food_comp_child_endline) # Structure de la base food_comp_child_endline
+
+utils::str(food_comp_mother_baseline) # Structure de la base food_comp_mother_baseline
+
+utils::str(food_comp_mother_endline) # Structure de la base food_comp_mother_endline
+
+```
+
+
+**Noms des colonnes de chaque base**
+```{r}
+
+base::colnames(base_menage) # Nom des colonnes de la base ménage
+
+base::colnames(food_comp_child_baseline) # Nom des colonne de la base food_comp_child_baseline
+
+base::colnames(food_comp_child_endline) # Nom des colonne de la base food_comp_child_endline
+
+base::colnames(food_comp_mother_baseline) # Nom des colonne de la base food_comp_mother_baseline
+
+base::colnames(food_comp_mother_endline) # Nom des colonne de la base food_comp_mother_endline
+
+```
+
+# Partie 1 : Gestion et nettoyage des bases de données
+
+## 1.	Vérifiez la présence de doublons dans les bases de données Baseline, Endline et ménage. Supprimez les doublons si nécessaire.
+
+
+```{r}
+
+cat("Nombre d'observations dans base ménage avant suppression des doublons :", nrow(base_menage), "\n")
+
+cat("Nombre d'observations dans food_comp_child_baseline avant suppression des doublons :", nrow(food_comp_child_baseline), "\n")
+
+cat("Nombre d'observations dans food_comp_child_endline avant suppression des doublons :", nrow(food_comp_child_endline), "\n")
+
+cat("Nombre d'observations dans food_comp_mother_baseline avant suppression des doublons :", nrow(food_comp_mother_baseline), "\n")
+
+cat("Nombre d'observations dans food_comp_mother_endline avant suppression des doublons :", nrow(food_comp_mother_endline), "\n")
+```
+
+
+```{r}
+
+# Supprimer les doublons en se basant sur l'identifiant du ménage
+base_menage = base_menage %>% distinct(hhid, .keep_all = TRUE)
+
+cat("Nombre d'observations dans base_menage après suppression des doublons :", nrow(base_menage), "\n")
+
+# Supprimer les doublons dans food_comp_child_baseline
+food_comp_child_baseline = dplyr::distinct(food_comp_child_baseline)
+
+cat("Nombre d'observations dans food_comp_child_baseline après suppression des doublons :", nrow(food_comp_child_baseline), "\n")
+
+# Supprimer les doublons dans food_comp_child_endline
+food_comp_child_endline = dplyr::distinct(food_comp_child_endline)
+
+cat("Nombre d'observations dans food_comp_child_endline après suppression des doublons :", nrow(food_comp_child_endline), "\n")
+
+# Supprimer les doublons dans food_comp_mother_baseline
+food_comp_mother_baseline = dplyr::distinct(food_comp_mother_baseline)
+
+cat("Nombre d'observations dans food_comp_mother_baseline après suppression des doublons :", nrow(food_comp_mother_baseline), "\n")
+
+# Supprimer les doublons dans food_comp_mother_endline
+food_comp_mother_endline = dplyr::distinct(food_comp_mother_endline)
+
+cat("Nombre d'observations dans food_comp_mother_endline après suppression des doublons :", nrow(food_comp_mother_endline), "\n")
+
+
+```
+## 2.	Assurez-vous que les noms des variables sont cohérents entre les bases de données Baseline et Endline (par exemple, les noms des nutriments doivent être identiques). Si ce n’est pas le cas, apportez des corrections.
+
+```{r}
+
+base::colnames(food_comp_child_baseline) # Nom des colonne de la base food_comp_child_baseline
+
+base::colnames(food_comp_child_endline) # Nom des colonne de la base food_comp_child_endline
+
+
+
+```
+
+```{r}
+
+
+base::colnames(food_comp_mother_baseline) # Nom des colonne de la base food_comp_mother_baseline
+
+base::colnames(food_comp_mother_endline) # Nom des colonne de la base food_comp_mother_endline
+
+
+```
+**Ici, le nom des variables n'est pas pareil**
+
+```{r}
+# Renommer les colonnes V9 et V1
+
+food_comp_mother_baseline <- food_comp_mother_baseline %>% rename(zinc_mg = V9, energ_kcal = V1)
+```
+
+## 3.	Certaines variables peuvent contenir des données manquantes, cependant suivant une logique bien établie, il est possible de corriger ces données manquantes. Veuillez vérifier soigneusement les données et corriger les données manquantes de certaines variables si possibles.
+
+```{r}
+
+# Calculer le nombre de valeurs manquantes par variable (colonne)
+print("Valeurs manquante base ménage")
+NA_base_men <- colSums(is.na(base_menage))
+NA_base_men
+
+print("Valeurs manquante base food_comp_mother_baseline")
+NA_mother_base <- colSums(is.na(food_comp_mother_baseline))
+NA_mother_base
+
+print("Valeurs manquante base food_comp_mother_endline")
+NA_mother_end <- colSums(is.na(food_comp_mother_endline))
+NA_mother_end
+
+print("Valeurs manquante base food_comp_child_baseline")
+NA_child_base <- colSums(is.na(food_comp_child_baseline))
+NA_child_base
+
+print("Valeurs manquante base food_comp_child_endline")
+NA_child_end <- colSums(is.na(food_comp_child_endline))
+NA_child_end
+
+```
+ **Traitons les valeurs manquantes dans région et commune de la base food_comp_mother_baseline**
+```{r}
+# 1. Remplacer les valeurs manquantes dans 'commune' en se basant sur le village
+food_comp_mother_baseline <- food_comp_mother_baseline %>%
+  group_by(villageid) %>% # Grouper par village
+  mutate(communeid = ifelse(is.na(communeid), first(communeid[!is.na(communeid)]), communeid))  %>% #les individus n'ayant pas de commune prennent la commune de celui du meme village que lui
+  ungroup() # Dégrouper
+
+# 2. Remplacer les valeurs manquantes dans 'region' en se basant sur la commune
+
+food_comp_mother_baseline <- food_comp_mother_baseline %>%
+  group_by(communeid) %>% # grouper par commune
+  mutate(regionid = ifelse(is.na(regionid), first(regionid[!is.na(regionid)]), regionid)) %>% #les individus n'ayant pas de region prennent la région de celui du meme commune que lui
+  ungroup()# Dégrouper
+
+
+```
+
+**Vérification**
+```{r}
+print("Valeurs manquante base food_comp_mother_baseline")
+NA_mother_base <- colSums(is.na(food_comp_mother_baseline))
+NA_mother_base
+
+```
+**Traitement fait avec succès**
+
+## 4.	Quelle est la consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base ?
+```{r}
+conso_energie_moy_base <- food_comp_mother_baseline %>% 
+                            labelled::to_factor() %>% # labellisation des modalités
+                            group_by(s1_q0) %>% # grouper suivant les 4 repas
+                            summarise(moyenne = mean(energ_kcal,na.rm=TRUE)) %>% # faire la moyenne en ne considérant pas la NA
+                            ungroup()
+conso_energie_moy_base
+```
+
+
+## 5.	Après vérification et correction de chaque base de données : 
+
+    - i)	Sauvegarder les changements de la base food_comp_mother_baseline.dta en mother_baseline_v1.dta
+```{r}
+
+dossier_sauvegarde <- "../Données/"  # spécification du dossier de sauvegarde
+
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "mother_baseline_v1.dta") # Création du dossier complet
+
+haven::write_dta(food_comp_mother_baseline, fichier_sauvegarde) # Sauvegarde
+
+
+```
+
+    - ii)	Sauvegarder les changements de la base food_comp_mother_endline.dta en mother_endline_v1.dta
+ 
+```{r}
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "mother_endline_v1.dta") # Création du dossier complet
+
+haven::write_dta(food_comp_mother_endline, fichier_sauvegarde) # Sauvegarde
+
+
+```
+  
+    - iii)	Sauvegarder les changements de la base food_comp_child_baseline.dta en child_baseline_v1.dta
+   
+```{r}
+
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "child_baseline_v1.dta") # Création du dossier complet
+
+haven::write_dta(food_comp_child_baseline, fichier_sauvegarde) # Sauvegarde
+
+```
+
+    - iv)	Sauvegarder les changements de la base food_comp_child_endline.dta en child_endline_v1.dta
+    
+```{r}
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "child_endline_v1.dta") # Création du dossier complet
+
+haven::write_dta(food_comp_child_endline, fichier_sauvegarde) # Sauvegarde
+
+
+```
+
+    - v)	Sauvegarder les changements de la base base_menage.dta en base_menage_final.dta
+
+```{r}
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "base_menage_final.dta") # Création du dossier complet
+
+haven::write_dta(base_menage, fichier_sauvegarde) # Sauvegarde
+
+```
+
+# **Partie 2 : Empilement et Fusion des données**
+
+*Maintenant que vous avez vérifié et corrigé les possibles incohérences dans les bases de données suivre les instructions suivantes :*
+
+## 1)	**Baseline**
+
+**Importons les différentes bases**
+
+
+
+```{r}
+##
+base_menage_final <-  haven::read_dta("../Données/base_menage_final.dta") # Importation de la base ménage finale
+
+child_baseline_v1 <-  haven::read_dta("../Données/child_baseline_v1.dta") # Importation de la base child_baseline_v1.dta
+
+child_endline_v1 <-  haven::read_dta("../Données/child_endline_v1.dta") # Importation de la base child_endline_v1.dta
+
+mother_baseline_v1 <-  haven::read_dta("../Données/mother_baseline_v1.dta") # Importation de la base mother_baseline_v1.dta
+
+mother_endline_v1.dta <-  haven::read_dta("../Données/mother_endline_v1.dta") # Importation de la base mother_endline_v1
+
+```
+
+
+  - *i)	Empilez les bases de données des mères (mother_baseline_v1.dta) et des enfants (child_baseline_v1.dta) de sorte que pour chaque ménage de l’étude, on retrouve une ou plusieurs lignes concernant la mère et sa consommation journalière et une ou plusieurs lignes concernant la consommation de l’enfant.* 
+
+```{r}
+
+mother_chil_baseline_v1 <- bind_rows(mother_baseline_v1,child_baseline_v1) %>% # empiler les deux bases 
+                          arrange(hhid,s1_q2) # trié suivant le numéro du ménage et suivant la personne qui a consommé
+
+
+```
+
+    - ii)	Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _b pour faire référence à l’enquête Baseline.
+    
+```{r}
+# Renommer les colonnes de consommation d'énergie et nutriments en ajoutant "_b"
+
+mother_chil_baseline_v1 <- mother_chil_baseline_v1 %>%
+  rename_with(~paste0(., "_b"),  # Renommer le nom de la variable par le nom concatener avec _b
+              .cols = energ_kcal:vit_c_mg) # spécifie les variables concernées par l'opération 
+```
+
+
+    - iii)	Créez une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
+
+```{r}
+
+# Calculer la somme pour chaque variable entre energ_kcal_b et vit_c_mg_b
+base <- mother_chil_baseline_v1 %>%
+  group_by(hhid, s1_q2) %>% ## Grouper suivant le numér du ménage et suivant le fait que ça soit mere ou enfant
+  summarise(across(energ_kcal_b:vit_c_mg_b, \(x) sum(x, na.rm = TRUE)), .groups = "drop") # calculons la somme des consommation par individu et en ignorant les valeurs manquantes
+
+base # Afficher la base
+# Renommer les colonnes en supprimant le suffixe "_e"
+names(base) <- gsub("_e$", "", names(base))
+
+# Afficher les nouveaux noms des colonnes
+names(base)
+  
+
+```
+
+
+    - iv)	Sauvegardez la base de données finale contenant seulement les hhid s1_q2 energ_kcal   protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ». Veuillez noter que pour cette base de données, pour chaque ménage, nous avons une ligne pour la mère et une ligne pour l’enfant.
+
+
+```{r}
+
+base <-  base %>% 
+  select(hhid,s1_q2,energ_kcal_b,protein_g_b,lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b )
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "baseline_final.dta") # Création du dossier complet
+
+haven::write_dta(base, fichier_sauvegarde) # Sauvegarde
+
+```
+
+
+  - *i)	Empilez les bases de données des mères (mother_endline_v1.dta) et des enfants (child_endline_v1.dta) de sorte que pour chaque ménage de l’étude, on retrouve une ou plusieurs lignes concernant la mère et sa consommation journalière et une ou plusieurs lignes concernant la consommation de l’enfant. Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _e pour faire référence à l’enquête Endline.* 
+
+```{r}
+
+mother_chil_endline_v1 <- bind_rows(mother_endline_v1.dta,child_endline_v1) %>% # empiler les deux bases 
+                          arrange(hhid,s1_q2) # trié suivant le numéro du ménage et suivant la personne qui a consommé
+
+# Renommer les colonnes de consommation d'énergie et nutriments en ajoutant "_b"
+
+mother_chil_endline_v1 <- mother_chil_endline_v1 %>%
+  rename_with(~paste0(., "_e"),  # Renommer le nom de la variable par le nom concatener avec _b
+              .cols = energ_kcal:vit_c_mg) # spécifie les variables concernées par l'opération 
+
+
+```
+
+    
+    - ii)	Créez une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande collapse.
+
+```{r}
+
+# Calculer la somme pour chaque variable entre energ_kcal_b et vit_c_mg_b
+base <- mother_chil_endline_v1 %>%
+  group_by(hhid, s1_q2) %>% ## Grouper suivant le numér du ménage et suivant le fait que ça soit mere ou enfant
+  summarise(across(energ_kcal_e:vit_c_mg_e, \(x) sum(x, na.rm = TRUE)), .groups = "drop") # calculons la somme des consommation par individu et en ignorant les valeurs manquantes
+
+base # Afficher la base
+
+
+# Renommer les colonnes en supprimant le suffixe "_e"
+names(base) <- gsub("_e$", "", names(base))
+
+# Afficher les nouveaux noms des colonnes
+names(base)
+
+  
+
+```
+
+
+    -	iii)	Sauvegarder la base de données finale contenant seulement les hhid s1_q2 energ_kcal  protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « endline_final.dta ». Veuillez noter que pour cette base de données, pour chaque ménage, nous avons une ligne pour la mère et une ligne pour l’enfant.
+
+
+```{r}
+
+base <-  base %>% 
+  select(hhid,s1_q2,energ_kcal,protein_g,lipid_tot_g, calcium_mg, iron_mg, zinc_mg )
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "endline_final.dta") # Création du dossier complet
+
+haven::write_dta(base, fichier_sauvegarde) # Sauvegarde
+
+```
+
+
+3)	Fusionnez les données baseline_final.dta   et endline_final.dta. La base de données résultant de cette fusion doit comporter le même nombre d’observations que les bases baseline_final.dta et endline_final.dta. Ainsi, sur une ligne d’observation, on retrouve à la fois les informations de l’enquête Baseline et de l’enquête Endline, concernant l’individu (mère ou enfant).
+
+**Importation**
+```{r}
+
+baseline_final <-  haven::read_dta("../Données/baseline_final.dta") # Importation de la base baseline_final.dta
+
+endline_final <-  haven::read_dta("../Données/endline_final.dta") # Importation de la base endline_final.dta
+```
+
+**Fusion**
+
+```{r}
+
+base_end <-  left_join(baseline_final,endline_final,by = c("hhid","s1_q2"))
+
+```
+4)	En utilisant la base base_menage_final, fusionnez les informations sur les caractéristiques des ménages telles que région, commune, village, statut matrimonial, taille du ménage, niveau d’éducation du chef de ménage, le ratio de dépendance, score HFIAS, la variable de traitement T1. 
+
+```{r}
+
+base <-  base_menage_final %>% 
+  select(hhid,regionid,communeid,villageid,hhsize,hh_primary,dependencyratio,hfias_score,T1)
+
+base_end_men <-  full_join(base_end,base,by = "hhid")
+
+```
+5)	Sauvegarder la base de données finale sous le nom base_finale.dta.
+
+
+```{r}
+fichier_sauvegarde <- file.path(dossier_sauvegarde, "base_finale.dta.") # Création du dossier complet
+
+haven::write_dta(base_end_men, fichier_sauvegarde) # Sauvegarde
+
+```
+
+
+# Partie 3 : Statistiques descriptives avec le package gtsummary
+
+**importation**
+```{r}
+base_final <-  haven::read_dta("../Données/base_finale.dta") # Importation de la base base_final.dta
+
+
+```
+
+
+```{r}
+
+# Résumé des variables quantitatives
+summary_table_quantitative <- base_final %>%
+  select(energ_kcal, protein_g, lipid_tot_g, calcium_mg) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd})") # Moyenne et écart-type
+  )%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Statistique sur la consommation des différents nutriments "
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+
+summary_table_quantitative
+
+```
+
+
+```{r}
+base_final%>%    
+  select(s1_q2,energ_kcal_b ,protein_g_b,lipid_tot_g_b,calcium_mg_b)%>% 
+  labelled::to_factor() %>%
+  tbl_summary( by = s1_q2,
+             label=list(energ_kcal_b~"Consommation d'énergie ",
+                        protein_g_b~"Consomation de protéine",
+                        lipid_tot_g_b~"Consomation de lipide ",
+                        calcium_mg_b~"Consomation de calcium "),
+ digits=everything()~c(0,0,0,0),
+ statistic = list(everything()~"{mean} ({sd}) {median}"),
+ missing = "always",
+ missing_text="Valeurs manquante"
+)%>%
+  modify_header(label = "**Taille de l'échantillon**") %>%
+  bold_labels() %>% 
+  
+as_gt() %>%
+gt::tab_header(
+    title = "Consomation "
+  ) %>%
+gt::tab_options(
+    heading.title.font.size = 18,
+    heading.title.font.weight = "black",
+    heading.background.color = "#0073C2"
+  
+)
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

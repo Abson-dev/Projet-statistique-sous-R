@@ -1,0 +1,289 @@
+---
+title: "  Unlited"
+author: "Kerencia SEUNKAM"
+date: "2025-02-25"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r}
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled","survey")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+## chargement des bases
+
+```{r}
+
+base_men <-  haven::read_dta("Données/base_menage.dta")%>%
+  labelled::to_factor()
+
+ food_comp_child_baseline <-  haven::read_dta("Données/food_comp_child_baseline.dta")%>%
+ labelled::to_factor()
+
+food_comp_child_endline <-  haven::read_dta("Données/food_comp_child_endline.dta")%>%
+  labelled::to_factor()
+
+food_comp_mother_baseline <-  haven::read_dta("Données/food_comp_mother_baseline.dta")%>%
+  labelled::to_factor()
+
+food_comp_mother_endline <-  haven::read_dta("Données/food_comp_mother_endline.dta")%>%
+labelled::to_factor()
+```
+
+```{r}
+sum(duplicated(food_comp_child_baseline))
+sum(duplicated(food_comp_mother_baseline))
+sum(duplicated(food_comp_child_endline))
+sum(duplicated(food_comp_mother_endline))
+sum(duplicated(base_men))
+```
+```{r}
+base_men <- base_men %>% distinct()  
+```
+
+```{r}
+ls()
+```
+
+
+```{r}
+
+  
+child_baseline_var <- colnames(food_comp_child_baseline)
+child_endline_var<-colnames(food_comp_child_endline)
+mother_baseline_var<-colnames(food_comp_mother_baseline)
+mother_endline_var<-colnames(food_comp_mother_endline)
+
+setdiff(child_baseline_var, child_endline_var)
+setdiff(mother_baseline_var, mother_endline_var)
+
+```
+```{r}
+colnames(food_comp_mother_endline)
+colnames(food_comp_mother_baseline)
+food_comp_mother_baseline <- food_comp_mother_baseline %>%
+  rename(zinc_mg = V9, energ_kcal = V1)
+
+```
+
+```{r}
+summary(food_comp_mother_baseline$round)
+summary(food_comp_mother_baseline$s1_q0)
+summary(food_comp_mother_baseline$s1_q1)
+summary(food_comp_mother_baseline$s1_q2)
+```
+#La consommation moyenne d’énergie par repas pour les mères lors de l’enquête de base est 714.72 kcal. Cela a été calculé à partir de la division de energ_kcal par nb_repas pour chaque observation comme ci dessous:
+
+```{r}
+mother_baseline <- food_comp_mother_baseline %>%
+  mutate(nb_repas = (s1_q0 == "Yes") + (s1_q1 == "Yes") + (s1_q2 == "Yes")) 
+```
+
+```{r}
+mother_baseline <- mother_baseline %>%
+  mutate(energ_par_repas = energ_kcal / nb_repas)
+
+mean_energie_par_repas <- mean(mother_baseline$energ_par_repas, na.rm = TRUE)
+print(mean_energie_par_repas)
+
+```
+
+# Sauvegarde des chandement des bases
+```{r}
+# Sauvegarde de food_comp_mother_baseline corrigée
+haven::write_dta(food_comp_mother_baseline, "mother_baseline_v1.dta")
+
+# Sauvegarde de food_comp_mother_endline corrigée
+haven::write_dta(food_comp_mother_endline, "mother_endline_v1.dta")
+
+# Sauvegarde de food_comp_child_baseline corrigée
+haven::write_dta(food_comp_child_baseline, "child_baseline_v1.dta")
+
+# Sauvegarde de food_comp_child_endline corrigée
+haven::write_dta(food_comp_child_endline, "child_endline_v1.dta")
+
+# Sauvegarde de base_menage corrigée
+haven::write_dta(base_men, "base_menage_final.dta")
+```
+
+
+## partie 2
+
+###Baseline
+
+```{r}
+child_baseline_V1 <-  haven::read_dta("child_baseline_v1.dta")%>%
+ labelled::to_factor()
+child_endline_V1 <-  haven::read_dta("child_endline_v1.dta")%>%
+ labelled::to_factor()
+mother_baseline_V1 <-  haven::read_dta("mother_baseline_v1.dta")%>%
+ labelled::to_factor()
+mother_endline_V1 <-  haven::read_dta("mother_endline_v1.dta")%>%
+ labelled::to_factor()
+```
+
+```{r}
+# Empilement des données mères et enfants (Baseline)
+baseline_combined <- bind_rows(
+  mother_baseline_V1 %>% mutate(type = "mother"), 
+  child_baseline_V1 %>% mutate(type = "child")
+)
+```
+
+```{r}
+# Vérifier les noms des colonnes dans baseline_combined
+colnames(baseline_combined)
+```
+
+
+```{r}
+# Liste des variables de consommation
+consumption_vars <- c("energ_kcal", "protein_g", "lipid_tot_g", 
+                       "calcium_mg", "iron_mg", "zinc_mg", 
+                       "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+# Renommer les variables de consommation en ajoutant le suffixe "_b"
+baseline_combined <- baseline_combined %>%
+  rename_with(~paste0(.,"_b"), all_of(consumption_vars))
+```
+
+```{r}
+# Calcul de la somme des repas pour chaque individu
+baseline_combined <- baseline_combined %>%
+  mutate(total_energ_kcal_b = rowSums(select(., energ_kcal_b), na.rm = TRUE),
+         total_protein_g_b = rowSums(select(., protein_g_b), na.rm = TRUE),
+         total_lipid_tot_g_b = rowSums(select(., lipid_tot_g_b), na.rm = TRUE),
+         total_calcium_mg_b = rowSums(select(., calcium_mg_b), na.rm = TRUE),
+         total_iron_mg_b = rowSums(select(., iron_mg_b), na.rm = TRUE),
+         total_zinc_mg_b = rowSums(select(., zinc_mg_b), na.rm = TRUE),
+         total_vit_b6_mg_b = rowSums(select(., vit_b6_mg_b), na.rm = TRUE),
+         total_vit_b12_mcg_b = rowSums(select(., vit_b12_mcg_b), na.rm = TRUE),
+         total_vit_c_mg_b = rowSums(select(., vit_c_mg_b), na.rm = TRUE))
+```
+
+```{r}
+# Sauvegarder la base de données finale
+baseline_final <- baseline_combined %>%
+  select(hhid, s1_q2, energ_kcal_b, protein_g_b, lipid_tot_g_b, 
+         calcium_mg_b, iron_mg_b, zinc_mg_b, vit_b6_mg_b, 
+         vit_b12_mcg_b, vit_c_mg_b)
+
+# Sauvegarder en fichier .dta
+haven::write_dta(baseline_final, "baseline_final.dta")
+```
+
+###Endline
+
+```{r}
+# Chargement des bases de données Endline
+mother_endline_v1 <- haven::read_dta("mother_endline_v1.dta") %>% labelled::to_factor()
+child_endline_v1 <- haven::read_dta("child_endline_v1.dta") %>% labelled::to_factor()
+
+# Empilement des données mères et enfants
+endline_combined <- bind_rows(
+  mother_endline_v1 %>% mutate(type = "mother"), 
+  child_endline_v1 %>% mutate(type = "child")
+)
+
+# Liste des variables de consommation
+consumption_vars <- c("energ_kcal", "protein_g", "lipid_tot_g", 
+                       "calcium_mg", "iron_mg", "zinc_mg", 
+                       "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+# Renommer les variables de consommation en ajoutant le suffixe "_e"
+endline_combined <- endline_combined %>%
+  rename_with(~paste0(.,"_e"), all_of(consumption_vars))
+```
+
+```{r}
+# Vérifier les noms des colonnes dans le jeu de données
+colnames(endline_combined)
+```
+```{r}
+# Calculer la somme des 4 repas pour chaque individu
+endline_summary <- endline_combined %>%
+  group_by(hhid, type) %>%  # Regrouper par hhid et type (mère ou enfant)
+  summarize(
+    total_energ_kcal = sum(energ_kcal_e, na.rm = TRUE),
+    total_protein_g = sum(protein_g_e, na.rm = TRUE),
+    total_lipid_tot_g = sum(lipid_tot_g_e, na.rm = TRUE),
+    total_calcium_mg = sum(calcium_mg_e, na.rm = TRUE),
+    total_iron_mg = sum(iron_mg_e, na.rm = TRUE),
+    total_zinc_mg = sum(zinc_mg_e, na.rm = TRUE),
+    total_vit_b6_mg = sum(vit_b6_mg_e, na.rm = TRUE),
+    total_vit_b12_mcg = sum(vit_b12_mcg_e, na.rm = TRUE),
+    total_vit_c_mg = sum(vit_c_mg_e, na.rm = TRUE)
+  )
+
+# Vérification de la nouvelle base résumée
+head(endline_summary)
+
+# Sauvegarder la base de données finale sous "endline_final.dta"
+haven::write_dta(endline_summary, "endline_final.dta")
+```
+```{r}
+colnames(endline_combined)
+```
+
+
+```{r}
+ # Sélectionner les colonnes nécessaires
+endline_final <- endline_combined %>%
+  select(hhid, s1_q2, energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e)
+
+# Vérification du contenu de la base avant de sauvegarder
+head(endline_final)
+
+# Sauvegarder la base de données finale sous "endline_final.dta"
+haven::write_dta(endline_final, "endline_final.dta")
+    
+```
+```{r}
+# Charger les données
+baseline_final <- haven::read_dta("baseline_final.dta")
+endline_final <- haven::read_dta("endline_final.dta")
+
+# Fusionner les deux bases de données
+combined_data <- merge(baseline_final, endline_final, by = "hhid", suffixes = c("_b", "_e"))
+
+# Vérifier la fusion
+head(combined_data)
+```
+```{r}
+# Charger la base de données des caractéristiques du ménage
+base_menage_final <- haven::read_dta("base_menage_final.dta")
+
+# Fusionner les informations des caractéristiques du ménage
+final_data <- merge(combined_data, base_menage_final, by = "hhid")
+
+# Vérifier la fusion
+head(final_data)
+```
+```{r}
+final_data<- haven::read_dta("base_finale.dta")%>%
+  labelled::to_factor()
+colnames(final_data)
+
+```
+
+```{r}
+# Sauvegarder la base de données finale sous "base_finale.dta"
+haven::write_dta(final_data, "base_finale.dta")
+```
