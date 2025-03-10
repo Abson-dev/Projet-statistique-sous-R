@@ -72,9 +72,9 @@ for (package in packages) {
 ```{r}
 
 # Charger les données
-burkina <- haven::read_dta("Données/EHCVM_HDX_Burkina.dta")
-senegal <- haven::read_dta("Données/EHCVM_HDX_Senegal.dta")
-menage_bf <- readr::read_csv("Données/ehcvm_menage_bfa2021-1.csv")
+burkina <- haven::read_dta("../Données/EHCVM_HDX_Burkina.dta")
+senegal <- haven::read_dta("../Données/EHCVM_HDX_Senegal.dta")
+menage_bf <- readr::read_csv("../Données/ehcvm_menage_bfa2021-1.csv")
 ```
 ```{r}
 View(menage_bf)
@@ -283,7 +283,7 @@ ggplot(data = senegal_map) +
 Pour cela on va importer le fichier shapefile sur les regions du senegal 
 
 ```{r}
-senegal_shp_r <- st_read("Données/Region/sen_admbnda_adm1_anat_20240520.shp")
+senegal_shp_r <- st_read("../Données/Region/sen_admbnda_adm1_anat_20240520.shp")
 ```
 
 ```{r}
@@ -322,7 +322,7 @@ ggplot(data = senegal_shp_r) +
 
 ```{r}
 
-senegal_shp_c <- st_read("Données/Departement/sen_admbnda_adm2_anat_20240520.shp")
+senegal_shp_c <- st_read("../Données/Departement/sen_admbnda_adm2_anat_20240520.shp")
 
 senegal_shp_c <- st_transform(senegal_shp_c, crs = 32628) # Utilisez un CRS approprié pour le Sénégal
 
@@ -342,7 +342,6 @@ il ya 46 communes au total
 
 
 ```{r, fig.width=12, fig.height=8}
-
 
 # Créer un vecteur de couleurs
 my_colors <- rainbow(n_commune) # Palette de couleurs arc-en-ciel
@@ -371,12 +370,9 @@ senegal_shp_d <- st_read("../Données/Commune/sen_admbnda_adm3_anat_20240520.shp
 
 senegal_shp_d <- st_transform(senegal_shp_d, crs = 32628) # Utilisez un CRS approprié pour le Sénégal
 
-View(senegal_shp_d)
-
 ```
 
 ```{r}
-
 # Créer une palette de couleurs personnalisée
 unique_departement <- unique(senegal_shp_d$ADM3_FR) # Assurez-vous que cette variable est correcte
 n_departement <- length(unique_departement) # Correction du nom de la variable
@@ -387,7 +383,6 @@ Il ya donc 125 départements au total
 
 
 ```{r}
-
 
 # Créer un vecteur de couleurs
 my_colors <- rainbow(n_departement) # Palette de couleurs arc-en-ciel
@@ -406,10 +401,11 @@ ggplot(data = senegal_shp_d) +
 
 # Répresentations des variables en fonction des régions , communes et départements du sénegal 
 
-#A. Senegal 
+#A.Sénegal 
 
 # Repartition du taux de scolarisation par département 
-Nous allons répresenter le taux de scolarisation en fonction  des départements 
+
+Nous allons répresenter construire un indicateur sur le taux de scolarisation et le représenter  en fonction  des départements. 
 
 ```{r}
 # Joindre les données aux shapefiles
@@ -516,9 +512,9 @@ View(merge_menage)
 ## La fusion des bases contenant des statistiques 
 
 ```{r}
-region <- st_read("../Données/Region/bfa_admbnda_adm1_igb_20200323.shp")  # 2er découpage (régions)
-province <- st_read("../Données/Departement/bfa_admbnda_adm2_igb_20200323.shp")  # 3e découpage (provinces)
-commune <- st_read("../Données/Commune/bfa_admbnda_adm3_igb_20200323.shp")  # 4e découpage (communes)
+region <- st_read("Données/Region/bfa_admbnda_adm1_igb_20200323.shp")  # 2er découpage (régions)
+province <- st_read("Données/Departement/bfa_admbnda_adm2_igb_20200323.shp")  # 3e découpage (provinces)
+commune <- st_read("Données/Commune/bfa_admbnda_adm3_igb_20200323.shp")  # 4e découpage (communes)
 
 region_grosrum <- dplyr::left_join(region,base_grosrumsum,by=c("ADM1_FR"))
 
