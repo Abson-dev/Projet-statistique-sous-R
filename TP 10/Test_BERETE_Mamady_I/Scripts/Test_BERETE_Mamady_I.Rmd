@@ -1,0 +1,337 @@
+---
+title: "Devoir"
+author: "BERETE Mamady I"
+date: "2025-02-25"
+output: word_document
+---
+
+## Installation et importation des packages
+
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r results=FALSE,message=FALSE}
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt","labelled","survey", "foreign")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+
+## Section I : Importation et analyse des  bases
+
+
+### Importation des bases
+
+```{r}
+## Base ménage
+library(haven)
+base_menage <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/base_menage.dta")
+View(base_menage)
+
+## Base food_comp_child_baseline
+base_child_baseline <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/food_comp_child_baseline.dta")
+View(base_child_baseline)
+
+## Base _child_endline
+base_child_endline  <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/food_comp_child_endline.dta")
+View(base_child_endline)
+
+## Base food_comp_mother_baseline
+base_mother_baseline <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/food_comp_mother_baseline.dta")
+View(base_mother_baseline)
+
+
+## Base food_comp_mother_endline
+base_mother_endline <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/food_comp_mother_endline.dta")
+View(base_mother_endline)
+
+```
+
+
+
+### Structure des bases**
+
+```{r}
+print("Structure de la Base ménage")
+str(base_menage)
+
+print("Structure de la Base food_comp_child_baseline")
+str(base_child_baseline)
+
+
+print("Structure de la Base child_endline")
+str(base_child_endline)
+
+print("Structure de la Base food_comp_mother_baseline")
+str(base_mother_baseline)
+
+print("Structure de la Base food_comp_mother_endline")
+str(base_mother_endline)
+```
+
+
+### Nom des colonnes dans chaque base
+
+```{r}
+print("Structure de la Base ménage")
+colnames(base_menage)
+
+print("Structure de la Base food_comp_child_baseline")
+colnames(base_child_baseline)
+
+
+print("Structure de la Base child_endline")
+colnames(base_child_endline)
+
+print("Structure de la Base food_comp_mother_baseline")
+colnames(base_mother_baseline)
+
+print("Structure de la Base food_comp_mother_endline")
+colnames(base_mother_endline)
+
+```
+
+
+# Partie 1 : Gestion et nettoyage des bases de données
+
+## 1.	Vérification de la présence de doublons dans les bases de données Baseline, Endline et ménage. Supprimez les doublons si nécessaire.
+
+```{r}
+#Base ménage
+
+#Vérification des doublons
+doublons_menage <- base_menage[duplicated(base_menage), ]
+
+# Suppression des doublons selon une clé spécifique
+base_menage_unique <- base_menage %>% 
+  distinct(hhid, .keep_all = TRUE)
+
+# Vérification du résultat
+cat("Nombre de lignes avant suppression :", nrow(base_menage), "\n")
+cat("Nombre de lignes après suppression des doublons :", nrow(base_menage_unique), "\n")
+
+# Mettre à jour ta base initiale
+base_menage <- base_menage_unique
+
+
+#Base Base child_baseline
+
+#Vérification des doublons
+
+doublons_base_child_baseline <- base_child_baseline[duplicated(base_child_baseline), ]
+
+# Suppression des doublons selon une clé spécifique
+base_child_baseline_unique <- base_child_baseline %>% 
+  distinct(hhid, .keep_all = TRUE)
+
+# Vérification du résultat
+cat("Nombre de lignes avant suppression :", nrow(base_child_baseline), "\n")
+cat("Nombre de lignes après suppression des doublons :", nrow(base_child_baseline_unique), "\n")
+
+# Mettre à jour ta base initiale
+base_child_baseline <- base_child_baseline_unique
+
+
+#Base Base child_endline 
+
+#Vérification des doublons
+
+doublons_base_child_endline <- base_child_endline[duplicated(base_child_endline), ]
+
+# Suppression des doublons selon une clé spécifique
+base_child_endline_unique <- base_child_endline %>% 
+  distinct(hhid, .keep_all = TRUE)
+
+# Vérification du résultat
+cat("Nombre de lignes avant suppression :", nrow(base_child_endline), "\n")
+cat("Nombre de lignes après suppression des doublons :", nrow(base_child_endline_unique), "\n")
+
+# Mettre à jour ta base initiale
+base_child_endline <- base_child_endline_unique
+
+
+#Base Base food_comp_mother_baseline
+
+#Vérification des doublons
+
+doublons_base_mother_baseline <- base_mother_baseline[duplicated(base_mother_baseline), ]
+
+# Suppression des doublons selon une clé spécifique
+base_mother_baseline_unique <- base_mother_baseline %>% 
+  distinct(hhid, .keep_all = TRUE)
+
+# Vérification du résultat
+cat("Nombre de lignes avant suppression :", nrow(base_mother_baseline), "\n")
+cat("Nombre de lignes après suppression des doublons :", nrow(base_mother_baseline_unique), "\n")
+
+# Mettre à jour ta base initiale
+base_mother_baseline <- base_mother_baseline_unique
+
+
+#Base Base food_comp_mother_endline 
+
+#Vérification des doublons
+
+doublons_base_mother_endline <- base_mother_endline[duplicated(base_mother_endline), ]
+
+# Suppression des doublons selon une clé spécifique
+base_mother_endline_unique <- base_mother_endline %>% 
+  distinct(hhid, .keep_all = TRUE)
+
+# Vérification du résultat
+cat("Nombre de lignes avant suppression :", nrow(base_mother_endline), "\n")
+cat("Nombre de lignes après suppression des doublons :", nrow(base_mother_endline_unique), "\n")
+
+# Mettre à jour ta base initiale
+base_mother_endline <- base_mother_endline_unique
+
+```
+
+
+## La consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base 
+```{r}
+## Consommation d'énergie moyenne des mères (baseline)
+# Assumant que la variable énergie s'appelle "energy_baseline_mother"
+
+V1 <- base_mother_baseline %>%
+  summarise(mean_energy = mean(V1, na.rm = TRUE))
+```
+
+
+# La vérification et correction de chaque base de données
+
+
+```{r}
+# Sauvegarde mother_baseline et son exportation
+write_dta(base_mother_baseline, "mother_baseline_v1.dta")
+
+write_dta(base_mother_baseline, "C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/mother_baseline_v1.dta")
+
+
+# Sauvegarde mother_endline et son exportation
+write_dta(base_mother_endline, "mother_endline_v1.dta")
+
+write_dta(base_mother_endline, "C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/mother_endline_v1.dta")
+
+# Sauvegarde child_baseline
+write_dta(base_child_baseline, "child_baseline_v1.dta")
+
+write_dta(base_child_baseline, "C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/child_baseline_v1.dta")
+
+
+# Sauvegarde child_endline
+write_dta(base_child_endline, "child_endline_v1.dta")
+
+write_dta(base_child_endline, "C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/child_endline_v1.dta")
+
+
+# Sauvegarde base_menage
+write_dta(base_menage, "base_menage_final.dta")
+
+write_dta(base_menage, "C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/base_menage_final.dta")
+
+```
+
+# Partie 2 : Empilement et Fusion des données
+
+## Section I : Importation et analyse des  bases
+
+
+### Importation des nouvelles bases
+
+```{r}
+## Base ménage
+
+base_menage_final <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/base_menage_final.dta")
+
+
+## Base food_comp_child_baseline
+child_baseline_v1 <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/child_baseline_v1.dta")
+
+
+## Base _child_endline
+child_endline_v1  <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/child_endline_v1.dta")
+
+
+## Base food_comp_mother_baseline
+mother_baseline_v1 <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/mother_baseline_v1.dta")
+
+
+
+## Base food_comp_mother_endline
+mother_endline_v1.dta <- read_dta("C:/Users/LENO/Desktop/ENSAE/R/Test_BERETE_Mamady_I/Données/mother_endline_v1.dta")
+
+```
+
+
+#	Baseline
+###	Empilez les bases de données des mères (mother_baseline_v1.dta) et des enfants (child_baseline_v1.dta) de sorte que pour chaque ménage de l’étude, on retrouve une ou plusieurs lignes concernant la mère et sa consommation journalière et une ou plusieurs lignes concernant la consommation de l’enfant. 
+
+
+```{r}
+## La fusion des trois bases
+
+base_merge <- dplyr::left_join(base_menage_final ,mother_baseline_v1,child_baseline_v1,by="hhid")
+
+
+```
+
+
+
+```{r}
+# Renommer les variables de consommation avec le suffixe _b
+
+## Liste des anciennes variables
+variables <- c("V1", "protein_g", "lipid_tot_g", "calcium_mg", "iron_mg", "V9", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+## Vérifier si ces variables existent dans base_merge
+variables_existantes <- variables[variables %in% names(base_merge)]
+
+## Renommer les colonnes existantes en ajoutant "_e"
+names(base_merge)[names(base_merge) %in% variables_existantes] <- paste0(variables_existantes, "_e")
+
+## Vérifier les nouvelles colonnes
+print(names(base_merge))
+
+```
+
+
+```{r}
+# Agréger les consommations journalières totales par individu
+print(names(base_merge))
+
+if (!"hhid" %in% names(base_merge)) {
+  stop("La variable 'hhid' n'existe pas dans base_merge")
+}
+base_merge <- base_merge %>%
+  mutate(across(c(V1_e, protein_g_e,lipid_tot_g_e, calcium_mg_e, iron_mg_e, V9_e, vit_b6_mg_e, vit_b12_mcg_e, vit_c_mg_e), as.numeric, .names = "clean_{.col}"))
+
+ #Effectuer l'agrégation
+base_journaliere <- base_merge %>%
+  group_by(hhid) %>%
+  summarise(across(c(V1_e, protein_g_e,lipid_tot_g_e, calcium_mg_e, iron_mg_e, V9_e, vit_b6_mg_e, vit_b12_mcg_e, vit_c_mg_e), sum, na.rm = TRUE))
+
+# Vérifier la base résultante
+print(head(base_journaliere))
+```
+
+
+
+```{r}
+# Sélectionner les variables d'intérêt
+
+baseline_final <- base_merge %>%
+  select(hhid, s1_q2.x, V1_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, V9_e)
+  
+# Vérification : Chaque ménage doit avoir une ligne pour la mère et une pour l'enfant
+
+table(baseline_final$hhid)  # Vérifier la répartition par hhid
+
+```
+
