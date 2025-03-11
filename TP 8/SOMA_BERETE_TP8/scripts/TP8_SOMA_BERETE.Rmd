@@ -1,0 +1,684 @@
+---
+title: 'TP8 : Cartographie sur R'
+author: "SOMA Ben Idriss & BERETE Mamady"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: false
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+    toc: false
+    number_sections: false
+  html_document:
+    toc: false
+    df_print: paged
+header-includes:
+- \usepackage{hyperref}
+- \usepackage{amsmath}
+- \usepackage{amssymb}
+- \usepackage{graphicx}
+- \usepackage{fontspec}
+- \setmainfont{Cambria}
+- \setsansfont{Franklin Gothic Demi Cond}
+- \setmonofont{Courier New}
+- \usepackage[margin=1in]{geometry}
+- \usepackage{titlesec}
+- \titleformat{\section}{\Huge\bfseries\color{black}}{\thesection}{1em}{}
+- \titleformat{\subsection}{\huge\bfseries\color{black}}{\thesubsection}{1em}{}
+- \titleformat{\subsubsection}{\LARGE\bfseries\color{black}}{\thesubsubsection}{1em}{}
+- \usepackage{tocloft}
+- \renewcommand{\cftsecfont}{\small}
+- \renewcommand{\cftsubsecfont}{\footnotesize}
+- \renewcommand{\cftsecpagefont}{\small}
+- \renewcommand{\cftsubsecpagefont}{\footnotesize}
+- \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE,warning = FALSE)
+```
+
+
+Ce travail consiste a faire des cartes sur les différents indicateurs ou variables dans les bases EHCVM en fonction des régions , des départements et des communes . 
+
+Nous allons Analyser les donées EHCM de deux pays : le Burkina Faso et le sénegal 
+
+# I. Chargement et analyse des différentes bases . 
+
+## Importation des librairies  
+    sf : Pour manipuler les données spatiales
+    ggplot2 : Pour la visualisation
+    tmap : Pour créer des cartes interactives ou statiques
+    rnaturalearth : Pour obtenir des cartes des pays
+    leaflet (optionnel) : Pour une cartographie interactive en ajoutant les limites administratives
+    ggspatial : Pour ajouter des éléments cartographiques comme la flèche du nord et l'échelle
+    raster : Pour la manipulation des données raster
+    cowplot : Pour extraire la légende et afficher la carte sans légende
+    viridis : Pour la palette de couleurs viridis
+    
+
+```{r}
+
+packages <- c("readr","haven","utils","dplyr", "knitr", "tidyr", "gtsummary", "labelled", "gt", "sf", "ggplot2", "tmap", "rnaturalearth", "rnaturalearthdata", "leaflet", "ggspatial", "raster", "cowplot", "viridis","ggrepel")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+
+
+# Importation des bases bases du sénegal et du Burina Faso 
+
+```{r}
+# Charger les données
+burkina <- haven::read_dta("../Données/EHCVM_HDX_Burkina.dta")
+senegal <- haven::read_dta("../Données/EHCVM_HDX_Senegal.dta")
+menage_bf <- readr::read_csv("../Données/ehcvm_menage_bfa2021-1.csv")
+```
+
+
+```{r}
+menage_bf
+```
+
+
+```{r}
+senegal
+```
+
+## La fusion des deux bases du Burkina Faso
+
+
+```{r}
+merge_menage <- dplyr::left_join(burkina,menage_bf,by="hhid")
+merge_menage
+```
+
+
+## Structure variables de la base  merge_menage du Burkina
+
+```{r}
+print("noms de colonnes  de la Base mergéé")
+colnames(merge_menage)
+
+print("Les variables de la merge_menage ")
+View(merge_menage)
+```
+
+
+On va afficher les données en facteur 
+
+```{r}
+senegal <- senegal %>% labelled::to_factor()
+burkina<- burkina %>% labelled::to_factor()
+
+senegal
+
+
+```
+
+
+## La recherche, correction et l'affichage des variables
+
+colonne de la base  individu du Burkina 
+```{r}
+# La recherche et la correction des colonnes avec des espaces, points, ou caractères spéciaux:
+colnames(burkina) <- make.names(colnames(burkina), unique = TRUE)
+
+
+colnames(burkina)
+```
+
+colonnes de la base individu  du Senegal 
+
+```{r}
+# La recherche et la correction des colonnes avec des espaces, points, ou caractères spéciaux:
+colnames(senegal) <- make.names(colnames(senegal), unique = TRUE)
+
+#  Les variables des bases
+colnames(senegal)
+
+```
+on va analyser les noms des colonnes 
+
+```{r}
+colnames(senegal)
+
+```
+
+```{r}
+colnames(burkina)
+```
+
+# Nombre de lignes et de colonnes  dans les bases 
+
+Nombres d'observations de la base du Burkina 
+```{r}
+dim(burkina)
+
+```
+
+Nombres d'observations de la base du sénegal 
+
+```{r}
+
+dim(senegal)  # Renvoie (nombre de lignes, nombre de colonnes)
+
+
+```
+# Informations géographiques du Burkina Faso et du Sénegal 
+
+# Burkina 
+ Le Burkina Faso  est subdivisé en 13 régions administratives et 
+ territoriales , elles-mêmes divisées administrativement en 45 
+ provinces et en départements , ou territorialement en communes 
+34 urbaines ou 306 rurales.
+
+# senegal 
+Il est subdivisé en 14 régions , 46 communes et 125 départements . 
+
+
+
+# II. Répresentations des différentes cartes 
+
+On va répresenter le globe terrestre ensuite la carte de l'Afrique avec le Sénegal et le Burkna Faso
+
+# Carte du monde
+
+
+```{r}
+# Charger la carte du monde
+monde <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Carte des pays
+ggplot(data = monde) +
+  geom_sf(fill = "lightblue", color = "black") +
+  ggtitle("Carte du monde ") +
+  theme_minimal()
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+```
+
+# Position du Burkina et du Sénegal  en Afrique 
+ 
+```{r,fig.width=8, fig.height=6}
+
+
+# Charger la carte de l'Afrique
+afrique <- ne_countries(continent = "Africa", returnclass = "sf")
+
+# Ajouter une colonne de classification pour la légende
+afrique <- afrique %>%
+  mutate(categorie = ifelse(name %in% c("Burkina Faso", "Senegal"), name, "Autres pays"))
+
+# Tracer la carte avec une légende
+ggplot(afrique) +
+  geom_sf(aes(fill = categorie), color = "black") +  # Colorier les pays en fonction de leur catégorie
+  scale_fill_manual(values = c("Burkina Faso" = "lightblue", 
+                               "Senegal" = "lightgreen", 
+                               "Autres pays" = "gray90"), 
+                    name = "Pays mis en avant") +  # Personnaliser la légende
+  theme_minimal() +
+  labs(title = "Carte de l'Afrique avec le Burkina Faso et le Sénégal")
+
+
+```
+Le Burkina et le Sénegal sont des pays situés en Afrique de l'Ouest.
+
+On va visionner maintenant  les cartes de chaque pays . 
+
+
+# Cartes des pays 
+
+1. Carte du Burkina 
+
+```{r,fig.width=8, fig.height=6}
+
+
+# Charger les pays autour du Burkina Faso
+pays_limitrophes <- c("Burkina Faso", "Mali", "Niger", "Ghana", "Togo", "Benin", "Côte d'Ivoire")
+africa_map <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Filtrer pour ne garder que le Burkina Faso et ses voisins
+region_map <- africa_map %>% filter(name %in% pays_limitrophes)
+burkina_map <- region_map %>% filter(name == "Burkina Faso")
+
+# Obtenir les coordonnées des centres des pays pour placer les labels
+region_centroids <- region_map %>%
+  mutate(centroid = st_centroid(geometry)) %>%
+  cbind(st_coordinates(.$centroid))  # Ajouter les coordonnées sous forme de colonnes X et Y
+
+# Tracer la carte
+ggplot() +
+  # Pays limitrophes en gris clair
+  geom_sf(data = region_map, fill = "gray85", color = "white") +
+  # Burkina Faso en bleu distinct
+  geom_sf(data = burkina_map, fill = "#1f78b4", color = "black") +
+  # Ajouter les noms des pays au centre
+  geom_text(data = region_centroids, aes(x = X, y = Y, label = name),
+            color = "black", size = 3, fontface = "bold") +
+  # Personnalisation
+  theme_minimal() +
+  labs(title = "Carte du Burkina Faso et de ses pays limitrophes") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+
+
+```
+
+2. Carte du sénegal 
+
+```{r,fig.width=8, fig.height=6}
+
+
+# Définir le Sénégal et ses pays voisins
+pays_limitrophes <- c("Senegal", "Mauritania", "Mali", "Guinea", "Gambia", "Guinea-Bissau")
+africa_map <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Filtrer pour ne garder que le Sénégal et ses voisins
+region_map <- africa_map %>% filter(name %in% pays_limitrophes)
+senegal_map <- region_map %>% filter(name == "Senegal")
+
+# Obtenir les coordonnées des centres des pays pour placer les labels
+region_centroids <- region_map %>%
+  mutate(centroid = st_centroid(geometry)) %>%
+  cbind(st_coordinates(.$centroid))  # Ajouter les coordonnées sous forme de colonnes X et Y
+
+# Tracer la carte
+ggplot() +
+  # Pays limitrophes en gris clair
+  geom_sf(data = region_map, fill = "gray85", color = "white") +
+  # Sénégal en bleu distinct
+  geom_sf(data = senegal_map, fill = "#1f78b4", color = "black") +
+  # Ajouter les noms des pays au centre
+  geom_text(data = region_centroids, aes(x = X, y = Y, label = name),
+            color = "black", size = 3, fontface = "bold") +
+  # Personnalisation
+  theme_minimal() +
+  labs(title = "Carte du Sénégal et de ses pays limitrophes") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+
+
+```
+
+
+# la carte du sénegal avec les régions 
+
+Pour cela on va importer le fichier shapefile sur les regions du senegal. 
+
+```{r}
+senegal_shp_r <- st_read("../Données/Region/sen_admbnda_adm1_anat_20240520.shp")
+```
+
+```{r}
+senegal_shp_r
+```
+
+
+
+# carte du sénégal en fonction des régions  
+
+```{r,fig.width=8, fig.height=6}
+
+senegal_shp_r <- st_transform(senegal_shp_r, crs = 32628) # Utilisez un CRS approprié pour le Sénégal
+
+
+# Créer une palette de couleurs personnalisée
+unique_regions <- unique(senegal_shp_r$ADM1_FR)
+n_regions <- length(unique_regions)
+
+# Créer un vecteur de couleurs
+my_colors <- rainbow(n_regions) # Par exemple, utilisez une palette de couleurs arc-en-ciel
+
+ggplot(data = senegal_shp_r) +
+  geom_sf(aes(fill = ADM1_FR), color = "black") +
+  scale_fill_manual(values = my_colors) + # Utilisez votre palette personnalisée
+  geom_sf_text(aes(label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Carte des Régions du Sénégal") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+
+```
+
+
+# carte du sénegal en fonction des departements 
+
+On importe les données shapefiles sur les départements. 
+
+```{r}
+
+senegal_shp_c <- st_read("../Données/Departement/sen_admbnda_adm2_anat_20240520.shp")
+
+senegal_shp_c <- st_transform(senegal_shp_c, crs = 32628) # Utilisez un CRS approprié pour le Sénégal
+
+View(senegal_shp_c)
+
+```
+
+```{r}
+
+unique_commune <- unique(senegal_shp_c$ADM2_FR)
+n_commune <- length(unique_commune)
+n_commune
+
+```
+il ya 46 communes au total 
+
+
+```{r, fig.width=12, fig.height=8}
+
+# Créer un vecteur de couleurs pour la carte 
+my_colors <- rainbow(n_commune) # Palette de couleurs arc-en-ciel
+
+# Créer la carte
+ggplot(data = senegal_shp_c) +
+  geom_sf(aes(fill = ADM2_FR), color = "black") + # Remplissage basé sur les communes
+  scale_fill_manual(values = my_colors, name = "Communes") + # Palette personnalisée et nom de la légende
+  labs(title = "Carte des departements  du Sénégal") + # Titre de la carte
+  theme_minimal() +
+  theme(legend.position = "right", # Positionner la légende à droite
+        legend.key.size = unit(0.8, "cm"), # Ajuster la taille des clés de légende
+        legend.title = element_text(size = 8), # Taille du titre de la légende
+        legend.text = element_text(size = 9)) # Taille du texte de la légende
+
+
+```
+
+
+# carte du sénegal en fonction des departements 
+
+
+```{r}
+senegal_shp_d <- st_read("../Données/Commune/sen_admbnda_adm3_anat_20240520.shp")
+
+senegal_shp_d <- st_transform(senegal_shp_d, crs = 32628) # Utilisez un CRS approprié pour le Sénégal
+
+View(senegal_shp_d)
+
+```
+
+```{r}
+
+# Créer une palette de couleurs personnalisée
+unique_departement <- unique(senegal_shp_d$ADM3_FR) # Assurez-vous que cette variable est correcte
+n_departement <- length(unique_departement) # Correction du nom de la variable
+
+n_departement
+```
+Il ya donc 125 départements au total 
+
+
+```{r,fig.width=8, fig.height=6}
+
+
+# Créer un vecteur de couleurs
+my_colors <- rainbow(n_departement) # Palette de couleurs arc-en-ciel
+
+# Créer la carte avec les labels décalés sur le côté
+ggplot(data = senegal_shp_d) + 
+  geom_sf(aes(fill = ADM3_FR), color = "black") + # Remplissage basé sur les départements
+  scale_fill_manual(values = my_colors, name = "Départements") + # Palette personnalisée
+  labs(title = "Carte des départements du Sénégal") + # Titre de la carte
+  theme_minimal() +
+  theme(legend.position = "none", # Supprimer la légende
+        plot.margin = margin(1, 1, 1, 1, "cm")) 
+
+
+```
+
+# Répresentations des variables en fonction des régions , communes et départements du sénegal 
+
+#A. Senegal 
+
+# Repartition du taux de scolarisation par département 
+Nous allons répresenter construire un indicateur sur le taux de scolarisation et répresenter  en fonction  des départements. 
+
+```{r,fig.width=8, fig.height=6}
+# Joindre les données aux shapefiles
+senegal$scol <- as.integer(senegal$scol)
+senegal_agg <- senegal %>%
+  group_by(ADM1_FR) %>%
+  summarise(scolarisation = mean(scol, na.rm = TRUE)) # Calculer la moyenne
+
+senegal_map <- senegal_shp_r %>% left_join(senegal_agg, by = c("ADM1_FR"))
+
+# Fonction pour tracer une carte
+plot_map <- function(data, var, title) {
+  ggplot(data) +
+    geom_sf(aes(fill = !!sym(var)), color = "black") +  # Remplissage basé sur la variable
+    scale_fill_viridis_c(name = "Taux de scolarisation  par région ") +  # Titre de la légende
+    geom_sf_text(aes(label = ADM1_FR), size = 4, color = "black", 
+                 position = position_nudge(y = 0.2)) +  # Ajouter les étiquettes des régions
+    theme_minimal() +
+    labs(title = title, fill = var)   # Titre et légende
+}
+
+# Générer la carte
+plot_map(senegal_map, "scolarisation", "Taux de scolarisation")
+
+
+```
+
+Nous avons calculé un indicateur qui répresente le taux de scolarisation par département . 
+les taux de scolarisation varient de 1 a 1.5 . 
+les départements en gris sont ceux qui n'ont donné aucune information sur la scolarisation 
+
+# Répartition des salaires  par region
+
+```{r,fig.width=8, fig.height=6}
+# Joindre les données aux shapefiles
+senegal_agg <- senegal %>%
+  group_by(ADM1_FR) %>%
+  summarise(salaire = mean(salaire, na.rm = TRUE)) # Calculer la moyenne
+
+senegal_map <- senegal_shp_r %>% left_join(senegal_agg, by = c("ADM1_FR"))
+
+# Fonction pour tracer une carte
+plot_map <- function(data, var, title) {
+  ggplot(data) +
+    geom_sf(aes(fill = !!sym(var)), color = "black") +  # Remplissage basé sur la variable
+    scale_fill_viridis_c(name = "Salaire moyen") +  # Titre de la légende
+    geom_sf_text(aes(label = ADM1_FR), size = 4, color = "black", 
+                 position = position_nudge(y = 0.2)) +  # Ajouter les étiquettes des régions
+    theme_minimal() +
+    labs(title = title, fill = var)   # Titre et légende
+}
+
+# Générer la carte
+plot_map(senegal_map, "salaire", "Salaire moyen par région")
+
+
+```
+On remarque que les salaires les plus élevés sont dans la région de Kolda et les salaires les plus faibles sont a saint-Louis et Tambacounda.
+
+
+#B.Burkina Faso 
+
+```{r}
+merge_menage
+```
+
+
+## le calcul de certains indicateurs selon la région
+```{r}
+
+# Le nombre de gros ruminants par région
+  base_grosrumsum <- merge_menage %>% 
+  group_by (ADM1_FR) %>% 
+  summarise (grosrumsum = sum(grosrum, na.rm = TRUE))
+              
+# Le nombre de petit ruminants par région
+  base_petitrum <- merge_menage %>% 
+  group_by (ADM1_FR) %>% 
+  summarise (petitrum = sum(petitrum, na.rm = TRUE))
+
+# Le nombre moyen de voleil par région
+  base_volaille <- merge_menage %>% 
+  group_by (ADM1_FR) %>% 
+  summarise (volail = sum(volail, na.rm = TRUE))
+               
+# Le nombre de superficie agricole par région
+  base_superficie <- merge_menage %>% 
+  group_by (ADM1_FR) %>% 
+  summarise(superf = round(sum(superf, na.rm = TRUE), 3))
+  
+```
+
+## La fusion des bases contenant des statistiques 
+
+```{r}
+region <- st_read("../Données/Region/bfa_admbnda_adm1_igb_20200323.shp")  # 2er découpage (régions)
+province <- st_read("../Données/Departement/bfa_admbnda_adm2_igb_20200323.shp")  # 3e découpage (provinces)
+commune <- st_read("../Données/Commune/bfa_admbnda_adm3_igb_20200323.shp")  # 4e découpage (communes)
+
+region_grosrum <- dplyr::left_join(region,base_grosrumsum,by=c("ADM1_FR"))
+
+region_petitrum <- dplyr :: left_join(region, base_petitrum, by=c("ADM1_FR"))
+
+region_volail <- dplyr::left_join(region,base_volaille,by=c("ADM1_FR"))
+
+region_superf <- dplyr :: left_join(region, base_superficie, by=c("ADM1_FR"))
+
+```
+
+
+# III. Les statistiques par région
+
+## La répartition du nombre de gros Ruminants par région au Burkina Fasso
+```{r,fig.width=8, fig.height=6}
+ggplot(data = region_grosrum) +
+  geom_sf(aes(fill = ADM1_FR), color = "black") +
+  geom_sf_text(aes(label = paste(ADM1_FR, "\n", grosrumsum)), size = 3, color = "black") +
+  ggtitle("La répartition du nombre de gros Ruminants par région au Burkina Fasso") +
+  theme_minimal()
+
+```
+On remarque que il ya plus de gros ruminants dans la partie Sud et Ouest du Pays dans les Régions comme les Cascades , Hauts-Bassins et Boucle du Mouhoun 
+
+
+## La répartition du nombre de petit Ruminants par région au Burkina Fasso
+```{r,fig.width=8, fig.height=6}
+
+ggplot(data = region_petitrum) +
+  geom_sf(aes(fill = ADM1_FR), color = "black") +
+  geom_sf_text(aes(label = paste(ADM1_FR, "\n", petitrum)), size = 3, color = "black") +
+  ggtitle("La répartition du nombre de petit Ruminants par région au Burkina Fasso") +
+  theme_minimal()
+
+```
+On remarque que il ya plus de petits  ruminants dans la partie Sud et Ouest du Pays dans les Régions comme les Cascades , Hauts-Bassins et Boucle du Mouhoun . 
+
+
+
+## La répartition du nombre moyen de volail par région au Burkina Fasso
+```{r,fig.width=8, fig.height=6}
+
+ggplot(data = region_volail) +
+  geom_sf(aes(fill = ADM1_FR), color = "black") +
+  geom_sf_text(aes(label = paste(ADM1_FR, "\n", volail)), 
+               size = 3, color = "black", nudge_x = 0.8) +  # Décalage vers la droite
+  ggtitle("La répartition du nombre moyen de volail par région au Burkina Faso") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))  # Centrer le titre
+
+```
+
+Il ya plus de volails dans la partie Centre du pays . Il Y a  peu de volails au Nord . 
+
+
+## le calcul de certains indicateurs selon la province
+```{r}
+# Le nombre de gros ruminants par province
+  base_grosrumsumP <- merge_menage %>% 
+  group_by (ADM2_FR) %>% 
+  summarise (grosrumsum = sum(grosrum, na.rm = TRUE))
+  
+# Le nombre de petit ruminants par province
+  base_petitrumP <- merge_menage %>% 
+  group_by (ADM2_FR) %>% 
+  summarise (petitrum = sum(petitrum, na.rm = TRUE))
+  
+# Le nombre moyen de porc par province
+  base_porckP <- merge_menage %>% 
+  group_by(ADM2_FR) %>% 
+  summarise(porc = round(mean(porc, na.rm = TRUE), 2))
+  
+# Le nombre moyen de labin par province
+  base_lapinP <- merge_menage %>% 
+  group_by (ADM2_FR) %>% 
+  summarise (lapin = round(mean(lapin, na.rm = TRUE), 2))
+               
+# Le nombre moyen de voleil par province
+  base_volailleP <- merge_menage %>% 
+  group_by (ADM2_FR) %>% 
+  summarise (volail = round(mean(volail, na.rm = TRUE), 2))
+               
+# Le nombre de superficie agricole par province
+  base_superficieP <- merge_menage %>% 
+  group_by (ADM2_FR) %>% 
+  summarise(superf = round(sum(superf, na.rm = TRUE), 3))
+
+```
+
+## La fusion des bases contenant des statistiques 
+
+```{r}
+province_grosrum <- dplyr::left_join(province,base_grosrumsumP,by=c("ADM2_FR"))
+
+
+
+province_superf <- dplyr :: left_join(province, base_superficieP, by=c("ADM2_FR"))
+
+```
+
+
+# IIII. Les statistiques par province
+
+## La répartition du nombre de gros Ruminants par province au Burkina Fasso
+```{r,fig.width=8, fig.height=6}
+
+
+ggplot(data = province_grosrum) +
+  geom_sf(aes(fill = grosrumsum), color = "black") + 
+  scale_fill_viridis_c(option = "plasma", name = "Nombre de gros ruminants") + 
+  ggtitle("La répartition du nombre de gros ruminants par commune  au Burkina Faso") +
+  theme_minimal()
+
+```
+La commune en gris est celle ou on n'a pas pu faire l'enquete . Les communes au Sud Ouest possèdent plus de gros ruminants . Les communes a l'Est et au Nord ont peu de gros ruminants 
+
+```{r,fig.width=8, fig.height=6}
+
+
+ggplot(data = province_superf) +
+  geom_sf(aes(fill = superf), color = "black") + 
+  scale_fill_viridis_c(option = "plasma", name = "superficie agricole par commune en HA") + 
+  ggtitle("Communes  ") +
+  theme_minimal()
+
+```
+
+
+Les communes et départements  au Sud du pays notamment la région des cascades  disposent de plus de superficie agricole tandis que les  communes du Nord disposent de peu de superficie agricole . 
+
+# Conclusion 
+
+Dans ce travail, nous avons exploré la cartographie sur R en utilisant diverses bibliothèques dédiées au traitement et à la visualisation des données spatiales. À travers l’analyse des bases de données EHCVM du Burkina Faso et du Sénégal, nous avons mis en évidence l’importance de la représentation cartographique pour mieux appréhender les disparités territoriales et les dynamiques socio-économiques.
+
+L’utilisation des outils tels que sf, ggplot2, tmap et leaflet nous a permis de générer des cartes statiques et interactives mettant en valeur les différentes unités administratives de chaque pays. Nous avons également manipulé et fusionné des bases de données pour enrichir nos représentations et affiner nos analyses.
+
+Ce TP nous a permis d’acquérir une meilleure compréhension des techniques de cartographie sous R, tout en consolidant nos compétences en manipulation et traitement de données spatiales. Les compétences développées ici sont essentielles pour toute analyse géostatistique et ouvrent la voie à des applications plus avancées, notamment en géomarketing, en planification urbaine ou encore en études environnementales.
+
+Ainsi, la cartographie reste un outil puissant pour la prise de décision et la compréhension des réalités territoriales. Son intégration dans les études statistiques et économiques est une approche incontournable pour visualiser et interpréter efficacement les données.
+
+
+
+
+
+
+

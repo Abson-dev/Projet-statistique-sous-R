@@ -1,0 +1,121 @@
+```{r, results=FALSE, message=FALSE, include=FALSE}
+#loading packages
+
+if (!requireNamespace("pacman", quietly = TRUE)) {
+  # Install pacman from CRAN if not installed
+  install.packages("pacman")
+}
+pacman::p_load(pagedown,readr, haven,mapsf, dplyr, sf, ggplot2, utils, leaflet,leaflet.extras, viridis, ggspatial)
+
+```
+
+## Chargement des bases - Burkina :
+
+Dans cette section, nous nous intéressons à la représentation spatiale des données de l'ECHVM 2021 du Burkina. Nous chargeons la base de données, qui contient des informations socio-économiques au niveau des individus et des ménages. Cette base servira à calculer des indicateurs statistiques agrégés par région, département et commune afin d’alimenter les cartes thématiques.
+
+```{r, message=FALSE, include=FALSE}
+base <- haven::read_dta("../donnees/EHCVM_HDX_Burkina.dta") # charger de la base
+individus <- read.csv("../donnees/ehcvm_individu_bfa2021.csv")
+```
+
+fusion des 2 bases 
+
+```{r}
+# Merge the two datasets on the household ID (hhid)
+data <- left_join(individus, base, by="hhid")
+```
+
+## Cartes niveau departement
+
+Nous passons à une échelle plus fine avec la carte départementale de l'âge moyen.
+
+```{r, message=FALSE, warning=FALSE}
+departement <- st_read("../donnees/bfa_admbnda_adm2_igb_20200323.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy2 <- data %>% 
+  group_by(ADM2_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM2_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_dep <- left_join(departement,base_moy2, by = "ADM2_FR")
+```
+Cette analyse plus détaillée met en avant des écarts significatifs d'une préfecture à l'autre, mettant en évidence des différences en termes de démographie et de conditions de vie.
+
+### Age moyen par préfecture
+
+```{r, message=FALSE, warning=FALSE}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_dep$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_dep) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Préfecture :</b>", ADM2_FR, "<br>",
+                   "<b>Âge moyen :</b>", age_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_dep$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveau communal
+
+```{r, message=FALSE, warning=FALSE}
+commune <- st_read("../donnees/bfa_admbnda_adm3_igb_20200323.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy3 <- data %>% 
+  group_by(ADM3_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM3_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_com <- left_join(commune,base_moy3, by = "ADM3_FR")
+```
+
+### Age moyen par commune
+
+```{r}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_com$volhor_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_com) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>commune :</b>", ADM3_FR, "<br>",
+                   "<b>Âge moyen :</b>", age_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_com$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+Ces cartes constituent un outil précieux pour étudier les inégalités locales et approfondir la compréhension des dynamiques sociodémographiques à l’échelle la plus détaillée.
+
+
+# CONCLUSION
+Grâce à cette méthode, nous avons examiné et représenté visuellement les disparités régionales, départementales et communales à travers plusieurs indicateurs socio-économiques. Ces cartes facilitent l’identification des zones nécessitant une intervention prioritaire en matière de politique publique.
+
