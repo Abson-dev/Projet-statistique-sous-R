@@ -1,0 +1,673 @@
+---
+output:
+  html_document:
+    toc: true
+    toc_depth: 3  # Profondeur de la ToC (3 niveaux)
+    toc_float: true
+    df_print: paged
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+    toc: false
+    number_sections: false
+    toc_depth: 3  # Profondeur de la ToC (3 niveaux)
+always_allow_html: true # forcer la sortie des éléments Html dans le cas de la sortie en pdf
+header-includes:
+- \usepackage{hyperref}
+- \usepackage{amsmath}
+- \usepackage{amssymb}
+- \usepackage{graphicx}
+- \usepackage{fontspec}
+- \setmainfont{Cambria}
+- \setsansfont{Franklin Gothic Demi Cond}
+- \setmonofont{Courier New}
+- \usepackage[margin=1in]{geometry}
+- \usepackage{titlesec}
+- \titleformat{\section}{\Huge\bfseries\color{black}}{\thesection}{1em}{}
+- \titleformat{\subsection}{\huge\bfseries\color{black}}{\thesubsection}{1em}{}
+- \titleformat{\subsubsection}{\LARGE\bfseries\color{black}}{\thesubsubsection}{1em}{}
+- \usepackage{tocloft}
+- \renewcommand{\cftsecfont}{\small}
+- \renewcommand{\cftsubsecfont}{\footnotesize}
+- \renewcommand{\cftsecpagefont}{\small}
+- \renewcommand{\cftsubsecpagefont}{\footnotesize}
+- \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+---
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\LARGE RÉPUBLIQUE DU SÉNÉGAL}\\[0.1cm]
+        \includegraphics[width=3cm]{"../Documents/Logo SEN.png"} \\[0.1cm]  
+        \textbf{\large Un Peuple - Un But - Une Foi}\\[0.2cm]
+        
+        \textbf{\LARGE Ministère de l'Économie, du Plan et de la Coopération}\\[0.1cm]
+        \includegraphics[width=4cm]{"../Documents/Logo-MP.png"} \\[0.1cm] 
+        
+        \textbf{\large Agence Nationale de la Statistique et de la Démographie (ANSD)}\\[0.2cm]
+        
+        \includegraphics[width=4cm]{"../Documents/Logo-ANSD.png"} \\[0.1cm]  
+        
+        \textbf{\large École nationale de la Statistique et de l'Analyse économique Pierre Ndiaye (ENSAE)}\\[0.4cm]
+        \includegraphics[width=3cm]{"../Documents/ENSAE-Dakar-logo.png"} \\[0.1cm]
+        
+        \textbf{\LARGE PROJET STATISTIQUES SOUS R }\\[0.3cm]
+        \textbf{\Huge \color{black} \textsf{TP8 : Cartographie sur R}}\\[0.2cm]
+        \rule{\linewidth}{0.2mm} \\[0.5cm]
+        
+        \begin{minipage}{0.5\textwidth}
+    \begin{flushleft} \large
+        \emph{\textsf{Rédigé par :}}\\
+        \textbf{KAFANDO G. Judicaël Oscar}\\
+        \textbf{ILLY Jacques}\\
+        \textit{Élèves ingénieurs statisticiens économistes}
+    \end{flushleft}
+\end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                \textbf{M. Aboubacar HEMA}\\
+                \textit{ANALYSTE DE RECHERCHE CHEZ IFPRI }
+            \end{flushright}
+        \end{minipage}
+
+        \vfill
+
+        {\large \textsf{Année scolaire : 2024-2025}}\\[0.5cm]
+        
+    \end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+
+
+
+
+```{r setup, include=FALSE}
+
+# Ce code permet d'appliquer ces paramètres a tous les chuncks
+
+knitr::opts_chunk$set(cache=TRUE, 
+                      message=FALSE, # Supprime les messages générés par les packages lors de leur chargement.
+                      warning=FALSE, # Masque les avertissements générés pendant l'exécution du code.
+                      
+                      fig.width=8, #Définit la largeur des graphiques générés dans le document (en pouces)
+                      
+                      fig.height=6) #Définit la hauteur des graphiques générés dans le document (en pouces)
+
+```
+
+# **Section 0 : Généralité**
+
+## *1. Qu'est-ce que la Cartographie ?*
+
+La cartographie est une discipline essentielle qui permet de représenter visuellement des données géographiques. Grâce à **R**, et notamment aux bibliothèques comme **sf**, **ggplot2** et **tmap**, il est possible de charger, manipuler et visualiser des données spatiales de manière efficace.
+
+## *2. Qu'elle est l'usage de la Cartographie ?*
+
+La **cartographie** est largement utilisée dans de nombreux domaines, notamment :\
+- L'urbanisme et l’aménagement du territoire\
+- Les sciences environnementales\
+- L'économie et la planification statistique\
+- La gestion des ressources naturelles
+
+En utilisant **R**, nous pouvons intégrer des données spatiales et produire des cartes dynamiques et interactives.
+
+## *3. Comprendre les Fichiers Shapefiles*
+
+Un **Shapefile** est un format de données géospatiales largement utilisé pour stocker des informations cartographiques vectorielles (points, lignes, polygones). Il est souvent utilisé avec les **Systèmes d’Information Géographique (SIG)** et est composé de plusieurs fichiers associés.
+
+Un shapefile comprend généralement les fichiers suivants :\
+- **.shp** : Contient la géométrie des objets (polygones, lignes, points).\
+- **.shx** : Un index permettant d’accéder rapidement aux entités géographiques.\
+- **.dbf** : Une base de données contenant les attributs des entités géographiques (nom, population, superficie, etc.).\
+- **.prj** : Définit le système de projection et de coordonnées utilisé.
+
+Ces fichiers sont essentiels pour représenter et analyser des entités spatiales.
+
+
+\newpage
+
+# **Section 1 : Installation des packages et Importation** 
+
+## *Installation des packages nécesssaires*
+
+```{r,results=FALSE,message=FALSE}
+
+packages <-  c("dplyr","haven","sf","ggplot2","tmap")
+
+for (package in packages) {
+  if(!requireNamespace(package,quietly = TRUE)){
+    install.packages(package)
+  }
+  library(package,character.only = TRUE)
+}
+
+```
+
+## *Importation des bases*
+
+Pour cette partie, toute nos bases sont nommées de la sorte : *EHCVM_HDX_* suivie du nom du pays. Donc nous ferons une boucle pour les chargé.
+
+```{r}
+
+pays  <-  c("Burkina","Senegal","Niger","Benin") # Liste des pays
+chemin_base <-  "../Data/Base/" # Chemin menant aux différentes bases
+
+for (p in pays) {
+  
+  fichier <- paste0(chemin_base, "EHCVM_HDX_", p, ".dta") ## Chemin d'acces à la base : concatener chaque element sans espace
+  
+  base <- haven::read_dta(fichier) # Importation des bases
+  assign(paste0("EHCVM_", p), labelled::to_factor(base)) # Labeliser chaque base et l'affecter à un objet du type "EHCVM_nompays"
+  
+}
+
+```
+
+
+\newpage
+
+# **Section 2 : Cartographie sur les pays**
+
+*1. Importation du shapefile*
+
+```{r, results='hide'}
+
+shp_adm0_AF <- sf::st_read("../Data/Shapefile/Pays/afr_g2014_2013_0.shp") ## Shapefile delimitant par pays de l'Afrique
+
+```
+
+*2. Correction des noms des pays*
+
+Certains pays comme la **Côte d'Ivoire** ont du mal à s'afficher du fait de l'encodage. Le texte d'origine est encodé en UTF-8 (format standard des caractères internationaux).On Convertit les caractères en ASCII en remplaçant les accents et caractères spéciaux par leurs équivalents.
+
+```{r}
+
+shp_adm0_AF$ADM0_NAME <- iconv(shp_adm0_AF$ADM0_NAME, from = "UTF-8", to = "ASCII//TRANSLIT") # Convertit les texte en suppriment les caractères spéciaux et les accents
+
+```
+
+*3. Traçons la carte*
+
+Nous traçons la carte avec **ggplot2** en utilisant la fonction `geom_sf()`. Nous utilisons également la fonction `geom_text()` pour ajouter les noms des régions.
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot() +
+  geom_sf(data = shp_adm0_AF, fill = "lightgreen", color = "black") + # Tracer la carte
+  
+  # Ajouter les labels des régions avec âge moyen
+  geom_sf_text(data = shp_adm0_AF, 
+               aes(label = ADM0_NAME), # Afficher le nom de la région 
+               size = 2, color = "black") +  # METTRE le nom en noir et taille 3
+  
+  # Ajout d'un cthème minimal
+  theme_minimal() + 
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Carte de l'Afrique avec les pays") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+
+\newpage
+
+# **Section 3 : Cartographie par région sur les pays**
+
+## *Importations des shapefiles adéquats*
+
+Importons les fichiers de subdivision niveau régional
+
+```{r,message=FALSE,results=FALSE}
+
+shp_adm1_BF <- sf::st_read("../Data/Shapefile/Region/bfa_admbnda_adm1_igb_20200323.shp") ## Shapefile delimitant par région du Burkina
+
+shp_adm1_SEN <- sf::st_read("../Data/Shapefile/Region/sen_admbnda_adm1_anat_20240520.shp") ## Shapefile delimitant par région du Sénégal
+
+shp_adm1_NER <- sf::st_read("../Data/Shapefile/Region/geoBoundaries-NER-ADM1.shp") ## Shapefile delimitant par région du Niger
+
+shp_adm1_BN <- sf::st_read("../Data/Shapefile/Region/geoBoundaries-BEN-ADM1.shp") ## Shapefile delimitant par région du Bénin
+
+```
+
+## *Quelques cartes*
+
+### Cartes brutes
+
+**1- Carte du Burkina avec les régions**
+
+Nous traçons la carte avec **ggplot2** en utilisant la fonction `geom_sf()`. Nous utilisons également la fonction `geom_text()` pour ajouter les noms des régions.
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot() + 
+  geom_sf(data = shp_adm1_BF, fill = "lightyellow", color = "black") + # Tracer la carte avec un fond de couleur jaune clair et les tracé en noir
+  
+  # Ajouter les labels des régions
+  geom_sf_text(data = shp_adm1_BF, 
+               aes(label = ADM1_FR), # Afficher le nom de la région 
+               size = 3, color = "black") +  # METTRE le nom en noir et taille 3
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Carte du Burkina suivant les régions") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre de la carte
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+**2- Carte du Bénin avec les régions**
+
+Nous traçons la carte avec **ggplot2** en utilisant la fonction `geom_sf()`. Nous utilisons également la fonction `geom_text()` pour ajouter les noms des régions.
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot() +
+  geom_sf(data = shp_adm1_BN, fill = "gray", color = "black") + # Tracer la carte avec un fond de couleur gris  et les tracé en noir
+  
+  # Ajouter les labels des régions 
+  geom_sf_text(data = shp_adm1_BN, 
+               aes(label = shapeName), # Afficher le nom de la région 
+               size = 3, color = "black") +  # METTRE le nom en noir et taille 3
+  
+  #Ajouter un theme minimal
+  theme_minimal() +
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Carte du Bénin suivant les régions") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre de la carte
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+## Carte avec quelques statistiques par région
+
+**Carte du Sénégal avec quelquesstatistiques par région**
+
+Pour réussir une telle carte, nous avions besion non seulement de la carte brute, mais aussi des statistiques concernées pour chaque région.
+
+Calculons *l'age moyen du chef de ménage* et le *volume horaire de travail moyen* pour chaque région
+
+```{r}
+
+VolHor_age_moyen_par_region <- EHCVM_Senegal %>% # Précise la base de travail
+  group_by(ADM1_FR) %>% # Groupe suivant la région
+  summarise(age_moyen = mean(age, na.rm = TRUE),# calcule l'age moyen pour chaque région en ignorant les valeurs manquantes
+            volhor_moyen = mean(volhor, na.rm = TRUE)) %>% # calcule du volume horaire moyen pour chaque région en ignorant les valeurs manquantes
+  select(ADM1_FR,volhor_moyen,age_moyen)# Seléctionne le nom des regions, le volume horaire moyen et l'age moyen du chef de menage
+
+VolHor_age_moyen_par_region # affiche la base
+
+```
+
+Maintenant, nous associons l'âge moyen du CM et le volume horaire moyen de travail au shapefile shp_adm1_SEN, en faisant correspondre par région.
+
+```{r}
+
+shp_adm1_SEN_volhor_age_moyen <- left_join(shp_adm1_SEN,VolHor_age_moyen_par_region, by = "ADM1_FR") ## Jointure gauche en prenant comme identifiant ADM1_FR
+
+#shp_adm1_SEN_volhor_age_moyen
+
+```
+
+Nous traçons la carte maintenant.
+
+**- Carte avec l'age moyen du chef de ménage**
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot(shp_adm1_SEN_volhor_age_moyen) +
+  geom_sf( fill = "gray", color = "black") + # Tracer la carte en mettant le fond en gris
+  
+  # Ajouter les labels des régions avec âge moyen
+  geom_sf_text( 
+               aes(label = paste(ADM1_FR, "\n", round(age_moyen, 0))), # Afficher le nom de la région et la valeur de l'age moyen
+               size = 3, color = "blue") +  # Mettre le nom en blue et taille 3
+  
+  #Ajouter theme minimal
+  theme_minimal()+
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Sénégal - Age moyen du CM par région") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+**- Carte avec le volume horaire de travail**
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot(shp_adm1_SEN_volhor_age_moyen) +
+  
+  geom_sf( aes(fill = volhor_moyen), color = "black") + # Tracer la carte en mettant des couleurs pour chaque région  en fonction du volume horaire moyen
+  
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen", name = "Volume horaire moyen") +  # Ajouter une palette de couleurs dégradé du bleu clair au bleu foncé  pour le volume horaire
+  
+  
+  # Ajouter les labels des régions avec âge moyen
+  geom_sf_text( aes(label = ADM1_FR), # Afficher le nom de la région 
+               size = 3, color = "red") +  # Mettre le nom en en rouge
+  
+  #Ajouter theme minimal
+  theme_minimal()+
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Sénégal - Volume horaire moyen par région") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+
+\newpage
+
+
+# **Section 4 : Cartographie par département sur les pays**
+
+## *Importations des shapefiles adéquats*
+
+Importons les fichiers de subdivision niveau départemental (**deuxième niveau de division**) .
+
+```{r,message=FALSE,results=FALSE}
+
+shp_adm2_BF <- sf::st_read("../Data/Shapefile/Departement/bfa_admbnda_adm2_igb_20200323.shp") ## Shapefile delimitant par département du Burkina
+
+shp_adm2_SEN <- sf::st_read("../Data/Shapefile/Departement/sen_admbnda_adm2_anat_20240520.shp") ## Shapefile delimitant par département du Sénégal
+
+shp_adm2_NER <- sf::st_read("../Data/Shapefile/Departement/geoBoundaries-NER-ADM2.shp") ## Shapefile delimitant par département du Niger
+
+shp_adm2_BN <- sf::st_read("../Data/Shapefile/Departement/geoBoundaries-BEN-ADM2.shp") ## Shapefile delimitant par département du Bénin
+
+```
+
+## *Quelques cartes*
+
+### Cartes brutes
+
+**1- Carte du Niger avec les départements**
+
+Nous traçons la carte avec **ggplot2** en utilisant la fonction `geom_sf()`. Nous utilisons également la fonction `geom_text()` pour ajouter les noms des départements.
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot() +
+  geom_sf(data = shp_adm2_NER, fill = "lightblue", color = "black") + # Tracer la carte en mettant un fond bleu et les tracés en noir
+  
+  # Ajouter les labels des départements 
+  geom_sf_text(data = shp_adm2_NER, 
+               aes(label = shapeName), # Afficher le nom du département 
+               size = 2, color = "black") +  # Mettre le nom en noir et taille 2
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Carte du Niger suivant les départements") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre de la carte
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+**2- Carte du Burkina avec les départements**
+
+Nous traçons la carte avec **ggplot2** en utilisant la fonction `geom_sf()`. Nous utilisons également la fonction `geom_text()` pour ajouter les noms des départements.
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot() +
+  geom_sf(data = shp_adm2_BF, fill = "lightgreen", color = "gray") + # Tracer la carte avec un fond vert et des tracé en gris
+  
+  # Ajouter les labels des départements
+  geom_sf_text(data = shp_adm2_BF, 
+               aes(label = ADM2_FR), # Afficher le nom du département 
+               size = 2, color = "black") +  # Mettre le nom en noir et taille 2
+  
+  #Ajouter un theme 
+  theme_linedraw() +
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Carte du Burkina suivant les provinces") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+### Carte avec quelques statistiques
+
+**1- Carte du Sénégal avec quelques statistiques par département**
+
+Pour réussir une telle carte, nous avions besion non seulement de la carte brute, mais aussi des statistiques concernées pour chaque département.
+
+Calculons *l'age moyen au mariage* et le *salaire moyen* moyen pour chaque région
+
+```{r}
+
+Base <- EHCVM_Senegal %>% # Precise la base de travail
+  
+  group_by(ADM2_FR) %>% # Groupe suivant le departement
+  
+  summarise(salaire_moyen = mean(salaire, na.rm = TRUE), # Calcul du salaire moyen par departement en ignorant les valeurs manquantes
+            
+            agemar_moyen = mean(agemar, na.rm = TRUE)) %>% # calcule de l'age moyen au mariage pour chaque departement en ignorant les valeurs manquantes 
+  
+  select(ADM2_FR,agemar_moyen, salaire_moyen)# Seléctionne le nom des departement, l'age moyen au mariage   et le salaire moyen
+
+Base # afficher la base
+
+```
+
+Maintenant, nous associons l'âge moyen au mariage et le salaire moyen au shapefile shp_adm1_SEN, en faisant correspondre par département.
+
+```{r}
+
+shp_adm2_SEN_Base <- left_join(shp_adm2_SEN,Base, by = "ADM2_FR") ## Jointure gauche en prenant comme identifiant ADM2_FR
+
+#shp_adm2_SEN_Base
+
+```
+
+Nous traçons la carte maintenant.
+
+**- Carte avec le salaire moyen**
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot(shp_adm2_SEN_Base) +
+  geom_sf( aes(fill = salaire_moyen), color = "black") + # Tracer la carte en mettant les couleurs de chaque département en fonction du salaire moyen
+  scale_fill_gradient(
+    low = "orange", high = "darkred",   # Dégradé de orange au rouge
+    name = "Salaire Moyen (FCFA)"      # Nom de la légende
+  ) +
+  
+  # Ajouter les labels des département
+  geom_sf_text( 
+               aes(label = ADM2_FR), # Afficher le nom  
+               size = 2, color = "black") +  # Mettre le nom en noir
+  
+  #Ajouter theme  (cadre)
+  theme_linedraw()+
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Sénégal - Volume horaire moyen du CM par département") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+On constate que certains départements comme *Médina-Yorofoula, Sédhiou,Bakel, etc* sont en couleur gris, qui n'est pas dans la légende. Cela s'explique par le fait que pour ces départemenst il n'y a pas de valeur en ce qui concerne le salaire moyen.
+
+**- Carte avec le salaire moyen du chef de ménage**
+
+```{r,warning=FALSE, message=FALSE}
+
+ggplot2::ggplot(shp_adm2_SEN_Base) +
+  geom_sf( fill = "white", color = "blue") + # Tracer la carte en mettant le fond en gris
+  
+  # Ajouter les labels des régions avec âge moyen au mariage
+  geom_sf_text( 
+               aes(label = paste(ADM2_FR, "\n", round(agemar_moyen, 0))), # Afficher le nom de la région et la valeur de l'age moyen au mariage
+               size = 2, color = "black") +  # Mettre le nom en blue et taille 3
+  
+  #Ajouter theme minimal
+  theme_minimal()+
+  
+  # Ajouter les labels pour les axes et le titre
+  labs(x = "Longitude", y = "Latitude", title = "Sénégal - Age moyen au mariage par département") +  
+  
+  # Centrer le titre et les labels des axes
+  theme(plot.title = element_text(hjust = 0.5),  # Centrer le titre
+        axis.title.x = element_text(hjust = 0.5),  # Centrer le titre de l'axe X
+        axis.title.y = element_text(hjust = 0.5),  # Centrer le titre de l'axe Y
+        panel.grid = element_blank())  # Supprimer la grille de fond
+
+```
+
+
+\newpage
+
+# **Section 5 : Cartographie par commune sur les pays**
+
+## *Importations des shapefiles adéquats*
+
+Importons les fichiers de subdivision niveau communal
+
+```{r,message=FALSE,results=FALSE}
+
+shp_adm3_BF <- sf::st_read("../Data/Shapefile/Commune/bfa_admbnda_adm3_igb_20200323.shp") ## Shapefile delimitant par commune du Burkina
+
+shp_adm3_SEN <- sf::st_read("../Data/Shapefile/Commune/sen_admbnda_adm3_anat_20240520.shp") ## Shapefile delimitant par commune du Sénégal
+
+shp_adm3_NER <- sf::st_read("../Data/Shapefile/Commune/geoBoundaries-NER-ADM3.shp") ## Shapefile delimitant par commune du Niger
+
+shp_adm3_BN <- sf::st_read("../Data/Shapefile/Commune/geoBoundaries-BEN-ADM3.shp") ## Shapefile delimitant par commune du Bénin
+
+```
+
+## *Quelques cartes*
+
+**Dans cette partie, nous ferons des cartes interractives, il est donc important de savoir ce que c'est.**
+
+### *1. Définition*
+
+Les cartes interactives sont des outils puissants permettant de visualiser et d’explorer des données géographiques de manière dynamique. Contrairement aux cartes statiques qui affichent une image fixe, les cartes interactives offrent des fonctionnalités avancées telles que le **zoom**, le **déplacement**, l’**affichage de pop-ups d’informations**, et la **personnalisation des styles en temps réel**.
+
+### *2. Avantages des Cartes Interactives*
+
+Les cartes interactives présentent plusieurs avantages par rapport aux cartes statiques :
+
+-   **Navigation dynamique** : Possibilité de zoomer et de se déplacer dans la carte.
+-   **Affichage d’informations supplémentaires** : Des pop-ups interactifs permettent d’afficher des détails en cliquant sur une zone.
+-   **Mise à jour en temps réel** : Possibilité d’intégrer des données dynamiques ou des flux en direct.
+-   **Personnalisation avancée** : L’utilisateur peut activer ou désactiver des couches de données pour mieux explorer les informations.
+-   **Meilleure lisibilité** : Les cartes interactives permettent d’adapter l’affichage en fonction du niveau de zoom, évitant ainsi la surcharge d’informations.
+
+Sur **R**, nous pouvons utiliser les packages *tmap*, *leaflet* pour sa réalisation.
+
+**NB : Dans la suite du travail, pour voir les graphiques, il faudra voir sur la sortie html, car seul cette derniere permet de visualiser les cartes interractives. La sortie en pdf ne le permet pas.**
+
+### *3. Carte du Burkina suivant les communes*
+
+Nous traçon une carte du Burkina avec des subdivision niveau communal
+
+```{r, message=FALSE,warning=FALSE}
+
+# Activer le mode interactif
+tmap::tmap_mode("view")
+
+tmap::tm_shape(shp_adm3_BF) + # presente la carte avec les limites niveau communes
+  
+  tm_polygons("ADM1_FR", #Ajoute des couleurs en fonction des régions
+              
+             popup.vars = setNames(c("ADM3_FR", "ADM2_FR", "ADM1_FR"), # Specifie les informations visible au clic 
+                                    c("Commune", "Province", "Région")), # Renomme les elements en nom comprehensible
+              border.col = "black") + # couleur des tracées
+  
+  tm_text("ADM3_FR", size = 0.8, col = "black", auto.placement = TRUE)   # Affiche les noms des communes
+  
+```
+
+### *4. Carte du Niger suivant les communes*
+
+Nous traçon une carte du Niger avec des subdivision niveau communal et presentant chaque ménage enqueté.
+
+Pour se faire nous devons d'abord transformer la base ménage en objet sf pour pouvoir representer chaque menage sur la carte.
+
+```{r}
+
+# Convertir la base ménage en objet sf (Système de coordonnées WGS84)
+
+menages_sf <- st_as_sf(EHCVM_Niger, coords = c("GPS__Longitude", "GPS__Latitude"), crs = 4326)
+
+```
+
+L'affichage des noms sur la carte est bloqué par la bibliothèque *s2* du package *sf*, pour certaines erreurs de géométrie, donc désactivons le temporairement afin de pouvoir afficher les communes.
+
+```{r}
+sf::sf_use_s2(FALSE) 
+```
+
+Maintenant, traçons la carte et superposons les ménages
+
+```{r}
+
+# Activer le mode interactif
+tmap::tmap_mode("view")
+
+# Créer la carte avec les communes et les ménages
+
+tm_shape(shp_adm3_NER)+ # Tracer la carte du Niger
+  
+  tm_polygons(fill = "lightblue") + # mettre un fond de couleur bleu clair
+
+  tm_text("shapeName", size = 0.8, col = "black", auto.placement = TRUE)+  # Affiche les noms des communes
+  
+tm_shape(menages_sf) + # tracer une autre carte avec des menage, superposer à la premiere
+  
+  tm_dots(fill = "pink", size = 0.5, # Representer chaque ménage par un point de couleur rose
+          popup.vars = setNames(c("s00q01","s00q04", "s00q05","AREA_SQKM"), 
+                                c("Région","Milieu de résidence", "Village/Quartier","Superficie de la région"))) 
+
+
+```
+
+
+\newpage
+
+# **Conclusion**
+
+Grâce à **R**, il est possible de réaliser des cartes précises et informatives en utilisant des **Shapefiles** et les packages `sf` et `ggplot2`. En combinant des données statistiques et spatiales, nous pouvons explorer de nouvelles perspectives analytiques et mieux comprendre les dynamiques territoriales.
