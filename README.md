@@ -179,4 +179,4 @@ This course material is licensed under a Creative Commons Attribution 4.0 Intern
   
 ## Additional resources
 
-
+- [The Epidemiologist R Handbook](https://epirhandbook.com/en/)
