@@ -1,0 +1,687 @@
+---
+title: "Projet statistique sous R et Python: tableaux et graphiques sur R Markdown"
+author: |
+  <div style="display: flex; justify-content: space-between;">
+    <div>
+      Rédigé par : 
+      Fogwoung Djoufack Sarah-Laure
+      Niass Ahmadou
+      Nguemfouo Ngoumtsa Célina
+      Sene Malick
+      Élèves Ingénieurs Statisticiens Économistes
+    </div>
+    <div style="text-align: right;">
+      Sous la supervision de :
+      
+      M. Aboubacar Hema 
+      
+      Research Analyst   
+    </div>
+  </div>
+date: "Année scolaire : 2024/2025"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    css: custom.css
+---
+
+<!-- Logos alignés en haut de la page -->
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="LOGO3.jpg" height="80" style="margin-right: 20px;">
+  <img src="LOGO2.jpg" height="80" style="margin-right: 20px;">
+  <img src="LOGO1.jpg" height="80">
+</div>
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Packages
+
+```{r packages, message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(haven)
+library(kableExtra)
+
+```
+
+# Importation des (06) bases et identification de l'année 
+
+
+-   Faire un petit str et mettre les années pour reconnaissance. (meêm si cette variables existe déjà)
+
+## Bases de 2021
+
+```{r}
+gnb2021 <- read_dta("data/ehcvm_welfare_gnb2021.dta")
+tgo2021 <- read_dta("data/ehcvm_welfare_tgo2021.dta")
+civ2021 <- read_dta("data/ehcvm_welfare_civ2021.dta")
+```
+
+```{r}
+names(gnb2021)
+```
+
+```{r}
+gnb2021$annee <- 2021
+tgo2021$annee <- 2021
+civ2021$annee <- 2021
+```
+
+
+
+## Bases de 2018
+
+```{r}
+gnb2018 <- read_dta("data/ehcvm_welfare_gnb2018.dta")
+tgo2018 <- read_dta("data/ehcvm_welfare_tgo2018.dta")
+civ2018 <- read_dta("data/ehcvm_welfare_civ2018.dta")
+```
+
+```{r}
+names(gnb2018)
+```
+```{r}
+gnb2018$annee <- 2018
+tgo2018$annee <- 2018
+civ2018$annee <- 2018
+```
+
+
+
+# Noms des variables dans les différentes bases
+
+## Côte d'Ivoire
+
+On affiche les variables, leurs descriptions et leurs types.
+
+
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(civ2018) 
+
+for(i in colnames(civ2018)){
+  label <- attr(civ2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(civ2018[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables,
+#'leur type
+#'les questions qu'elles représentent.
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2018") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(civ2021) 
+
+for(i in colnames(civ2021)){
+  label <- attr(civ2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(civ2021[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables,
+#'leur type
+#'les questions qu'elles représentent.
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2021") %>% kable_classic(full_width = F,
+position = "center" )
+
+```
+
+
+### Correspondance entre variables
+
+Variables qui sont dans l'une des bases mais pas dans l'autre
+
+```{r}
+
+## dans 2018 only
+difciv_1 <- setdiff(names(civ2018), names(civ2021))
+
+## dans 2021 only
+difciv_2 <- setdiff(names(civ2021), names(civ2018))
+
+```
+
+
+On afffiche les labels pour voir s'il n'y a pas variables de noms différents mais qui sont en fait les mêmes
+
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in difciv_2){
+  label <- attr(civ2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(civ2021[[i]]))
+}
+
+t <- as.matrix(cbind(difciv_2, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2021 mais pas dans celle de 2018") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in difciv_1){
+  label <- attr(civ2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(civ2018[[i]]))
+}
+
+t <- as.matrix(cbind(difciv_1, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2018 mais pas dans celle de 2021") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+
+Chaque variable spécifique à une année est renommée "nomvariable_année".
+
+
+```{r}
+for(nom_var in difciv_1){
+  civ2018 <-  civ2018 %>% dplyr::rename(!!paste0(nom_var,"_2018") := !!sym(nom_var))
+}
+
+for(nom_var in difciv_2){
+  civ2021 <- civ2021 %>%  dplyr::rename(!!paste0(nom_var,"_2021") := !!sym(nom_var))
+}
+
+# Vérification
+names(civ2021)
+```
+
+
+## Guinée-Bissau
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(gnb2018) 
+
+for(i in colnames(gnb2018)){
+  label <- attr(gnb2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(gnb2018[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables,
+#'leur type
+#'les questions qu'elles représentent.
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2018") %>% kable_classic(full_width = F,
+position = "center" )
+
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(gnb2021) 
+
+for(i in colnames(gnb2021)){
+  label <- attr(gnb2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(gnb2021[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables,
+#'leur type
+#'les questions qu'elles représentent.
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2021") %>% kable_classic(full_width = F,
+position = "center" )
+
+```
+
+
+### Correspondance entre variables
+
+
+Variables qui sont dans l'une des bases mais pas dans l'autre
+
+```{r}
+
+## dans 2018 only
+difgnb_1 <- setdiff(names(gnb2018), names(gnb2021))
+
+## dans 2021 only
+difgnb_2 <- setdiff(names(gnb2021), names(gnb2018))
+
+```
+
+
+On afffiche les labels pour voir s'il n'y a pas variables de noms différents mais qui sont en fait les mêmes.
+
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in difgnb_2){
+  label <- attr(gnb2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(gnb2021[[i]]))
+}
+
+t <- as.matrix(cbind(difgnb_2, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2021 mais pas dans celle de 2018") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in difgnb_1){
+  label <- attr(gnb2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(gnb2018[[i]]))
+}
+
+t <- as.matrix(cbind(difgnb_1, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2018 mais pas dans celle de 2021") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+
+On marque les variables qui sont spécifique à une année bien précise.
+
+```{r}
+for(nom_var in difgnb_1){
+  gnb2018 <-  gnb2018 %>% dplyr::rename(!!paste0(nom_var,"_2018") := !!sym(nom_var))
+}
+
+for(nom_var in difgnb_2){
+  gnb2021 <- gnb2021 %>%  dplyr::rename(!!paste0(nom_var,"_2021") := !!sym(nom_var))
+}
+
+# vérifiion
+
+names(gnb2021)
+```
+
+
+
+## Togo
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(tgo2018) 
+
+for(i in colnames(tgo2018)){
+  label <- attr(tgo2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(tgo2018[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables ;
+#'leur type ;
+#'les questions qu'elles représentent ;
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2018") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+Variables <- names(tgo2021) 
+
+for(i in colnames(tgo2021)){
+  label <- attr(tgo2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(tgo2021[[i]]))
+}
+
+t <- as.matrix(cbind(Variables, type, noms))
+
+#'Le tableau t nous donne les variables ;
+#'leur type ;
+#'les questions qu'elles représentent ;
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables de la base, leurs types et leurs labels, 2021") %>% kable_classic(full_width = F,
+position = "center" )
+
+```
+
+
+### Correspondance entre variables
+
+On recherche les différences 
+
+```{r}
+# Présent dans 2018 only
+diftgo_1 <- setdiff(names(tgo2018), names(tgo2021))
+
+# Présent dans 2021 only
+diftgo_2 <- setdiff(names(tgo2021), names(tgo2018))
+
+```
+
+On affiche les labels
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in diftgo_2){
+  label <- attr(tgo2021[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(tgo2021[[i]]))
+}
+
+t <- as.matrix(cbind(diftgo_2, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2021 mais pas dans celle de 2018") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+
+```{r}
+type <- c()
+noms <- c()
+
+for(i in diftgo_1){
+  label <- attr(tgo2018[[i]], "label")
+  noms <- c(noms, ifelse(!is.null(label), label, ""))
+  type <- c(type, typeof(tgo2018[[i]]))
+}
+
+t <- as.matrix(cbind(diftgo_1, type, noms))
+
+ kable(t, table.attr = "style='width:40%;'", caption = "Variables dans la base 2018 mais pas dans celle de 2021") %>% kable_classic(full_width = F,
+position = "center" )
+```
+
+On marque les variables spécifiques à une année donnée.
+
+
+```{r}
+for(nom_var in diftgo_1){
+  tgo2018 <-  tgo2018 %>% dplyr::rename(!!paste0(nom_var,"_2018") := !!sym(nom_var))
+}
+
+for(nom_var in diftgo_2){
+  tgo2021 <- tgo2021 %>%  dplyr::rename(!!paste0(nom_var,"_2021") := !!sym(nom_var))
+}
+
+# vérifiion
+
+names(tgo2021)
+```
+
+
+
+# Variables codifiées
+
+## Côte d'Ivoire
+
+On considère les variables en commun et parmi elles, celles qui sont codifiées.
+
+```{r}
+
+com_vars <- intersect(names(civ2018), names(civ2021))
+
+# variables codifiées
+
+com_vars_cod <- c()
+
+for(var in com_vars){
+  if (!is.null(attr(civ2021[[var]], "labels"))){
+    com_vars_cod <- c(com_vars_cod, var)
+  }
+}
+
+# Affichage des variables à recodes (éventuellement)
+com_vars_cod
+
+```
+
+
+On affiche un tableau qui fait la comparaison pour voir ce qui a changé.
+
+```{r}
+
+codes_2018_2021 <- c()
+
+for(i in com_vars_cod){
+  
+  # On récupère lees attributs labels, vecteurs nommées
+  label_18 <- attr(civ2018[[i]], "labels")
+  label_21 <- attr(civ2021[[i]], "labels")
+  
+  # On les transforme en chaînes de caractère, pour une meileure lecture
+  label_18_str <- paste(label_18, names(label_18), collapse = " ; ")
+  label_21_str <- paste(label_21, names(label_21), collapse = " ; ")
+  
+  info <- paste0("2018 ( ",label_18_str, " )\n",
+                "2021 ( ",label_21_str, " )" )
+  
+  # On ajoute à nos vecteurs
+  codes_2018_2021 <- c(codes_2018_2021,  info)
+}
+
+#t <- as.matrix(cbind(com_vars_cod, codes_2018_2021))
+# 
+t <- data.frame(
+  Variable = com_vars_cod,
+  Codes = codes_2018_2021,
+  stringsAsFactors = FALSE
+)
+# 
+#   kable(t, escape=FALSE,  table.attr = "style='width:40%;'", caption = "Variables codifiées des deux bases")%>%
+#     kable_classic(full_width = F,
+#  position = "center" ) 
+  
+  
+kable(t, escape = FALSE, table.attr = "style='width:40%;'", 
+      caption = "Variables codifiées des deux bases") %>%
+  kable_classic(full_width = T, position = "center") %>%
+  kable_styling(bootstrap_options = "bordered") 
+
+
+```
+
+
+
+## Guinée-Bissau
+
+On considère les variables en commun et parmi elles, celles qui sont codifiées.
+
+```{r}
+
+com_vars <- intersect(names(gnb2018), names(gnb2021))
+
+# variables codifiées
+
+com_vars_cod <- c()
+
+for(var in com_vars){
+  if (!is.null(attr(gnb2021[[var]], "labels"))){
+    com_vars_cod <- c(com_vars_cod, var)
+  }
+}
+
+# Affichage des variables à recodes (éventuellement)
+com_vars_cod
+
+```
+
+
+On affiche un tableau qui fait la comparaison pour voir ce qui a changé.
+
+```{r}
+
+codes_2018_2021 <- c()
+
+for(i in com_vars_cod){
+  
+  # On récupère lees attributs labels, vecteurs nommées
+  label_18 <- attr(gnb2018[[i]], "labels")
+  label_21 <- attr(gnb2021[[i]], "labels")
+  
+  # On les transforme en chaînes de caractère, pour une meileure lecture
+  label_18_str <- paste(label_18, names(label_18), collapse = " ; ")
+  label_21_str <- paste(label_21, names(label_21), collapse = " ; ")
+  
+  info <- paste0("2018 ( ",label_18_str, " )\n",
+                "2021 ( ",label_21_str, " )" )
+  
+  # On ajoute à nos vecteurs
+  codes_2018_2021 <- c(codes_2018_2021,  info)
+}
+
+#t <- as.matrix(cbind(com_vars_cod, codes_2018_2021))
+# 
+t <- data.frame(
+  Variable = com_vars_cod,
+  Codes = codes_2018_2021,
+  stringsAsFactors = FALSE
+)
+# 
+#   kable(t, escape=FALSE,  table.attr = "style='width:40%;'", caption = "Variables codifiées des deux bases")%>%
+#     kable_classic(full_width = F,
+#  position = "center" ) 
+  
+  
+kable(t, escape = FALSE, table.attr = "style='width:40%;'", 
+      caption = "Variables codifiées des deux bases") %>%
+  kable_classic(full_width = T, position = "center") %>%
+  kable_styling(bootstrap_options = "bordered")
+  #column_spec(2, extra_css = "white-space: pre-wrap;")
+
+
+```
+
+
+
+
+## Togo
+
+On considère les variables en commun et parmi elles, celles qui sont codifiées.
+
+```{r}
+
+com_vars <- intersect(names(tgo2018), names(tgo2021))
+
+# variables codifiées
+
+com_vars_cod <- c()
+
+for(var in com_vars){
+  if (!is.null(attr(tgo2021[[var]], "labels"))){
+    com_vars_cod <- c(com_vars_cod, var)
+  }
+}
+
+# Affichage des variables à recodes (éventuellement)
+com_vars_cod
+
+```
+
+
+On affiche un tableau qui fait la comparaison pour voir ce qui a changé.
+
+```{r}
+
+codes_2018_2021 <- c()
+
+for(i in com_vars_cod){
+  
+  # On récupère lees attributs labels, vecteurs nommées
+  label_18 <- attr(tgo2018[[i]], "labels")
+  label_21 <- attr(tgo2021[[i]], "labels")
+  
+  # On les transforme en chaînes de caractère, pour une meileure lecture
+  label_18_str <- paste(label_18, names(label_18), collapse = " ; ")
+  label_21_str <- paste(label_21, names(label_21), collapse = " ; ")
+  
+  info <- paste0("2018 ( ",label_18_str, " )\n",
+                "2021 ( ",label_21_str, " )" )
+  
+  # On ajoute à nos vecteurs
+  codes_2018_2021 <- c(codes_2018_2021,  info)
+}
+
+#t <- as.matrix(cbind(com_vars_cod, codes_2018_2021))
+# 
+t <- data.frame(
+  Variable = com_vars_cod,
+  Codes = codes_2018_2021,
+  stringsAsFactors = FALSE
+)
+# 
+#   kable(t, escape=FALSE,  table.attr = "style='width:40%;'", caption = "Variables codifiées des deux bases")%>%
+#     kable_classic(full_width = F,
+#  position = "center" ) 
+  
+  
+kable(t, escape = FALSE, table.attr = "style='width:40%;'", 
+      caption = "Variables codifiées des deux bases") %>%
+  kable_classic(full_width = T, position = "center") %>%
+  kable_styling(bootstrap_options = "bordered") 
+
+
+```
+
+
+
+
+
+# Les enjeux
+
+-   il reste à harmoniser les labels : **nous décidons de conserver les labels de 2021** ;
+-   les missing particuliers: cas d'une variable qui était dans 2019 mais pas en 2021. Pour cela, pour cela, on a spécifié les variables qui ne sont que dans une seule base (une seule année).
+
+Enregistrons les bases.
+
+```{r}
+write_dta(civ2018, "pre_merging_datasets/civ2018_welfare_premerge.dta")
+write_dta(gnb2018, "pre_merging_datasets/gnb2018_welfare_premerge.dta")
+write_dta(tgo2018, "pre_merging_datasets/tgo2018_welfare_premerge.dta")
+
+write_dta(civ2021, "pre_merging_datasets/civ2021_welfare_premerge.dta")
+write_dta(gnb2021, "pre_merging_datasets/gnb2021_welfare_premerge.dta")
+write_dta(tgo2021, "pre_merging_datasets/tgo2021_welfare_premerge.dta")
+
+```
+
+
+
