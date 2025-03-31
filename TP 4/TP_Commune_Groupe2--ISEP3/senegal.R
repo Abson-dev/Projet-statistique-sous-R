@@ -261,3 +261,9 @@ resultat_merge <- merge_bases_commune_interactive(data_SEN, data, threshold = 0.
 # Afficher le résultat final de la fusion
 cat("\nRésultat de la fusion :\n")
 print(resultat_merge)
+
+# Pour avoir la base finale en STATA, il nous faut supprimer la variable geometry
+resultat_merge <- resultat_merge %>%
+  select(-geometry)
+
+haven::write_dta(resultat_merge, "Outputs/data_final_SEN.dta")

@@ -1,0 +1,1103 @@
+---
+title: "Fusion des bases welfare des EHCVM 2018 et 2021"
+author: "DJERAKEI MISTALENGAR"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  word_document:
+    toc: yes
+    toc_depth: '4'
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+  html_document:
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+    number_sections: yes
+    theme: cosmo
+    highlight: tango
+    df_print: kable
+    code_folding: hide
+---
+
+Structure générale
+
+Ce script RMarkdown a pour objectif de fusionner deux bases de données (EHCVM 2018 et 2021) sur le bien-être au Sénégal. Il suit une approche méthodique pour harmoniser les structures, les encodages et les labels des variables avant la fusion.
+
+
+```{r 01 setup, include=FALSE, results = 'hide'}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+  results = "show"
+	
+)
+```
+
+
+# Gestion des packages
+
+```{r message=FALSE, warning = FALSE}
+
+packages <- c("haven", "utils", "dplyr", "tidyverse","labelled", "expss", "sjPlot", "janitor")
+
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE))
+    install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+
+```
+
+
+```{r }
+# Supprimer toutes les variables de l'environnement
+rm(list = ls())
+
+# Forcer un nettoyage de la mémoire
+gc()
+
+```
+# Chargement des Données
+
+
+```{r echo=TRUE }
+# Charger les bases sans conversion immédiate des labels
+
+wel_18 <- read_dta("../Donnees/ehcvm_welfare_sen2018.dta") 
+
+
+wel_21 <- read_dta("../Donnees/ehcvm_welfare_sen2021.dta") 
+
+```
+
+```{r}
+
+glimpse(wel_21)
+glimpse(wel_18)
+
+```
+
+Appliquer la conversion à toutes les colonnes de la base 2018. La fonction lapply permet de parcourir chaque colonne et d'appliquer iconv pour ajuster l'encodage.
+
+```{r}
+
+wel_18[] <- lapply(wel_18, function(x) iconv(x, from = "latin1", to = "UTF-8"))
+
+```
+
+# Diagnostic des Données
+
+Pour un meilleur traitement, nous commençons par analyser et comprendre les deux bases, afin de voir les similitudes et les divergences.
+
+## Doublons
+
+Vérification des doublons
+
+Vérifie l'unicité des identifiants de ménage (hhid) dans les deux bases
+
+```{r}
+
+anyDuplicated(wel_18$hhid)
+
+anyDuplicated(wel_21$hhid)
+
+```
+
+Aucun ménage n'est dupliqué dans les deux bases.
+
+## Valeurs Manquantes
+
+Implémente une fonction calc_na_stats() pour calculer: le nombre de NA par variable, le pourcentage de NA par rapport au total.
+
+Affiche les résultats triés par pourcentage décroissant
+
+```{r}
+# Fonction pour calculer les valeurs manquantes et les pourcentages
+calc_na_stats <- function(data) {
+  na_counts <- colSums(is.na(data))  # Nombre de NA par colonne
+  total_rows <- nrow(data)  # Nombre total de lignes
+  na_percent <- (na_counts / total_rows) * 100  # Pourcentage de NA
+  
+  # Créer un tableau récapitulatif
+  na_stats <- data.frame(
+    Variable = names(na_counts),
+    NA_Count = na_counts,
+    NA_Percentage = round(na_percent, 2)  # Arrondi à 2 décimales
+  )
+  
+  # Trier les résultats par pourcentage décroissant
+  na_stats <- na_stats[order(-na_stats$NA_Percentage), ]
+  
+  return(na_stats)
+}
+
+
+```
+
+Valeurs manquantes - Base 2018
+
+
+```{r}
+NA_stats_2018 <- calc_na_stats(wel_18)
+print(NA_stats_2018)
+
+```
+Valeurs manquantes - Base 2021
+
+
+```{r}
+NA_stats_2021 <- calc_na_stats(wel_21)
+print(NA_stats_2021)
+```
+
+## Comparaison des variables
+
+Identification des variables communes et uniques.
+
+Utilise setdiff() et intersect() pour identifier: Variables communes aux deux bases et Variables spécifiques à 2018 ou 2021.
+
+
+```{r}
+
+# Variables uniques à 2018
+
+setdiff(names(wel_18), names(wel_21))
+
+```
+
+```{r}
+
+# Variables uniques à 2021
+
+setdiff(names(wel_21), names(wel_18))
+
+```
+```{r}
+
+# variables communes
+
+vars_com <- intersect(names(wel_18), names(wel_21))
+vars_com
+
+```
+
+
+## Etude des labels
+
+Renommage de la variable "halfa" en "halfab" pour harmoniser
+
+```{r}
+
+colnames(wel_21)[colnames(wel_21)=="halfa"] <- "halfab"
+
+# Ajoutons cette variables à la liste des variables communes.
+
+vars_com <-  append(vars_com,"halfab")
+
+```
+
+
+Nous verifions si pour les variables communes, nous avions les mêmes labels. Pour se faire, nous parcourons la liste des variables communes et nous récupérons les labels de chaque variable en 2018 et en 2021. Une fois cela fait, nous les comparons pour voir s'il y a incohérence ou pas.
+
+```{r}
+
+variable_label_diff <- c() # créer une liste vide 
+
+for (variable in vars_com) { # parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(wel_18[[variable]])){ # vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(wel_18[[variable]]) # recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL # Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(wel_21[[variable]])){ # vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(wel_21[[variable]]) # recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL # Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+
+```
+
+# Harmonisation des labels
+
+Après avoir identifié les variables avec des labels incohérents (variable_label_diff),nous procédons à l'examen détaillé de chaque variable problématique.
+Pour chacune, nous comparons systématiquement :
+ 1. Les labels entre 2018 et 2021
+ 2. Les distributions des valeurs
+ 3. Les incohérences potentielles
+
+Puis nous appliquons les corrections nécessaires.
+
+Procédure standard pour chaque variable :
+1. Affichage des labels et distributions dans chaque base
+2. Analyse des différences
+3. Décision d'harmonisation (généralement vers les labels 2021)
+4. Application des corrections
+5. Vérification des résultats
+
+
+### Variables géographiques
+
+- Zone d'étude (zae)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$zae)
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,zae)
+```
+
+Donc pas de label pour la variable region en 2018
+
+```{r}
+#View labels
+expss::val_lab(wel_21$zae)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,zae)
+
+```
+
+```{r}
+
+wel_18 <- wel_18 %>%
+  mutate(zae = as.numeric(as.vector(zae))) %>%  # Convertir en numérique brut
+  mutate(zae = recode(zae,
+    1 ~ 11,  # Dakar reste 11
+    2 ~ 9,   # Ziguinchor devient 9
+    3 ~ 5,   # Diourbel fusionne avec Thiès (5)
+    4 ~ 3,   # Saint-Louis devient 3
+    5 ~ 9,   # Tambacounda fusionne avec Ziguinchor (9)
+    6 ~ 7,   # Kaolack devient 7
+    7 ~ 5,   # Thiès devient 5
+    8 ~ 5,   # Louga fusionne avec Thiès (5)
+    9 ~ 7,   # Fatick fusionne avec Kaolack (7)
+    10 ~ 9,  # Kolda fusionne avec Ziguinchor (9)
+    11 ~ 3,  # Matam fusionne avec Saint-Louis (3)
+    12 ~ 7,  # Kaffrine fusionne avec Kaolack (7)
+    13 ~ 1,  # Kédougou garde 1
+    14 ~ 9   # Sédhiou fusionne avec Ziguinchor (9)
+  ))
+
+```
+
+```{r}
+labels_zae_2021 <- expss::val_lab(wel_21$zae)
+
+expss::val_lab(wel_18$zae) <- labels_zae_2021
+
+table(wel_18$zae, useNA = "ifany")
+table(haven::as_factor(wel_21$zae), useNA = "ifany")
+
+
+
+```
+
+
+region
+
+```{r}
+#View labels
+expss::val_lab(wel_18$region)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,region)
+```
+
+La variable région n'est pas labellisée en 2018
+
+```{r}
+#View labels
+expss::val_lab(wel_21$region)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,region)
+```
+
+```{r}
+
+region_labels <- c(
+  "Dakar" = 1, "Ziguinchor" = 2, "Diourbel" = 3, "Saint-Louis" = 4, 
+  "Tambacounda" = 5, "Kaolack" = 6, "Thiès" = 7, "Louga" = 8, 
+  "Fatick" = 9, "Kolda" = 10, "Matam" = 11, "Kaffrine" = 12, 
+  "Kédougou" = 13, "Sédhiou" = 14
+)
+
+# Fonction pour harmoniser la variable 'zae'
+harmoniser_zae <- function(data) {
+  data <- data %>%
+    mutate(zae = as.numeric(as.character(zae)))  # Convertir en numérique si nécessaire
+  
+  val_lab(data$zae) <- region_labels  # Appliquer les labels
+
+  return(data)
+}
+
+# Appliquer le recodage aux deux bases
+wel_18 <- harmoniser_zae(wel_18)
+wel_21 <- harmoniser_zae(wel_21)
+
+# Vérification des labels appliqués
+print("Labels de la variable 'zae' dans wel_18 :")
+print(val_lab(wel_18$zae))
+
+print("Labels de la variable 'zae' dans wel_21 :")
+print(val_lab(wel_21$zae))
+
+```
+
+- Milieu de résidence (milieu)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$milieu)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,milieu)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$milieu)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,milieu)
+```
+
+```{r}
+
+wel_18 <- wel_18 %>%
+    mutate(milieu = ifelse(milieu == 1, 1, 0))
+
+ 
+```
+
+```{r}
+wel_21 <- wel_21 %>%
+    mutate(milieu = ifelse(milieu == 1, 1, 0))
+```
+
+```{r}
+val_lab(wel_18$milieu) <- c("Rural" = 0, "Urbain" = 1)
+val_lab(wel_21$milieu) <- c("Rural" = 0, "Urbain" = 1)
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'milieu' dans wel_18 :")
+print(val_lab(wel_18$milieu))
+
+print("Labels de la variable 'milieu' dans wel_21 :")
+print(val_lab(wel_21$milieu))
+```
+
+```{r}
+# Vérification des effectifs
+table(haven::as_factor(wel_18$milieu), useNA = "ifany")
+table(haven::as_factor(wel_21$milieu), useNA = "ifany")
+```
+
+### Variables démographiques
+
+- Sexe du chef de ménage (hgender)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hgender)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hgender)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hgender)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hgender)
+```
+
+```{r}
+wel_18 <- wel_18 %>%
+    mutate(hgender = ifelse(hgender == 1, 1, 0))
+```
+
+```{r}
+wel_21 <- wel_21 %>%
+    mutate(hgender = ifelse(hgender == 1, 1, 0))
+```
+
+```{r}
+val_lab(wel_18$hgender) <- c("Masculin" = 1, "Féminin" = 0)
+val_lab(wel_21$hgender) <- c("Masculin" = 1, "Féminin" = 0)
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'milieu' dans wel_18 :")
+print(val_lab(wel_18$hgender))
+
+print("Labels de la variable 'milieu' dans wel_21 :")
+print(val_lab(wel_21$hgender))
+```
+
+```{r}
+# Vérification des effectifs
+table(haven::as_factor(wel_18$hgender), useNA = "ifany")
+table(haven::as_factor(wel_21$hgender), useNA = "ifany")
+```
+
+- Statut matrimonial (hmstat)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hmstat)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hmstat)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hmstat)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hmstat)
+```
+
+
+
+```{r}
+
+wel_18 <- wel_18 %>%
+  mutate(
+    hmstat = case_when(
+      hmstat == 1 ~ 1,  # Célibataire
+      hmstat == 2 ~ 2,  # Marié monogame
+      hmstat == 3 ~ 3,  # Marié polygame
+      hmstat == 4 ~ 4,  # Union libre
+      hmstat == 5 ~ 5,  # Veuf
+      hmstat == 6 ~ 6,  # Divorcé
+      hmstat == 7 ~ 7,  # Séparé
+      TRUE ~ NA_real_
+    )
+  ) 
+labels_hmstat_2021 <- expss::val_lab(wel_21$hmstat)
+
+expss::val_lab(wel_18$hmstat) <- labels_hmstat_2021
+```
+
+
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'milieu' dans wel_18 :")
+print(val_lab(wel_18$hmstat))
+
+print("Labels de la variable 'milieu' dans wel_21 :")
+print(val_lab(wel_21$hmstat))
+```
+
+
+
+```{r}
+table(haven::as_factor(wel_18$hmstat), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hmstat), useNA = "ifany")
+
+```
+
+
+- Religion (hreligion)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hreligion)
+
+wel_18 %>% plot_frq(coord.flip =T,hreligion)
+
+```
+
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hreligion)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hreligion)
+```
+
+
+```{r}
+labels_religion_2021 <- expss::val_lab(wel_21$hreligion)
+
+expss::val_lab(wel_18$hreligion) <- labels_religion_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hreligion' dans wel_18 :")
+print(val_lab(wel_18$hreligion))
+
+print("Labels de la variable 'milieu' dans wel_21 :")
+print(val_lab(wel_21$hreligion))
+```
+
+```{r}
+# Vérification des effectifs
+table(haven::as_factor(wel_18$hreligion), useNA = "ifany")
+table(haven::as_factor(wel_21$hreligion), useNA = "ifany")
+```
+
+
+
+
+### Caractéristiques du chef de ménage
+
+
+#### Activités du chef de ménage
+
+- Activité sur 7 jours (hactiv7j)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hactiv7j)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hactiv7j)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hactiv7j)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hactiv7j)
+```
+
+```{r}
+# Recodage pour harmoniser avec 'wel_21$hactiv7j'
+wel_18$hactiv7j <- dplyr::recode(wel_18$hactiv7j,
+                                 `2` = 4,  # Chômeur devient 4
+                                 `3` = 2,  # TF cherchant emploi devient 2
+                                 `4` = 3,  # TF cherchant pas reste 3
+                                 `1` = 1,  # Occupe reste 1
+                                 `5` = 5,  # Inactif reste 5
+                                 `6` = 6)  # Moins de 5 ans reste 6
+
+# Appliquer les labels de 2021 à la variable recodée
+expss::val_lab(wel_18$hactiv7j) <- expss::val_lab(wel_21$hactiv7j)
+
+# Vérification des labels et des valeurs après recodage
+print("Labels après harmonisation de 'hactiv7j' dans wel_18 :")
+print(expss::val_lab(wel_18$hactiv7j))
+
+print("Table de fréquences après recodage :")
+print(table(wel_18$hactiv7j, useNA = "ifany"))
+
+
+```
+
+
+```{r}
+table(haven::as_factor(wel_18$hactiv7j), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hactiv7j), useNA = "ifany")
+
+```
+
+- Branche d'activité (hbranch)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hbranch)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hbranch)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hbranch)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hbranch)
+```
+
+```{r warning=FALSE}
+# Recoder 'wel_18$hbranch' pour harmoniser avec 'wel_21$hbranch'
+wel_18$hbranch <- dplyr::recode(wel_18$hbranch,
+                                `2` = 2)  # Recode "Elevage/peche" en "Elevage/syl./peche" (valeur 2 reste inchangée ici)
+
+# Appliquer les mêmes labels de 'wel_21$hbranch' à 'wel_18$hbranch'
+expss::val_lab(wel_18$hbranch) <- expss::val_lab(wel_21$hbranch)
+
+# Vérifier les labels après recodage
+print("Labels après harmonisation de 'hbranch' dans wel_18 :")
+print(expss::val_lab(wel_18$hbranch))
+
+
+```
+
+```{r}
+table(haven::as_factor(wel_18$hbranch), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hbranch), useNA = "ifany")
+
+```
+
+- Secteur institutionnel (hsectins)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hsectins)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hsectins)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hsectins)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hsectins)
+```
+
+```{r}
+labels_hsectins_2021 <- expss::val_lab(wel_21$hsectins)
+
+expss::val_lab(wel_18$hsectins) <- labels_hsectins_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hsectins' dans wel_18 :")
+print(val_lab(wel_18$hsectins))
+
+print("Labels de la variable 'hsectins' dans wel_21 :")
+print(val_lab(wel_21$hsectins))
+```
+
+```{r}
+table(wel_18$hmstat, useNA = "ifany")
+
+table(haven::as_factor(wel_21$hsectins), useNA = "ifany")
+```
+
+- Categorie soio-professionnelle (hcsp)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hcsp)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hcsp)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hcsp)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hcsp)
+```
+
+```{r}
+labels_hcsp_2021 <- expss::val_lab(wel_21$hcsp)
+
+expss::val_lab(wel_18$hcsp) <- labels_hcsp_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hcsp' dans wel_18 :")
+print(val_lab(wel_18$hcsp))
+
+print("Labels de la variable 'hcsp' dans wel_21 :")
+print(val_lab(wel_21$hsectins))
+```
+
+
+
+```{r}
+table(haven::as_factor(wel_18$hcsp), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hcsp), useNA = "ifany")
+```
+
+- Alphabétisation (halfab)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$halfab)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,halfab)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$halfab)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,halfab)
+```
+
+```{r}
+labels_halfab_2021 <- expss::val_lab(wel_21$halfab)
+
+expss::val_lab(wel_18$halfab) <- labels_halfab_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'halfab' dans wel_18 :")
+print(val_lab(wel_18$halfab))
+
+print("Labels de la variable 'halfab' dans wel_21 :")
+print(val_lab(wel_21$halfab))
+```
+
+
+```{r}
+table(haven::as_factor(wel_18$halfab), useNA = "ifany")
+
+table(haven::as_factor(wel_21$halfab), useNA = "ifany")
+```
+
+- Nationalité (hnation)
+
+Variables nécessitant un regroupement de modalités (hnation)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hnation)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hnation)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hnation)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hnation)
+```
+
+```{r}
+wel_21 <- wel_21 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3,  # Remplace la modalité 4 par 3
+                          `8` = 4,  # Remplace la modalité 8 par 4
+                          `10` = 5, # Remplace la modalité 10 par 5
+                          `11` = 6, # Remplace la modalité 11 par 6
+                          `13` = 7, # Remplace la modalité 13 par 7
+                          `15` = 8, # Remplace la modalité 15 par 8
+                          `12` = 9, # Remplace la modalité 12 par 9
+                          `17` = 11, # Remplace la modalité 17 par 11
+                          `18` = 12, # Remplace la modalité 18 par 12
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10 # Remplace les modalités (3,9,14,5,6,7) par 10
+                          ))
+
+```
+
+```{r}
+labels_hnation_2021 <- expss::val_lab(wel_21$hnation)
+
+expss::val_lab(wel_18$hnation) <- labels_hnation_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'halfab' dans wel_18 :")
+print(val_lab(wel_18$hnation))
+
+print("Labels de la variable 'halfab' dans wel_21 :")
+print(val_lab(wel_21$hnation))
+```
+
+
+
+```{r}
+table(haven::as_factor(wel_18$hnation), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hnation), useNA = "ifany")
+```
+
+- Activité sur 12 mois (hactiv12m)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hactiv12m)
+
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hactiv12m)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hactiv12m)
+
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hactiv12m)
+```
+
+```{r}
+labels_hactiv12m_2021 <- expss::val_lab(wel_21$hactiv12m)
+
+expss::val_lab(wel_18$hactiv12m) <- labels_hactiv12m_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hactiv12m' dans wel_18 :")
+print(val_lab(wel_18$hactiv12m))
+
+print("Labels de la variable 'hactiv12m' dans wel_21 :")
+print(val_lab(wel_21$hactiv12m))
+```
+
+```{r}
+table(haven::as_factor(wel_18$hactiv12m), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hactiv12m), useNA = "ifany")
+```
+
+#### Education
+
+- niveau d'éducation (heduc)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$heduc)
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,heduc)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$heduc)
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,heduc)
+```
+
+```{r}
+labels_heduc_2021 <- expss::val_lab(wel_21$heduc)
+
+expss::val_lab(wel_18$heduc) <- labels_heduc_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'heduc' dans wel_18 :")
+print(val_lab(wel_18$heduc))
+
+print("Labels de la variable 'heduc' dans wel_21 :")
+print(val_lab(wel_21$heduc))
+```
+
+
+
+```{r}
+table(haven::as_factor(wel_18$heduc), useNA = "ifany")
+
+table(haven::as_factor(wel_21$heduc), useNA = "ifany")
+```
+
+- Diplôme (hdiploma)
+
+```{r}
+#View labels
+expss::val_lab(wel_18$hdiploma)
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hdiploma)
+```
+
+```{r}
+#View labels
+expss::val_lab(wel_21$hdiploma)
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hdiploma)
+```
+
+```{r}
+labels_hdiploma_2021 <- expss::val_lab(wel_21$hdiploma)
+
+expss::val_lab(wel_18$hdiploma) <- labels_hdiploma_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hdiploma' dans wel_18 :")
+print(val_lab(wel_18$hdiploma))
+
+print("Labels de la variable 'hdiploma' dans wel_21 :")
+print(val_lab(wel_21$hdiploma))
+```
+
+```{r}
+table(haven::as_factor(wel_18$hdiploma), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hdiploma), useNA = "ifany")
+```
+
+
+- Handicap majeur (hhandig)
+
+```{r}
+#View labels
+
+expss::val_lab(wel_18$hhandig)
+
+wel_18 %>% 
+  plot_frq(coord.flip =T,hhandig)
+```
+
+```{r}
+#View labels
+
+expss::val_lab(wel_21$hhandig)
+
+wel_21 %>% 
+  plot_frq(coord.flip =T,hhandig)
+```
+
+```{r}
+labels_hhandig_2021 <- expss::val_lab(wel_21$hhandig)
+
+expss::val_lab(wel_18$hhandig) <- labels_hhandig_2021
+
+```
+
+```{r}
+# Vérification des labels
+print("Labels de la variable 'hhandig' dans wel_18 :")
+print(val_lab(wel_18$hhandig))
+
+print("Labels de la variable 'hhandig' dans wel_21 :")
+print(val_lab(wel_21$hhandig))
+```
+
+
+```{r}
+table(haven::as_factor(wel_18$hhandig), useNA = "ifany")
+
+table(haven::as_factor(wel_21$hhandig), useNA = "ifany")
+```
+Convertir maintenant toutes les variables à labels en facteur pour les deux bases
+
+```{r}
+
+convert_to_factor <- function(data) {
+  data %>% 
+    mutate(across(where(~ !is.null(expss::val_lab(.))), haven::as_factor))
+}
+
+# Appliquer la conversion sur les deux bases
+wel_18 <- convert_to_factor(wel_18)
+wel_21 <- convert_to_factor(wel_21)
+
+```
+
+Harmoniser les noms des variables dans les deux bases au cas ou il aurait des anomalies de nom.
+
+clean_names() de janitor :Convertit tous les noms en minuscules, remplace les espaces et caractères spéciaux par des underscores (_) et supprime les accents et caractères non standards.
+
+```{r Harmoniser les noms des variables dans les deux bases}
+ 
+# Nettoyage des noms + ajout des suffixes
+
+wel_18 <- wel_18 %>%
+  clean_names() %>% 
+  rename_with(~ paste0(., "_2018"))
+
+wel_21 <- wel_21 %>% 
+  clean_names() %>% 
+  rename_with(~ paste0(., "_2021"))
+
+
+```
+
+```{r}
+names(wel_18)
+names(wel_21)
+```
+
+# Fusion des bases
+
+Cette section présente la méthode de fusion retenue pour combiner nos deux bases de données (2018 et 2021). Nous optons pour une approche par empilement (row-binding), qui consiste à superposer verticalement les observations.
+
+
+```{r}
+
+wel_fusion <- bind_rows(
+  wel_18 %>% mutate(across(where(is.numeric), as.character)),
+  wel_21 %>% mutate(across(where(is.numeric), as.character))
+)
+
+head(wel_fusion)
+
+haven::write_dta(wel_fusion, "../Donnees/wel_fusion.dta")
+
+```
+
+

@@ -1,0 +1,227 @@
+---
+title: "TEST"
+author: "FRANCIS_ENSAE"
+date: "2025-02-25"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+```{r}
+#Importation des bases de données
+library(haven)
+library(tidyverse)
+library(gtsummary)
+base_menage <- read_dta("C:/Users/Hp/Desktop/TEST_PRO_AUJOUR/Test - 20252502/data/base_menage.dta")
+View(base_menage)
+food_comp_child_baseline <- read_dta("C:/Users/Hp/Desktop/TEST_PRO_AUJOUR/Test - 20252502/data/food_comp_child_baseline.dta")
+View(food_comp_child_baseline)
+food_comp_child_endline <- read_dta("C:/Users/Hp/Desktop/TEST_PRO_AUJOUR/Test - 20252502/data/food_comp_child_endline.dta")
+View(food_comp_child_endline)
+food_comp_mother_baseline <- read_dta("C:/Users/Hp/Desktop/TEST_PRO_AUJOUR/Test - 20252502/data/food_comp_mother_baseline.dta")
+View(food_comp_mother_baseline)
+food_comp_mother_endline <- read_dta("C:/Users/Hp/Desktop/TEST_PRO_AUJOUR/Test - 20252502/data/food_comp_mother_endline.dta")
+View(food_comp_mother_endline)
+```
+
+
+```{r}
+#1.	Vérification de la présence de doublons dans les bases de données Baseline, Endline et ménage. Puis la suppression des doublons si nécessaire.
+sum(duplicated(base_menage))
+sum(duplicated(food_comp_child_baseline))
+sum(duplicated(food_comp_child_endline))
+sum(duplicated(food_comp_mother_baseline))
+sum(duplicated(food_comp_mother_endline))
+```
+
+
+```{r}
+#la suppression des doublons si nécessaire.
+base_men<-unique(base_menage)
+```
+
+
+```{r}
+#les noms des variables sont cohérents entre les bases de données Baseline et Endline
+colnames(food_comp_child_baseline)
+colnames(food_comp_child_endline)
+```
+
+
+```{r}
+#les noms des variables ne sont pas cohérents entre les bases de données Baseline et Endline
+#Correction
+# Renommer les colonnes dans Baseline
+colnames(food_comp_mother_baseline)[colnames(food_comp_mother_baseline) == "V1"] <- "energ_kcal"
+
+```
+
+
+```{r}
+#Vérification de la présence des données manquantes  et la correction des données manquantes si nécessaire
+is.na(base_men)
+```
+
+
+```{r}
+#Vérification de la présence des données manquantes  et la correction des données manquantes si nécessaire
+is.na(food_comp_child_baseline)
+#Correction des valeurs manquantes
+# Suppression des lignes contenant des valeurs manquantes
+food_child_baseline_clean <- na.omit(food_comp_child_baseline)
+
+
+
+
+
+
+
+```
+
+
+```{r}
+#Vérification de la présence des données manquantes  et la correction des données manquantes si nécessaire
+#Correction des valeurs manquantes
+is.na(food_comp_child_endline)
+```
+
+
+```{r}
+# Suppression des lignes contenant des valeurs manquantes
+food_endlineline_clean<-na.omit(food_comp_child_endline)
+print(food_child_baseline_clean)
+```
+
+
+```{r}
+#Vérification de la présence des données manquantes  et la correction des données manquantes si nécessaire
+#Correction des valeurs manquantes
+# Suppression des lignes contenant des valeurs manquantes
+is.na(food_comp_mother_baseline)
+
+food_mother_clean <- na.omit(food_comp_mother_baseline)
+
+```
+
+
+```{r}
+#Vérification de la présence des données manquantes  et la correction des données manquantes si nécessaire
+#Correction des valeurs manquantes
+# Suppression des lignes contenant des valeurs manquantes
+is.na(food_comp_mother_endline)
+
+food_her_endline_clean <- na.omit(food_comp_mother_endline)
+
+```
+
+
+```{r}
+# la consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base ?
+mean(food_child_baseline_clean$energ_kcal)
+mean(food_child_endlineline_clean$energ_kcal)
+mean(food_her_endline_clean$energ_kcal)
+mean(food_mother_clean$energ_kcal)
+```
+
+
+```{r}
+#	Après vérification et correction de chaque base de données 
+#i)	Sauvegarder les changements de la base food_comp_mother_baseline.dta en mother_baseline_v1.dta
+mother_baseline_v1.dta<-food_mother_clean
+#ii)	Sauvegarder les changements de la base food_comp_mother_endline.dta en mother_endline_v1.dta
+mother_endline_v1.dta<-food_her_endline_clean
+#iii)	Sauvegarder les changements de la base food_comp_child_baseline.dta en child_baseline_v1.dta
+child_baseline_v1.dta<-food_child_baseline_clean
+#iv)	Sauvegarder les changements de la base food_comp_child_endline.dta en child_endline_v1.dta
+child_endline_v1.dta<-food_child_endlineline_clean
+#v)	Sauvegarder les changements de la base base_menage.dta en base_menage_final.dta
+base_menage_final.dta<-base_men
+```
+
+
+```{r}
+#Partie 2 : Empilement et Fusion des données
+#1	Baseline
+empile<-left_join(mother_baseline_v1.dta,child_endline_v1.dta)
+```
+
+
+```{r}
+#ii)	Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _b pour faire référence à l’enquête Baseline.
+# Renommer les colonnes de energ_kcal à vit_c_mcg en ajoutant le suffixe "_b"
+Baseline <- empile %>%
+  rename_with(~ paste0(.x, "_b"), 
+              .cols = energ_kcal:vit_c_mg)
+```
+
+
+```{r}
+#iv)	Sauvegardez la base de données finale contenant seulement les hhid s1_q2 energ_kcal   protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ». Veuillez noter que pour cette base de données, pour chaque ménage, nous avons une ligne pour la mère et une ligne pour l’enfant.
+baseline_final.dta<-Baseline%>%
+  select(hhid,s1_q2,protein_g_b,lipid_tot_g_b,calcium_mg_b,iron_mg_b)
+```
+
+
+```{r}
+#Endline
+empile2<-left_join(mother_baseline_v1.dta,child_endline_v1.dta)
+```
+
+
+```{r}
+#Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _e pour faire référence à l’enquête Endline.
+
+	Endline <- empile2 %>%
+  rename_with(~ paste0(.x, "_e"), 
+              .cols = energ_kcal:vit_c_mg)
+	colnames(empile2)
+```
+
+
+```{r}
+#iii)	Sauvegarder la base de données finale contenant seulement les hhid s1_q2 energ_kcal  protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « endline_final.dta ». 
+endline_final.dta <-Endline%>%
+  select(hhid,s1_q2,lipid_tot_g_e,calcium_mg_e,iron_mg_e,zinc_mg)
+```
+
+
+```{r}
+#3)	Fusion des données baseline_final.dta   et endline_final.dta.
+Fusion<-left_join(baseline_final.dta,endline_final.dta)
+```
+
+
+```{r}
+#Partie 3 : Statistiques descriptives avec le package gtsummary
+#Faites des statistiques descriptives intéressantes de vos choix en utilisant le package gtsummary.
+Fusion%>%
+  
+  select(hhid,calcium_mg_e,protein_g_b)%>%
+  tbl_summary()
+
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

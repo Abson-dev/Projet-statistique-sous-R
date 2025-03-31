@@ -1,0 +1,471 @@
+---
+title: "Représentation cartographique"
+author: "Jean-Luc BATABATI & Dior MBENGUE"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+# Installation et importation des packages
+
+Avant toute chose, nous veillerons à installer tous les packages qui servirons dans la suite puis les charger.
+
+```{r, warning=FALSE, message=FALSE}
+
+packages <- c("readr","haven","utils","dplyr", "kableExtra", 
+              "gtsummary", "labelled", "survey", "cardx", "Hmisc", "tidyverse", "sf", "readxl" )
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+# Importation des bases ménages, individu et des shapefiles
+
+```{r}
+# Chargement des bases
+# Charger les données tabulaires (nombre d'hommes par région)
+Base <- read.csv("C:../Bases/TP5_G3_FinalMergedData.csv", encoding = "latin1")
+Base_men <- read.csv("C:../Bases/Menage.csv", encoding = "latin1")
+Base_ind <- read.csv("C:../Bases/Individu.csv", encoding = "latin1")
+
+# Charger les données des limites administratives (Admin1)
+admin1_data <- read_excel("../Bases/mli_adminboundaries_tabulardata.xlsx", sheet = "Admin1")
+
+```
+
+# Statistiques des individus suivant les régions
+
+Nous calculons des indicateurs sur les individus en regroupant par région.
+
+```{r, warning=FALSE, message=FALSE}
+
+Region_group <- Base %>%
+  group_by(admin1Name_fr) %>%
+  summarise(
+    nombre_hommes = sum(sexe == 1, na.rm = TRUE),
+    Celibataire = sum(mstat == 2, na.rm = TRUE),
+    Scolarisation = sum(scol == 0, na.rm = TRUE),
+    nombre_rural = sum(milieu == 1, na.rm = TRUE),
+    telephone = sum(telpor == 2, na.rm = TRUE),
+    couverture = sum(couvmal == 2, na.rm = TRUE),
+    Age_mean = mean(age, na.rm = TRUE),
+    Salaire = mean(salaire, na.rm = TRUE)
+  )
+```
+
+Nous allons renommer les variables clés qui vont servir à merger la base des indicateurs et celle des limites administratives 
+
+```{r}
+
+Region_group<- Region_group %>% rename(
+  ADM1_FR=admin1Name_fr
+)
+
+admin1_data<- admin1_data %>% rename(
+  ADM1_FR=admin1Name_fr
+)
+```
+
+
+Fusionner la base des indicateurs et celle des limites administratives puis avec le shapefile du mali
+
+```{r, warning=FALSE, message=FALSE}
+
+admin1_data <- admin1_data %>%
+  left_join(Region_group, by = "ADM1_FR")
+
+# Charger le shapefile correspondant aux régions du Mali
+mali_shapefile_r <- st_read("../Shapefile/mli_admbnda_adm1_1m_gov_20211220.shp")
+
+# Fusionner avec les données shapefiles
+mali_map <- mali_shapefile_r %>%
+  left_join(admin1_data, by = "ADM1_FR")
+
+```
+
+# Calculer les centroïdes des régions*
+Pour pouvoir afficher le nom des regions dans la carte
+
+```{r, warning=FALSE, message=FALSE}
+mali_map <- mali_map %>%
+  mutate(centroid = st_centroid(geometry),
+         lon = st_coordinates(centroid)[,1], 
+         lat = st_coordinates(centroid)[,2])
+
+```
+
+Représentation des salaires moyen des individus par région au Mali
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(mali_map) +
+  geom_sf(aes(fill = Salaire), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Salaire moyen des individus par région au Mali",
+       fill = "Salaire moyen des individus") +
+  theme_minimal()
+```
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(mali_map) +
+  geom_sf(aes(fill = Age_mean), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Age moyen des individus par région au Mali",
+       fill = "Age moyens des individus") +
+  theme_minimal()
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+# Visualiser la carte avec les noms des régions
+ggplot(mali_map) +
+  geom_sf(aes(fill = nombre_hommes), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Répartition des hommes par région au Mali",
+       fill = "Nombre d'hommes") +
+  theme_minimal()
+```
+
+
+```{r}
+## Milieu rural par région
+ggplot(mali_map) +
+  geom_sf(aes(fill = nombre_rural), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Répartition des individus suivant le milieu rural par région au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+Repartition des celibataires par région
+
+```{r}
+
+ggplot(mali_map) +
+  geom_sf(aes(fill = Celibataire), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Répartition des celibataires suivant par région au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+Répartition des individus non scolarisés par région au Mali
+
+```{r}
+
+## Scolarisation par région
+ggplot(mali_map) +
+  geom_sf(aes(fill = Scolarisation), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Répartition des individus non scolarisés par région au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+
+
+# Merger la base ménage et celle des individus
+L'objectif ici est d'avoir les régions dans la base ménage
+
+```{r}
+Base_men <- Base_men %>%
+  left_join(Base %>% select(hhid, admin1Name_fr) %>% distinct(hhid, .keep_all = TRUE), by = "hhid")
+ 
+
+```
+
+
+
+# Statistiques des ménages suivant les régions
+
+```{r, warning=FALSE, message=FALSE}
+## Statistiques par régions
+
+Menage_group <- Base_men%>%
+  group_by(admin1Name_fr) %>%
+  summarise(
+    grosrum = sum(grosrum, na.rm = TRUE),
+    petitrum = sum(petitrum, na.rm = TRUE)
+  )
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+
+Menage_group<- Menage_group %>% rename(
+  ADM1_FR=admin1Name_fr
+)
+
+# Fusionner les données géographiques et démographiques
+admin1_data <- admin1_data %>%
+  left_join(Menage_group, by = "ADM1_FR")
+
+# Fusionner avec les données démographiques
+mali_men <- mali_shapefile_r %>%
+  left_join(admin1_data, by = "ADM1_FR")
+
+```
+
+
+
+```{r, warning=FALSE, message=FALSE}
+# Calculer les centroïdes des régions
+mali_men <- mali_men %>%
+  mutate(centroid = st_centroid(geometry),
+         lon = st_coordinates(centroid)[,1], 
+         lat = st_coordinates(centroid)[,2])
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(mali_men) +
+  geom_sf(aes(fill = grosrum), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Total des gros ruminants des ménages par région au Mali",
+       fill = "Nombre de gros ruminants") +
+  theme_minimal()
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(mali_men) +
+  geom_sf(aes(fill = petitrum), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM1_FR), size = 3, color = "black") +
+  labs(title = "Total des petits ruminants des ménages par région au Mali",
+       fill = "Nombre de peits ruminants") +
+  theme_minimal()
+```
+
+
+
+
+# Statistiques  sur les individus suivant les départements
+
+
+```{r}
+
+Depart_group <- Base %>%
+  group_by(admin2Name_fr) %>%
+  summarise(
+    nombre_hommes_d = sum(sexe == 1, na.rm = TRUE),
+    Celibataire_d = sum(mstat == 2, na.rm = TRUE),
+    Scolarisation_d = sum(scol == 0, na.rm = TRUE),
+    nombre_rural_d = sum(milieu == 1, na.rm = TRUE),
+    Age_mean_d = mean(age, na.rm = TRUE),
+    Age_mean = mean(age, na.rm = TRUE),
+    Salaire_d = mean(salaire, na.rm = TRUE)
+  )
+
+```
+
+
+```{r}
+# Charger les données des limites administratives (Admin1)
+admin2_data <- read_excel("../Bases/mli_adminboundaries_tabulardata.xlsx", sheet = "Admin2")
+
+Depart_group<- Depart_group %>% rename(
+  ADM2_FR=admin2Name_fr
+)
+
+admin2_data<- admin2_data %>% rename(
+  ADM2_FR=admin2Name_fr
+)
+
+# Fusionner les données géographiques et démographiques
+admin2_data <- admin2_data %>%
+  left_join(Depart_group, by = "ADM2_FR")
+
+# Charger le shapefile correspondant aux régions du Mali (assurez-vous d'avoir un fichier .shp)
+mali_shapefile_d <- st_read("../Shapefile/mli_admbnda_adm2_1m_gov_20211220.shp")
+
+# Fusionner avec les données démographiques
+mali_map_d <- mali_shapefile_d %>%
+  left_join(admin2_data, by = "ADM2_FR")
+```
+
+
+```{r}
+# Calculer les centroïdes des régions
+mali_map_d <- mali_map_d %>%
+  mutate(centroid = st_centroid(geometry),
+         lon = st_coordinates(centroid)[,1], 
+         lat = st_coordinates(centroid)[,2])
+
+# Visualiser la carte avec les noms des régions
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = nombre_hommes_d), color = "black") +
+  scale_fill_gradientn(colors = c("orange", "yellow", "blue"), na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Répartition des hommes par département au Mali",
+       fill = "Nombre d'hommes") +
+  theme_minimal()
+
+
+```
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = Salaire_d), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Salaire moyen des individus par département au Mali",
+       fill = "Salaire moyen") +
+  theme_minimal()
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = Age_mean_d), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Age moyen des individus par département au Mali",
+       fill = "Interval d'âge d'individu") +
+  theme_minimal()
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = nombre_hommes_d), color = "black") +
+  scale_fill_gradientn(colors = c("green", "yellow", "blue"), na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Répartition des hommes par département au Mali",
+       fill = "Nombre d'hommes") +
+  theme_minimal()
+
+```
+
+
+```{r}
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = nombre_rural_d), color = "black") +
+  scale_fill_gradientn(colors = c("green", "yellow", "blue"), na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Répartition des individus suivant le milieu rural par département au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+
+```{r}
+
+## Scolarisation par région
+ggplot(mali_map_d) +
+  geom_sf(aes(fill = Scolarisation_d), color = "black") +
+  scale_fill_gradientn(colors = c("orange", "yellow", "blue"), na.value = "white") +
+  geom_text(aes(x = lon, y = lat, label = ADM2_FR), size = 2, color = "black") +
+  labs(title = "Répartition des individus non scolarisés par département au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+# Statistiques descriptives sur les individus suivant les communes
+
+
+```{r}
+## Statistiques par Commune
+
+
+Commune_group <- Base %>%
+  group_by(commune) %>%
+  summarise(
+    nombre_hommes_c = sum(sexe == 1, na.rm = TRUE),
+    Celibataire_c = sum(mstat == 2, na.rm = TRUE),
+    Scolarisation_c = sum(scol == 0, na.rm = TRUE),
+    nombre_rural_c = sum(milieu == 2, na.rm = TRUE),
+    Salaire_c = mean(salaire, na.rm = TRUE),
+    Age_mean_c = mean(age, na.rm = TRUE)
+  )
+
+```
+
+
+
+```{r}
+
+# Charger les données des limites administratives (Admin1)
+admin3_data <- read_excel("../Bases/mli_adminboundaries_tabulardata.xlsx", sheet = "Admin3")
+
+Commune_group<- Commune_group %>% rename(
+  ADM3_FR=commune
+)
+
+admin3_data<- admin3_data %>% rename(
+  ADM3_FR=admin3Name_fr
+)
+
+# Fusionner les données géographiques et démographiques
+admin3_data <- admin3_data %>%
+  left_join(Commune_group, by = "ADM3_FR")
+
+# Charger le shapefile correspondant aux régions du Mali (assurez-vous d'avoir un fichier .shp)
+mali_shapefile_c <- st_read("../Shapefile/mli_admbnda_adm3_1m_gov_20211220.shp")
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+# Fusionner avec les données démographiques
+mali_map_c <- mali_shapefile_c %>%
+  left_join(admin3_data, by = "ADM3_FR")
+
+```
+
+
+```{r}
+ggplot(mali_map_c) +
+  geom_sf(aes(fill = nombre_hommes_c), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  labs(title = "Répartition des hommes par commune au Mali",
+       fill = "Nombre d'hommes") +
+  theme_minimal()
+```
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot(mali_map_c) +
+  geom_sf(aes(fill = Salaire_c), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  labs(title = "Salaire moyen des individus par commune au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+ggplot(mali_map_c) +
+  geom_sf(aes(fill = Age_mean_c), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  labs(title = "Age moyen des individus par commune au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```
+
+
+```{r}
+
+ggplot(mali_map_c) +
+  geom_sf(aes(fill = Scolarisation_c), color = "black") +
+  scale_fill_viridis_c(option = "plasma", na.value = "white") +
+  labs(title = "Répartition des individus non scolarisés par communes au Mali",
+       fill = "Nombre d'individu") +
+  theme_minimal()
+```

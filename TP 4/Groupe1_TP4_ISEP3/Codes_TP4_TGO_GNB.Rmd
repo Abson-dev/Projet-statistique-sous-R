@@ -1,0 +1,284 @@
+---
+title: "Read code"
+author: "Groupe_1"
+date: "2025-02-18"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# Packages
+```{r}
+library(stringdist)
+library(haven)
+library(dplyr)
+library(stringr)
+library(labelled)
+library(stringi)  # Pour mieux gérer les caractères spéciaux
+library(readxl)
+library(tidyr)
+library(here)
+
+wd <-setwd(here())
+
+```
+
+# Chargement des bases
+
+On notera que le même fichier a été utilisé pour le Togo et pour la Guinée, quelques différences près.
+```{r}
+
+knitr::opts_knit$set(root.dir = wd)
+#my_data <- read_dta("Togo/ehcvm_individu_tgo2021.dta")
+
+my_data <- read_dta("GNB/ehcvm_individu_gnb2021.dta")
+
+my_data <- my_data %>% labelled::to_factor()
+glimpse(my_data)
+
+```
+
+```{r}
+
+## Seulemenet pout la base du TOGO
+names(my_data)
+
+## Pas de admin3 dans la base
+canton <- my_data$canton
+unique(canton) ##NA
+table(canton) ## Table of extent 0
+```
+
+
+```{r}
+# Charger les données
+data_hdx <- readxl::read_excel("GNB/gnb_adminboundaries_tabulardata.xlsx", sheet = "ADM2")
+
+#data_hdx <- readxl::read_excel("Togo/tgo_adminboundaries_tabulardata.xlsx", sheet = "ADM2")
+
+## On prend en compte les cas de split (deux noms différents avec des /)
+data_hdx <- data_hdx %>%  separate_rows(ADM2_EN, sep="/")
+
+```
+
+
+# Standardisation des écritures
+
+```{r}
+# Fonction pour nettoyer les caractères spéciaux : algorithme de base
+clean_text <- function(text) {
+  text <- stri_trans_general(text, "Latin-ASCII")  # Supprimer les accents
+  text <- toupper(text)  # Convertir en majuscules
+  text <- gsub("'", "", text)  # Supprimer les apostrophes
+  text <- gsub("[^A-Z0-9 ]", "", text)  # Supprimer les autres caractères spéciaux sauf espaces et chiffres
+  text <- trimws(text) ## on enlève les espaces superflus
+  return(text)
+}
+```
+
+
+```{r}
+# Appliquer le nettoyage aux deux bases
+my_data <- my_data %>%
+  mutate(admin2 = clean_text(prefecture))
+
+data_hdx <- data_hdx %>%
+  mutate(admin2 = clean_text(ADM2_EN))
+
+```
+
+# Voyons les différences
+
+```{r}
+
+# Différence entre les deux bases
+communes_non_trouvees_ehcvm <- setdiff(my_data$admin2, data_hdx$admin2)
+
+length(communes_non_trouvees_ehcvm)  # Nombre de communes non trouvées --- 7
+communes_non_trouvees_ehcvm # Aperçu des premières
+```
+
+
+# Traitement en utilisant les distances
+
+
+```{r}
+cas_restant <- data.frame("Noms_restant"=communes_non_trouvees_ehcvm)
+commune_hdx_clean <- data_hdx$admin2
+
+# traitement avec les distances ...
+cas_restant <- cas_restant %>%
+  rowwise() %>%
+  mutate(
+    #" METHODE Levenshtein
+    Match_lv = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "lv")
+    )],
+    Distance_lv = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "lv")
+    ),
+    #METHODE
+     Match_jw = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "jw")
+    )],
+    Distance_jw = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "jw")
+    ),
+    
+    ## METHODE QGRAM -- sous chaines communes
+     Match_qg = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "qgram")
+    )],
+    Distance_qg = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "qgram")
+    ),
+    
+    ## METHODE SOUNDEX -- phonétique
+     Match_sdx = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "soundex")
+    )],
+    Distance_sdx = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "soundex")
+    )
+  ) %>%
+  ungroup()
+
+```
+
+
+```{r}
+cas_restant
+```
+# Traitement manuel
+
+A partir de là, avec la distance de Lenvenshtein, il est possible de ne retenir que les valeurs ayant une distance minimale
+**inférieure à un certain seuil** et de traiter le reste manuellement.
+
+  Toutefois, nous décidons de traiter les valeurs manuellement
+
+```{r TOGO}
+
+
+# Traitement du résultat : Normalisation si la distance est faible
+# Valide pour TOGO only
+
+my_data <- my_data %>%
+  mutate(admin2 = case_when(
+    admin2 == "SOUS PREFECTURE DE MO" ~ "PLAINE DU MO",
+    admin2 == "GOLFE2" ~ "GOLFE",
+    admin2 == "ARRONDISSEMENT I" ~ "GOLFE",
+    admin2 == "ARRONDISSEMENT II" ~ "GOLFE",
+    admin2 == "ARRONDISSEMENT III" ~ "GOLFE",
+    admin2 == "ARRONDISSEMENT IV" ~ "GOLFE",
+    admin2 == "ARRONDISSEMENT V" ~ "GOLFE"
+  
+  ))
+
+# Résultat : Commune_Standard contient maintenant les noms "normalisés"
+
+
+```
+
+
+Pour la Guinée, nous voyons que la distance de JJARO-WINKERS résout très bien notre problème.
+```{r GUINEE}
+
+# On fait un merge 
+my_data <- my_data %>%
+  left_join(cas_restant %>% select(Noms_restant, Match_jw), by = c("admin2" = "Noms_restant")) %>% 
+  mutate(admin2 = ifelse(!is.na(Match_jw), Match_jw, admin2)) #" Puis on remplace
+
+
+
+```
+
+
+On revérifie
+
+```{r}
+
+# Différence entre les deux bases
+communes_non_trouvees_ehcvm <- setdiff(my_data$admin2, data_hdx$admin2)
+
+length(communes_non_trouvees_ehcvm)  # Nombre de communes non trouvées --- 7
+communes_non_trouvees_ehcvm # Aperçu des premières
+```
+
+## Merging ---
+
+```{r}
+
+hdx_merge <-  data_hdx %>% select(admin2, ADM2_PCODE) %>% unique()
+
+my_data_merge <- right_join(my_data,hdx_merge , by= "admin2")
+
+
+sum(is.na(my_data_merge$ADM2_PCODE))
+
+```
+# Saving 
+```{r}
+#write.csv(my_data_merge, "Togo/TGO_output_database.csv")
+
+write.csv(my_data_merge, "GNB/GNB_output_database.csv")
+
+```
+
+
+# ET SI ON FAISAIT UN PEU DE STATISTIQUE SPATIALE ???
+
+Nous allons procéder à des intersections en fonction des coorrdonnées. Dans notre cas, nous utilisons les shp et la base ménage du TOGO.
+
+
+```{r}
+library(sf)
+library(ggplot2)
+
+tgo_shp <- st_read("Togo/tgo_admbnda_adm3_inseed_20210107.shp")
+```
+```{r}
+colnames(tgo_shp)
+```
+
+
+On s'interesse now aux ménages
+
+```{r}
+data <- read_dta("Togo/s00_me_tgo2021.dta")
+
+names(data)
+
+# Convertir les données en un objet spatial sf
+data_spatial <- sf::st_as_sf(data, coords = c("GPS__Longitude", "GPS__Latitude"), crs = st_crs(tgo_shp))
+
+
+```
+
+
+```{r}
+ggplot() +
+  geom_sf(data = tgo_shp, fill = NA, color = "blue", size = 1) +
+  
+  geom_sf(data = data_spatial, aes(color = I("pink")), size = 2) +
+  
+  theme_minimal() +
+  labs(title = "Carte des ménages enquêtés")
+```
+
+# On fait le merging
+
+
+```{r}
+points_mg<- st_join(data_spatial , tgo_shp, join = st_intersects)
+
+points_mg <- points_mg%>%  as.data.frame() 
+
+points_mg[1:5,] %>% kableExtra::kable()
+
+```

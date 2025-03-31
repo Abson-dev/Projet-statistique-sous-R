@@ -1,6 +1,50 @@
 # Projet-statistique-sous-R
  
 Le cours de Projet Statistique sous R et Python est dispense par Mr Hema Aboubacar, [Analyste de Recherche a IFPRI](https://www.ifpri.org/profile/aboubacar-hema/) depuis 2022 aux etudiants de l'[ENSAE - Dakar](https://www.ensae.sn/).
+Ce cours a pour but de permettre aux etudiant.e.s de maitriser l'exploration des donnees (EDA) avec R a savoir les etapes suivantes:
+
+1 - Comprendre le probleme
+
+     - Quel est l'objectif?
+     - Quelles sont les variables clees/importantes
+     - Y a t-il des contraintes specifiques?
+
+2 - Chargement des donnees
+
+     - Lecture du fichier (CSV, dta, Excel, SPSS, SQL, etc)
+     - Apercu des premieres lignes
+     - Verification de la dimension de la base
+     - Informations generales sur les colonnes/variables
+
+3 - Verification de la qualite des donnees
+
+     - Valeurs manquantes
+     - Doublons
+     - Types de donnees
+     - Detection de valeurs aberrantes (Boxplot, IQR, Z-score)
+     
+
+4 - Analyse univariee
+
+
+5 - Analyse bivariee
+
+
+6 - Traitement des variables
+
+
+7 - Detection des valeurs aberrantes et anomalies/incoherence
+
+
+8 - Gestion des valeurs manquantes
+
+
+9 - Verification de la base finale
+
+
+10 - Modelisation/Econometrie/etc
+
+ **Encours de redaction**
 
 ## Data Credits
 
@@ -55,16 +99,25 @@ Vous devriez avoir un seul lien qui regroupe toutes les etapes d'harmonisation d
 
 ### TP 8
 
+**Pour les ISE 1**
+
 **Cartographie avec R**
+
 En utilisant les outputs du **TP 4**, faites des cartes en affichant des variables/indicateurs suivant:
  - les pays
  - les regions/le 1er decoupage administratif du pays
  - les departements/le 2e decoupage administratif du pays
  - les communes/le 3e decoupage administratif du pays
 
+**Echeance: lundi 10 mars 2025 a 23h59**
+
 ### TP 9
+
+**Pour les ISE 1 et ISEP 3**
+
 Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seule base.
-Pour ce faire
+
+**Echeance: lundi 31 mars 2025 a 23h59**
 
 ### TP 10
 
@@ -75,8 +128,28 @@ Pour ce faire
 - Theme 4: Suivie de la collecte des donnees avec R
 - Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
 - Theme 6: Le calcul parallele sur R
+- Theme 7: Traitement de donnees avec le package tidyverse
+- Theme 8: Le package janitor
+- Theme 9: Tableaux avec gtsummary
+- Theme 10: Le package reticulate: R et Python
+- Theme 11: Developpement de package sur R
+- Theme 12: Questionnaire d'enquete avec R
+- Theme 13: Automatisation des rapports avec R : le package rmarkdown
+- Theme 14: Tableaux de bord avec R shiny
+- Theme 15: Traitement des questions ouvertes: text mining
 
-### TP 11
+ 
+ **Presentation: samedi 5 avril 2025**
+
+### TP 11 : Synthese des presentations
+
+Chacun.e fera une synthese des differentes presentations
+
+
+### TP 12 : Examen de 4 a 5h sur table avec les ordinateurs pour les ISE 1 et ISEP 3
+
+Vous aurez 4 a 5h pour faire votre examen final sur table avec les ordinateurs.
+L'utilisation de ChatGPT, Gimini ou toute IA qui vous sera utile.
 
 
 
@@ -106,4 +179,4 @@ This course material is licensed under a Creative Commons Attribution 4.0 Intern
   
 ## Additional resources
 
-
+- [The Epidemiologist R Handbook](https://epirhandbook.com/en/)
