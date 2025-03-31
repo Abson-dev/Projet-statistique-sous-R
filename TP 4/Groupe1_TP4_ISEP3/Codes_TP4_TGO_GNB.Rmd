@@ -282,4 +282,3 @@ points_mg <- points_mg%>%  as.data.frame()
 points_mg[1:5,] %>% kableExtra::kable()
 
 ```
-
