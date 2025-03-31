@@ -871,14 +871,14 @@ for (var in names(var_labels)) {
 # Fusion des deux bases
 ```{r}
 # Empiler les deux bases après harmonisation
-data_welf_final <- dplyr::bind_rows(data_welf2018, data_welf2021)
-data_welf_final
+data_welf_final18_21 <- dplyr::bind_rows(data_welf2018, data_welf2021)
+data_welf_final18_21
 
 ```
 
 ## Quelques statistiques sur la base final
 ```{r}
-data_welf_final %>%    
+data_welf_final18_21 %>%    
   to_factor() %>%  # Conversion des variables haven_labelled en facteurs
   select(year, hage, hgender, hdiploma, hcsp, dtot, dali, halfab) %>% 
   tbl_summary(
@@ -898,7 +898,12 @@ data_welf_final %>%
 ```
 
 
+## Sauvegarde de la base final
+```{r}
+# Sauvegarde au format Stata
+write_dta(data_welf_final18_21, "data_welf_final18_21.dta")
 
+```
 
 
 
