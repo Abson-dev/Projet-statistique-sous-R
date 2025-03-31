@@ -2,18 +2,24 @@
 
 Ce projet a pour objectif de fusionner deux bases de données d'enquêtes de bien-être (Welfare) pour les années **2018** et **2021**, en assurant une **harmonisation des variables catégorielles**.
 
+# TP9 - Harmonisation des bases Welfare 2018 et 2021
+
+Ce projet a pour objectif de fusionner deux bases de données d'enquêtes de bien-être (Welfare) pour les années **2018** et **2021**, en assurant une **harmonisation des variables catégorielles**.
+
 ## 📁 Structure du projet
 
-TP9_Groupe_3_ISEP3/ 
-├── data/ # Contient les fichiers .dta originaux de 2018 et 2021 
- └──ehcvm_welfare_sen2018.dta 
- └── ehcvm_welfare_sen2021.dta 
-├── Scripts/ # Contient le script R principal de traitement 
- └── Traitement.R 
-├── Outputs/ # Contiendra le fichier fusionné final au format .dta 
- └── welfare_2018_2021_output.dta 
-├── TP9_Groupe_3_ISEP3.Rproj 
-├── README.md # Ce fichier
+```txt
+TP9_Groupe_3_ISEP3/
+├── data/                          # Contient les fichiers .dta originaux de 2018 et 2021
+│   ├── ehcvm_welfare_sen2018.dta
+│   └── ehcvm_welfare_sen2021.dta
+├── Scripts/                       # Contient le script R principal de traitement
+│   └── Traitement.R
+├── Outputs/                       # Contiendra le fichier fusionné final au format .dta
+│   └── welfare_2018_2021_output.dta
+├── TP9_Groupe_3_ISEP3.Rproj
+└── README.md                      # Ce fichier
+```
 
 
 ## ⚙️ Fonctionnement du script `Traitement.R`
@@ -42,11 +48,12 @@ Il contient :
 
 ## 👨‍💻 Auteurs
 
-Projet réalisé dans le cadre du TP9 par le groupe 3 en ISEP3 composé de :
+Projet réalisé dans le cadre du TP9 par le **Groupe 3** en **ISEP3**, composé de :
 
-Khadidiatou Diakhaté
-Raherinasolo Ange Emilson Rayan
-Awa Diaw
-Alioune Abdou Salam Kane
+- Khadidiatou Diakhaté  
+- Raherinasolo Ange Emilson Rayan  
+- Awa Diaw  
+- Alioune Abdou Salam Kane
+
 
 
