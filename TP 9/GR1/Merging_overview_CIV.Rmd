@@ -4,10 +4,10 @@ author: |
   <div style="display: flex; justify-content: space-between;">
     <div>
       Rédigé par : 
-     Khadidiatou COULIBALY
-     Samba DIENG
-     Tamsir NDONG
-     Jeanne De La Fleche ONANENA AMANA
+      Khadidiatou COULIBALY
+      Samba DIENG
+      Tamsir NDONG
+      Jeanne De La Fleche ONANENA AMANA
       Élèves Ingénieurs Statisticiens Économistes
     </div>
     <div style="text-align: right;">
