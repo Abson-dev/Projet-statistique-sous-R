@@ -107,7 +107,6 @@ base_merge
 *Type de logement pour chaque individu*
 
 ```{r}
-
 result <-  base_merge %>% 
             select(pid,logem)
 result

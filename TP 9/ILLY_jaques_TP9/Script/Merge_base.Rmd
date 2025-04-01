@@ -471,7 +471,20 @@ welfare <- bind_rows(welfare_2018, welfare_2021)
 
 ```
 
+Sauvegarde la base welfare dans le dossier Donnée_nettoyées
 
+```{r }
+# On exporte les welfare dans le dossier donnée_nettoyée en leur donnant le nom welfare final
+welfare <- read_dta("../Données/Donnée_nettoyées/welfare")
+```
+
+
+ Réimportation de la base welfare 
+```{r }
+# On exporte les welfare dans le dossier donnée_nettoyée en leur donnant le nom welfare final
+write_dta(welfare, "../Données/Donnée_nettoyées/welfare")
+
+```
 # **V-Statistique descriptive**
 
 Dans cette partie nous allons faire de staistique descriptive sur quelques variables.
