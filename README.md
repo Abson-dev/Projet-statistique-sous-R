@@ -129,6 +129,9 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
 - Theme 6: Le calcul parallele sur R
 - Theme 7: Traitement de donnees avec le package tidyverse
+- 
+     Etudiants:
+  
     **Kerencia Dyvana PAHANE SEUNKAM**
     **Malick SENE**
 
