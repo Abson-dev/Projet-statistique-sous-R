@@ -1,0 +1,681 @@
+---
+title: ""
+output:
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{tcolorbox}
+  - \usepackage{xcolor}
+  - \usepackage{geometry}
+  - \geometry{top=2.5cm, bottom=2.5cm, left=3cm, right=3cm}  # Marges normales du document
+  - \usepackage{fontspec}
+  - \setmainfont{Cambria}
+  - \setsansfont{Franklin Gothic Demi Cond}
+  - \usepackage{titlesec}
+  - \titleformat{\section}{\Huge\bfseries\color{black}}{\thesection}{1em}{}
+  - \titleformat{\subsection}{\huge\bfseries\color{black}}{\thesubsection}{1em}{}
+  - \usepackage{tocloft}
+  - \renewcommand{\cftsecfont}{\small}   
+  - \renewcommand{\cftsubsecfont}{\footnotesize} 
+---
+
+```{=latex}
+% Changer temporairement les marges pour la page de garde
+\newgeometry{top=1cm, bottom=1cm, left=1cm, right=1cm}  
+
+\begin{titlepage}
+    \begin{tcolorbox}[colframe=black, colback=white, width=\textwidth, arc=5pt, boxrule=2pt]
+    \begin{center}
+        \textbf{\LARGE \textsf{RÉPUBLIQUE DU SÉNÉGAL}}\\[0.2cm]
+        \includegraphics[width=3cm]{../Documents/sen.png} \\[0.2cm]
+        \textbf{\large \textsf{Un Peuple - Un But - Une Foi}}\\[1cm]
+        
+        \textbf{\LARGE \textsf{Ministère de l'Économie, du Plan et de la Coopération}}\\[0.2cm]
+        **********************************************\\[1cm]
+        \textbf{\large \textsf{Agence nationale de la Statistique et de la Démographie (ANSD)}}\\[0.3cm]
+        \includegraphics[width=4cm]{../Documents/ansd.png} \\[1cm]  
+        
+        \textbf{\large \textsf{École nationale de la Statistique et de l'Analyse économique Pierre Ndiaye (ENSAE)}}\\[0.4cm]
+        \includegraphics[width=3cm]{../Documents/ensae.png} \\[0.8cm]
+        
+        \textbf{\LARGE \textbf{PROJET STATISTIQUES SOUS R}}\\[0.8cm]
+        \textbf{\Huge \color{black} \textsf{TP9 : Fusion des bases welfare des EHCVM 2018 ET 2021 du Sénégal}}\\[1cm]
+       
+        
+        \begin{minipage}{0.45\textwidth}
+            \begin{flushleft} \large
+                \textbf{\textsf{Rédigé par :}}\\[0.1cm]
+                \textbf{Jean Luc BATABATI}\\
+                \textit{Élève ingénieur statisticien économiste}
+            \end{flushleft}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.45\textwidth}
+            \begin{flushright} \large
+                \textbf{\textsf{Sous la supervision de :}}\\[0.1cm]
+                \textbf{M. Aboubacar HEMA}\\
+                \textit{Analyste de recherche chez IFPRI}
+            \end{flushright}
+        \end{minipage}
+
+        \vfill
+
+        {\large \textsf{Année scolaire : 2024/2025}}\\[1cm]
+        
+    \end{center}
+    \end{tcolorbox}
+\end{titlepage}
+
+% Rétablir les marges normales pour le reste du document
+\restoregeometry
+```
+
+\newpage
+\tableofcontents
+\newpage
+
+
+
+```{r setup, include=FALSE}
+
+# Ce code permet d'appliquer ces paramètres a tous les chuncks
+
+knitr::opts_chunk$set(cache=TRUE, 
+                      message=FALSE, # Supprime les messages générés par les packages lors de leur chargement.
+                      warning=FALSE, # Masque les avertissements générés pendant l'exécution du code.
+                      
+                      fig.width=8, #Définit la largeur des graphiques générés dans le document (en pouces)
+                      
+                      fig.height=6) #Définit la hauteur des graphiques générés dans le document (en pouces)
+
+```
+
+L'objectif de ce TP est de merger les bases welfare EHCVM du sénégal des années 2018 et 2021. Nous ferons les traitements necessaires afin d'avoir un bon résultat.
+
+# **Section 1 : Installation des packages et Importation des bases** 
+
+## Installation des packages nécesssaires
+
+```{r,results=FALSE,message=FALSE}
+
+packages <-  c("dplyr","haven", "gtsummary", "tidyverse", "labelled")
+
+for (package in packages) {
+  if(!requireNamespace(package,quietly = TRUE)){
+    install.packages(package)
+  }
+  library(package,character.only = TRUE)
+}
+
+```
+
+## Importation des bases
+
+```{r}
+welfare_2018 <- read_dta("../Donnees/ehcvm_welfare_sen2018.dta")
+welfare_2021 <- read_dta("../Donnees/ehcvm_welfare_sen2021.dta")
+
+```
+
+
+# **Section 2: Traitement des bases**
+
+## Description des bases
+
+```{r}
+dim(welfare_2018)
+colnames(welfare_2018)
+```
+L'analyse de ce résultat montre que la base welfare 2018 contient 7156 observations et 35 variables
+
+```{r}
+dim(welfare_2021)
+colnames(welfare_2021)
+```
+La base welfare 2021 quant à elle contient 7120 observations et 47 variables. 
+
+## Vérification des doublons
+
+
+```{r}
+
+doublon_2018 <- welfare_2018[duplicated(welfare_2018[, c("grappe","menage")]), ] # sélectionne les doublons qui sont dans la base 2018
+
+doublon_2021 <- welfare_2021[duplicated(welfare_2021[, c("grappe","menage")]), ] # sélectionne les doublons qui sont dans la base 2021
+
+cat("Nombre de doublons présents dans la base welfare 2018  :", nrow(doublon_2018), "\n")
+
+cat("Nombre de doublons présents dans la base welfare 2021  :", nrow(doublon_2021))
+
+```
+On constate qu'il n'y a pas de doublons dans les deux bases.
+
+## Vérification des valeurs manquantes
+
+```{r}
+print("Valeurs manquantes base 2018")
+NA_2018 <- colSums(is.na(welfare_2018))
+NA_2018
+
+print("Valeurs manquante base 2021")
+NA_2021 <- colSums(is.na(welfare_2021))
+NA_2021
+
+```
+
+En analysant ce résultat, on constate que dans la base 2018, 4 variables présentent des valeurs manquantes dont 2 pour hmstat et 1722 pour les variables hbranch,  hsectins et hcsp. Par contre sauf la variable hetnie possède 2 valeurs manquantes dans la base 2021.
+
+
+
+Ces deux bases contiennent déjà la variable date pour distinguer les observation après fusion.
+
+En outre, on constate une différence de variables entre les deux bases de données. Certaines variables sont présentes dans la base de 2021 mais absentes dans celle de 2018, et vice versa. De plus, certaines variables communes sont écrites différemment. Nous allons donc identifier ces variables et procéder aux corrections nécessaires.
+
+## Détection des variables identiques
+
+Ici nous recherchons à avoir la liste des vairbales qui sont dans les deux bases
+
+```{r}
+# Trouver les noms de colonnes communes
+variables_communes <- intersect(names(welfare_2021), names(welfare_2018))
+
+# Affichage sous forme de chaîne de caractères
+resultat <- paste0('"', variables_communes, '"', collapse = ", ")
+
+cat(resultat, "\n")
+```
+
+## Les différences dans les noms des variables
+
+```{r}
+# Variables présentes uniquement en 2018
+cat("Variables présentes uniquement en 2018 :\n")
+unique_2018 <- setdiff(names(welfare_2018), names(welfare_2021))
+  print(unique_2018)
+
+
+# Variables présentes uniquement en 2021
+cat("\nVariables présentes uniquement en 2021 :\n")
+unique_2021 <- setdiff(names(welfare_2021), names(welfare_2018))
+  print(unique_2021)
+
+```
+On voit ainsi la différence entre les deux bases. 
+
+Dans la base 2018 la variable d'alphabetisation est nommé halfab alors que dans la base 2021 cette variable est décomposé en halfa Alphabétisation du CM (lire et écrire) et halfa2 Alphabétisation du CM (lire, écrire et comprend). En 2018, toute personne sachant lire et écrire dans une langue donnée est considérée comme alphabétisée dans cette langue. Donc nous allons renommer la variable halfab de l'EHCVM 2018 en halfa.
+
+```{r}
+welfare_2018 <- welfare_2018 %>%
+  rename(halfa = halfab)
+# Ajoutons cette variables à la liste des variables communes.
+
+variables_communes <-  append(variables_communes,"halfab")
+```
+
+
+Dans la base 2021 nous avons la variable month qui n'est pas dans celle de 2018. Cette variable donne le jour, le mois et l'année de l'enquête vu que l'enquête s'est déroulée de 2021 à 2022. De même, les variables hethnie (éthnie), def_temp_prix2021m11 (déflateur temporel pour la pauvreté internationale), def_temp_cpi (déflateur temporel alternatif basé sur l'IPC officiel, style 2018/19), def_temp_adj (temporal deflator adjusted for difference between hh and market survey periods), zali0 (sum conso cp val up) variable créee, dtet (dépense totale annuelle par tête) variable créee, monthly_cpi (Valeur mensuelle de l'IPC), cpi2017 (adjustment factor for inflation between 2017 ICP year and base period for survey), icp2017 (PPP exchange rate to USD based on 2017 ICP), dollars (welfare in 2017 PPP USD per capita per day (not spatially deflated)).
+
+
+
+## Les différences au niveau des modalités de chaque variable
+
+Nous vérifions dans cetet parite si les modalités des variables sont les mêmes
+```{r}
+
+variable_label_diff <- c() #créer une liste vide 
+
+for (variable in variables_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare_2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(welfare_2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(welfare_2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(welfare_2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+
+```
+
+En analysant ces sorties on constate que les variables zae, hnation, hdiploma, activité 7 jours, hbranch et hCSP sont labelisées différemment. Nous allons donc harmoniser cela.
+
+### Correction de la variable zae
+
+```{r}
+labelled::val_labels(welfare_2018$zae)
+
+```
+
+En 2018 la variable zae n'est pas labelisée
+
+```{r}
+labelled::val_labels(welfare_2021$zae)
+
+```
+
+On constate qu'en 2021, cette variable est labelisée suivant un regroupement de région. Donc pour avoir les noms correspondants dans la base 2018, nous allons tabuler la variable zae et region de 2018.
+
+```{r}
+
+welfare_2018 %>%labelled::to_factor()%>%
+  tbl_cross(
+    row = region,    
+    col = zae
+  ) 
+
+```
+
+A partir de ce tableau on peut voir que le 1 correspond à Dakar, le 2 à Sant-louis et Matam, le 3 à Diourbel, Thies et  Louga, le 4 à Kaloack, Fatick et Kaffrine, le 5 à Ziguinchor, Tambacounda et Louga et le 6 à kedougou. Pour une meilleure harmonisation, nous allons d'abord labeliser la variable zae dans la base 2018 et ensuite faire un recodange dans la base 2021.
+
+```{r}
+welfare_2018 <- welfare_2018 %>%
+  mutate(zae = labelled(zae, 
+    c("Dakar" = 1, 
+      "Saint-Louis-Matam" = 2, 
+      "Thies-Diourbel-Louga" = 3, 
+      "Kaolack-Fatick-Kaffrine" = 4, 
+      "Ziguinchor-Tamba-Kolda-Sédhiou" = 5, 
+      "Kédougou" = 6)
+  ))
+
+```
+
+```{r}
+class(welfare_2021$zae)
+
+```
+
+
+```{r}
+
+welfare_2021 <- welfare_2021 %>%
+  mutate(zae = recode(as.factor(zae),  # Convertir en numérique pour éviter les erreurs
+    `1` = 6,
+    `3` = 2,
+    `5` = 3,
+    `7` = 4,
+    `9` = 5,
+    `11` = 1
+  ))
+
+#Affectons les labels de 2021 à ceux de 2018
+labelled::val_labels(welfare_2021$zae) <-  labelled::val_labels(welfare_2018$zae)
+# convertir en facteur
+#welfare_2021 <- welfare_2021 %>%
+#  mutate(zae = factor(zae))
+
+
+
+```
+
+
+
+### Correction de la variable hnation
+
+```{r}
+labelled::val_labels(welfare_2018$hnation)
+
+```
+
+
+```{r}
+labelled::val_labels(welfare_2021$hnation)
+
+```
+
+On voit que dans les deux bases les pays associés à chaque numéro ne sont pas le même. Nous allons donc corriger cela
+
+```{r}
+welfare_2021 %>%
+  to_factor() %>% #labéliser
+  select(hnation) %>% #selection des variables qui vont s'afficher
+  tbl_summary(digits = list(all_continuous() ~ 2), missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+  
+```
+
+
+```{r}
+welfare_2021 <- welfare_2021 %>%
+  mutate(hnation = recode(as.factor(hnation),  # Convertir en numérique si nécessaire
+                          `4` = 3,  
+                          `8` = 4,  
+                          `10` = 5, 
+                          `11` = 6, 
+                          `13` = 7, 
+                          `15` = 8, 
+                          `12` = 9, 
+                          `17` = 11, 
+                          `18` = 12, 
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10  
+                          ))
+
+```
+
+
+**Affectons les labels de 2018 à ceux de 2021**
+
+
+```{r}
+labelled::val_labels(welfare_2021$hnation) <-  labelled::val_labels(welfare_2018$hnation)
+
+```
+
+```{r}
+welfare_2021 %>%
+  to_factor() %>% #labéliser
+  select(hnation) %>% #selection des variables qui vont s'afficher
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+
+### Correction de la variable hdiploma
+
+**Detection de l'incohérence**
+
+```{r}
+val_labels(welfare_2018$hdiploma)
+
+```
+
+```{r}
+val_labels(welfare_2021$hdiploma)
+```
+
+On voit une différence dans l'écriture de bepc. Nous allons dans la suite corriger cela
+
+```{r}
+
+welfare_2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+```
+
+```{r}
+
+val_labels(welfare_2018$hdiploma) <-  val_labels(welfare_2021$hdiploma)
+
+```
+
+
+```{r}
+
+welfare_2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+### Correction de la variable hactivty7j
+
+
+```{r}
+val_labels(welfare_2018$hactiv7j)
+
+```
+
+```{r}
+val_labels(welfare_2021$hactiv7j)
+```
+Ici on voit par exemple que chomeur est associe à 2 dans la base 2018 alors qu'il est associé à 4 dans la base 2021. Nous allons harmoniser cela
+
+```{r}
+welfare_2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+
+```{r}
+welfare_2018 <- welfare_2018 %>%
+  mutate(hactiv7j = dplyr::recode(hactiv7j,
+                          `2` = 4, 
+                          `3` = 2,  
+                          `4` = 3))
+
+```
+
+```{r}
+
+val_labels(welfare_2018$hactiv7j) <-  val_labels(welfare_2021$hactiv7j)
+```
+
+
+```{r}
+welfare_2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+### Correction de la variable branche d'activité
+
+
+```{r}
+val_labels(welfare_2018$hbranch)
+
+```
+
+```{r}
+val_labels(welfare_2021$hbranch)
+```
+
+Ici on voit une différence dans les labels. En 2018, c'est Elevage/peche qui est associé à 2 alors qu'en 2021 c'est  Elevage/syl./peche.  Nous allons adopter la labelisation de 2021 
+
+```{r}
+
+
+val_labels(welfare_2018$hbranch) <-  val_labels(welfare_2021$hbranch)
+
+
+```
+
+### Correction de la variable CSP
+
+
+```{r}
+val_labels(welfare_2018$hcsp)
+
+```
+
+```{r}
+val_labels(welfare_2021$hcsp)
+```
+Ici au niveau de la modalité 9, familial est écrit avec un f minuscule en 2018 et avec majuscule en 2021.
+Nous allons adopter la labelisation de 2018 
+
+
+```{r}
+val_labels(welfare_2021$hcsp) <-  val_labels(welfare_2018$hcsp)
+
+
+```
+
+
+
+## Vérification après correction
+
+
+```{r}
+
+variable_label_diff <- c() #créer une liste vide 
+
+for (variable in variables_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare_2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(welfare_2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(welfare_2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(welfare_2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+
+```
+
+Ainsi toutes les correction ont été bien faites.
+
+## Vérification des types de variables
+
+Dans cette partie après correction des différences nous verrons nos variables communes ont le même type
+
+```{r}
+
+# Initialiser un vecteur vide pour stocker les variables avec des types différents
+variable_type_diff <- vector("character")  
+
+# Boucle sur les variables communes
+for (variable in variables_communes) {  
+
+  # Récupérer les classes des variables en 2018 et 2021
+  type_var_2018 <- class(welfare_2018[[variable]])  
+  type_var_2021 <- class(welfare_2021[[variable]])  
+
+  # Vérifier si les types sont différents
+  if (!identical(type_var_2018, type_var_2021)) {  
+    variable_type_diff <- c(variable_type_diff, variable)  # Ajouter la variable au vecteur
+  }
+}
+
+# Afficher les variables ayant des types différents entre 2018 et 2021
+print(variable_type_diff)
+
+
+
+```
+
+Ainsi toutes les variables de même nom communes aux deux bases ont le même types.
+
+## Détection des ménages communes aux deux enquêtes 
+
+Un rapport publié par l'INS du Bénin mentionne que, dans la base **s00_me_ben2021**, la variable `PanelHH` indique si un ménage enquêté en 2021 avait déjà été interrogé en 2018. De même, cette variable est présente dans la base **s00_me_sen2021**, ce qui permet d'identifier les ménages communs aux deux enquêtes. Ainsi, nous allons fusionner ces deux bases, afin de repérer les ménages ayant participé aux enquêtes de 2018 et 2021.
+
+### Importation de la base 
+```{r}
+
+Base_s00_me_sen2021 <-  read_dta("../Donnees/s00_me_sen2021.dta")
+
+
+```
+
+### Fusion des deux bases
+
+Nous allons effectuer la jointure en sélectionnant uniquement les variables **`PanelHH`**, **`grappe`** et **`menage`** dans la base **s00_me_ben2021**. Les variables **`grappe`** et **`menage`** seront utilisées comme clés de jointure afin d'identifier les ménages communs aux deux bases.
+
+```{r}
+
+welfare_2021 <- dplyr::left_join(
+  welfare_2021, 
+  Base_s00_me_sen2021 %>% select(grappe, menage, PanelHH),
+  by = c("grappe", "menage")
+)
+
+```
+
+
+# **Section 3: Fusion des bases welfare 2021 et 2018**
+
+
+Après avoir détecté et corrigé toutes les incohérences, nous allons, dans cette section, fusionner les deux bases en les **empilant**.
+
+
+```{r}
+welfare_final <- bind_rows(welfare_2018,welfare_2021)
+```
+
+On note qu'après le merge il y a de nouvelles valeurs manquantes qui sont créées. Cela dû aux variables qui étaient présentes uniquement dans l'une des bases. Nous différencierons ces valeurs manquantes aux autres.
+
+Par ailleurs, une tabulation entre les variables halfa et halfa2 de la base 2021 montre que tous les individus qui ont non pour halfa ont également non pour halfa2. Nous attribuerons ainsi la valeur non à ces individus pour la variable halfa2 dans la base finale.
+
+## Correction de la variable halfa
+
+```{r}
+
+welfare_2021 %>%labelled::to_factor()%>%
+  tbl_cross(
+    row = halfa,    
+    col = halfa2
+  ) 
+
+```
+
+Il nous faut avoir la description de la variable
+```{r}
+labelled::val_labels(welfare_2018$halfa)
+
+```
+
+
+```{r}
+welfare_final <- welfare_final %>%
+  mutate(halfa2 = ifelse(halfa == 0 & year == 2018, 0, halfa2))
+
+```
+
+
+## Enregistrement de la base
+```{r}
+write_dta(welfare_final, "../Sortie/welfare_final.dta")
+
+```
+
+
+## Visualisation de la base finale
+
+```{r}
+# Sélectionner les 5 premières et 5 dernières variables
+selected_vars <- c(names(welfare_final)[1:5], tail(names(welfare_final), 5))
+
+# Afficher les 8 premières observations
+head(welfare_final[selected_vars], 8)
+
+# Afficher les 8 dernières observations
+tail(welfare_final[selected_vars], 8)
+
+```
+

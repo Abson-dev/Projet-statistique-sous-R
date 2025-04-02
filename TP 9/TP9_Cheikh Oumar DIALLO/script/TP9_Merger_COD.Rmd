@@ -1,0 +1,450 @@
+---
+title: "TP9 MERGE_BASES"
+author: "Cheikh Oumar DIALLO"
+date: "2025-03-26"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    toc_float:
+      collapsed: yes
+  word_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# INTRODUCTION
+
+Ce travail pratique consiste à fusionner les bases de données welfare de 2018 et 2021 de l'Enquête harmonisée sur les Conditions de Vie des Ménages (EHCVM). Pour atteindre cet objectif, il faudra passer par plusieurs étapes : le traitement des variables, l'uniformisation des labels et le recodage de certaines modalités. 
+
+# PACKAGE ET DONNÉES UTILISÉES
+
+## Le chargement des Packages
+
+```{r}
+library(haven)
+library(tidyverse)
+library(dplyr)
+library(gtsummary)
+library(utils)
+library(labelled)
+```
+
+## Données utilisées
+
+```{r}
+# Importation des bases welfare 2018 et 2021
+wf_2018 <- haven::read_dta("../data/ehcvm_welfare_sen2018.dta")
+wf_2021 <- haven::read_dta("../data/ehcvm_welfare_sen2021.dta")
+```
+
+## La description des bases de données
+
+La base welfare 2018 contient *7156* observations pour *35* variables.
+La base welfare 2021 contient *7120* observations pour *47* variables.
+
+# TRAITEMENT DES DONNÉES
+
+## La structure des bases
+
+```{r}
+# Affichage des noms de colonnes
+print("Les colonnes de la base welfare 2018")
+colnames(wf_2018)
+
+print("Les colonnes de la base welfare 2021")
+colnames(wf_2021)
+```
+
+## La vérification des doublons dans les deux bases
+
+```{r}
+dbl_2018 <- wf_2018[duplicated(wf_2018[, c("grappe","menage")]), ]
+cat("Le nombre de doublons dans la base welfare 2018 est :", nrow(dbl_2018), "\n")
+
+dbl_2021 <- wf_2021[duplicated(wf_2021[, c("grappe","menage")]), ]
+cat("Le nombre de doublons dans la base welfare 2021 est :", nrow(dbl_2021), "\n")
+```
+
+## La vérification des valeurs manquantes
+
+```{r}
+print("Les valeurs manquantes dans la base welfare 2018")
+NA_wf_2018 <- colSums(is.na(wf_2018))
+NA_wf_2018
+
+print("Les valeurs manquantes dans la base welfare 2021")
+NA_wf_2021 <- colSums(is.na(wf_2021))
+NA_wf_2021
+```
+
+## les variables de la Bases
+```{r}
+##Les variables des bases
+#wefare 2018
+# liste des variables
+var_2018 = colnames(wf_2018)
+var_2021 = colnames(wf_2021)
+
+# var commune
+var_com <-intersect(var_2018,var_2021)
+var_com
+#variable uniquement présent dans la base welfare 2018
+Var_unik_2018 <-setdiff(var_2018,var_2021)
+Var_unik_2018
+#variable uniquement présent dans la base welfare 2021
+Var_unik_2021 <-setdiff(var_2021,var_2018)
+Var_unik_2021
+```
+
+## Le recodage de la variable Halfa en Halfab
+
+```{r}
+# recodage de variable
+colnames(wf_2021)[colnames(wf_2021)=="halfa"] <- "halfab"
+
+# ajout aux variables communes
+var_com <- append(var_com,"halfab")
+var_com
+```
+
+## La verification des labelles
+
+```{r}
+##La verification des labelles
+#créer une liste vide
+var_lab_dif <- c() 
+
+#Pour les variables communes
+for (variable in var_com) { 
+
+#vérification de la labélisation et recupération des labels wefare 2018
+    
+  if(labelled::is.labelled(wf_2018[[variable]])){ 
+    
+      val_lab_2018 <- labelled::val_labels(wf_2018[[variable]]) 
+
+  }else{
+      val_lab_2018 <- NULL 
+  }
+  
+  #vérification de la labélisation et recupération des labels wefare 2021
+  
+  if(labelled::is.labelled(wf_2021[[variable]])){ 
+    
+      val_lab_2021 <- labelled::val_labels(wf_2021[[variable]]) 
+      
+  }else{
+    
+      val_lab_2021 <- NULL 
+  }
+  
+  if(!identical(val_lab_2018, val_lab_2021)){ 
+  
+     #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer 
+    
+     var_lab_dif <- append(var_lab_dif,variable) 
+     print(variable)
+     
+   }
+}
+```
+
+## Traitement des variables communes présentant des incoherences.
+
+```{r}
+#LA VARIABLE zae zone ecologique
+labelled::val_labels(wf_2021$zae)
+```
+**RECODAGE DE LA VARIABLE ZONE AGROECOLOGIQUE**
+```{r}
+# Affichage des proportions avant recodage
+table_avant <- wf_2018 %>%
+  tbl_summary(by = zae, statistic = all_categorical() ~ "{p}%") %>%
+  modify_header(label = "**ZAE (Avant Recodage)**") 
+
+# Recodage de la variable `zae`
+wf_2018 <- wf_2018 %>%
+  mutate(zae = case_when(
+    zae == 1 ~ 11,
+    zae  == 5 ~ 9,
+    zae  == 3 ~ 5,
+    zae  == 2 ~ 3,
+    zae  == 4 ~ 7,
+    zae  == 6 ~ 1,
+    TRUE ~ zae  # Garde les autres valeurs inchangées
+  ))
+
+```
+
+```{r}
+#affectation des labels
+# Tableau avant affectation
+wf_2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+
+```{r}
+#affectation des labels
+labelled::val_labels(wf_2018$zae) <-labelled::val_labels(wf_2021$zae)
+```
+
+```{r}
+#tableau après affectation
+wf_2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+
+```
+
+```{r}
+#*RECODAGE DE LA VARIABLE hnation*
+labelled::val_labels(wf_2018$hnation)
+```
+
+```{r}
+labelled::val_labels(wf_2021$hnation)
+```
+
+```{r}
+#RECODAGE DES MODALITES
+#recodation des modalites de la hnaption de la base wf_21 
+# il s'agira d'uniformiser les modalités à celles de la base wf_18
+wf_2021 <- wf_2021 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3, 
+                          `8` = 4,  
+                          `10` = 5, 
+                          `11` = 6, 
+                          `13` = 7, 
+                          `15` = 8, 
+                          `12` = 9, 
+                          `17` = 11,
+                          `18` = 12, 
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10 ))
+```
+
+```{r}
+#Affectation des labels.
+labelled::val_labels(wf_2021$hnation) <- labelled::val_labels(wf_2018$hnation)
+```
+
+```{r}
+#visualisation après affectation
+wf_2021 %>% 
+  to_factor() %>% 
+  select(hnation) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+**La variable hdiploma**
+```{r}
+#recodage de la variable hdiploma
+labelled::val_labels(wf_2018$hdiploma)
+```
+
+```{r}
+labelled::val_labels(wf_2021$hdiploma)
+```
+*la variable hdiploma* present les mêmes modalites dans les deux bases, cependant la différence se situe au niveau des labels. pour une correction les labels de la base wf_2021 seront affecter à celle de la base wf_2018 pour la variable hdiploma
+```{r}
+labelled::val_labels(wf_2018$hdiploma)<-labelled::val_labels(wf_2021$hdiploma)
+```
+
+```{r}
+wf_2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+
+```{r}
+wf_2021 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+**La variable hactiv7j**
+```{r}
+#RECODE VARIABLE hactiv7j
+labelled::val_labels(wf_2018$hactiv7j)
+```
+
+```{r}
+labelled::val_labels(wf_2021$hactiv7j)
+```
+
+*la variable hactiv7j* present des modalites différentes au niveau des labels dans les deux bases. pour une correction on procédera  d'abord au recodage des labels de variable hactiv7j dans la base wf_2018 puis les labels de la base wf_2021 seront affectés à celle de la base wf_2018 pour la variable hactiv7j
+
+```{r}
+#recodation des modalites de la hactiv7j de la base wf_2018 
+wf_2018 <- wf_2018 %>% 
+ mutate(hactiv7j= dplyr::recode(hactiv7j,
+                   `2` = 4,
+                   `3` = 2,
+                   `4` = 3
+    ))
+```
+
+*Affectation des labels*
+
+```{r}
+labelled::val_labels(wf_2018$hactiv7j)<- labelled::val_labels(wf_2021$hactiv7j)
+```
+
+```{r}
+#Tableau après
+wf_2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+
+*recodage de la variable hbranch*
+
+```{r}
+labelled::val_labels(wf_2018$hbranch)
+```
+
+```{r}
+labelled::val_labels(wf_2021$hbranch)
+```
+
+*la variable hbranch* present les mêmes modalites dans les deux bases, cependant la différence se situe au niveau des labels. pour une correction les labels de la base wf_2021 seront affecter à celle de la base wf_2018 pour la variable hbranch
+
+```{r}
+labelled::val_labels(wf_2018$hbranch)<- labelled::val_labels(wf_2021$hbranch)
+```
+
+```{r}
+wf_2018 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing="always",
+            missing_stat ="NA")
+```
+
+*RECODAGE DE LA VARIABLE hCSP*
+
+```{r}
+labelled::val_labels(wf_2018$hcsp)
+```
+
+```{r}
+labelled::val_labels(wf_2021$hcsp)
+```
+*la variable catégorie socio professionnel, hCSP* present les mêmes modalites dans les deux bases, cependant la différence se situe au niveau des labels. pour une correction les labels de la base wf_2018 seront affecter à celle de la base wf_2021 pour la variable categorie socio professionnelle
+
+```{r}
+labelled::val_labels(wf_2021$hcsp) <- labelled::val_labels(wf_2018$hcsp)
+```
+
+```{r}
+wf_2018 %>% 
+  to_factor() %>% 
+  select(hcsp) %>% 
+  tbl_summary(missing="always",
+              missing_stat ="NA" )
+```
+
+*la vérification du type des variables* 
+ce code permet de vérifier si les variables dans les deux bases sont de même types 
+```{r}
+# Créer une liste vide
+var_class_dif <- c()
+
+# Pour les variables communes
+for (variable in var_com) { 
+  
+  # Récupération des types de variables pour wf_2018
+  type_var_2018 <- class(wf_2018[[variable]])
+  
+  # Récupération des types de variables pour wf_2021
+  type_var_2021 <- class(wf_2021[[variable]])
+  
+  # Comparaison des types de variables
+  if (!identical(type_var_2018, type_var_2021)) {
+    
+    # Si les types diffèrent, alors ajouter le nom de la variable à la liste créée
+    var_class_dif <- append(var_class_dif, variable)
+    print(variable)
+  }
+}  
+
+```
+
+**Traitement de la variable zae(zone agroécologique)**
+```{r}
+class(wf_2018$zae)
+
+```
+
+```{r}
+class(wf_2021$zae)
+```
+**traitement du type de la variable zae**
+il s'agira de corriger le type de la variable zae dans la base 2021
+```{r}
+class(wf_2021$zae) <-class(wf_2018$zae)
+```
+
+```{r}
+#Après traitement
+class(wf_2021$zae)
+```
+```{r}
+##Les variables des bases
+#wefare 2018
+# liste des variables
+var_2018 = colnames(wf_2018)
+var_2021 = colnames(wf_2021)
+
+# var commune
+var_com <-intersect(var_2018,var_2021)
+var_com
+#variable uniquement présent dans la base welfare 2018
+Var_unik_2018 <-setdiff(var_2018,var_2021)
+Var_unik_2018
+#variable uniquement présent dans la base welfare 2021
+Var_unik_2021 <-setdiff(var_2021,var_2018)
+Var_unik_2021
+```
+
+
+# EMPILEMENT DES BASES 
+
+L'objectif de l'empilement est de regrouper toutes les données sur une même base.
+
+## Empilement
+
+```{r}
+wf_18_21 <- bind_rows(wf_2018, wf_2021)
+```
+
+## Affichage de la base finale
+
+```{r}
+cat("Les colonnes de la base welfare fusionnée :\n")
+print(colnames(wf_18_21))
+cat("\nNombre d'observations :", nrow(wf_18_21), "\n")
+cat("Nombre de variables :", ncol(wf_18_21), "\n")
+```
+
+## Enregistrement de la base fusionnée
+
+```{r}
+# Sauvegarde de la base wf_18_21
+haven::write_dta(wf_18_21, "../data/welfare_fusionnee.dta")
+```

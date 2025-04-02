@@ -218,7 +218,8 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(zae) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
   
 ```
 
@@ -257,7 +258,9 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(zae) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
+  
   
 
 ```
@@ -300,7 +303,9 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hnation) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
+  
   
 
 ```
@@ -342,7 +347,9 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hnation) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
+  
   
 
 ```
@@ -392,7 +399,9 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hactiv7j) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
+  
   
 
 ```
@@ -429,7 +438,9 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hactiv7j) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label = "**Caractéristiques**")
+  
   
 
 ```
@@ -596,13 +607,34 @@ welfare_total <- bind_rows(welfare_2018,welfare_2021_ajusté) %>% # empiler les 
 
 Maintenant que l'empilement est fait, de nouveaux manquants se sont crées, cela due aux variables non communes.
 
-Dans la base \*welfare total (fusionnée)**, toutes les valeurs manquants** qui s'y trouve dans des variables propres à l'année 2021 et qui ont pour année (**year**) 2018 sont généré après la fusion. C'est d'eux qu'on qualifie de nouveaux manquants.
+Dans la base **welfare total (fusionnée)**, toutes les valeurs manquants** qui s'y trouve dans des variables propres à l'année 2021 et qui ont pour année (**year**) 2018 sont généré après la fusion. C'est d'eux qu'on qualifie de nouveaux manquants.
+
+### **Exportation**
+
+Maintenant la base finale obtenu, nous l'exportons pour sauvegarde.
+
+
+
+```{r}
+
+haven::write_dta(welfare_total,
+                 file.path("../Data/welfare_2021_2018.dta")) # Sauvegarde
+
+```
+
+### **Importation de la base fusionnée**
+
+```{r}
+welfare_2021_2018 <- haven::read_dta("../Data/welfare_2021_2018.dta")
+
+```
+
 
 **Labélisons**
 
 ```{r}
 
-welfare_total <- welfare_total %>% 
+welfare_2021_2018 <- welfare_2021_2018 %>% 
   labelled::to_factor()
 
 ```
@@ -610,7 +642,7 @@ welfare_total <- welfare_total %>%
 **Extrait de la base**
 
 ```{r}
-welfare_total[1:10,1:10] #affichons les 10 premieres lignes et les 10 premières variables
+welfare_2021_2018[1:10,1:10] #affichons les 10 premieres lignes et les 10 premières variables
 
 ```
 
@@ -619,7 +651,7 @@ welfare_total[1:10,1:10] #affichons les 10 premieres lignes et les 10 premières
 ```{r}
 
 
-Table1 <- welfare_total %>%
+Table1 <- welfare_2021_2018 %>%
   select(year, hgender, hage, hhsize, heduc, milieu, pcexp) %>% #selection des variables qui vont s'afficher
   tbl_summary(by = year,  #grouper par années
               
@@ -630,10 +662,12 @@ Table1 <- welfare_total %>%
                 heduc ~ "Niveau d'éducation",
                 milieu ~ "Milieu de résidence",
                 pcexp ~ "Dépense per capital (FCFA)"
+               
               ),
               
-              missing = "no",  #  Ne pas  inclure les NA
-              
+              missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes",
+
               statistic = list(
                 all_continuous() ~ "{mean} ± {sd}", #afficher la moyenne et l'écart-type pour les variables continues
                 all_categorical() ~ "{n} ({p}%)" #afficher l'effectif et le pourcentage pour les variables catégorielles
@@ -641,8 +675,18 @@ Table1 <- welfare_total %>%
               
               digits = all_continuous() ~ 1, #mettre tous les nombres des variable numériques continue avec un chiffre apres la virgule
               ) %>%
-  
-  bold_labels()
+  modify_header(label = "**Caractéristiques**") %>%
+  bold_labels() %>% 
+  as_gt() %>%
+  gt::tab_header(
+      title = "Quelques statistiques par année sur les ménages enquétés"
+    ) %>%
+  gt::tab_options(
+      heading.title.font.size = 18,
+      heading.title.font.weight = "black",
+      heading.background.color = "#0073C2"
+    
+  )
 
 Table1 # Afficher la table
 

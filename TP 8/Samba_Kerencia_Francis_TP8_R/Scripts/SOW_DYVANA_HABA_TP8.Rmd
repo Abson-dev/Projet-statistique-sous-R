@@ -1,0 +1,170 @@
+---
+title: "Cartographie avec R"
+author: "Samba SOW Kerencia DYVANA et Fromo Francis HABA"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Installation et importation des packages
+Dans cette section, nous installons tous les packages qui servirons dans la suite.
+
+```{r include=FALSE}
+packages <- c("readr","utils","haven","dplyr","psych", "gtsummary","spData", "labelled","sf","mapsf", "ggplot2","viridis","exactextractr", "tmap","leaflet","raster","terra","leaflet.extras","ggspatial")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {  
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+```
+
+## Importation de la base issue des sorties du TP4
+
+```{r}
+base <- read_csv("../bases/Mali.csv") 
+```
+
+# Contexte et objectifs de l'analyse
+
+Le Mali est divisé administrativement en plusieurs niveaux :
+- **Régions (ADM1)** : 10 régions et le district de Bamako.
+- **Préfectures ou cercles (ADM2)** : subdivisions des régions.
+- **Communes (ADM3)** : unités administratives locales.
+
+L’objectif de cette analyse est de visualiser certaines caractéristiques socio-économiques, telles que l'âge médian et le revenu médian, à ces différents niveaux administratifs à l’aide de la cartographie.
+
+## Jointure entre la base de données et le shapefile
+
+Nous calculons des statistiques descriptives sur des variables clés par région.
+Ici, nous déterminons la **médiane** pour certaines variables afin de limiter l’impact des valeurs extrêmes. Nous analysons :
+- L’âge médian
+- Le revenu médian
+
+```{r, message=FALSE, warning=FALSE}
+base_stats <- base %>% 
+  group_by(admin1Name_fr) %>%
+  summarise(age_median = median(age, na.rm = TRUE), 
+            revenu_median = median(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin1Name_fr, age_median, revenu_median)
+```
+
+
+# Cartes au niveau régional
+## chargement des shapfiles du Mali niveau régional
+
+```{r, message=FALSE, warning=FALSE}
+shp1 <- st_read("../bases/geoBoundaries-MLI-ADM1.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, include=FALSE, warning=FALSE}
+colnames(shp1)
+```
+
+Jointure des données statistiques avec le shapefile :
+
+```{r, message=FALSE, warning=FALSE}
+base_stats_shp <- left_join(shp1, base_stats, by = c("shapeName" = "admin1Name_fr"))
+```
+
+### Visualisation : Age médian par région
+
+```{r, message=FALSE, warning=FALSE}
+#colnames(base_stats_shp)
+tm_shape(base_stats_shp) + 
+  tm_polygons("age_median", palette = "Greens") +  # Correction de la palette
+  tm_borders(col = "black") +
+  tm_text("shapeName", size = 0.8, col = "black", shadow = TRUE) +  # Ajout des labels
+  tm_title("Âge médian par région") + 
+  tm_layout(frame = FALSE)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+#colnames(base_stats_shp)
+tm_shape(base_stats_shp) + 
+  tm_polygons(fill = "revenu_median", fill.scale = tm_scale(values = "brewer.greens")) +
+  tm_borders(col = "black") +
+  tm_text("shapeName", size = 0.8, col = "black", shadow = TRUE) +
+  tm_title("Revenu médian par région") + 
+  tm_layout(frame = FALSE)
+```
+
+# Cartes niveau préfecture
+## chargement des shapfiles du Mali niveau préfecture
+```{r, message=FALSE, warning=FALSE}
+shp2 <- st_read("../bases/geoBoundaries-MLI-ADM2.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_stats_2 <- base %>% 
+  group_by(admin2Name_fr) %>%
+  summarise(age_median = median(age, na.rm = TRUE), 
+            salaire_median = median(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin2Name_fr,age_median,salaire_median)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_stats_shp2 <- left_join(shp2,base_stats_2, by = c("shapeName" = "admin2Name_fr"))
+```
+
+### Age médian par préfecture
+
+```{r, message=FALSE, warning=FALSE}
+tm_shape(base_stats_shp2) + 
+  tm_polygons(fill = "age_median", fill.scale = tm_scale(values = "brewer.greens")) +
+  tm_borders(col = "black") +
+  tm_text("shapeName", size = 0.8, col = "black", shadow = TRUE) +
+  tm_title("Age médian par préfecture") + 
+   tm_layout(frame = FALSE)
+```
+
+### Salaire médian par prefecture
+```{r}
+tm_shape(base_stats_shp2) + 
+  tm_polygons(fill = "salaire_median", fill.scale = tm_scale(values = "brewer.greens")) +
+  tm_borders(col = "black") +
+  tm_text("shapeName", size = 0.8, col = "black", shadow = TRUE) +
+  tm_title("Salaire médian par préfecture") + 
+   tm_layout(frame = FALSE)
+```
+
+# Cartes niveau communes
+Importons les shepfiles au nveau communal
+```{r, message=FALSE, warning=FALSE}
+shp3 <- st_read("../bases/geoBoundaries-MLI-ADM3.shp", quiet= TRUE)
+```
+
+Calculs de quelques statistiques en vu de faire la representation par carte
+
+```{r, message=FALSE, warning=FALSE}
+base_stats_3 <- base %>% 
+  group_by(admin3RefName) %>%
+  summarise(age_median = median(age, na.rm = TRUE), 
+            salaire_median = median(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(admin3RefName,age_median,salaire_median)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_stats_shp3 <- left_join(shp3,base_stats_3, by = c("shapeName" = "admin3RefName"))
+```
+
+### Age médian par commune
+
+```{r, message=FALSE, warning=FALSE}
+tm_shape(base_stats_shp3) + 
+  tm_polygons(fill = "age_median", fill.scale = tm_scale(values = "brewer.greens")) +
+  tm_borders(col = "black") +
+
+  tm_title("Age médian par commune") + 
+   tm_layout(frame = FALSE)
+```
+
+### Salaire médian par commune
+```{r}
+tm_shape(base_stats_shp3) + 
+  tm_polygons(fill = "salaire_median", fill.scale = tm_scale(values = "brewer.greens")) +
+  tm_borders(col = "black") +
+ 
+  tm_title("Salaire médian par commune") + 
+   tm_layout(frame = FALSE)
+```
