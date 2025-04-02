@@ -289,7 +289,7 @@ recap <- tibble(# Créons une mini-base contenant la liste des variables.
 recap %>%
   gt::gt() %>%
   gt::tab_header(
-    title = "Comparaison des variables entre les bases Welfare du Sénégal ent 2018 et en 2021",
+    title = "Comparaison des variables entre les bases Welfare du Sénégal en 2018 et en 2021",
     subtitle = "Variables communes et spécifiques à chaque année (2018 et 2021)"
   )
 
@@ -377,6 +377,7 @@ La variable "zae" n'est pas étiquetée en 2018, mais l'est en 2021. Afin d'unif
 
 ```{r}
 plot(welfare_sen2021$zae)
+title("Distribution de la variable zae de la base welfare du Sénégal en 2021")
 
 ```
 
@@ -470,8 +471,10 @@ On constate que la présence de certains pays en 2021 qui ne figurent pas en 201
 library(ggplot2)
 
 ggplot(data = welfare_sen2021, aes(x = hnation, fill = is.na(hnation))) +  
-  geom_bar()
-  
+  geom_bar() +
+  ggtitle("Distribution de la variable hnation de la base welfare du Sénégal en 2021 avant la modification") +
+  theme_minimal()
+
 ```
 
 **Modification (recodage)**
@@ -799,7 +802,7 @@ Table1 <- welfare_combined %>%
               
               digits = all_continuous() ~ 1 # Arrondir les nombres continus à 1 décimale.
   ) %>%
-  modify_header(label = "**Profil sociodémographique et économique des ménages au Sénégal en 2018 et 2021**") %>%
+  modify_header(label = "**Profil sociodémographique et économique des ménages au Sénégal en 2018 et en 2021**") %>%
   bold_labels() # Mettre les labels en gras.
 
 Table1 # Afficher la table
@@ -908,7 +911,7 @@ cat("Nombre de doublons :", duplicate_count, "\n")
 ```{r}
 ggplot(welfare_combined, aes(x = as.factor(year), y = pcexp)) +
   geom_boxplot() + 
-  labs(title = "Boxplot du Revenu par Année au Sénégal", x = "année", y = "dépense")
+  labs(title = "Boxplot des Dépenses par Année (2018 et 2021) au Sénégal", x = "année", y = "dépense")
 
 ```
 
