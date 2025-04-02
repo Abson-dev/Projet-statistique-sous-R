@@ -1,0 +1,349 @@
+---
+title: "TP8"
+author: "RASAMOELINA Paulinah et FALL Ndeye Ramatoulaye Ndoye"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  output_dir: "./Sorties"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# CARTOGRAPHIE SUR R
+
+# TP : Cartographie avec R et analyse des indicateurs socio-économiques du Sénégal
+
+# I. Introduction
+
+## 1. Définition et importance de la cartographie
+
+La cartographie est une discipline qui consiste à représenter des données géographiques sous forme de cartes. Elle permet d’analyser et de visualiser les phénomènes spatiaux, facilitant ainsi la prise de décision dans divers domaines : urbanisme, santé publique, économie, etc.
+
+## 2. R et son rôle en cartographie statistique
+
+R est un outil puissant pour la manipulation et la visualisation des données géospatiales. Grâce à des packages comme sf, ggplot2 et tmap, il est possible de charger des fichiers géographiques (shapefiles), de les fusionner avec des données statistiques et de produire des cartes thématiques.
+
+
+L’objectif de ce TP est de créer des cartes thématiques du Sénégal en intégrant des indicateurs socio-économiques issus de la base EHCVM Individu 2021. Nous utiliserons des données sur la pauvreté, l’accès aux services de santé, l’accès aux services bancaires et le revenu moyen.
+
+# II. Méthodologie
+
+## 1. Chargement des données géographiques et statistiques
+
+Nous avons deux sources de données principales :
+
+Les fichiers shapefile du Sénégal, contenant les limites administratives (régions, départements et communes).
+
+Le fichier EHCVM Individu 2021, qui contient des informations socio-économiques sur les ménages et les individus interrogés.
+
+## 2. Importation des packages :
+
+Dans cette section, nous importons tous les packages qui seront utilisés par la suite.
+
+readr : Ce package est utilisé pour lire des fichiers de données, notamment des fichiers CSV et TXT, de manière rapide et efficace. Il facilite l’importation des données dans R pour leur analyse.
+
+haven : Il permet d'importer et d'exporter des fichiers de Stata (.dta), SPSS (.sav) et SAS (.sas7bdat). Il est utilisé ici pour lire les données de l’EHCVM, qui sont au format .dta.
+
+mapsf : Ce package est utilisé pour la cartographie thématique. Il permet de générer facilement des cartes statiques en attribuant des couleurs aux zones en fonction d’indicateurs.
+
+sf : Ce package est essentiel pour la manipulation des données spatiales sous le format Simple Features. Il permet de charger des shapefiles (.shp), de faire des jointures spatiales et d’effectuer des analyses géographiques.
+
+ggplot2 : Ce package est utilisé pour la visualisation de données avec une approche basée sur la Grammar of Graphics. Il est utilisé ici pour tracer des cartes statiques en combinant geom_sf() avec des données spatiales.
+
+dplyr : C'est un package de manipulation de données qui simplifie des opérations comme le filtrage, l'agrégation et la transformation des données. Il est utilisé pour calculer des indicateurs régionaux avant la cartographie.
+
+utils : Il contient des fonctions de base pour R, notamment pour importer des fichiers, gérer les connexions et manipuler les objets en mémoire. Il est souvent utilisé pour des opérations générales comme la lecture de données ou l'affichage d'informations.
+
+leaflet : Ce package est utilisé pour créer des cartes interactives. Il permet de superposer des couches de données, d’ajouter des popups et d’intégrer des fonds de carte dynamiques comme OpenStreetMap ou Google Maps.
+
+leaflet.extras : C'est une extension du package leaflet qui ajoute des fonctionnalités supplémentaires, comme des contrôles interactifs, des effets visuels et des options avancées de personnalisation pour améliorer l’affichage des cartes.
+
+viridis : Il est utilisé pour générer des palettes de couleurs optimisées pour la cartographie. Il permet d’assurer un bon contraste et une lisibilité accrue, notamment pour les personnes ayant des déficiences visuelles.
+
+ggspatial : Ce package ajoute des outils SIG à ggplot2, comme l’affichage de nord, échelles, grilles et fonds de carte. Il est utile pour améliorer la précision et l’esthétique des cartes générées avec ggplot2.
+
+
+
+```{r, results=FALSE, message=FALSE, include=FALSE}
+
+# Charger les packages
+library(readr)
+library(haven)
+library(mapsf)
+library(sf)       
+library(ggplot2)
+library(dplyr)
+library(utils)
+library(leaflet)  
+library(leaflet.extras)
+library(viridis)
+library(ggspatial)
+```
+
+## Chargement des bases - Sénégal :
+
+Dans cette section, nous nous intéressons à la représentation spatiale des données de l'ECHVM 2021 du Sénégal. Nous chargeons la base de données, qui contient des informations socio-économiques au niveau des individus et des ménages. Cette base servira à calculer des indicateurs statistiques agrégés par région, département et commune afin d’alimenter les cartes thématiques.
+
+```{r, message=FALSE, include=FALSE}
+base <- haven::read_dta("../donnees/data_final_SEN.dta") # charger de la base
+```
+
+```{r, message=FALSE, include=FALSE}
+str(base)
+```
+
+```{r, message=FALSE, include=FALSE}
+dim(base)
+```
+
+```{r, message=FALSE, include=FALSE}
+colnames(base)
+```
+
+## Cartes au niveau régional
+
+Ici, nous allons générer des cartes thématiques des régions du Sénégal en utilisant un shapefile contenant les contours administratifs des régions.
+
+Nous commençons par charger le shapefile correspondant :
+
+```{r, message=FALSE, warning=FALSE}
+# chargement du shapfile du Sénégal niveau régional
+region <- st_read("../donnees/sen_admbnda_adm1_anat_20240520.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, include=FALSE, warning=FALSE}
+colnames(region)
+```
+
+### Jointure entre la base du TP4 et le shapefile :
+
+Nous calculons la moyenne de quelques variables pertinentes par région pour la représentation. Nous déterminerons l'âge moyen par région, l'âge moyen au premier mariage, le volume horaire de travail moyen ainsi que le salaire moyen par région.
+
+```{r, message=FALSE, warning=FALSE}
+base_moy <- base %>% 
+  group_by(ADM1_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM1_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+
+
+### Jointure entre la base contenant les variables agrégées par moyenne au niveau régional et le shapefile des régions.
+Nous devons maintenant agréger les données EHCVM par région afin de calculer des indicateurs tels que l’âge moyen, le volume horaire moyen, l’âge moyen au premier mariage et le salaire moyen.
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_reg <- left_join(region,base_moy, by = "ADM1_FR")
+```
+
+## Cartographie des indicateurs régionaux
+Nous allons maintenant représenter graphiquement les indicateurs par région à l’aide de cartes interactives avec Leaflet.
+
+### Age moyen par région
+
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_reg$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_reg) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Âge moyen :</b>", age_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_reg$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+
+### Carte du volume horaire moyen emploi principal par région
+
+Nous utilisons le même principe que pour la carte précédente mais en remplaçant la variable d’intérêt par volhor_moyen.
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Blues", domain = base_moy_reg$volhor_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_reg) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(volhor_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Volume horaire/an moyen :</b>", volhor_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_reg$volhor_moyen,
+    title = "Volume horaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+Cette carte met en évidence les régions où le temps de travail est plus élevé.
+
+
+### Age moyen au premier mariage par région
+
+Cette carte interactive représente l'âge moyen au premier mariage dans les différentes régions du Sénégal. L'objectif est de mettre en évidence les disparités régionales en matière d'âge d'union.
+
+Coloration avec la palette "Reds" : Plus la couleur est foncée, plus l'âge moyen au premier mariage est élevé.
+Popup informative : En passant la souris sur une région, on peut voir son nom et l'âge moyen au premier mariage.
+Outils interactifs : La carte inclut des options de recentrage et un mode plein écran pour une exploration plus fluide.
+
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_reg$agemar_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_reg) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(agemar_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", agemar_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_reg$agemar_moyen,
+    title = "Volume horaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+Interprétation : Cette visualisation permet d’analyser les tendances matrimoniales et d’identifier les régions où les mariages ont lieu plus tôt ou plus tard.
+
+### Salaire moyen emploi principal par région
+
+Cette carte met en avant la distribution du salaire moyen des travailleurs par région au Sénégal.
+
+Utilisation d'une échelle de couleurs rouges : Les zones en rouge foncé correspondent aux régions où le salaire moyen est plus élevé.
+Affichage interactif des valeurs : En cliquant sur une région, l'utilisateur obtient des informations détaillées sur le salaire moyen.
+
+```{r, message=FALSE, warning=FALSE}
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_reg$salaire_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_reg) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(salaire_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Région :</b>", ADM1_FR, "<br>",
+                   "<b>Age moyen premier mariage:</b>", salaire_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_reg$salaire_moyen,
+    title = "Salaire moyen emploi principal par région", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+Cette carte permet de visualiser les disparités économiques entre les régions et peut servir d'outil d'aide à la décision pour les politiques publiques et les stratégies d'investissement
+
+## Cartes niveau departement
+
+Nous passons à une échelle plus fine avec la carte départementale de l'âge moyen.
+
+```{r, message=FALSE, warning=FALSE}
+departement <- st_read("../donnees/sen_admbnda_adm2_anat_20240520.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy2 <- base %>% 
+  group_by(ADM2_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM2_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_dep <- left_join(departement,base_moy2, by = "ADM2_FR")
+```
+Cette analyse plus détaillée met en avant des écarts significatifs d'un departement à l'autre, mettant en évidence des différences en termes de démographie et de conditions de vie.
+
+### Age moyen par departement
+
+```{r, message=FALSE, warning=FALSE}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_dep$age_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_dep) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>Préfecture :</b>", ADM2_FR, "<br>",
+                   "<b>Âge moyen :</b>", age_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_dep$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+
+## Cartes niveau communal
+
+```{r, message=FALSE, warning=FALSE}
+commune <- st_read("../donnees/sen_admbnda_adm3_anat_20240520.shp", quiet= TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy3 <- base %>% 
+  group_by(ADM3_FR) %>%
+  summarise(age_moyen = mean(age, na.rm = TRUE), 
+            volhor_moyen = mean(volhor, na.rm = TRUE),
+            agemar_moyen = mean(agemar, na.rm = TRUE),
+            salaire_moyen = mean(salaire, na.rm = TRUE)) %>% 
+  dplyr::select(ADM3_FR,volhor_moyen,age_moyen,agemar_moyen,salaire_moyen)
+```
+
+```{r, message=FALSE, warning=FALSE}
+base_moy_com <- left_join(commune,base_moy3, by = "ADM3_FR")
+```
+
+### Age moyen par commune
+
+```{r}
+# Palette de couleurs pour l'âge moyen
+age_palette <- colorNumeric(palette = "Reds", domain = base_moy_com$volhor_moyen)
+
+# Création de la carte interactive avec le nom des régions dans la popup
+leaflet(base_moy_com) %>%
+  addTiles() %>%  # Couche OpenStreetMap
+  addPolygons(
+    color = "black", weight = 2, opacity = 1, 
+    fillColor = ~age_palette(age_moyen), fillOpacity = 0.7,
+    popup = ~paste("<b>commune :</b>", ADM3_FR, "<br>",
+                   "<b>Âge moyen :</b>", age_moyen) 
+  ) %>%
+  addLegend(
+    "bottomright", pal = age_palette, values = base_moy_com$age_moyen,
+    title = "Âge moyen", opacity = 1
+  ) %>%
+  addResetMapButton() %>%  # Bouton de recentrage
+  addFullscreenControl()   # Mode plein écran
+```
+Ces cartes sont particulièrement utiles pour analyser les disparités locales et mieux comprendre les dynamiques sociodémographiques au niveau le plus fin.
+
+
+
+#CONCLUSION
+Grâce à cette approche, nous avons pu analyser et cartographier les inégalités régionales, départementales et communales sur plusieurs indicateurs socio-économiques. Ces cartes permettent d'identifier les zones à fort besoin d'intervention en termes de politique publique.
+

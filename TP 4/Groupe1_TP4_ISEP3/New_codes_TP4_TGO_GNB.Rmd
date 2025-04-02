@@ -1,0 +1,302 @@
+---
+title: "New code TP4"
+author: "Groupe_1"
+date: "2025-02-18"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# Packages
+```{r}
+library(stringdist)
+library(haven)
+library(dplyr)
+library(stringr)
+library(labelled)
+library(stringi)  # Pour mieux gérer les caractères spéciaux
+library(readxl)
+library(tidyr)
+library(sf)
+library(ggplot2)
+library(here)
+
+wd <-setwd(here())
+knitr::opts_knit$set(root.dir = wd)
+
+```
+
+
+
+# Cas de la Guinée-Bissau
+
+
+## Chargement des bases
+
+```{r}
+# Charger les données
+data_hdx <- readxl::read_excel("Guinée-Bissau/gnb_adminboundaries_tabulardata.xlsx", 
+                            sheet = "ADM2")
+
+
+## On prend en compte les cas de deux noms différents avec des /
+data_hdx <- data_hdx %>%  separate_rows(ADM2_EN, sep="/")
+
+```
+
+```{r}
+
+my_data <- read_dta("Guinée-Bissau/ehcvm_individu_gnb2021.dta")
+
+my_data <- my_data %>% labelled::to_factor()
+
+```
+
+
+## Standardisation des écritures
+
+On standardise
+
+```{r}
+# Fonction pour nettoyer les caractères spéciaux : algorithme de base
+clean_text <- function(text) {
+  text <- stri_trans_general(text, "Latin-ASCII")  # Supprimer les accents
+  text <- toupper(text)  # Convertir en majuscules
+  text <- gsub("'", "", text)  # Supprimer les apostrophes
+  text <- gsub("[^A-Z0-9 ]", "", text)  # Supprimer les autres caractères spéciaux sauf espaces et chiffres
+  text <- trimws(text) ## on enlève les espaces superflus
+  return(text)
+}
+```
+
+On l'applique aux bases
+
+```{r}
+# Appliquer le nettoyage aux deux bases
+my_data <- my_data %>%
+  mutate(admin2 = clean_text(prefecture))
+
+data_hdx <- data_hdx %>%
+  mutate(admin2 = clean_text(ADM2_EN))
+
+```
+
+## Voyons les différences
+
+```{r}
+
+# Différence entre les deux bases
+communes_non_trouvees_ehcvm <- setdiff(my_data$admin2, data_hdx$admin2)
+
+length(communes_non_trouvees_ehcvm)  # Nombre de communes non trouvées --- 7
+communes_non_trouvees_ehcvm # Aperçu des différences
+```
+
+
+## Traitement en utilisant les distances
+
+
+```{r}
+cas_restant <- data.frame("Noms_restant"=communes_non_trouvees_ehcvm)
+commune_hdx_clean <- data_hdx$admin2
+
+# traitement avec les distances ...
+cas_restant <- cas_restant %>%
+  rowwise() %>%
+  mutate(
+    #" METHODE Levenshtein
+    Match_lv = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "lv")
+    )],
+    Distance_lv = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "lv")
+    ),
+    #METHODE
+     Match_jw = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "jw")
+    )],
+    Distance_jw = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "jw")
+    ),
+    
+    ## METHODE QGRAM -- sous chaines communes
+     Match_qg = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "qgram")
+    )],
+    Distance_qg = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "qgram")
+    ),
+    
+    ## METHODE SOUNDEX -- phonétique
+     Match_sdx = commune_hdx_clean[which.min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "soundex")
+    )],
+    Distance_sdx = min(
+      stringdist(Noms_restant, commune_hdx_clean, method = "soundex")
+    )
+  ) %>%
+  ungroup()
+
+```
+
+Voyons ce que les distances donnent
+
+```{r}
+cas_restant
+```
+
+
+# Traitement des cas de no matching
+
+Pour la Guinée, nous voyons que la distance de JJARO-WINKERS résout très bien notre problème.
+```{r GUINEE}
+
+# On fait un merge 
+my_data <- my_data %>%
+  left_join(cas_restant %>% select(Noms_restant, Match_jw), by = c("admin2" = "Noms_restant")) %>% 
+  mutate(admin2 = ifelse(!is.na(Match_jw), Match_jw, admin2)) #" Puis on remplace
+
+
+
+```
+
+
+On revérifie
+
+```{r}
+
+# Différence entre les deux bases
+communes_non_trouvees_ehcvm <- setdiff(my_data$admin2, data_hdx$admin2)
+
+length(communes_non_trouvees_ehcvm)  
+```
+
+## Merging the databases
+
+```{r}
+
+hdx_merge <-  data_hdx %>% select(admin2, ADM2_PCODE) %>% unique()
+
+my_data_merge <- left_join(my_data,hdx_merge , by= "admin2")
+
+
+sum(is.na(my_data_merge$ADM2_PCODE))
+
+```
+# Saving 
+```{r}
+#write.csv(my_data_merge, "Togo/TGO_output_database.csv")
+
+haven::write_dta(my_data_merge, "Guinée-Bissau/GNB_output_database.dta")
+
+```
+
+
+# Cas du Togo : résolution spatiale
+
+## Chargement des données
+
+On notera que pour le Togo, comme pour la Guinée, il n'y a pas de "Admin 3" dans notre base de données.
+
+Ainsi, nous faisons le choix ici d'utiliser les données spatiales afin d'identifier, pour chaque ménége, la division administrative de niveau 3 à laquelle il appartient. Autrement dit, nous allons procéder à des intersections en fonction des coorrdonnées.
+
+Pour cela, nous utilisons les fichiers shp et la base ménage.
+
+
+```{r}
+
+data_tgo <- read_dta("Togo/s00_me_tgo2021.dta")
+
+tgo_shp <- st_read("Togo/tgo_admbnda_adm3_inseed_20210107.shp")
+
+```
+
+
+```{r}
+colnames(tgo_shp)
+```
+## Un peu de représentation graphique...
+
+```{r}
+
+# Conversion des données en un objet spatial sf
+data_spatial <- sf::st_as_sf(data_tgo, coords = c("GPS__Longitude", "GPS__Latitude"), crs = st_crs(tgo_shp))
+
+```
+
+
+```{r}
+ggplot() +
+  geom_sf(data = tgo_shp, fill = NA, color = "blue", size = 1) +
+  
+  geom_sf(data = data_spatial, aes(color = I("pink")), size = 2) +
+  
+  theme_minimal() +
+  labs(title = "Carte des ménages enquêtés")
+```
+
+## Place au merging
+
+
+```{r}
+tgo_shp_1 <- tgo_shp %>% select(ADM3_FR, ADM3_PCODE, ADM2_FR) ## on garde ce qui nous interesse
+
+points_mg<- st_join(data_spatial , tgo_shp_1, join = st_intersects)
+
+points_mg <- points_mg%>%  as.data.frame() 
+
+points_mg %>% 
+  select(grappe, menage, vague,ADM3_FR, ADM3_PCODE) %>% 
+  slice(1:5) %>% 
+  kableExtra::kable()
+
+```
+
+
+
+```{r}
+## Dataframe
+tgo_merge <- points_mg  %>% 
+  sf::st_drop_geometry()  %>%
+  as.data.frame()
+
+# Vérifier les colonnes problématiques -- qui sont sous forme de listes
+list_cols <- sapply(tgo_merge, is.list)
+
+# Si des colonnes sont de type list, les convertir en texte
+tgo_merge <- tgo_merge %>%
+  mutate(across(which(list_cols), ~ sapply(., function(x) paste(x, collapse = "; "))))
+
+# Saving
+write_dta(tgo_merge, "Togo/TGO_output_database.dta")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

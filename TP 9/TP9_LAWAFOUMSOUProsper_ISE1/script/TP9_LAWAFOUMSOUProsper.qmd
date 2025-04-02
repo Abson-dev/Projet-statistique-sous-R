@@ -1,0 +1,483 @@
+---
+title: "TP9 : Merge des bases welfare EHCVM 2019 et 2021"
+author: "LAWA FOUMSOU Prosper"
+date: today
+format: 
+  pdf:
+    documentclass: article
+    number-sections: true
+    fontsize: 12pt
+    mainfont: "Times New Roman"
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Introduction
+
+Ce document présente le processus de fusion (**merge**) des bases de données *welfare* issues de l'**EHCVM** pour les années **2018** et **2021**.
+
+```{r, results=FALSE, include=FALSE}
+# Chargement de packages nécessaires
+packages <- c("readr", "dplyr", "gtsummary", "tibble" ,"gt", "tidyr","haven", "labelled", "expss")
+
+install_and_load <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+  library(pkg, character.only = TRUE)
+}
+invisible(lapply(packages, install_and_load))
+
+# Charger les packages
+library(readr)
+library(haven)
+library(dplyr)
+library(gtsummary)
+library(labelled)
+library(gt)
+library(tidyr)
+library(tibble)
+library(sjlabelled)
+library(expss)
+```
+
+# Chargement des bases et détection des incohérences
+
+```{r}
+# chargement des deux bases
+base2018 <- read_dta("../data/ehcvm_welfare_sen2018.dta")
+base2021 <- read_dta("../data/ehcvm_welfare_sen2021.dta") 
+```
+
+```{r, results=FALSE, include=FALSE}
+# voir le nom des variables
+names(base2018)
+```
+
+```{r, results=FALSE, include=FALSE}
+# voir le nom des variables
+names(base2021)
+```
+
+Essayons d'avoir une idée sur la structure des deux bases.
+
+```{r, include=FALSE}
+base2018 %>% dplyr::glimpse()
+base2021 %>% dplyr::glimpse()
+```
+
+Vérifions les variables présentes dans la base **EHCVM 2018** et non dans la base **EHCVM 2021.**
+
+```{r}
+setdiff(names(base2018), names(base2021))
+```
+
+Vérifions les variables présentes dans la base **EHCVM 2021** et non dans la base **EHCVM 2018.**
+
+```{r}
+setdiff(names(base2021), names(base2018))
+```
+
+Nous constatons que toutes les variables présentent dans la base de l'année 2018 sont présentent dans celle de l'année 2021. Sauf la variable relative à l'alphabétisation qui a été renommée différement dans dans la base 2021. Cependant, nous remarquons qu'il y a des variables présentes dans la base 2021 mais non dans la base 2019. Pour ces variables, les colonnes pour les individus de l'année 2018 seront vides car l'information n'a pas été collectée.
+
+Corrigeons le nom de la variable relative à l'alphabétisation pour une harmonisation dans les deux bases.
+
+```{r}
+base2021 <- base2021 %>%
+  rename(
+    halfab=halfa
+  )
+```
+
+## Détection des variables ayant des variables ayant un problème de codification ou de labélisation
+
+Détectons les variables qui n'ont pas été codifiées ou labélisée de la même façon dans les deux bases.
+
+```{r}
+variable_label_diff <- c() #créer une liste vide 
+vars_communes <- intersect(colnames(base2018), colnames(base2021))
+
+for (variable in vars_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(base2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(base2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(base2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+value_label_2021 <- labelled::val_labels(base2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+   }
+}
+```
+
+# Récodification et labellisation des variables à problème
+
+Afin de réussir la fusion de nos deux bases, nous devons harmoniser les modalités de mêmes variables dans les deux bases.
+
+## Correction de la variable hnation
+
+Affichons la variable dans les deux bases pour avoir une idée sur la codification.
+
+```{r}
+# Visualisation des modalités et codification
+expss::val_lab(base2018$hnation)
+```
+
+```{r}
+# Visualisation des modalités et codification
+expss::val_lab(base2021$hnation)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+
+# Distribution en 2018
+base2018 %>%
+  mutate(across(everything(), ~ labelled::to_factor(.))) %>%  
+  select(hnation) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>%
+  mutate(across(everything(), ~ labelled::to_factor(.))) %>%  
+  select(hnation) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Nous remarquons que la variable relative à la nationalité à été plus détaillée lors de l'enquête de l'année 2021. Par exemple dans la base 2018, Gambie, Ghana,Guinée,Cap-vert et Libéria ont été régroupés en Autres pays de la Cedeao alors qu'ils ont été explicités lors de l'enquête 2021. Cela change la codification de cette variable. Pour contourner cela nous allons uniformiser la codification à celle de 2018 qui est plus adaptée simple et adaptée ici.
+
+```{r}
+
+# Recodage
+base2021 <- base2021 %>%
+  mutate(hnation = case_when(
+    hnation == 1  ~ 1,   # Bénin -> Benin
+    hnation == 2  ~ 2,   # Burkina Faso -> Burkina Faso
+    hnation == 4  ~ 3,   # Cote d'Ivoire -> Côte d'Ivoire
+    hnation == 8  ~ 4,   # Guinée Bissau -> Guinée Bissau
+    hnation == 10 ~ 5,   # Mali -> Mali
+    hnation == 11 ~ 6,   # Niger -> Niger
+    hnation == 13 ~ 7,   # Sénégal -> Sénégal
+    hnation == 15 ~ 8,   # Togo -> Togo
+    hnation == 12 ~ 9,   # Nigeria -> Nigéria
+    hnation %in% c(3, 5, 6, 7, 14) ~ 10, 
+    # Cape-vert, Gambie, Ghana, Guinée, Sierra Leone -> Autre CEDEAO
+    hnation == 17 ~ 11,  # Autre Afrique -> Autre Afrique
+    hnation == 18 ~ 12,  # Autre pays hors Afrique -> Autre pays hors Afrique
+    TRUE ~ NA_real_
+  )) 
+
+base2021$hnation <- labelled(
+  base2021$hnation,
+  labels = c(
+    "Benin" = 1, "Burkina Faso" = 2, "Côte d'Ivoire" = 3, 
+    "Guinée Bissau" = 4,"Mali" = 5, "Niger" = 6, "Sénégal" = 7, 
+    "Togo" = 8, "Nigéria" = 9,"Autre CEDEAO" = 10, 
+    "Autre Afrique" = 11, "Autre pays hors Afrique" = 12
+  )
+)
+```
+
+## Correction de la variable zae
+
+Pour la récodification des autres variables, nous allons plutôt harmoniser les modalités des variables de la base de 2018 en fonction de celles de 2021 car elle est plus actuelle.
+
+Affichons la variable dans les deux bases pour avoir une idée de la codification et de la labélisation.
+
+```{r}
+# Visualisation des modalités et codification
+expss::val_lab(base2018$zae)
+```
+
+```{r}
+# Visualisation des modalités et codification
+expss::val_lab(base2021$zae)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+# Distribution en 2018
+base2018 %>% labelled::to_factor() %>%  
+  select(zae) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>% labelled::to_factor() %>%  
+  select(zae) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Remarquon que la variable zae n'est pas labélisée dans la base de 2018. CependansRécodifions la variable zae dans la base 2018 et labélisont là en fonction de la base de 2021.
+
+```{r}
+
+# Recodage
+base2018 <- base2018 %>%
+  mutate(
+    zae = case_when(
+      zae == 6 ~ 1,
+      zae == 2 ~ 3,
+      zae == 3 ~ 5,
+      zae == 4 ~ 7,
+      zae == 5 ~ 9,
+      zae == 1 ~ 11,
+      TRUE ~ NA_real_
+    )
+  )
+base2018$zae <- labelled(
+  base2018$zae,
+  labels = c(
+    "Kédougou" = 1, 
+    "Saint-Louis-Matam" = 3, 
+    "Thies-Diourbel-Louga" = 5,
+    "Kaolack-Fatick-Kaffrine" = 7,
+    "Ziguinchor-Tamba-Kolda-Sédhiou" = 9,
+    "Dakar" = 11
+  )
+)
+```
+
+## Correction de la variable hdiploma
+
+Affichons la variable dans les deux bases pour avoir une idée de la codification et de la labélisation.
+
+```{r}
+expss::val_lab(base2018$hdiploma)
+```
+
+```{r}
+expss::val_lab(base2021$hdiploma)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+# Distribution en 2018
+base2018 %>% labelled::to_factor() %>%  
+  select(hdiploma) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>% labelled::to_factor() %>%  
+  select(hdiploma) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
+
+```{r}
+base2018$hdiploma <- labelled(
+  base2018$hdiploma,
+  labels = c(
+            "Aucun"=0, "cepe"=1, "bepc"=2, "cap"=3, 
+            "bt"=4, "bac"=5, "DEUG, DUT, BTS"=6, "Licence"=7, 
+            "Maitrise"=8, "Master/DEA/DESS"=9,"Doctorat/Phd"=10
+  )
+)
+```
+
+## Correction de la variable hactiv7j
+
+Affichons la variable dans les deux bases pour avoir une idée de la codification et de la labélisation.
+
+```{r}
+expss::val_lab(base2018$hactiv7j)
+```
+
+```{r}
+expss::val_lab(base2021$hactiv7j)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+# Distribution en 2018
+base2018 %>% labelled::to_factor() %>%  
+  select(hactiv7j) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>% labelled::to_factor() %>%  
+  select(hactiv7j) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Récodifions la variable relative à l'activité du CM durant les 7 jours précédant l'enquête. Pour cette variable, les labels sont differents pour les deux années.
+
+```{r}
+
+base2018 <- base2018 %>%
+  mutate(hactiv7j = case_when(
+    hactiv7j == 1 ~ 1,   # Occupé -> Occupé 
+    hactiv7j == 2 ~ 4,   # TF cherchant emploi -> TF cherchant pas
+    hactiv7j == 3 ~ 2,   # TF cherchant pas -> Chômeur
+    hactiv7j == 4 ~ 3,   # Chômeur -> TF cherchant emploi
+    hactiv7j == 5 ~ 5,   # Inactif -> Inactif 
+    hactiv7j == 6 ~ 6,   # Moins de 5 ans -> Moins de 5 ans
+    TRUE ~ NA_real_      # Autres valeurs -> NA
+  ))
+
+# Ajouter les labels
+base2018$hactiv7j <- labelled(
+  base2018$hactiv7j,
+  labels = c(
+    "Occupe" = 1, "TF cherchant emploi" = 2, "TF cherchant pas" = 3, 
+    "Chomeur" = 4, "Inactif" = 5, "Moins de 5 ans" = 6
+  )
+)
+```
+
+## Correction de la variable hcsp
+
+Affichons la variable dans les deux bases pour avoir une idée de la codification et de la labélisation.
+
+```{r}
+expss::val_lab(base2018$hcsp)
+```
+
+```{r}
+expss::val_lab(base2021$hcsp)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+# Distribution en 2018
+base2018 %>% labelled::to_factor() %>%  
+  select(hcsp) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>% labelled::to_factor() %>%  
+  select(hcsp) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
+
+```{r}
+base2018$hcsp <- labelled(
+  base2018$hcsp,
+  labels = c(
+    "Cadre supérieur" = 1,
+    "Cadre moyen/agent de maîtrise" = 2,
+    "Ouvrier ou employé qualifié" = 3,
+    "Ouvrier ou employé non qualifié" = 4,
+    "Manœuvre, aide ménagère" = 5,
+    "Stagiaire ou Apprenti rénuméré" = 6,
+    "Stagiaire ou Apprenti non rénuméré" = 7,
+    "Travailleur Familial contribuant pour une entreprise familial" = 8,
+    "Travailleur pour compte propre" = 9,
+    "Patron" = 10
+  )
+)
+```
+
+## Correction de la variable hbranch
+
+Affichons la variable dans les deux bases pour avoir une idée de la codification et de la labélisation.
+
+```{r}
+expss::val_lab(base2018$hbranch)
+```
+
+```{r}
+expss::val_lab(base2021$hbranch)
+```
+
+Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
+
+```{r}
+# Distribution en 2018
+base2018 %>% labelled::to_factor() %>%  
+  select(hbranch) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+
+# Distribution en 2021
+base2021 %>% labelled::to_factor() %>%  
+  select(hbranch) %>%
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
+
+```{r}
+base2018$hbranch <- labelled(
+  base2018$hbranch,
+  labels = c(
+    "Agriculture" = 1,
+    "Elevage/syl./peche" = 2,
+    "Indust. extr." = 3,
+    "Autr. indust." = 4,
+    "btp" = 5,
+    "Commerce" = 6,
+    "Restaurant/Hotel" = 7,
+    "Trans./Comm." = 8,
+    "Education/Sante" = 9,
+    "Services perso." = 10,
+    "Aut. services" = 11
+  )
+)
+```
+
+# Jointure finale
+
+Les labels étant harmonisés dans les deux bases, nous pouvons procéder à l'empilement des deux bases.
+
+```{r}
+# Ajouter les colonnes manquantes dans la base2018
+col_manq_2018 <- setdiff(names(base2021), names(base2018))
+base2018[col_manq_2018] <- NA
+
+# Réordonner les colonnes pour être identiques
+base2021 <- base2021[, names(base2018)]
+
+# Fusionner
+base_final <- dplyr::bind_rows(base2018, base2021)
+```
+
+Harmonisons les labels des variables dans la base finale.
+
+```{r, results='hide'}
+# Copier les labels de base2021 vers base_final
+for (var in names(base2021)) {
+  base_final[[var]] <- set_label(base_final[[var]], get_label(base2021[[var]]))
+}
+```
+
+```{r}
+dim(base_final)
+```
+
+Enregistrement de la base finale
+
+```{r}
+write_dta(base_final, "../sorties/base_final.dta")
+```

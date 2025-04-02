@@ -1,0 +1,315 @@
+---
+title: "TEST R EVALUATION"
+author: "FALL Ndeye Ramatoulaye Ndoye"
+date: "2025-02-25"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Installation et chargement des packages nécessaires
+packages <- c("haven", "utils", "dplyr", "tidyverse", "gtsummary", "survey", "knitr", "kableExtra", "labelled")
+
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+
+```
+
+```{r include=FALSE}
+setwd("C:/Users/ANSD/Documents/ENSAE/ISE1 ECO/MES DOCS ISE/FIRST SEMESTER/R Studio")
+```
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(haven)
+
+# Chargement des bases
+base_menage <- read_dta("data/base_menage.dta")
+mother_baseline <- read_dta("data/food_comp_mother_baseline.dta")
+mother_endline <- read_dta("data/food_comp_mother_endline.dta")
+child_baseline <- read_dta("data/food_comp_child_baseline.dta")
+child_endline <- read_dta("data/food_comp_child_endline.dta")
+
+```
+
+
+
+
+#PARTIE 1: GESTION ET NETTOYAGE DES BASES DE DONNEES
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+# Chargeons les packages nécessaires pour la gestion et le nettoyage des bases de données
+library(haven)
+library(dplyr)
+library(tidyverse)
+
+# 1. Vérification de la présence ou non de doublons et suppression si oui
+
+base_menage <- base_menage %>% distinct()
+mother_baseline <- mother_baseline %>% distinct()
+mother_endline <- mother_endline %>% distinct()
+child_baseline <- child_baseline %>% distinct()
+child_endline <- child_endline %>% distinct()
+
+# 2. Vérification et harmonisation des noms des variables entre les bases endline et baseline
+# Affichons les noms pour comparer
+names(mother_baseline)
+names(mother_endline)
+
+names(child_baseline)
+names(child_endline)
+
+###Visiblement il y a des differeces our le zinc par exemple et l'energie calorique, alors nous allons attribuer aux variables de mother endline les noms dans baseline, Ce sont les mêmes pour les bases enfants donc labas il ne sera pas nécessaire de modifier
+```
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Harmonisation des noms différents des variables pour les bases baseline et endline
+mother_baseline <- mother_baseline %>%
+  rename(
+    energ_kcal = V1,
+    zinc_mg = V9
+  )
+
+```
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Maintenant vérifions que les changements ont bien été prises en compte
+setdiff(names(mother_endline), names(mother_baseline))
+```
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# 3. Corrigeons si possibles les données manquantes
+traiter_na <- function(df, vars){
+  df %>% mutate(across(all_of(vars), ~ if_else(is.na(.), median(., na.rm = TRUE), .)))
+}
+
+vars_nutrition <- c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg", "iron_mg", "zinc_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+# Appliquons la correction sur les bases
+mother_baseline <- mother_baseline %>% replace_na(as.list(colMeans(select(., all_of(vars_nutrition)), na.rm = TRUE)))
+mother_endline <- mother_endline %>%
+  mutate(across(all_of(vars_nutrition), ~if_else(is.na(.), median(., na.rm=TRUE), .)))
+
+child_baseline <- child_baseline %>%
+  mutate(across(all_of(vars_nutrition), ~if_else(is.na(.), median(., na.rm=TRUE), .)))
+
+child_endline <- child_endline %>%
+  mutate(across(all_of(vars_nutrition), ~if_else(is.na(.), median(., na.rm=TRUE), .)))
+
+
+```
+Grâce à la fonction replace_na_median on a pu remplacer les valeurs manquantes par la médiane qui est une caractéristique de dispersion. Cette action permettra de corriger les manquements sans risquer de biaiser les résultats
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# 4. Calculons l'apport énergétique moyenne à chaque repas pour l'ensemble des mères
+mother_baseline %>%
+  mutate(Type_de_repas = case_when(
+    s1_q2 == 1 ~ "Petit-déjeuner",
+    s1_q2 == 2 ~ "Déjeuner",
+    s1_q2 == 3 ~ "Dîner",
+    s1_q2 == 4 ~ "Snacks/Goûter"
+  )) %>%
+  group_by(Type_de_repas) %>%
+  summarise(Energie_moyenne_kcal = mean(energ_kcal, na.rm = TRUE)) %>%
+  kable("html", caption = "Consommation moyenne d'énergie par repas chez les mères (Baseline)")
+```
+La consommation énergétique moyenne des mères au cours des repas est d'environ 700 kcal par repas, ce qui indique un apport énergétique modéré. Cette valeur est cohérente avec les recommandations générales pour un adulte en bonne santé, dont l'apport calorique quotidien recommandé se situe entre 1800 et 2200 kcal réparties sur trois repas principaux et une collation éventuelle
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# 5. Sauvegarde des nouvelles bases traitées et corrigées
+
+write_dta(mother_baseline, "mother_baseline_v1.dta")
+write_dta(mother_endline, "mother_endline_v1.dta")
+write_dta(child_baseline, "child_baseline_v1.dta")
+write_dta(child_endline, "child_endline_v1.dta")
+write_dta(base_menage, "base_menage_final.dta")
+```
+
+#PARTIE 2: EMPILEMENT ET FUSION DES DONNEES
+
+##1) BASELINE
+
+```{recho=TRUE, message=FALSE, warning=FALSE}
+###Importation des packages nécessaires
+library(dplyr)
+library(haven)
+
+##Nomenclature des vecteurs pour les nouvelles bases 
+mother_baseline <- read_dta("mother_baseline_v1.dta")
+child_baseline <- read_dta("child_baseline_v1.dta")
+base_menage <- read_dta("base_menage_final.dta")
+
+# Renommons les variables nutritionnelles avec _b à la fin
+mother_baseline <- mother_baseline %>% rename_with(~paste0(., "_b"), energ_kcal:vit_c_mg)
+child_baseline <- child_baseline %>% rename_with(~paste0(., "_b"), energ_kcal:vit_c_mg)
+
+# Empilement des bases mère et enfant baselines
+baseline_combined <- bind_rows(mother_baseline, child_baseline)
+
+# Résumé des consommations journalières totales par individu
+baseline_total <- baseline_combined %>%
+  group_by(hhid, s1_q2) %>%
+  summarise(across(c(energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b), sum, na.rm = TRUE), .groups = "drop")
+
+# Vérifions les variables communes
+intersect(names(baseline_total), names(base_menage))
+
+# Ce code va faire l'intersection entre les bases pour trouver les réferences communes afin d'avoir une bonne jointure finale 
+
+# Supprime ou renomme la variable gênante dans base_menage avant la jointure
+base_menage <- base_menage %>% select(-s1_q2)
+
+# Ensuite, effectue clairement ta jointure left_join :
+baseline_final <- baseline_total %>%
+  left_join(base_menage, by = "hhid")
+
+# Sauvegarde la base finale baseline
+write_dta(baseline_final, "baseline_final.dta")
+
+```
+
+##1) ENDLINE
+
+```{r }
+# Mettons les packages nécessaires 
+library(dplyr)
+library(haven)
+
+mother_endline <- read_dta("mother_endline_v1.dta")
+child_endline <- read_dta("child_endline_v1.dta")
+
+
+# Renommer les variables nutritionnelles pour endline
+mother_endline <- mother_endline %>% rename_with(~paste0(., "_e"), energ_kcal:vit_c_mg)
+child_endline <- child_endline %>% rename_with(~paste0(., "_e"), energ_kcal:vit_c_mg)
+
+# Empilement Endline
+endline_combined <- bind_rows(mother_endline, child_endline)
+
+# Calcul de la consommation journalière totales par individu (endline)
+endline_total <- endline_combined %>%
+  group_by(hhid) %>%
+  summarise(across(c(energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e), sum, na.rm = TRUE), .groups = 'drop')
+
+# Jointure Endline avec base ménage
+endline_final <- endline_total %>% left_join(base_menage, by = "hhid")
+
+write_dta(endline_final, "endline_final.dta")
+
+```
+
+#SUITE PARTIE 2 APRES ENDLINE 
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(haven)
+
+
+# Importons les bases créées précédemment
+base_menage <- read_dta("base_menage_final.dta")
+baseline_final <- read_dta("baseline_final.dta")
+endline_final <- read_dta("endline_final.dta")
+
+
+# 3. Fusion des deux bases finales endline et baseline
+base_finale <- inner_join(baseline_final, endline_final, by = c("hhid"))
+
+# 4. Fusion avec la base ménage pour intégrer les caractéristiques socio-économiques
+base_menage <- read_dta("base_menage_final.dta")
+base_finale <- left_join(base_finale, base_menage, by = "hhid")
+
+
+```
+
+#PARTIE3: STATISTIQUES DESCRIPTIVES
+
+Dans cette partie nous allons porter l'attention sur la base child baseline et nous allons nous intéresser à la nutrition infantile
+
+```{r}
+library(gtsummary)
+library(dplyr)
+library(haven)
+
+# Importer la base des enfants baseline
+child_baseline <- read_dta("child_baseline_v1.dta")
+
+# Sélection des variables pertinentes pour l'analyse nutritionnelle
+child_baseline <- child_baseline %>% 
+  select(energ_kcal, protein_g, lipid_tot_g, calcium_mg, iron_mg, zinc_mg, vit_b6_mg, vit_b12_mcg, vit_c_mg)
+
+# Création du tableau de statistiques descriptives
+nutrition_summary <- child_baseline %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd})"),
+    label = list(
+      energ_kcal ~ "Énergie (kcal)",
+      protein_g ~ "Protéines (g)",
+      lipid_tot_g ~ "Lipides totaux (g)",
+      calcium_mg ~ "Calcium (mg)",
+      iron_mg ~ "Fer (mg)",
+      zinc_mg ~ "Zinc (mg)",
+      vit_b6_mg ~ "Vitamine B6 (mg)",
+      vit_b12_mcg ~ "Vitamine B12 (mcg)",
+      vit_c_mg ~ "Vitamine C (mg)"
+    ),
+    digits = everything() ~ c(0),  
+    missing = "always",
+    missing_text = "valeurs manquantes") %>%
+    modify_header(label = "Caractéristiques nutritionnelles")
+
+# Affichage du tableau
+nutrition_summary
+
+
+```
+L’analyse des données nutritionnelles des enfants au Baseline révèle une grande variabilité dans les apports alimentaires. En moyenne, les enfants consomment environ 405 kcal par jour avec un écart-type de 307 kcal, ce qui indique des différences notables entre les individus. Certains enfants bénéficient d’un apport énergétique adéquat, tandis que d’autres sont nettement en dessous des recommandations, soulevant des préoccupations quant à la qualité et la quantité des aliments consommés.
+L’apport en protéines est en moyenne de 13 g avec un écart-type de 16 g, illustrant une hétérogénéité importante. Si certains enfants reçoivent suffisamment de protéines essentielles à leur croissance, d’autres en consomment très peu, ce qui peut avoir des conséquences sur leur développement musculaire et leur santé globale. Le même constat peut être fait pour les lipides, dont la consommation moyenne est de 7 g avec un écart-type de 14 g, reflétant des disparités importantes dans la disponibilité des sources de matières grasses.
+
+Concernant les micronutriments, les résultats mettent en évidence des apports souvent insuffisants. L’apport moyen en calcium est de 76 mg, bien en dessous des recommandations nutritionnelles, ce qui peut poser un risque pour la santé osseuse des enfants. Le fer, élément clé pour la prévention de l’anémie, est consommé à hauteur de 5 mg en moyenne, avec un écart-type de 6 mg, suggérant qu’une partie des enfants est potentiellement à risque de carence. La situation est similaire pour le zinc, dont la consommation moyenne est de 2 mg, un apport relativement faible pour assurer un bon fonctionnement immunitaire et une croissance optimale.
+
+Les vitamines présentent également des tendances préoccupantes. La vitamine B6 et la vitamine B12 affichent des moyennes proches de zéro, ce qui témoigne d’un manque probable d’aliments riches en ces nutriments essentiels, comme la viande, le poisson ou les produits laitiers. En revanche, la consommation de vitamine C montre une forte variabilité, avec une moyenne de 21 mg et un écart-type de 67 mg, indiquant que certains enfants ont accès à des fruits et légumes riches en vitamine C, tandis que d’autres en consomment très peu.
+
+Ces résultats suggèrent des inégalités marquées dans l’alimentation des enfants. La forte dispersion des valeurs montre que certains groupes bénéficient d’un apport nutritionnel plus équilibré, tandis que d’autres souffrent de déficits potentiellement préoccupants. Une analyse plus approfondie permettrait d’explorer les facteurs expliquant ces écarts, notamment en fonction du niveau socio-économique des ménages ou des zones géographiques étudiées
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
