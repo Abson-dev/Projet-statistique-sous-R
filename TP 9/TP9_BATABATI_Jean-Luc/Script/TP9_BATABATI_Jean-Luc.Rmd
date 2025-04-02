@@ -348,7 +348,8 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hnation) %>% #selection des variables qui vont s'afficher
   tbl_summary(digits = list(all_continuous() ~ 2), missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes")%>%
+  modify_header(label = "Répartition suivant les pays en 2021 avant correction")
   
 ```
 
@@ -384,7 +385,8 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(hnation) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes")%>%
+  modify_header(label = "Répartition suivant les pays en 2021 après correction")
 ```
 
 
@@ -409,7 +411,8 @@ welfare_2018 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+  modify_header(label = "Répartition suivant les diplomes en 2018 avant correction")
 ```
 
 ```{r}
@@ -425,7 +428,8 @@ welfare_2018 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+  modify_header(label = "Répartition suivant les diplomes en 2018 après correction")
 
 ```
 
@@ -447,7 +451,8 @@ welfare_2018 %>%
   to_factor() %>% 
   select(hactiv7j) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+  modify_header(label = "Répartition suivant l'activité du CM en 2018 avant correction")
 
 ```
 
@@ -473,7 +478,9 @@ welfare_2018 %>%
   to_factor() %>% 
   select(hactiv7j) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+  modify_header(label = "Répartition suivant l'activité du CM en 2018 après correction")
+
 
 ```
 
