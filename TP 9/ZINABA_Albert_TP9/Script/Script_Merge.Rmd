@@ -8,6 +8,8 @@ output:
     number_sections: true
   word_document:
     toc: true
+  pdf_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
@@ -219,11 +221,23 @@ Pour chaque variable, nous allons:
 
 ####**Visualisation de la distribution**
 ```{r}
+
 data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(zae) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+  to_factor() %>% # Convertir les variables labellisées en facteurs
+  select(zae) %>% # Sélectionner la variable à afficher
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  # Conversion en tableau GT
+  gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
 ```
 
 ####**Detection de l'incoherence**
@@ -282,11 +296,26 @@ data_welf2021$zae <- labelled(
 
 ####**Revisualisons la distribution apres la correction**
 ```{r}
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(zae) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018<-data_welf2018 %>%
+  mutate(zae = to_factor(zae)) %>% # Convertir en facteur si nécessaire
+  select(zae) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  # Convertir en tableau GT
+  gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage du tableau
+table_2018
+
 ```
 Nous voyons que les distributions restent les memes après la correction.
 
@@ -297,18 +326,43 @@ Nous voyons que les distributions restent les memes après la correction.
 ####**Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hnation) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018<-data_welf2018 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hnation) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Visualisation dans la base 2021
+table_2021<-data_welf2021 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -386,19 +440,44 @@ data_welf2021$hnation <- labelled(
   
 ####**Revisualisation des distribtions apres correction**
 ```{r}
-#Revisualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hnation) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")   
+# Visualisation dans la base 2018
+table_2018<-data_welf2018 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Revisualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hnation) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Visualisation dans la base 2021
+table_2021<-data_welf2021 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -407,19 +486,43 @@ data_welf2021 %>%
 ####**Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hdiploma) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur si nécessaire
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur si nécessaire
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hdiploma) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -481,19 +584,43 @@ data_welf2018$hdiploma <- labelled(
 ####**Revisualisation de la distribution apres correction**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hdiploma) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hdiploma) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -503,19 +630,44 @@ data_welf2021 %>%
 ####**Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hactiv7j) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
 
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hactiv7j) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
 ```
 
 
@@ -566,19 +718,43 @@ data_welf2021$hactiv7j <- labelled(
 ####**Revisualisation de la distribution apres correction**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hactiv7j) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hactiv7j) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -587,19 +763,43 @@ data_welf2021 %>%
 ####**Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hcsp) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hcsp) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -627,19 +827,43 @@ val_labels(data_welf2018$hcsp) <-  val_labels(data_welf2021$hcsp)
 ####**Revisualisation de la distribution apres correction**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hcsp) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hcsp) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -649,19 +873,43 @@ data_welf2021 %>%
 #### **Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hbranch) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hbranch) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -687,19 +935,43 @@ val_labels(data_welf2018$hbranch) <-  val_labels(data_welf2021$hbranch)
 ####**Revisualisation de la distribution apres correction**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(hbranch) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(hbranch) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -708,19 +980,43 @@ data_welf2021 %>%
 ####**Visualisation de la distribution**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(region) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(region) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
+
 ```
 
 
@@ -747,19 +1043,42 @@ val_labels(data_welf2021$region) <-  val_labels(data_welf2018$region)
 ####**Revisualisation de la distribution apres correction**
 ```{r}
 # Visualisation dans la base 2018
-data_welf2018 %>%
-  to_factor() %>% #labéliser
-  select(region) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+table_2018 <- data_welf2018 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
 
-#Visualisation dans la base 2021
-data_welf2021 %>%
-  to_factor() %>% #labéliser
-  select(region) %>% #selection des variables qui vont s'afficher
-  tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+# Affichage des tableaux
+table_2018
+table_2021
 ```
 
 
@@ -887,8 +1206,9 @@ data_welf_final18_21 %>%
     missing = "always",
     missing_text = "Valeurs manquantes"
   ) %>% 
+  modify_header(label ~ "**Taille des échantillons**") %>% 
   as_gt() %>%
-  gt::tab_header(title = "Statistiques sur certaines variables apres fusion") %>% 
+  gt::tab_header(title = "Statistiques sur certaines variables après fusion") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 et 2021 (SEN)") %>%
   gt::tab_options(
     heading.title.font.size = 20,

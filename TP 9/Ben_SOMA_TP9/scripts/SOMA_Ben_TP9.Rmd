@@ -20,6 +20,12 @@ output:
     css: custom.css
 ---
 
+<style>
+pre {
+  background-color: #f6f7f6; 
+}
+</style>
+
 <!-- Logos alignés en haut de la page -->
 <div style="text-align: center; margin-bottom: 20px;">
   <img src="LOGO3.jpg" height="80" style="margin-right: 20px;">
@@ -36,7 +42,7 @@ knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
 
 Ce TP consiste à vérifier toutes les incohérences  entre  les bases welfares de EHCVM de 2018 et 2021 du Burkina Faso et ensuite les merger . 
 
-#I.Importation des packages 
+# I.Importation des packages 
 
 ```{r}
 library(haven)
@@ -49,6 +55,9 @@ library(tibble)
 library(forcats)
 library(labelled)
 library(kableExtra)
+library(gtsummary)
+suppressPackageStartupMessages(library(dplyr)) # pour éviter les erreurs d'avertissement 
+suppressPackageStartupMessages(library(kableExtra))
 ```  
 
 ##Importations des bases welfare 2018 et 2021 
@@ -64,6 +73,42 @@ Nous allons comparer les noms des variables dans les deux bases welfares  : 2018
  
  
 # II. Vérification des incohérences entre les bases 
+
+```{r}
+var_label(welfare2018)
+
+```
+
+```{r}
+var_label(welfare2021)
+```
+
+
+Vérifions les doublons 
+
+```{r}
+
+duplicat <- duplicated(welfare2018)
+
+
+welfare2018[duplicat, ]
+
+```
+Il n'y a pas de doublons dans la base welfare 2018
+
+```{r}
+
+duplicat <- duplicated(welfare2021)
+
+
+welfare2021[duplicat, ]
+
+```
+
+Il n'y a pas de doublons pour la bse de 2021 
+
+
+
 
 ```{r}
 
@@ -92,7 +137,8 @@ df_final <- full_join(df_2018, df_2021, by = "Variable")
 ```{r}
 df_final %>%
   kable("html") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
   
 ```
 
@@ -188,13 +234,15 @@ welfare2021 <- welfare2021 %>% labelled::to_factor()
 ```{r}
 head(welfare2018, 10) %>%
   kable("html", caption = "10 prémières observations welfare2018") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
 ```
 
 ```{r}
 head(welfare2021, 10) %>%
   kable("html", caption = "10 prémières observations welfare2021") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
 ```
 
 #Liste des variables de type facteurs 
@@ -861,7 +909,8 @@ base_merge <- bind_rows(welfare2018,welfare2021)
 
 head(base_merge, 10) %>%
   kable("html", caption = "Aperçu des 10 peremières observations base_merge") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
 
 ```
 
@@ -873,17 +922,176 @@ les 10 dernières observations
 
 tail(base_merge, 10) %>%
   kable("html", caption = "Les 10 dernières lignes de base_merge") %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
 
 
 ```
 
 
 
+```{r}
+# Sauvegarder la base de données finale
+write_dta(base_merge, "../données/base_merge.dta")
+```
+
+```{r}
+write.csv(base_merge, "../données/base_merge.csv")
+```
+
+# Quelques statistiques descriptives sur la base mergée 
+
+```{r}
+# Création du résumé avec tbl_summary
+summary_table <- base_merge %>%
+  select(halfab, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
+
+# Renommer l'en-tête "Characteristic"
+summary_table <- modify_header(summary_table, label = "Education des ménages ")
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+summary_table_kable
+```
+Les statistiques présentées montrent l'évolution de l'éducation des ménages entre 2018 et 2021. En 2018, sur un total de 7,010 ménages, 60% n'avaient pas achevé l'éducation à mi-chemin (halfab), tandis que 40% l'avaient complétée. En 2021, sur 7,176 ménages, la proportion de ménages n'ayant pas achevé halfab a légèrement diminué à 57%, tandis que ceux ayant achevé cette étape ont augmenté à 43%. Cette évolution suggère un léger progrès vers une meilleure éducation des ménages au fil des années, bien que les différences soient relativement modestes.
+
+
+```{r}
+# Création du résumé avec tbl_summary
+summary_table <- base_merge %>%
+  select(milieu, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
+
+# Renommer l'en-tête "Characteristic"
+summary_table <- modify_header(summary_table, label = "Milieu de résidence")
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+summary_table_kable
+```
+
+
+Les statistiques par année montrent la répartition des ménages selon leur milieu de résidence en 2018 et en 2021, exprimées en pourcentage. En 2018, 45% des ménages se trouvaient en milieu urbain et 55% en milieu rural dans l'échantillon. En 2021, cette répartition a légèrement évolué avec une augmentation à 47% pour les ménages urbains et une légère baisse à 53% pour les ménages ruraux. Cette variation suggère une tendance vers une urbanisation modérée dans l'échantillon sur cette période, mettant en lumière un léger déplacement vers les zones urbaines au détriment des zones rurales.
+
+```{r}
+
+# Création du résumé avec tbl_summary
+summary_table <- base_merge %>%
+  select(hactiv7j, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
+
+# Renommer l'en-tête "Characteristic"
+summary_table <- modify_header(summary_table, label = "Niveau d'occupation ")
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+summary_table_kable
+
+```
+
+En 2018, 88% des individus étaient occupés, tandis que cette proportion est passée à 84% en 2021. En parallèle, le pourcentage de chômeurs est passé de 0.5% à 1.0%, et celui des inactifs de 10% à 15%. Ces changements suggèrent une dynamique où une part plus élevée de la population est inactive ou au chômage en 2021 comparé à 2018, reflétant possiblement des fluctuations économiques et sociales sur cette période.
+Ceci peut s'expliquer par la crise du COVID 19. 
+
+```{r}
+
+
+# Création du résumé avec tbl_summary
+summary_table <- base_merge %>%
+  select(heduc, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
+
+# Renommer l'en-tête "Characteristic"
+summary_table <- modify_header(summary_table, label = "Niveau d'education  ")
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+summary_table_kable
+
+```
+
+
+Les données sur le niveau d'éducation des individus entre 2018 et 2021 montrent des variations intéressantes. En 2018, 69% des individus n'avaient aucun niveau d'éducation spécifique, tandis que cette proportion est légèrement tombée à 66% en 2021. Parallèlement, les niveaux d'éducation primaire et secondaire général ont montré une légère augmentation, passant de 14% à 15% pour l'éducation primaire et de 4.5% à 5.5% pour le secondaire général. Cela suggère une tendance vers une amélioration légère mais notable dans l'accès à l'éducation de base au fil des années, bien que les changements dans les niveaux d'éducation plus avancés soient moins significatifs.
 
 
 
+```{r}
 
 
+summary_table <- base_merge %>%
+  select(hmstat, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
 
+
+summary_table <- modify_header(summary_table, label = " Situation matrimoniale   ")
+
+
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+
+summary_table_kable
+```
+
+
+Les données sur la situation matrimoniale entre 2018 et 2021 montrent plusieurs tendances intéressantes. En 2018, la majorité des individus étaient mariés monogames (60%), suivis par les mariages polygames (23%). En 2021, ces proportions sont restées relativement stables avec 61% pour les mariages monogames et 22% pour les mariages polygames. Cependant, on observe une légère diminution dans les autres catégories : une légère baisse dans la proportion de veufs (de 9.0% à 7.9%) et une diminution plus modeste dans les célibataires (de 4.3% à 4.9%), divorcés (de 0.8% à 0.7%) et séparés (de 0.9% à 1.2%). L'augmentation la plus notable est observée dans la catégorie "Union libre", passant de 1.7% en 2018 à 2.8% en 2021. Ces changements indiquent une légère évolution dans les structures familiales et conjugales au fil du temps, reflétant possiblement des dynamiques sociales et culturelles en mutation.
+
+
+```{r}
+
+summary_table <- base_merge %>%
+  select(hdiploma, year) %>%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  )
+
+
+summary_table <- modify_header(summary_table, label = " Diplômes obtenus    ")
+
+
+summary_table_kable <- as_kable(summary_table) %>%
+  kable_styling(full_width = FALSE) %>%
+  add_header_above(c(" ", "Statistiques par année" = 2))%>%
+  row_spec(c(0), bold = TRUE, color = "white", background = "#2196F3")
+
+
+summary_table_kable
+```
+
+
+En 2018, la majorité des individus, soit 80%, n'avaient obtenu aucun diplôme formel, tandis que ce chiffre est légèrement inférieur en 2021 avec 77%. On observe une augmentation du nombre de personnes ayant obtenu un diplôme de niveau BAC entre 2018 (1.5%) et 2021 (3.2%), ce qui suggère une progression dans l'obtention de diplômes de niveau secondaire supérieur. Les autres catégories de diplômes ont généralement montré des variations légères ou stables entre les deux années, avec des pourcentages restant relativement bas par rapport à la population totale étudiée.
 

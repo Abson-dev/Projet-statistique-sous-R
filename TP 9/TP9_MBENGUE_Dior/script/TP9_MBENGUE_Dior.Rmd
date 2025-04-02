@@ -137,7 +137,8 @@ welfare21 %>%
   to_factor() %>% 
   select(hnation) %>% 
   tbl_summary(missing = "always", 
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes")%>%
+modify_header(label="Les caractéristiques de la nation du chef de ménage")
   
 ```
 ```{r}
@@ -173,7 +174,8 @@ welfare21 %>%
   to_factor() %>% 
   select(hnation) %>% 
   tbl_summary(missing = "always", 
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes")%>%
+modify_header(label="Les caractéristiques de la nation du chef de ménage")
 ```
 
 
@@ -192,7 +194,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du diplome du chef de ménage")
 ```
 
 ```{r}
@@ -205,7 +208,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du diplome du chef de ménage")
 ```
 #la variable hactivty7j
 ```{r}
@@ -223,7 +227,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hactiv7j) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de l'activité  des 7 derniers jours du chef de ménage")
 ```
 
 
@@ -247,7 +252,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hactiv7j) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de l'activité  des 7 derniers jours du chef de ménage")
 
 ```
 # La variable "hbranch"
@@ -266,7 +272,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hbranch) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la branche activité du chef de ménage")
 ```
 l'incohérence concernait la labellisation
 
@@ -281,7 +288,8 @@ welfare18 %>%
   to_factor() %>% 
   select(hbranch) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la branche activité du chef de ménage")
 ```
 
 # La variable "hcsp"
@@ -299,7 +307,8 @@ welfare21 %>%
   to_factor() %>% 
   select(hcsp) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du CSP du chéf de ménage")
 
 ```
 
@@ -313,7 +322,8 @@ welfare21 %>%
   to_factor() %>% 
   select(hcsp) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du CSP du chéf de ménage")
 ```
 # La variable "zae"
 ```{r}
@@ -330,7 +340,8 @@ welfare18 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
 ```
 La codification n'est pas la meme pour les deux bases
 ```{r}
@@ -338,7 +349,8 @@ welfare21 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
 ```
 
 ```{r}
@@ -362,7 +374,8 @@ welfare18 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
 ```
 
 ```{r}
@@ -471,6 +484,7 @@ Table <- welfare_merge %>%
               
               digits = all_continuous() ~ 1, 
               ) %>%
+modify_header(label="Les caractéristiques du ménage")%>%
   
   bold_labels()
 
