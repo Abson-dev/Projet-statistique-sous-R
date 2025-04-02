@@ -89,7 +89,7 @@ base2021 <- base2021 %>%
   )
 ```
 
-## Détection des variables ayant des variables ayant un problème de codification ou de labélisation
+## Détection des variables ayant un problème de codification ou de labélisation
 
 Détectons les variables qui n'ont pas été codifiées ou labélisée de la même façon dans les deux bases.
 
@@ -150,14 +150,16 @@ base2018 %>%
   mutate(across(everything(), ~ labelled::to_factor(.))) %>%  
   select(hnation) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Nationalité du CM 2018")
 
 # Distribution en 2021
 base2021 %>%
   mutate(across(everything(), ~ labelled::to_factor(.))) %>%  
   select(hnation) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Nationalité du CM 2021")
 ```
 
 Nous remarquons que la variable relative à la nationalité à été plus détaillée lors de l'enquête de l'année 2021. Par exemple dans la base 2018, Gambie, Ghana,Guinée,Cap-vert et Libéria ont été régroupés en Autres pays de la Cedeao alors qu'ils ont été explicités lors de l'enquête 2021. Cela change la codification de cette variable. Pour contourner cela nous allons uniformiser la codification à celle de 2018 qui est plus adaptée simple et adaptée ici.
@@ -217,13 +219,15 @@ Affichons la distribution de la variable dans les deux bases pour une bonne réc
 base2018 %>% labelled::to_factor() %>%  
   select(zae) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Zone agroécologique")
 
 # Distribution en 2021
 base2021 %>% labelled::to_factor() %>%  
   select(zae) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Zone agroécologique")
 ```
 
 Remarquon que la variable zae n'est pas labélisée dans la base de 2018. CependansRécodifions la variable zae dans la base 2018 et labélisont là en fonction de la base de 2021.
@@ -275,13 +279,15 @@ Affichons la distribution de la variable dans les deux bases pour une bonne réc
 base2018 %>% labelled::to_factor() %>%  
   select(hdiploma) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Diplôme du CM")
 
 # Distribution en 2021
 base2021 %>% labelled::to_factor() %>%  
   select(hdiploma) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Diplôme du CM")
 ```
 
 Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
@@ -316,13 +322,15 @@ Affichons la distribution de la variable dans les deux bases pour une bonne réc
 base2018 %>% labelled::to_factor() %>%  
   select(hactiv7j) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Occupation du CM les 7 derniers jours")
 
 # Distribution en 2021
 base2021 %>% labelled::to_factor() %>%  
   select(hactiv7j) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Occupation du CM les 7 derniers jours")
 ```
 
 Récodifions la variable relative à l'activité du CM durant les 7 jours précédant l'enquête. Pour cette variable, les labels sont differents pour les deux années.
@@ -365,17 +373,20 @@ expss::val_lab(base2021$hcsp)
 Affichons la distribution de la variable dans les deux bases pour une bonne récodification.
 
 ```{r}
+
 # Distribution en 2018
 base2018 %>% labelled::to_factor() %>%  
   select(hcsp) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Catégorie socio-professionnel du CM")
 
 # Distribution en 2021
 base2021 %>% labelled::to_factor() %>%  
   select(hcsp) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Catégorie socio-professionnel du CM")
 ```
 
 Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
@@ -417,13 +428,15 @@ Affichons la distribution de la variable dans les deux bases pour une bonne réc
 base2018 %>% labelled::to_factor() %>%  
   select(hbranch) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Branche d'activité du CM")
 
 # Distribution en 2021
 base2021 %>% labelled::to_factor() %>%  
   select(hbranch) %>%
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+              modify_header(label="Branche d'activité du CM")
 ```
 
 Pour cette variable, remarquons que le seul problème réside au niveau des labels, pour la codification il n' y a pas de problème.
@@ -474,6 +487,38 @@ for (var in names(base2021)) {
 
 ```{r}
 dim(base_final)
+```
+
+# Quelques statistiques sur la base finale
+
+```{r}
+base_final %>% 
+  labelled::to_factor() %>% 
+  select(hgender, hage, hmstat, heduc, hdiploma, year) %>%  
+  tbl_summary(
+    by = year,
+    label = list(
+      hgender ~ "Sexe",
+      hage ~ "Âge",
+      hmstat ~ "Situation matrimoniale",
+      heduc ~ "Éducation", 
+      hdiploma ~ "Diplôme"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    )
+  ) %>% 
+  bold_labels() %>%
+  modify_header(
+    label ~ "**Variables**",  # En-tête pour la colonne des variables
+    all_stat_cols() ~ "**{level}**\nN = {n}"  # En-tête pour les années
+  ) %>% 
+  modify_spanning_header(
+    all_stat_cols() ~ "**Année d'enquête**"  # Titre global au-dessus des années
+  )
 ```
 
 Enregistrement de la base finale
