@@ -229,7 +229,7 @@ data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  # Conversion en tableau GT
   gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -304,7 +304,7 @@ table_2018<-data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  # Convertir en tableau GT
   gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -333,7 +333,7 @@ table_2018<-data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -350,7 +350,7 @@ table_2021<-data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -448,7 +448,7 @@ table_2018<-data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -465,7 +465,7 @@ table_2021<-data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -493,7 +493,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -510,7 +510,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -591,7 +591,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -608,7 +608,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -637,7 +637,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -654,7 +654,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -725,7 +725,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -742,7 +742,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -770,7 +770,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -787,7 +787,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -834,7 +834,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -851,7 +851,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -880,7 +880,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -897,7 +897,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -942,7 +942,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -959,7 +959,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -987,7 +987,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -1004,7 +1004,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -1050,7 +1050,7 @@ table_2018 <- data_welf2018 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
@@ -1067,7 +1067,7 @@ table_2021 <- data_welf2021 %>%
     missing = "always", # Afficher les valeurs manquantes
     missing_text = "Valeurs manquantes"
   ) %>%
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
   as_gt() %>%  
   gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
@@ -1206,7 +1206,7 @@ data_welf_final18_21 %>%
     missing = "always",
     missing_text = "Valeurs manquantes"
   ) %>% 
-  modify_header(label ~ "**Caractéristiques**") %>% 
+  modify_header(label ~ "**Taille des échantillons**") %>% 
   as_gt() %>%
   gt::tab_header(title = "Statistiques sur certaines variables après fusion") %>% 
   gt::tab_source_note(source_note = "Source : EHCVM 2018 et 2021 (SEN)") %>%
