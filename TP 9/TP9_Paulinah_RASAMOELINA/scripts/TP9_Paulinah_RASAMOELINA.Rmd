@@ -77,6 +77,7 @@ Respect de la confidentialité et des données sensibles : Assurez-vous que l'ut
 
 # **Section 2 : Chargement des données**
 
+
 ## **Lecture des fichiers au format .DTA**
 
 ```{r}
@@ -223,10 +224,10 @@ Le Boxplot est un excellent moyen visuel de détecter les valeurs aberrantes. Il
 
 ```{r}
 # Boxplot pour détecter les valeurs aberrantes dans une colonne de la base welfare_sen2018
-boxplot(welfare_sen2018$hhsize, main = "Boxplot pour welfare_sen2018", ylab = "Valeurs")
+boxplot(welfare_sen2018$hhsize, main = "Boxplot pour la base welfare du Sénégal en 2018", ylab = "Valeurs")
 
 # Boxplot pour welfare_sen2021
-boxplot(welfare_sen2021$hhsize, main = "Boxplot pour welfare_sen2021", ylab = "Valeurs")
+boxplot(welfare_sen2021$hhsize, main = "Boxplot pour la base welfare du Sénégal en 2021", ylab = "Valeurs")
 
 ```
 
@@ -272,6 +273,7 @@ Bien que la taille maximale d'un ménage soit de 56, ce qui pourrait initialemen
 
 # **Section 4 : Traitement des variables**
 
+
 ## **Comparaison et harmonisation des variables entre les bases de 2018 et 2021 **
 
 ```{r}
@@ -287,7 +289,7 @@ recap <- tibble(# Créons une mini-base contenant la liste des variables.
 recap %>%
   gt::gt() %>%
   gt::tab_header(
-    title = "Comparaison des variables entre les bases Welfare_sen2018 et Welfare_sen2021",
+    title = "Comparaison des variables entre les bases Welfare du Sénégal en 2018 et en 2021",
     subtitle = "Variables communes et spécifiques à chaque année (2018 et 2021)"
   )
 
@@ -375,6 +377,7 @@ La variable "zae" n'est pas étiquetée en 2018, mais l'est en 2021. Afin d'unif
 
 ```{r}
 plot(welfare_sen2021$zae)
+title("Distribution de la variable zae de la base welfare du Sénégal en 2021")
 
 ```
 
@@ -386,10 +389,11 @@ Par ce processus, nous aurons les mêmes codifications en 2021 et en 2018, puis 
 
 ```{r}
 welfare_sen2021 %>%
-  to_factor() %>% 
-  select(zae) %>% # selectionner les variables qui vont s'afficher.
-  tbl_summary()
-  
+  to_factor() %>%
+  select(zae) %>%
+  tbl_summary() %>%
+  modify_header(label = "**Répartition en pourcentage des zones agroécologiques par région au Sénégal en 2021**")
+
 ```
 
 **Recodage des modalités de la variable "zae" en 2021**
@@ -420,9 +424,10 @@ labelled::val_labels(welfare_sen2021$zae) <- c("Kédougou" = 6, "Saint-Louis-Mat
 
 ```{r}
 welfare_sen2021 %>%
-  to_factor() %>% 
-  select(zae) %>% # selection des variables qui vont s'afficher.
-  tbl_summary()
+  to_factor() %>%
+  select(zae) %>%
+  tbl_summary() %>%
+  modify_header(label = "**Répartition en pourcentage des zones agroécologiques par région au Sénégal en 2021**")
 
 ```
 
@@ -450,6 +455,7 @@ labelled::val_labels(welfare_sen2021$zae)
 labelled::val_labels(welfare_sen2018$hnation)
 
 ```
+
 **Modalités de la variable "hnation"en 2021**
 
 ```{r}
@@ -465,10 +471,11 @@ On constate que la présence de certains pays en 2021 qui ne figurent pas en 201
 library(ggplot2)
 
 ggplot(data = welfare_sen2021, aes(x = hnation, fill = is.na(hnation))) +  
-  geom_bar()
-  
-```
+  geom_bar() +
+  ggtitle("Distribution de la variable hnation de la base welfare du Sénégal en 2021 avant la modification") +
+  theme_minimal()
 
+```
 
 **Modification (recodage)**
 
@@ -709,6 +716,7 @@ welfare_2021_ajuste <-  dplyr::left_join(welfare_sen2021,panel_var,by=c("grappe"
 
 Dans cette section, nous procéderons à une fusion optimale des deux bases de données, en privilégiant un empilement des données de 2018 et de 2021. Pour ce faire, au-delà des traitements déjà effectués, nous devrons nous assurer de certains aspects importants.
 
+
 ## **Ordre des variables**
 
 Dans cette partie,comme toutes les variables de 2018 y sont en 2021, nous essaierons d'avoir dans chaque base, les variables communes au début et ordonnée dans le même sens. Ainsi, nous gardons  Quant aux variables présentent seulement en 2021, nous les mettons en fin.
@@ -768,35 +776,36 @@ welfare_combined[1:10,1:10] # Affichons les 10 premières lignes et les 10 premi
 
 # **Section 6 : Quelques analyses statistiques**
 
+
 ## **Analyse univarée**
 
 ```{r}
 Table1 <- welfare_combined %>%
-  select(year, hgender, hage, hhsize, heduc, milieu, pcexp) %>% # Selectionner les variables qui vont s'afficher.
-  tbl_summary(by = year,  # Grouper les variables par années.
+  select(year, hgender, hage, hhsize, heduc, milieu, pcexp) %>% # Sélectionner les variables à afficher.
+  tbl_summary(by = year,  # Grouper les variables par année.
               
-              label = list( # Labélisons les différentes variables.
+              label = list( # Labéliser les différentes variables.
                 hgender ~ "Sexe du chef de ménage",
                 hage ~ "Âge (moyenne)",
                 hhsize ~ "Taille du ménage",
                 heduc ~ "Niveau d'éducation",
                 milieu ~ "Milieu de résidence",
-                pcexp ~ "Dépense per capital (FCFA)"
+                pcexp ~ "Dépense per capita (FCFA)"
               ),
               
-              missing = "no",  #  Ne pas  inclure les NA.
+              missing = "no",  # Ne pas inclure les NA.
               
               statistic = list(
                 all_continuous() ~ "{mean} ± {sd}", # Afficher la moyenne et l'écart-type pour les variables continues.
                 all_categorical() ~ "{n} ({p}%)" # Afficher l'effectif et le pourcentage pour les variables catégorielles.
               ),
               
-              digits = all_continuous() ~ 1, # Ajuster l'affichage des variables numériques continues afin qu'elles soient présentées avec un seul chiffre après la virgule.
-              ) %>%
-  
-  bold_labels()
+              digits = all_continuous() ~ 1 # Arrondir les nombres continus à 1 décimale.
+  ) %>%
+  modify_header(label = "**Profil sociodémographique et économique des ménages au Sénégal en 2018 et en 2021**") %>%
+  bold_labels() # Mettre les labels en gras.
 
-Table1 # Afficher la table Table1
+Table1 # Afficher la table
 
 ```
 
@@ -807,7 +816,7 @@ Concernant **l’éducation**, la proportion des chefs de ménage n’ayant **ja
 La répartition entre **milieu urbain (55%) et milieu rural (45%)** est restée inchangée. Enfin, **la dépense annuelle moyenne par habitant a légèrement augmenté, passant de 615 630 FCFA en 2018 à 621 198 FCFA en 2021**, avec cependant une grande variabilité entre les ménages.
 
 
-##**Analyse bivariée**
+## **Analyse bivariée**
 
 L'analyse bivariée suivante examine la relation entre le sexe du chef de ménage et le milieu de résidence (urbain ou rural) dans les données de 2021.
 
@@ -816,25 +825,29 @@ L'analyse bivariée suivante examine la relation entre le sexe du chef de ménag
 ```{r}
 # Charger les bibliothèques nécessaires
 library(dplyr)
+library(knitr)  # Pour afficher un tableau avec un titre
+library(gt)  # Optionnel pour un affichage amélioré
 
 # 1. Tableau croisé de fréquences
 tableau_croise <- table(welfare_combined$hgender, welfare_combined$milieu)
 
-# Afficher le tableau croisé
-cat("Tableau croisé de fréquences:\n")
-print(tableau_croise)
+# Afficher le tableau croisé avec un titre
+cat("### Tableau croisé : Sexe du chef de ménage et Milieu de résidence\n")
+kable(tableau_croise, caption = "Répartition du sexe du chef de ménage selon le milieu de résidence")
 
-# Afficher les pourcentages
+# 2. Tableau croisé avec pourcentages
 tableau_croise_percentages <- prop.table(tableau_croise) * 100
-cat("\nTableau croisé avec pourcentages:\n")
-print(tableau_croise_percentages)
 
-# 2. Test du Chi-carré
+cat("\n### Tableau croisé en pourcentage : Sexe du chef de ménage et Milieu de résidence\n")
+kable(tableau_croise_percentages, caption = "Répartition en pourcentage du sexe du chef de ménage selon le milieu de résidence")
+
+# 3. Test du Chi-carré
 chi_test <- chisq.test(tableau_croise)
-cat("\nRésultat du test du Chi-carré:\n")
+cat("\n### Résultat du test du Chi-carré\n")
 print(chi_test)
 
 ```
+
 Le tableau croisé des fréquences montre la répartition des chefs de ménage selon leur sexe et leur milieu de résidence. En 2021, la majorité des **chefs de ménage masculins** vivent en milieu **rural (36,45%)** et **urbain (36,22%)**. En revanche, **les chefs de ménage féminins** sont proportionnellement plus nombreux en milieu **urbain (18,86%)** qu'en milieu **rural (8,47%)**. Le test du Chi-carré révèle une association statistiquement significative entre le sexe du chef de ménage et le milieu de résidence, avec **une p-value inférieure à 2.2e-16**. Cela indique qu'il existe **une relation forte et significative entre ces deux variables**.
 
 Bref, **le sexe du chef de ménage semble influencer son lieu de résidence, les femmes étant plus présentes dans les zones urbaines, tandis que les hommes sont plus répartis entre milieu urbain et rural**.
@@ -898,7 +911,7 @@ cat("Nombre de doublons :", duplicate_count, "\n")
 ```{r}
 ggplot(welfare_combined, aes(x = as.factor(year), y = pcexp)) +
   geom_boxplot() + 
-  labs(title = "Boxplot du Revenu par Année", x = "année", y = "dépense")
+  labs(title = "Boxplot des Dépenses par Année (2018 et 2021) au Sénégal", x = "année", y = "dépense")
 
 ```
 

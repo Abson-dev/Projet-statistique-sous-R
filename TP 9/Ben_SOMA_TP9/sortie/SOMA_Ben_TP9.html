@@ -476,7 +476,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;line-height: 1.6;color: #333;}h1, h2, h3 {color: #2c3e50;font-family: 'Helvetica Neue', Arial, sans-serif;}h1 {border-bottom: 2px solid #3498db;padding-bottom: 10px;}h2 {background-color: #f8f9fa;padding: 8px 15px;border-left: 4px solid #3498db;}pre {border-radius: 5px;box-shadow: 0 2px 4px rgba(0,0,0,0.1);}table {width: 100%;border-collapse: collapse;margin: 20px 0;box-shadow: 0 1px 3px rgba(0,0,0,0.1);}th {background-color: #3498db;color: white;padding: 10px;text-align: left;}td {padding: 8px 10px;border-bottom: 1px solid #ddd;}tr:nth-child(even) {background-color: #f8f9fa;}tr:hover {background-color: #e9f7fe;}a {color: #3498db;text-decoration: none;}a:hover {text-decoration: underline;}</style>
+<link rel="stylesheet" href="custom.css" type="text/css" />
 
 
 
@@ -592,6 +592,10 @@ Research Analyst</code></pre>
 </div>
 
 
+<style>
+pre {
+background-color: #f6f7f6; }
+</style>
 <!-- Logos alignés en haut de la page -->
 <div style="text-align: center; margin-bottom: 20px;">
 <p><img role="img" src="data:image/jpeg;base64,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" height="80" style="margin-right: 20px;">
@@ -602,7 +606,8 @@ Research Analyst</code></pre>
 <p>Ce TP consiste à vérifier toutes les incohérences entre les bases
 welfares de EHCVM de 2018 et 2021 du Burkina Faso et ensuite les merger
 .</p>
-<p>#I.Importation des packages</p>
+<div id="i.importation-des-packages" class="section level1">
+<h1>I.Importation des packages</h1>
 <pre class="r"><code>library(haven)
 library(gtsummary)
 library(haven)
@@ -626,6 +631,9 @@ library(kableExtra)</code></pre>
 <pre><code>## L&#39;objet suivant est masqué depuis &#39;package:dplyr&#39;:
 ## 
 ##     group_rows</code></pre>
+<pre class="r"><code>library(gtsummary)
+suppressPackageStartupMessages(library(dplyr)) # pour éviter les erreurs d&#39;avertissement 
+suppressPackageStartupMessages(library(kableExtra))</code></pre>
 <p>##Importations des bases welfare 2018 et 2021</p>
 <pre class="r"><code>welfare2018 &lt;- haven::read_dta(&quot;../données/ehcvm_welfare_bfa2018.dta&quot;)
 welfare2021 &lt;- haven::read_dta(&quot;../données/ehcvm_welfare_2b_bfa2021.dta&quot;)</code></pre>
@@ -634,8 +642,273 @@ welfares : 2018 et 2021 Nous transformons ensuite ces labels en tableaux
 (data frames) et les fusionnons afin d’obtenir une correspondance entre
 les labels des deux années. Cela nous permet de conserver toutes les
 variables, même si elles ne sont présentes que dans une seule année.</p>
+</div>
 <div id="ii.-vérification-des-incohérences-entre-les-bases" class="section level1">
 <h1>II. Vérification des incohérences entre les bases</h1>
+<pre class="r"><code>var_label(welfare2018)</code></pre>
+<pre><code>## $country
+## [1] &quot;Pays&quot;
+## 
+## $year
+## [1] &quot;Annee enquete&quot;
+## 
+## $hhid
+## [1] &quot;Idenfiant menage&quot;
+## 
+## $grappe
+## [1] &quot;Numero grappe&quot;
+## 
+## $menage
+## [1] &quot;Numero menage&quot;
+## 
+## $vague
+## [1] &quot;Vague&quot;
+## 
+## $zae
+## [1] &quot;Zone agroecologique&quot;
+## 
+## $region
+## [1] &quot;Region residence&quot;
+## 
+## $milieu
+## [1] &quot;Milieu residence&quot;
+## 
+## $hhweight
+## [1] &quot;Ponderation menage&quot;
+## 
+## $hhsize
+## [1] &quot;Taille menage&quot;
+## 
+## $eqadu1
+## [1] &quot;Nbr adultes-equiv. FAO&quot;
+## 
+## $eqadu2
+## [1] &quot;Nbr adultes-equiv. alt.&quot;
+## 
+## $hgender
+## [1] &quot;Genre du CM&quot;
+## 
+## $hage
+## [1] &quot;Age du CM&quot;
+## 
+## $hmstat
+## [1] &quot;Situation famille du CM&quot;
+## 
+## $hreligion
+## [1] &quot;Religion du CM&quot;
+## 
+## $hnation
+## [1] &quot;Nationalite du CM&quot;
+## 
+## $halfab
+## [1] &quot;Alphabetisation du CM&quot;
+## 
+## $heduc
+## [1] &quot;Education du CM&quot;
+## 
+## $hdiploma
+## [1] &quot;Diplome du CM&quot;
+## 
+## $hhandig
+## [1] &quot;Handicap majeur CM&quot;
+## 
+## $hactiv7j
+## [1] &quot;Activite 7 jours du CM&quot;
+## 
+## $hactiv12m
+## [1] &quot;Activite 12 mois du CM&quot;
+## 
+## $hbranch
+## [1] &quot;Branche activite du CM&quot;
+## 
+## $hsectins
+## [1] &quot;Secteur instit. du CM&quot;
+## 
+## $hcsp
+## [1] &quot;CSP du CM&quot;
+## 
+## $dali
+## [1] &quot;Conso annuelle alim. menage&quot;
+## 
+## $dnal
+## [1] &quot;Conso annuelle non alim. menage&quot;
+## 
+## $dtot
+## [1] &quot;Conso annuelle totale menage&quot;
+## 
+## $pcexp
+## [1] &quot;Indicateur de bien-être&quot;
+## 
+## $zref
+## [1] &quot;Seuil pauvrete national&quot;
+## 
+## $def_spa
+## [1] &quot;Deflateur spatial&quot;
+## 
+## $def_temp
+## [1] &quot;Deflateur temporel&quot;</code></pre>
+<pre class="r"><code>var_label(welfare2021)</code></pre>
+<pre><code>## $country
+## [1] &quot;Pays&quot;
+## 
+## $year
+## [1] &quot;Annee enquete&quot;
+## 
+## $hhid
+## [1] &quot;Idenfiant menage&quot;
+## 
+## $grappe
+## [1] &quot;Numero grappe&quot;
+## 
+## $menage
+## [1] &quot;Numero menage&quot;
+## 
+## $vague
+## [1] &quot;VAGUE&quot;
+## 
+## $zae
+## [1] &quot;Zone agroecologique&quot;
+## 
+## $region
+## [1] &quot;Region residence&quot;
+## 
+## $milieu
+## [1] &quot;Milieu residence&quot;
+## 
+## $hhweight
+## [1] &quot;Ponderation menage&quot;
+## 
+## $hhsize
+## [1] &quot;Taille menage&quot;
+## 
+## $eqadu1
+## [1] &quot;Nbr adultes-equiv. FAO&quot;
+## 
+## $eqadu2
+## [1] &quot;Nbr adultes-equiv. alt.&quot;
+## 
+## $hgender
+## [1] &quot;Genre du CM&quot;
+## 
+## $hage
+## [1] &quot;Age du CM&quot;
+## 
+## $hmstat
+## [1] &quot;Situation famille du CM&quot;
+## 
+## $hreligion
+## [1] &quot;Religion du CM&quot;
+## 
+## $hnation
+## [1] &quot;Nationalite du CM&quot;
+## 
+## $hethnie
+## [1] &quot;Ethnie du CM&quot;
+## 
+## $halfa
+## [1] &quot;Alpha. lire/ecr. CM&quot;
+## 
+## $halfa2
+## [1] &quot;Alpha. lire/ecr./comp. CM&quot;
+## 
+## $heduc
+## [1] &quot;Education du CM&quot;
+## 
+## $hdiploma
+## [1] &quot;Diplome du CM&quot;
+## 
+## $hhandig
+## [1] &quot;Handicap majeur CM&quot;
+## 
+## $hactiv7j
+## [1] &quot;Activite 7 jours du CM&quot;
+## 
+## $hactiv12m
+## [1] &quot;Activite 12 mois du CM&quot;
+## 
+## $hbranch
+## [1] &quot;Branche activite du CM&quot;
+## 
+## $hsectins
+## [1] &quot;Secteur instit. du CM&quot;
+## 
+## $hcsp
+## [1] &quot;CSP du CM&quot;
+## 
+## $dali
+## [1] &quot;Conso annuelle alim. menage&quot;
+## 
+## $dnal
+## [1] &quot;Conso annuelle non alim. menage&quot;
+## 
+## $dtot
+## [1] &quot;Conso annuelle totale menage&quot;
+## 
+## $dtet
+## [1] &quot;Conso annuelle par personne&quot;
+## 
+## $pcexp
+## [1] &quot;Indicateur de bien-être&quot;
+## 
+## $zref
+## [1] &quot;Seuil pauvrete national&quot;
+## 
+## $def_spa
+## [1] &quot;Deflateur spatial&quot;
+## 
+## $def_temp
+## [1] &quot;Deflateur temporel&quot;
+## 
+## $zaemil
+## [1] &quot;zae selon le milieu de résidence&quot;
+## 
+## $dif
+## NULL
+## 
+## $p0
+## NULL
+## 
+## $p1
+## NULL
+## 
+## $p2
+## NULL
+## 
+## $pauv
+## NULL
+## 
+## $quintiles
+## [1] &quot;5 quantiles of pcexp&quot;
+## 
+## $deciles
+## [1] &quot;10 quantiles of pcexp&quot;</code></pre>
+<p>Vérifions les doublons</p>
+<pre class="r"><code>duplicat &lt;- duplicated(welfare2018)
+
+
+welfare2018[duplicat, ]</code></pre>
+<pre><code>## # A tibble: 0 × 34
+## # ℹ 34 variables: country &lt;chr&gt;, year &lt;dbl&gt;, hhid &lt;dbl&gt;, grappe &lt;dbl&gt;,
+## #   menage &lt;dbl&gt;, vague &lt;dbl&gt;, zae &lt;dbl+lbl&gt;, region &lt;dbl+lbl&gt;,
+## #   milieu &lt;dbl+lbl&gt;, hhweight &lt;dbl&gt;, hhsize &lt;dbl&gt;, eqadu1 &lt;dbl&gt;, eqadu2 &lt;dbl&gt;,
+## #   hgender &lt;dbl+lbl&gt;, hage &lt;dbl&gt;, hmstat &lt;dbl+lbl&gt;, hreligion &lt;dbl+lbl&gt;,
+## #   hnation &lt;dbl+lbl&gt;, halfab &lt;dbl+lbl&gt;, heduc &lt;dbl+lbl&gt;, hdiploma &lt;dbl+lbl&gt;,
+## #   hhandig &lt;dbl+lbl&gt;, hactiv7j &lt;dbl+lbl&gt;, hactiv12m &lt;dbl+lbl&gt;,
+## #   hbranch &lt;dbl+lbl&gt;, hsectins &lt;dbl+lbl&gt;, hcsp &lt;dbl+lbl&gt;, dali &lt;dbl&gt;, …</code></pre>
+<p>Il n’y a pas de doublons dans la base welfare 2018</p>
+<pre class="r"><code>duplicat &lt;- duplicated(welfare2021)
+
+
+welfare2021[duplicat, ]</code></pre>
+<pre><code>## # A tibble: 0 × 45
+## # ℹ 45 variables: country &lt;chr&gt;, year &lt;dbl&gt;, hhid &lt;dbl&gt;, grappe &lt;dbl&gt;,
+## #   menage &lt;dbl&gt;, vague &lt;dbl&gt;, zae &lt;dbl+lbl&gt;, region &lt;dbl+lbl&gt;,
+## #   milieu &lt;dbl+lbl&gt;, hhweight &lt;dbl&gt;, hhsize &lt;dbl&gt;, eqadu1 &lt;dbl&gt;, eqadu2 &lt;dbl&gt;,
+## #   hgender &lt;dbl+lbl&gt;, hage &lt;dbl&gt;, hmstat &lt;dbl+lbl&gt;, hreligion &lt;dbl+lbl&gt;,
+## #   hnation &lt;dbl+lbl&gt;, hethnie &lt;dbl+lbl&gt;, halfa &lt;dbl+lbl&gt;, halfa2 &lt;dbl+lbl&gt;,
+## #   heduc &lt;dbl+lbl&gt;, hdiploma &lt;dbl+lbl&gt;, hhandig &lt;dbl+lbl&gt;, hactiv7j &lt;dbl+lbl&gt;,
+## #   hactiv12m &lt;dbl+lbl&gt;, hbranch &lt;dbl+lbl&gt;, hsectins &lt;dbl+lbl&gt;, …</code></pre>
+<p>Il n’y a pas de doublons pour la bse de 2021</p>
 <pre class="r"><code># Récupérer les labels en évitant les erreurs
 var_2018 &lt;- tryCatch(var_label(welfare2018), error = function(e) list())
 var_2021 &lt;- tryCatch(var_label(welfare2021), error = function(e) list())
@@ -657,17 +930,18 @@ df_2021 &lt;- if (length(var_2021) &gt; 0) {
 df_final &lt;- full_join(df_2018, df_2021, by = &quot;Variable&quot;)</code></pre>
 <pre class="r"><code>df_final %&gt;%
   kable(&quot;html&quot;) %&gt;%
-  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;))</code></pre>
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)</code></pre>
 <table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 Variable
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 Label_2018
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 Label_2021
 </th>
 </tr>
@@ -1248,113 +1522,114 @@ une seule des deux années.</p>
 <pre class="r"><code>welfare2021 &lt;- welfare2021 %&gt;% labelled::to_factor() </code></pre>
 <pre class="r"><code>head(welfare2018, 10) %&gt;%
   kable(&quot;html&quot;, caption = &quot;10 prémières observations welfare2018&quot;) %&gt;%
-  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))</code></pre>
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)</code></pre>
 <table class="table table-striped table-hover table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 10 prémières observations welfare2018
 </caption>
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 country
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 year
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhid
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 grappe
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 menage
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 vague
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zae
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 region
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 milieu
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhweight
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhsize
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu2
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hgender
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hage
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hmstat
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hreligion
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hnation
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfab
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 heduc
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hdiploma
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhandig
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv7j
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv12m
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hbranch
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hsectins
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hcsp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dali
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dnal
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtot
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pcexp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zref
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_spa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_temp
 </th>
 </tr>
@@ -2404,146 +2679,147 @@ Travailleur pour compte propre
 </table>
 <pre class="r"><code>head(welfare2021, 10) %&gt;%
   kable(&quot;html&quot;, caption = &quot;10 prémières observations welfare2021&quot;) %&gt;%
-  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))</code></pre>
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)</code></pre>
 <table class="table table-striped table-hover table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 10 prémières observations welfare2021
 </caption>
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 country
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 year
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhid
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 grappe
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 menage
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 vague
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zae
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 region
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 milieu
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhweight
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhsize
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu2
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hgender
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hage
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hmstat
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hreligion
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hnation
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hethnie
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfa
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfab
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 heduc
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hdiploma
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhandig
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv7j
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv12m
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hbranch
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hsectins
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hcsp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dali
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dnal
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtot
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtet
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pcexp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zref
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_spa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_temp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zaemil
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dif
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p0
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p2
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pauv
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 quintiles
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 deciles
 </th>
 </tr>
@@ -5281,146 +5557,147 @@ Nous pouvons maintenat passer au merge .</p>
 
 head(base_merge, 10) %&gt;%
   kable(&quot;html&quot;, caption = &quot;Aperçu des 10 peremières observations base_merge&quot;) %&gt;%
-  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))</code></pre>
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)</code></pre>
 <table class="table table-striped table-hover table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Aperçu des 10 peremières observations base_merge
 </caption>
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 country
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 year
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhid
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 grappe
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 menage
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 vague
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zae
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 region
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 milieu
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhweight
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhsize
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu2
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hgender
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hage
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hmstat
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hreligion
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hnation
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfab
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 heduc
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hdiploma
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhandig
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv7j
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv12m
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hbranch
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hsectins
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hcsp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dali
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dnal
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtot
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pcexp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zref
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_spa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_temp
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hethnie
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtet
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zaemil
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dif
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p0
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p2
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pauv
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 quintiles
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 deciles
 </th>
 </tr>
@@ -6801,146 +7078,147 @@ NA
 <p>les 10 dernières observations</p>
 <pre class="r"><code>tail(base_merge, 10) %&gt;%
   kable(&quot;html&quot;, caption = &quot;Les 10 dernières lignes de base_merge&quot;) %&gt;%
-  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))</code></pre>
+  kable_styling(full_width = FALSE, bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;responsive&quot;))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)</code></pre>
 <table class="table table-striped table-hover table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Les 10 dernières lignes de base_merge
 </caption>
 <thead>
 <tr>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 country
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 year
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhid
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 grappe
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 menage
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 vague
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zae
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 region
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 milieu
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhweight
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhsize
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 eqadu2
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hgender
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hage
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hmstat
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hreligion
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hnation
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfab
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 heduc
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hdiploma
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hhandig
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv7j
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hactiv12m
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hbranch
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hsectins
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hcsp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dali
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dnal
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtot
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pcexp
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zref
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_spa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 def_temp
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 hethnie
 </th>
-<th style="text-align:left;">
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 halfa
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dtet
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 zaemil
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 dif
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p0
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p1
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 p2
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 pauv
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 quintiles
 </th>
-<th style="text-align:right;">
+<th style="text-align:right;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
 deciles
 </th>
 </tr>
@@ -8318,6 +8596,793 @@ Oui
 </tr>
 </tbody>
 </table>
+<pre class="r"><code># Sauvegarder la base de données finale
+write_dta(base_merge, &quot;../données/base_merge.dta&quot;)</code></pre>
+<pre class="r"><code>write.csv(base_merge, &quot;../données/base_merge.csv&quot;)</code></pre>
+</div>
+<div id="quelques-statistiques-descriptives-sur-la-base-mergée" class="section level1">
+<h1>Quelques statistiques descriptives sur la base mergée</h1>
+<pre class="r"><code># Création du résumé avec tbl_summary
+summary_table &lt;- base_merge %&gt;%
+  select(halfab, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+# Renommer l&#39;en-tête &quot;Characteristic&quot;
+summary_table &lt;- modify_header(summary_table, label = &quot;Education des ménages &quot;)
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Education des ménages
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+halfab
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non
+</td>
+<td style="text-align:center;">
+4,202 (60%)
+</td>
+<td style="text-align:center;">
+4,091 (57%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oui
+</td>
+<td style="text-align:center;">
+2,808 (40%)
+</td>
+<td style="text-align:center;">
+3,085 (43%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>Les statistiques présentées montrent l’évolution de l’éducation des
+ménages entre 2018 et 2021. En 2018, sur un total de 7,010 ménages, 60%
+n’avaient pas achevé l’éducation à mi-chemin (halfab), tandis que 40%
+l’avaient complétée. En 2021, sur 7,176 ménages, la proportion de
+ménages n’ayant pas achevé halfab a légèrement diminué à 57%, tandis que
+ceux ayant achevé cette étape ont augmenté à 43%. Cette évolution
+suggère un léger progrès vers une meilleure éducation des ménages au fil
+des années, bien que les différences soient relativement modestes.</p>
+<pre class="r"><code># Création du résumé avec tbl_summary
+summary_table &lt;- base_merge %&gt;%
+  select(milieu, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+# Renommer l&#39;en-tête &quot;Characteristic&quot;
+summary_table &lt;- modify_header(summary_table, label = &quot;Milieu de résidence&quot;)
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Milieu de résidence
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+milieu
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Urbain
+</td>
+<td style="text-align:center;">
+3,149 (45%)
+</td>
+<td style="text-align:center;">
+3,338 (47%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rural
+</td>
+<td style="text-align:center;">
+3,861 (55%)
+</td>
+<td style="text-align:center;">
+3,838 (53%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>Les statistiques par année montrent la répartition des ménages selon
+leur milieu de résidence en 2018 et en 2021, exprimées en pourcentage.
+En 2018, 45% des ménages se trouvaient en milieu urbain et 55% en milieu
+rural dans l’échantillon. En 2021, cette répartition a légèrement évolué
+avec une augmentation à 47% pour les ménages urbains et une légère
+baisse à 53% pour les ménages ruraux. Cette variation suggère une
+tendance vers une urbanisation modérée dans l’échantillon sur cette
+période, mettant en lumière un léger déplacement vers les zones urbaines
+au détriment des zones rurales.</p>
+<pre class="r"><code># Création du résumé avec tbl_summary
+summary_table &lt;- base_merge %&gt;%
+  select(hactiv7j, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+# Renommer l&#39;en-tête &quot;Characteristic&quot;
+summary_table &lt;- modify_header(summary_table, label = &quot;Niveau d&#39;occupation &quot;)
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Niveau d’occupation
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+hactiv7j
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupe
+</td>
+<td style="text-align:center;">
+6,158 (88%)
+</td>
+<td style="text-align:center;">
+6,004 (84%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chomeur
+</td>
+<td style="text-align:center;">
+35 (0.5%)
+</td>
+<td style="text-align:center;">
+70 (1.0%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TF cherchant emploi
+</td>
+<td style="text-align:center;">
+20 (0.3%)
+</td>
+<td style="text-align:center;">
+5 (&lt;0.1%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TF cherchant pas
+</td>
+<td style="text-align:center;">
+62 (0.9%)
+</td>
+<td style="text-align:center;">
+12 (0.2%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inactif
+</td>
+<td style="text-align:center;">
+735 (10%)
+</td>
+<td style="text-align:center;">
+1,085 (15%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Moins de 5 ans
+</td>
+<td style="text-align:center;">
+0 (0%)
+</td>
+<td style="text-align:center;">
+0 (0%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>En 2018, 88% des individus étaient occupés, tandis que cette
+proportion est passée à 84% en 2021. En parallèle, le pourcentage de
+chômeurs est passé de 0.5% à 1.0%, et celui des inactifs de 10% à 15%.
+Ces changements suggèrent une dynamique où une part plus élevée de la
+population est inactive ou au chômage en 2021 comparé à 2018, reflétant
+possiblement des fluctuations économiques et sociales sur cette période.
+Ceci peut s’expliquer par la crise du COVID 19.</p>
+<pre class="r"><code># Création du résumé avec tbl_summary
+summary_table &lt;- base_merge %&gt;%
+  select(heduc, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+# Renommer l&#39;en-tête &quot;Characteristic&quot;
+summary_table &lt;- modify_header(summary_table, label = &quot;Niveau d&#39;education  &quot;)
+
+# Convertir en format kableExtra et ajouter des styles
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Niveau d’education
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+heduc
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aucun
+</td>
+<td style="text-align:center;">
+4,870 (69%)
+</td>
+<td style="text-align:center;">
+4,706 (66%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Maternelle
+</td>
+<td style="text-align:center;">
+1 (&lt;0.1%)
+</td>
+<td style="text-align:center;">
+0 (0%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Primaire
+</td>
+<td style="text-align:center;">
+966 (14%)
+</td>
+<td style="text-align:center;">
+1,051 (15%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Postprimaire général
+</td>
+<td style="text-align:center;">
+510 (7.3%)
+</td>
+<td style="text-align:center;">
+622 (8.7%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Postprimaire technique
+</td>
+<td style="text-align:center;">
+14 (0.2%)
+</td>
+<td style="text-align:center;">
+8 (0.1%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Secondaire général
+</td>
+<td style="text-align:center;">
+314 (4.5%)
+</td>
+<td style="text-align:center;">
+395 (5.5%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Secondaire technique
+</td>
+<td style="text-align:center;">
+46 (0.7%)
+</td>
+<td style="text-align:center;">
+39 (0.5%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Postsecondaire
+</td>
+<td style="text-align:center;">
+26 (0.4%)
+</td>
+<td style="text-align:center;">
+44 (0.6%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Superieur
+</td>
+<td style="text-align:center;">
+263 (3.8%)
+</td>
+<td style="text-align:center;">
+311 (4.3%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>Les données sur le niveau d’éducation des individus entre 2018 et
+2021 montrent des variations intéressantes. En 2018, 69% des individus
+n’avaient aucun niveau d’éducation spécifique, tandis que cette
+proportion est légèrement tombée à 66% en 2021. Parallèlement, les
+niveaux d’éducation primaire et secondaire général ont montré une légère
+augmentation, passant de 14% à 15% pour l’éducation primaire et de 4.5%
+à 5.5% pour le secondaire général. Cela suggère une tendance vers une
+amélioration légère mais notable dans l’accès à l’éducation de base au
+fil des années, bien que les changements dans les niveaux d’éducation
+plus avancés soient moins significatifs.</p>
+<pre class="r"><code>summary_table &lt;- base_merge %&gt;%
+  select(hmstat, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+
+summary_table &lt;- modify_header(summary_table, label = &quot; Situation matrimoniale   &quot;)
+
+
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Situation matrimoniale
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+hmstat
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Célibataire
+</td>
+<td style="text-align:center;">
+304 (4.3%)
+</td>
+<td style="text-align:center;">
+349 (4.9%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marié(e) monogame
+</td>
+<td style="text-align:center;">
+4,235 (60%)
+</td>
+<td style="text-align:center;">
+4,352 (61%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marié(e) polygame
+</td>
+<td style="text-align:center;">
+1,600 (23%)
+</td>
+<td style="text-align:center;">
+1,572 (22%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Union libre
+</td>
+<td style="text-align:center;">
+121 (1.7%)
+</td>
+<td style="text-align:center;">
+199 (2.8%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Veuf(ve)
+</td>
+<td style="text-align:center;">
+633 (9.0%)
+</td>
+<td style="text-align:center;">
+568 (7.9%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Divorcé(e)
+</td>
+<td style="text-align:center;">
+55 (0.8%)
+</td>
+<td style="text-align:center;">
+50 (0.7%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Séparé(e)
+</td>
+<td style="text-align:center;">
+62 (0.9%)
+</td>
+<td style="text-align:center;">
+86 (1.2%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>Les données sur la situation matrimoniale entre 2018 et 2021 montrent
+plusieurs tendances intéressantes. En 2018, la majorité des individus
+étaient mariés monogames (60%), suivis par les mariages polygames (23%).
+En 2021, ces proportions sont restées relativement stables avec 61% pour
+les mariages monogames et 22% pour les mariages polygames. Cependant, on
+observe une légère diminution dans les autres catégories : une légère
+baisse dans la proportion de veufs (de 9.0% à 7.9%) et une diminution
+plus modeste dans les célibataires (de 4.3% à 4.9%), divorcés (de 0.8% à
+0.7%) et séparés (de 0.9% à 1.2%). L’augmentation la plus notable est
+observée dans la catégorie “Union libre”, passant de 1.7% en 2018 à 2.8%
+en 2021. Ces changements indiquent une légère évolution dans les
+structures familiales et conjugales au fil du temps, reflétant
+possiblement des dynamiques sociales et culturelles en mutation.</p>
+<pre class="r"><code>summary_table &lt;- base_merge %&gt;%
+  select(hdiploma, year) %&gt;%
+  tbl_summary(
+    by = year,
+    statistic = list(all_categorical() ~ &quot;{n} ({p}%)&quot;)
+  )
+
+
+summary_table &lt;- modify_header(summary_table, label = &quot; Diplômes obtenus    &quot;)
+
+
+summary_table_kable &lt;- as_kable(summary_table) %&gt;%
+  kable_styling(full_width = FALSE) %&gt;%
+  add_header_above(c(&quot; &quot;, &quot;Statistiques par année&quot; = 2))%&gt;%
+  row_spec(c(0), bold = TRUE, color = &quot;white&quot;, background = &quot;#2196F3&quot;)
+
+
+summary_table_kable</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Statistiques par année
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+Diplômes obtenus
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2018</strong> N = 7,010
+</th>
+<th style="text-align:center;font-weight: bold;color: white !important;background-color: rgba(33, 150, 243, 255) !important;">
+<strong>2021</strong> N = 7,176
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+hdiploma
+</td>
+<td style="text-align:center;">
+</td>
+<td style="text-align:center;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aucun
+</td>
+<td style="text-align:center;">
+5,630 (80%)
+</td>
+<td style="text-align:center;">
+5,551 (77%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CEPE
+</td>
+<td style="text-align:center;">
+634 (9.0%)
+</td>
+<td style="text-align:center;">
+726 (10%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BEPC
+</td>
+<td style="text-align:center;">
+366 (5.2%)
+</td>
+<td style="text-align:center;">
+394 (5.5%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CAP
+</td>
+<td style="text-align:center;">
+23 (0.3%)
+</td>
+<td style="text-align:center;">
+20 (0.3%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BT
+</td>
+<td style="text-align:center;">
+5 (&lt;0.1%)
+</td>
+<td style="text-align:center;">
+5 (&lt;0.1%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BAC
+</td>
+<td style="text-align:center;">
+108 (1.5%)
+</td>
+<td style="text-align:center;">
+229 (3.2%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DEUG, DUT, BTS
+</td>
+<td style="text-align:center;">
+46 (0.7%)
+</td>
+<td style="text-align:center;">
+58 (0.8%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Licence
+</td>
+<td style="text-align:center;">
+93 (1.3%)
+</td>
+<td style="text-align:center;">
+110 (1.5%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Maitrise
+</td>
+<td style="text-align:center;">
+68 (1.0%)
+</td>
+<td style="text-align:center;">
+43 (0.6%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Master/DEA/DESS
+</td>
+<td style="text-align:center;">
+32 (0.5%)
+</td>
+<td style="text-align:center;">
+36 (0.5%)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Doctorat/Phd
+</td>
+<td style="text-align:center;">
+5 (&lt;0.1%)
+</td>
+<td style="text-align:center;">
+4 (&lt;0.1%)
+</td>
+</tr>
+</tbody>
+</table>
+<p>En 2018, la majorité des individus, soit 80%, n’avaient obtenu aucun
+diplôme formel, tandis que ce chiffre est légèrement inférieur en 2021
+avec 77%. On observe une augmentation du nombre de personnes ayant
+obtenu un diplôme de niveau BAC entre 2018 (1.5%) et 2021 (3.2%), ce qui
+suggère une progression dans l’obtention de diplômes de niveau
+secondaire supérieur. Les autres catégories de diplômes ont généralement
+montré des variations légères ou stables entre les deux années, avec des
+pourcentages restant relativement bas par rapport à la population totale
+étudiée.</p>
 </div>
 
 
