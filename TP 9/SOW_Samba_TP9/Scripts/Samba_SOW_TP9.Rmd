@@ -3,8 +3,8 @@ title: "TP9: Fusion des bases welfare de l'EHCVM : Cas du Sénégal"
 author: "Samba SOW"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 
@@ -212,7 +212,8 @@ welfare_2021 %>%
   to_factor() %>% #labéliser
   select(zae) %>% #selection des variables qui vont s'afficher
   tbl_summary(missing = "always", #afficher les valeurs manquantes
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes") %>% 
+  modify_header(label~"**Variable**")
 ```
 
 
