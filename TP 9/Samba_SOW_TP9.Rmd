@@ -1,0 +1,513 @@
+---
+title: "TP9: Fusion des bases welfare de l'EHCVM : Cas du Sénégal"
+author: "Samba SOW"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+## **Etape 1: Comprendre le problème**
+
+L'objectif est de fusionner les bases welfare_2018 et welfare_2021 pour comparer les évolutions des indicateurs sociaux entre les deux années. 
+
+## **Etape2 : Installation des packages et chagement des bases**
+
+  ✅ IInstallation des packages
+  
+```{r message=FALSE,warning=FALSE}
+
+packages <- c("readr","haven","utils","dplyr","labelled","questionr","gtsummary","ggplot2")
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+```
+
+✅ IImportation des bases
+```{r}
+## Base welfare
+welfare_2018 <-  haven::read_dta("../Bases/ehcvm_welfare_sen2018.dta") 
+
+welfare_2021 <-  haven::read_dta("../Bases/ehcvm_welfare_sen2021.dta")
+```
+
+En 2018, la base contient `r nrow(welfare_2018)` ménages et `r ncol(welfare_2018)` variables, tandis qu’en 2021, elle compte `r nrow(welfare_2021)` ménages et `r ncol(welfare_2021)` variables. La baisse de `r nrow(welfare_2018)-nrow(welfare_2021)` ménages entre les deux années peut être due à des pertes d’échantillons ou des changements dans la méthodologie de collecte des données. L’ajout de `r ncol(welfare_2021)-ncol(welfare_2018)` nouvelles variables en 2021 suggère l’introduction de nouveaux indicateurs ou un élargissement des thèmes étudiés. Ces différences auront un impact sur la fusion, car certaines variables devront être harmonisées et des valeurs manquantes (NA) apparaîtront si certains ménages ne sont présents que dans une des deux bases. Il sera également pertinent d’identifier quelles sont les nouvelles variables ajoutées en 2021 pour mieux comprendre l’évolution des données.
+
+
+## **Etape 3.  Vérification de la qualité des données**
+
+✅ Identifieons les rvariables avec des valeurs manquantes
+
+```{r}
+val_manq_2018 <- colSums(is.na(welfare_2018))
+val_manq_2018
+```
+Ici, les variables **hmstat**, **hbranch**, **hsectins** et **hcsp** présentent des valeurs manquantes avec 2 valeurs manquantes pour la variable **hmstat** et 1722 pour chacune des autres.
+
+```{r}
+val_manq_2021 <- colSums(is.na(welfare_2021))
+val_manq_2021
+```
+
+Pour la base de 2021, également quatres variables présentent des valeurs manquantes dont **hbranch**, **hsectins**, **hcsp** et la variables **hethnie**
+
+✅ Détection des doublons
+
+```{r}
+doublon_2018 <- welfare_2018[duplicated(welfare_2018[, c("grappe","menage")]), ] # sélectionne tous les ménages dupliqué qui sont dans la base 2018
+print(nrow(doublon_2018))
+
+doublon_2021 <- welfare_2021[duplicated(welfare_2021[, c("grappe","menage")]), ] # sélectionne tous les ménages dupliqué qui sont dans la base 2021
+print(nrow(doublon_2021))
+
+```
+
+Les résultats indiquent qu’il n’y a aucun doublon dans les identifiants des ménages (hhid) dans les bases de 2018 et 2021. Ce qui signifie que chaque ménage est unique dans chaque base, garantissant qu’aucune observation ne se répète. Ainsi, la fusion des bases en utilisant hhid pourra se faire sans crainte de doublons ni de confusion dans l’association des données.
+
+
+## **Etape 4: Detection et correction des incohéerences avant fusion**
+
+Pour une meilleure executin du travail, nous allons identifier les variables qui sont présentent dans les 2 bases en les repartissant en variables présentes uniquement en 2018, uniquement en 2021 et celles qui sont à la fois dasn les deux bases. Ainsi, nous porront tranquillenment fusionner les bases aprées avir corrigé les éventuelles incohérences liées à chacune d'elles.
+
+```{r}
+#liste des variables en 2018
+vars_2018 = colnames(welfare_2018) 
+
+#liste des variables en 2021
+vars_2021 = colnames(welfare_2021) 
+
+# Identifions les variables communes 
+vars_communes <- intersect(vars_2018, vars_2021) 
+
+# Variables présentes uniquement en 2018
+vars_only_2018 <- setdiff(vars_2018, vars_2021) 
+
+# Variables présentes uniquement en 2021
+vars_only_2021 <- setdiff(vars_2021, vars_2018) 
+
+vars_only_2018
+```
+
+Nous remarquons qu'il y a que la variable **`r setdiff(vars_2018, vars_2021)`** qui est présente uniquement en 2018. Ainsi, aprés avoir remarqué que cette variable stocke la même information que la variable **halfa** de la base 2021 et pour des besions d'harmonisation nous allons renommer la variable **halfab** en **`r setdiff(vars_2018, vars_2021)`**.
+
+✅ **Renommons la variable *halfab*:**
+```{r}
+colnames(welfare_2021)[colnames(welfare_2021)=="halfa"] <- "halfab"
+```
+
+Maintenant que c'est fait ajoutons cette variable à la liste des variables communes
+
+```{r}
+vars_communes <-  append(vars_communes,"halfab")
+```
+
+
+Ici, nous allons identifier parmi les variables présentent à la fois dans les deux bases, celles qui ne sont pas labélisées en 2018 ou en 2021 ou encore celles qui n'ont pas les mêmes correspondances dans leur système de labelisation.
+
+```{r include=TRUE}
+
+variable_label_diff <- c() #créer une liste vide 
+
+for (variable in vars_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare_2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(welfare_2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(welfare_2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(welfare_2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+```
+
+On voit donc que les varibles **"zae"**, **"hnation"**, **"hdiploma"**, **"hactiv7j"**, **"hbranch"** et **"hcsp"** sont celles qui ont des incohérences dans les leurs labels. Nous allons donc effetuer des corections afin de pouvoir réaliser la fusion de la manière la plus parfaite.
+
+
+## **Etape 5: Traitement des varaibles**
+
+Nous allons visualiser et corriger chaque variable.
+
+
+### **Variable "zae"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+labelled::val_labels(welfare_2018$zae)
+```
+La variable n'est pas codifiée en 2018
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+labelled::val_labels(welfare_2021$zae)
+```
+
+✅ **Recodons la variable en 2021**
+
+
+```{r}
+labelled::val_labels(welfare_2018$region)
+```
+
+
+✅ **Distribution avant modification**
+
+```{r}
+welfare_2021 %>%
+  to_factor() %>% #labéliser
+  select(zae) %>% #selection des variables qui vont s'afficher
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes") %>% 
+
+  modify_header(label~"**Variable**")
+```
+
+✅ **Recodage**
+
+```{r}
+welfare_2021 <- welfare_2021 %>%
+  dplyr::mutate(zae = dplyr::recode(zae,
+                          `11` = 1,  # Remplace la modalité 11 par 1
+                          `9` = 5,  # Remplace la modalité 9 par 5
+                          `5` = 3, # Remplace la modalité 5 par 3
+                          `3` = 2, # Remplace la modalité 3 par 2
+                          `7` = 4, # Remplace la modalité 7 par 4
+                          `1` = 6)) # Remplace la modalité 1 par 6
+```
+
+✅ **Labélisation de 2021**
+
+
+```{r}
+labelled::val_labels(welfare_2021$zae) <- c("Kédougou" = 6, "Saint-Louis-Matam"= 2, "Thies-Diourbel-Louga" = 3, "Kaolack-Fatick-Kaffrine" = 4, "Ziguinchor-Tamba-Kolda-Sédhiou" = 5,"Dakar" = 1)
+```
+
+✅ **Distribution après modification**
+
+```{r}
+welfare_2021 %>%
+  to_factor() %>% #labéliser
+  select(zae) %>% #selection des variables qui vont s'afficher
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+
+✅ **Ajout des labels à 2018**
+
+Maintenant que la codification est identique, nous Ajoutons à présent les labels qu'il faut à la base 2018
+
+```{r}
+
+labelled::val_labels(welfare_2018$zae) <-  labelled::val_labels(welfare_2021$zae) #Affectons juste les labels de 2021 à la base de 2018
+
+```
+
+
+
+### **Variable "hnation"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+labelled::val_labels(welfare_2018$hnation)
+
+```
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+
+labelled::val_labels(welfare_2021$hnation)
+
+```
+
+Nous remarquons que les pays tels que **liberia, Serra-Leonne, Cap vert,Gambie, Gana et Guinée**, ne sont présents que dans la base de 2021. Nous allons toutes les affectées dasn la modalité  **Autre CEDEAO** puis que ce sont tous despays de la CEDEAO. En outre mis à part les modalitées **Bénin et Burkina Faso** on peut remarquer que les autres modalités ne sont pas codifiées de la même manière, ainsi nous allons corriger cela.
+
+
+✅ **Distribution de la variable hnation**
+
+```{r}
+welfare_2021 %>%
+  to_factor() %>% 
+  select(hnation) %>% 
+  tbl_summary(missing = "always", missing_text = "Valeurs manquantes") %>% 
+  modify_header(label~"**Variable**")
+```
+
+✅ **Recodage**
+
+Ici, nous allons reaffecter les modalités qui ne correspondent pas vis à vis des deux bases afin d'avoir les mêmes modalités dasn les deux bases e facikiter la jointure après
+
+```{r}
+welfare_2021 <- welfare_2021 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3,  
+                          `8` = 4,  
+                          `10` = 5, 
+                          `11` = 6,
+                          `13` = 7,
+                          `15` = 8, 
+                          `12` = 9,
+                          `17` = 11,
+                          `18` = 12, 
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10 
+                          ))
+```
+
+
+Les labels de la variable sont maintenant uniformes entre les deux bases 2018 et 2021, nous allons donc affectés les labels de 2018 à ceux de 2021 pour faciliter la jointure à la fin.
+
+```{r}
+labelled::val_labels(welfare_2021$hnation) <- labelled::val_labels(welfare_2018$hnation) 
+```
+
+
+### **Variable "hdiploma"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+labelled::val_labels(welfare_2018$hdiploma)
+```
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+labelled::val_labels(welfare_2021$hdiploma)
+```
+Pour le cas de cette variable, l'incohérence reside uniquement dans dans les modalités codifiées respectivemnet en *1* et *2* et c'est juste liés à la manière dont elles sont écrites. Nous allons donc les uniformiser et puis affecter les labels de 2018 à ceux de 2021.
+
+```{r}
+labelled::val_labels(welfare_2021$hdiploma) <-  labelled::val_labels(welfare_2018$hdiploma)
+```
+
+### **Variable "hactiv7j"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+labelled::val_labels(welfare_2018$hactiv7j)
+```
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+labelled::val_labels(welfare_2021$hactiv7j)
+```
+
+On observe une légère incohérence dans les modalités et leurs labels entre les deux années. Par exemple, en 2018, la modalité 2 correspond à "chômeur", tandis qu'en 2021, ce statut est codé 4.
+
+Pour harmoniser les données, nous conserverons les libellés de 2018 et ajusterons ceux de 2021. 
+
+Concrètement, cela implique de modifier les codes des modalités suivantes : *chômeurs*, *TF cherchant pas* et *TF cherchant emploi* afin d'assurer une cohérence entre les deux bases.
+
+```{r}
+welfare_2021 <- welfare_2021 %>%
+  dplyr::mutate(hactiv7j = dplyr::recode(hactiv7j,
+                          `4` = 2,  
+                          `2` = 3, 
+                          `3` = 4))
+
+```
+
+Affectons les labels de 2018 à ceux de 2021
+```{r}
+labelled::val_labels(welfare_2021$hactiv7j) <-  labelled::val_labels(welfare_2018$hactiv7j)
+```
+
+
+### **Variable "hbranch"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+
+labelled::val_labels(welfare_2018$hbranch)
+
+```
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+labelled::val_labels(welfare_2021$hbranch)
+
+```
+
+L'incohérence relevée concerne uniquement certains labels, tandis que les modalités restent identiques entre les deux années. Par exemple, en 2021, la catégorie "Élevage/syl./pêche" est libellée différemment par rapport à 2018, où elle apparaît sous "Élevage/pêche".
+
+Afin d'assurer une harmonisation des données, nous adopterons les libellés de 2021 et mettrons à jour ceux de 2018 en conséquence.
+
+```{r}
+labelled::val_labels(welfare_2018$hbranch) <-  labelled::val_labels(welfare_2021$hbranch)
+```
+
+
+### **Variable "hcsp"**
+
+✅ **modalités de la variable en 2018**
+
+```{r}
+labelled::val_labels(welfare_2018$hcsp)
+```
+
+✅ **modalités de la variable en 2021**
+
+```{r}
+
+labelled::val_labels(welfare_2021$hcsp)
+
+```
+Là également  à l image de la variable précedente,les incohérences sont à noter que dasn ceraines modalités. Sinon les modalités sont tous pareil. Nous adopterons comme précédemment les libelles de 2021 et mettrons à jour ceux de 2018 en conséquence.
+
+```{r}
+labelled::val_labels(welfare_2018$hcsp) <-  labelled::val_labels(welfare_2021$hcsp)
+```
+
+
+
+## **Etape 6: Vérification**
+
+Nous allons réappliquer ce code pour essayer de trouver des variables parmi les variables communes aux deux bases qui n'ont pas le même systeme de labellisation.
+
+```{r}
+
+variable_label_diff <- c() #créer une liste vide 
+
+for (variable in vars_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare_2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(welfare_2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+  if(labelled::is.labelled(welfare_2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(welfare_2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     variable_label_diff <- append(variable_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+```
+On voit maintenat que la liste des variables qui présentent des incohérences par rapport aux modalités est vide. Ce qui est parfait pour la suite.
+
+
+## **Etape 7 : Fusion des bases**
+
+A présent, nous allons passer à la fusion des deux bases en faisant appel à la fonction *bind_rows()* (du package dplyr) qui est la plus adequate puis qu'elle combine les data frames  par lignes idéale pour fusionner des jeux de données similaires ou partiels.
+
+
+```{r}
+welfare_fusion <- bind_rows(welfare_2018,welfare_2021) %>% 
+                          arrange(grappe,menage) # trié suivant la grappe et le numéro du ménage 
+
+```
+
+Finalement, on obtient la base fusionnée **welfare_fusion**. On va tirées quelques statistiques de cette base.
+
+
+```{r}
+welfare_fusion <- welfare_fusion %>% 
+  labelled::to_factor()
+```
+
+
+✅ **Dimensions de la base**
+
+```{r}
+#Nombre de variables de la base de fusion
+ncol(welfare_fusion)
+
+#Nombre de lignes de la base
+nrow(welfare_fusion)
+
+```
+
+✅ **Aperçu de la base**
+
+```{r}
+head(welfare_fusion)
+```
+
+Aperçu du nombre de ménages, de variables et pour chaque variable son type et l'aperçu de ses différentes valeurs.
+
+```{r}
+dplyr::glimpse(welfare_fusion)
+```
+
+## **Etape 8 : Statistiques**
+
+Nous allons choisir quelques variables à savoir **sexe**, **Age**, **Situation matrimoniale**, **Education** et **Diplôme** et sortir quelques statistiques en utilisant *gt_summary*
+
+```{r}
+welfare_fusion %>% 
+  labelled::to_factor() %>% 
+  select(hgender, hage, hmstat, heduc, hdiploma, year) %>%  
+  tbl_summary(
+    by = year,
+    label = list(
+      hgender ~ "Sexe",
+      hage ~ "Âge",
+      hmstat ~ "Situation matrimoniale",
+      heduc ~ "Éducation", 
+      hdiploma ~ "Diplôme"
+    ),
+    missing = "always",
+    missing_text = "Valeurs manquantes",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    )
+  ) %>% 
+  bold_labels() %>%
+  modify_header(
+    label ~ "**Variable**",  # En-tête pour la colonne des variables
+    all_stat_cols() ~ "**{level}**\nN = {n}"  # En-tête pour les années
+  ) %>% 
+  modify_spanning_header(
+    all_stat_cols() ~ "**Année d'enquête**"  # Titre global au-dessus des années
+  )
+```
+
+L'analyse compare les caractéristiques sociodémographiques entre 2018 (N=7 156) et 2021 (N=7120). On observe une population majoritairement masculine (72-74%), avec un âge moyen passant de 51 à 54 ans. La situation matrimoniale montre une prédominance du mariage monogame (54-55%), une légère baisse de la polygamie (27% à 26%) et une augmentation du veuvage (12% à 15%). Le niveau d'éducation reste faible (69% sans éducation), avec une stabilité dans le primaire/secondaire (environ 23% combinés) et une légère diminution des diplômés du supérieur (4,8% à 4,0%). Les diplômes suivent la même tendance, avec 81% sans diplôme en 2021 (+1 point) et une réduction des masters/doctorats (1,3% à 0,7%).
+
+```{r}
+# Enregistrer le dataframe en format .dta
+write_dta(welfare_fusion, "Base fusionnée.dta")
+```
+
