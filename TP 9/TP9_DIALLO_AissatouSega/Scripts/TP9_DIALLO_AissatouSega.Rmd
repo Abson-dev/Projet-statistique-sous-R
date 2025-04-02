@@ -75,7 +75,10 @@ head(welf2021)
 # Vérification des dimensions des deux bases de données
 dim(welf2018)
 dim(welf2021)
+```
 
+
+```{r,results='hide'}
 # Informations générales sur les variables/colonnes
 str(welf2018)
 str(welf2021)
@@ -98,12 +101,16 @@ Aucun doublon n'a été trouvé dans les deux bases
 
 ## 2. Valeurs manquantes
 
-```{r}
-# Détection des valeurs manquantes
+```{r, results='hide'}
+## Détection des valeurs manquantes
+# Résumé des données welf2018
 summary(welf2018)
+# Résumé des données welf2021
 summary(welf2021)
+```
 
-# Calcul du pourcentage de valeurs manquantes pour chaque colonne
+```{r, results='hide'}
+## Calcul du pourcentage de valeurs manquantes pour chaque colonne
 colSums(is.na(welf2018)) / nrow(welf2018) * 100
 colSums(is.na(welf2021)) / nrow(welf2021) * 100
 
@@ -204,10 +211,14 @@ labelled::val_labels(welf2021$hnation)
 
 # Transformation de la variable hnation en facteur et affichage de la distribution en 2021
 welf2021 %>%
-  to_factor() %>%  
-  select(hnation) %>% 
-  tbl_summary(missing = "always",  # Affichage des valeurs manquantes
-              missing_text = "Valeurs manquantes")  
+  to_factor() %>%
+  select(hnation) %>%
+  tbl_summary(
+    missing = "always",  # Affichage des valeurs manquantes
+    missing_text = "Valeurs manquantes",
+    label = list(hnation ~ "Nationalité du CM"))%>%
+    modify_header(label = "**Nationalité du Chef de Ménage**"
+    )
 ```
 
 
@@ -253,7 +264,10 @@ welf2021 %>%
   to_factor() %>% 
   select(hnation) %>% 
   tbl_summary(missing = "always", 
-              missing_text = "Valeurs manquantes")
+              missing_text = "Valeurs manquantes",
+              label = list(hnation ~ "Nationalité du CM"))%>%
+    modify_header(label = "**Nationalité du Chef de Ménage**"
+              )
 ```
 
 
@@ -273,7 +287,10 @@ welf2018 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hdiploma ~ "Diplôme du CM"))%>%
+    modify_header(label = "**Diplôme le plus élevé du Chef de Ménage**"
+              )
 
 ```
 
@@ -297,7 +314,10 @@ welf2018 %>%
   to_factor() %>% 
   select(hdiploma) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hdiploma ~ "Diplôme du CM"))%>%
+    modify_header(label = "**Diplôme le plus élevé du Chef de Ménage**"
+              )
 
 ```
 
@@ -317,7 +337,8 @@ labelled::val_labels(welf2021$hactiv7j)
 welf2018 %>% 
   to_factor() %>%  
   select(hactiv7j) %>%  
-  tbl_summary(missing = "always", missing_text = "NA")  # Génération du tableau avec affichage des valeurs manquantes
+  tbl_summary(missing = "always", missing_text = "NA",label = list(hactiv7j ~ "Activité du CM"))%>%
+    modify_header(label = "**Activité des 7 derniers jours du Chef de Ménage**")  # Génération du tableau avec affichage des valeurs manquantes
 
 ```
 
@@ -348,7 +369,10 @@ welf2018 %>%
   to_factor() %>% 
   select(hactiv7j) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hactiv7j ~ "Activité du CM"))%>%
+              modify_header(label = "**Activité des 7 derniers jours du Chef de Ménage**")
+              
 
 ```
 
@@ -368,7 +392,10 @@ welf2018 %>%
   to_factor() %>% 
   select(hbranch) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hbranch ~ "Branche activité du CM"))%>%
+              modify_header(label = "**Branche d'activité du Chef de Ménage**")
+              
 
 ```
 
@@ -390,7 +417,10 @@ welf2018 %>%
   to_factor() %>% 
   select(hbranch) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hbranch ~ "Branche activité du CM"))%>%
+              modify_header(label = "**Branche d'activité du Chef de Ménage**")
+              
 
 ```
 
@@ -424,7 +454,10 @@ welf2021 %>%
   to_factor() %>% 
   select(hcsp) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(hcsp ~ "Catégorie SP du CM"))%>%
+              modify_header(label = "**Catégorie Socioprofessionnelle du Chef de Ménage**")
+              
 
 ```
 
@@ -444,13 +477,19 @@ welf2018 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 # Résumé de la distribution de la variable zae dans la base welfare 2021, avec gestion des valeurs manquantes
 welf2021 %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 ```
 
@@ -487,7 +526,10 @@ welf2018 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 
 #Harmonisation des codes géographiques dans la base 2021
@@ -511,7 +553,10 @@ welf2021 <- welf2021 %>%
 welf2021 %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 ```
 
@@ -553,7 +598,10 @@ welf2018 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 ```
 
@@ -563,7 +611,10 @@ welf2021 %>%
   to_factor() %>% 
   select(zae) %>% 
   tbl_summary(missing = "always",
-              missing_text = "NA")
+              missing_text = "NA",
+              label = list(zae ~ "ZAE"))%>%
+              modify_header(label = "**Zone Agroécologique**")
+              
 
 ```
 Le codage et la labellisation de la variable zae sont désormais cohérents entre les deux bases. Il reste à vérifier qu'aucune différence n'existe dans la labellisation ou le codage des autres variables communes aux deux bases.
