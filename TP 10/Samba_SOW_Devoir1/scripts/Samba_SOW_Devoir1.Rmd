@@ -3,11 +3,10 @@ title: "evaluation R"
 author: "Samba"
 date: "`r Sys.Date()`"
 output:
+  word_document: default
   html_document:
     df_print: paged
-  word_document: default
 ---
-
 
 ## Charger les bibliothèques
 
@@ -21,9 +20,7 @@ for (package in packages) {
 }
 ```
 
-
-1. Chargement des bases de données
-
+1.  Chargement des bases de données
 
 ```{r include=FALSE}
 menage <- haven::read_dta("../data/base_menage.dta")
@@ -37,10 +34,9 @@ endline_mere <- haven::read_dta("../data/food_comp_mother_endline.dta")
 dim(baseline_mere)
 ```
 
-
 #Partie 1 : Gestion et nettoyage des bases de données
 
-1.	Vérifions la présence de doublons dans les bases de données. Supprimons les doublons si nécessaire.
+1.  Vérifions la présence de doublons dans les bases de données. Supprimons les doublons si nécessaire.
 
 ```{r}
 nrow(menage) - nrow(distinct(menage))
@@ -49,7 +45,6 @@ nrow(endline_enf) - nrow(distinct(endline_enf))
 nrow(baseline_mere) - nrow(distinct(baseline_mere))
 nrow(endline_mere) - nrow(distinct(endline_mere))
 ```
-
 
 ```{r}
 # Afficher le nombre de doublons sur hhid
@@ -67,7 +62,6 @@ menage_uniq <- menage %>%
 
 ```
 
-
 ```{r}
 # Fonction pour vérifier les doublons
 verif_doublon <- function(data, key) {
@@ -80,7 +74,6 @@ verif_doublon <- function(data, key) {
   ))
 }
 ```
-
 
 ```{r}
 # Vérification des doublons
@@ -103,8 +96,7 @@ list(
 )
 ```
 
-2.	Assurez-vous que les noms des variables sont cohérents entre les bases de données Baseline et Endline (par exemple, les noms des nutriments doivent être identiques). Si ce n’est pas le cas, apportez des corrections.
-
+2.  Assurez-vous que les noms des variables sont cohérents entre les bases de données Baseline et Endline (par exemple, les noms des nutriments doivent être identiques). Si ce n’est pas le cas, apportez des corrections.
 
 ```{r}
 # Afficher les noms des colonnes
@@ -116,6 +108,7 @@ endline_mere <- endline_mere %>%
   rename_with(~ colnames(baseline_mere), everything())
 
 ```
+
 ```{r}
 
 
@@ -127,9 +120,7 @@ baseline_enf <- baseline_enf %>%
   rename_with(~ colnames(endline_enf), everything())
 ```
 
-
-
-3.	Certaines variables peuvent contenir des données manquantes, cependant suivant une logique bien établie, il est possible de corriger ces données manquantes. Veuillez vérifier soigneusement les données et corriger les données manquantes de certaines variables si possibles.
+3.  Certaines variables peuvent contenir des données manquantes, cependant suivant une logique bien établie, il est possible de corriger ces données manquantes. Veuillez vérifier soigneusement les données et corriger les données manquantes de certaines variables si possibles.
 
 ```{r}
 colSums(is.na(menage))
@@ -141,8 +132,7 @@ colSums(is.na(endline_mere))
 
 On peut remarquerv la presence de nombreuses données manquantes dans beaucoup de variables et ceci dans toutes les bases baseline et endline mais pour la base menage on remarque une seule valeur manquante dans la variable "communeid".
 
-
-Je vais choisi la methode de la médiane pour remplacer les valeurs manquantes (NA) car elle est plus robuste que la moyenne face aux valeurs aberrantes et fonctionne bien même lorsque les données sont asymétriques. Contrairement à la moyenne, qui peut être influencée par des valeurs extrêmes, la médiane représente mieux la tendance centrale des données, en particulier pour les variables nutritionnelles comme la consommation d’énergie et de nutriments. De plus, elle reste fiable même lorsque les valeurs sont très dispersées, contrairement au mode, qui peut être peu pertinent en présence de nombreuses valeurs uniques. 
+Je vais choisi la methode de la médiane pour remplacer les valeurs manquantes (NA) car elle est plus robuste que la moyenne face aux valeurs aberrantes et fonctionne bien même lorsque les données sont asymétriques. Contrairement à la moyenne, qui peut être influencée par des valeurs extrêmes, la médiane représente mieux la tendance centrale des données, en particulier pour les variables nutritionnelles comme la consommation d’énergie et de nutriments. De plus, elle reste fiable même lorsque les valeurs sont très dispersées, contrairement au mode, qui peut être peu pertinent en présence de nombreuses valeurs uniques.
 
 ```{r}
 replace_na_par_median <- function(data, cols) {
@@ -151,7 +141,6 @@ replace_na_par_median <- function(data, cols) {
   return(data)
 }
 ```
-
 
 ```{r}
 # Appliquer aux bases
@@ -163,7 +152,7 @@ endline_enf <- replace_na_par_median(endline_enf, var_num)
 
 ```
 
-4.	Quelle est la consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base ?
+4.  Quelle est la consommation d’énergie moyenne à chaque repas pour l’ensemble des mères lors de l’enquête de base ?
 
 ```{r}
 baseline_mere %>%
@@ -177,7 +166,8 @@ baseline_mere %>%
 
 ```
 
-##5.	Après vérification et correction de chaque base de données, enregistrer sous un nouveau nom
+##5. Après vérification et correction de chaque base de données, enregistrer sous un nouveau nom
+
 ```{r}
 write_dta(baseline_mere, "mother_baseline_v1.dta")
 write_dta(endline_mere, "mother_endline_v1.dta")
@@ -187,10 +177,7 @@ write_dta(menage, "base_menage_final.dta")
 
 ```
 
-Partie 2 : Empilement et Fusion des données
-Maintenant que vous avez vérifié et corrigé les possibles incohérences dans les bases de données suivre les instructions suivantes :
-1)	Baseline
-i)	Empilez les bases de données des mères (mother_baseline_v1.dta) et des enfants (child_baseline_v1.dta) de sorte que pour chaque ménage de l’étude, on retrouve une ou plusieurs lignes concernant la mère et sa consommation journalière et une ou plusieurs lignes concernant la consommation de l’enfant. 
+Partie 2 : Empilement et Fusion des données Maintenant que vous avez vérifié et corrigé les possibles incohérences dans les bases de données suivre les instructions suivantes : 1) Baseline i) Empilez les bases de données des mères (mother_baseline_v1.dta) et des enfants (child_baseline_v1.dta) de sorte que pour chaque ménage de l’étude, on retrouve une ou plusieurs lignes concernant la mère et sa consommation journalière et une ou plusieurs lignes concernant la consommation de l’enfant.
 
 ```{r}
 # Empiler les bases mères et enfants
@@ -198,9 +185,7 @@ baseline <- bind_rows(baseline_mere, baseline_enf)
 endline <- bind_rows(endline_mere, endline_enf)
 ```
 
-
-
-ii)	Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe _b pour faire référence à l’enquête Baseline.
+ii) Renommez toutes les variables de consommation energ_kcal jusqu’à vit_c_mcg en ajoutant le suffixe \_b pour faire référence à l’enquête Baseline.
 
 ```{r}
 baseline <- baseline %>% 
@@ -208,7 +193,7 @@ baseline <- baseline %>%
 colnames(baseline)
 ```
 
-iii)	Créez une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
+iii) Créez une base de données qui résume les consommations journalières totales par individu (somme des 4 repas) pour l’énergie et tous les nutriments en utilisant la commande merge.
 
 ```{r}
 colnames(baseline)
@@ -227,4 +212,12 @@ baseline_comb <- baseline %>%
   )
 ```
 
-iv)	Sauvegardez la base de données finale contenant seulement les hhid s1_q2 energ_kcal   protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ». Veuillez noter que pour cette base de données, pour chaque ménage, nous avons une ligne pour la mère et une ligne pour l’enfant.
+iv) Sauvegardez la base de données finale contenant seulement les hhid s1_q2 energ_kcal protein_g lipid_tot_g calcium_mg iron_mg zinc_mg sous le nom « baseline_final.dta ». Veuillez noter que pour cette base de données, pour chaque ménage, nous avons une ligne pour la mère et une ligne pour l’enfant.
+
+
+
+
+
+
+
+

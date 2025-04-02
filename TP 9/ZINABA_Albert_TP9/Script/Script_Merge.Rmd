@@ -1,0 +1,1231 @@
+---
+title: "Projet_Merge_Bases"
+author: "Albert ZINABA"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+  word_document:
+    toc: true
+  pdf_document:
+    toc: true
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+L’Enquête Harmonisée sur les Conditions de Vie des Ménages (EHCVM) est une initiative de l’UEMOA visant à améliorer la comparabilité des indicateurs de pauvreté et des conditions de vie dans ses États membres. Le Sénégal a participé à cette enquête à travers deux éditions, en 2018 et en 2021. Dans ce travail il nous ait demandé de faire la fusion des bases welfares presentes dan les deux années.Pour ce faire, il est essentiel d’effectuer un travail préalable de nettoyage, de recodage et d’harmonisation avant leur fusion. Ce processus garantira la cohérence et la comparabilité des variables pour la fusion.
+
+
+*Importations et Chargement des packages*
+
+```{r, message=FALSE, warning=FALSE}
+packages <- c("readr","cardx","haven","utils","dplyr","gtsummary","gt" , "DataExplorer","labelled","survey")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+# Importation et analyse des bases de données 
+
+Le travail coonsiste a faire la merge des bases de donnée welfare de l'EHCVM 2018 et 2021. Mais avant de faire le merge il est essentiel de passer au netoyage des deux base de données. Cet netoyage part du recodage des variables, la labelisation de certaines variables en tout a l'harmonisation des deux base de données.
+
+## *Importation des bases de données*
+
+```{r}
+#Nous importons les bases de données avec la fonction read_dta du package haven
+
+data_welf2018 <- haven::read_dta("../Donnees/ehcvm_welfare_SEN2018.dta") #base welfare 2018
+data_welf2021 <- haven::read_dta("../Donnees/ehcvm_welfare_sen2021.dta") #base welfare 2021
+```
+
+
+## *Analyse des bases de données*
+
+###**Structure de la base de données des deux bases**
+
+Nous affichons la structure des bases afin d'avoir une vue globale des deux bases 
+```{r}
+utils::str(data_welf2018) #Structure de la base 2018
+utils::str(data_welf2021) #Structure de la base 2021
+```
+
+
+###**Affichages des premieres lignes des deux bases**
+
+Nous affichons les premières lignes des deux bases afin de se faire une idée de leurs observations
+```{r}
+head(data_welf2018)
+head(data_welf2021)
+```
+
+
+###**Affichage de quelques statistiques des deux bases**
+
+Il s'agit d'afficher un résumé statistique des variables contenues dans les bases de données.
+```{r}
+summary(data_welf2018)
+summary(data_welf2021)
+```
+
+
+###**Verification des doublons** 
+
+Nous verifions pour détecter et compter les ménages dupliqués dans les bases de données.
+```{r}
+
+doublon_2018 <- data_welf2018[duplicated(data_welf2018[, c("grappe","menage")]), ] # sélectionne les ménages dupliqué qui sont dans la base 2018
+
+doublon_2021 <- data_welf2021[duplicated(data_welf2021[, c("grappe","menage")]), ] # sélectionne les ménages dupliqué qui sont dans la base 2021
+
+cat("Nombre de doublons présents dans la base welfare 2018  :", nrow(doublon_2018), "\n")
+
+cat("Nombre de doublons présents dans la base welfare 2021  :", nrow(doublon_2021))
+
+```
+
+
+###**verification des valeurs manquantes**
+
+Il s'agit d'afficher les valeurs manquantes pour chacune des deux bases de données 
+```{r}
+# Calculer le nombre de valeurs manquantes par variable (colonne)
+print("Valeurs manquante base 2018")
+NA_base_2018 <- colSums(is.na(data_welf2018))
+NA_base_2018
+
+print("Valeurs manquante base 2021")
+NA_base_2021 <- colSums(is.na(data_welf2018))
+NA_base_2021
+
+```
+
+
+## *Visualisations des observations des deux bases*
+
+###**Affichage des observations**
+
+Nous extrayons les noms des variables présentes dans chacune des bases de données, cela nous permet d'avoir une vue globale des variables des deux bases de données
+```{r}
+vars_2018 <- colnames(data_welf2018) # liste les variables dans la base 2018
+vars_2021 <- colnames(data_welf2021) # liste les variables dans la base 2021
+
+cat("Variables dans la base 2018 :\n")
+for (var in vars_2018) {
+  cat(var, "\n")}
+
+cat("\nVariables dans la base 2021 :\n")
+for (var in vars_2021) {
+  cat(var, "\n")}
+
+```
+
+
+###**Identifications des variables des deux base des donnees**
+
+Nous identifions les variables qui sont communes aux deux bases et celles qui sont specifiques a chacune des deux bases, cela nous permet d'avoir une idée de comment s'y prendre pour l'harmonisation des deux bases pour la fusion.
+```{r}
+# Identification des variables communes entre les deux bases de données
+vars_com <- dplyr::intersect(vars_2018, vars_2021)
+
+# Identification des variables spécifiques à chaque base
+vars_uniq_welf2018 <- dplyr::setdiff(vars_2018, vars_com)
+vars_uniq_welf2021 <- dplyr::setdiff(vars_2021, vars_com)
+
+# Affichage
+cat("Variables communes :\n")
+print(vars_com)
+
+cat("\nVariables spécifiques à la base 2018 :\n")
+print(vars_uniq_welf2018)
+
+cat("\nVariables spécifiques à la base 2021 :\n")
+print(vars_uniq_welf2021)
+```
+Nous constatons que toutes les variables presentes en 2018 sont egalement presentes en 2021 a l'exception de la variable "alphab". Par contre il y a 13 nouvelles en 2021 qui ne sont pas presents en 2018.
+
+
+
+# Traitement des bases de données
+
+Après identification des variables des deux bases de données ont constate des variables communes mais aussi des variables specifiques a chacune des bases. Pour la suite du travail il nous faut nous assurer de la coherence des deux bases de données pour pouvoir faire le merge. Pour cela nous allons proceder au recodage, la labelisation, et l'harmonisation de certaines variables.
+
+De prime a bord nous constatons que la varaible "halfab" en 2018 et "halfa" en 2021 represente la meme variable c'est a dire alphabetisation du chef de menage. Nous allons donc procedé à l'uniformisation de variable en le renommant en fonction du nom dans l'une des bases
+
+```{r}
+# Renommons la variable halpha en halphab dans la base 2021
+vars_2021[vars_2021== "halfa"]<- "halfab"
+vars_2021
+
+#Ajoutons cette variable a la liste des variables communes 
+vars_com <- append(vars_com, "halfab")
+vars_com
+```
+
+
+## *Traitement des variables communes mais avec des labels differents dans les deux bases*
+
+###**Verification des variables communes avec des labels differents**
+Le code ci-après permet de vérifier si les labels des variables communes entre les bases 2018 et 2021 sont identiques ou non. Il crée une liste des variables dont les labels diffèrent entre les deux bases. Donc Après exécution, l'objet "vars_label_diff" contient les variables dont les labels sont différents entre les deux bases.
+
+```{r}
+vars_label_diff <- c() #créer une liste vide 
+
+for (variable in vars_com) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(data_welf2018[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+      value_label_2018 <- labelled::val_labels(data_welf2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      value_label_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+if(labelled::is.labelled(data_welf2021[[variable]])){ #vérifier si la variable en 2021 est labéliser
+    
+      value_label_2021 <- labelled::val_labels(data_welf2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      value_label_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+  }
+  
+  if(!identical(value_label_2018, value_label_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+vars_label_diff <- append(vars_label_diff,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+```
+Après execution nous aons liste de 7 variables dont les labels diffèrent entre les deux bases. Pour faire le merge il faut harmoniser les labels de ces variables dans les deux bases. Cela fera l'objet de la suite de notre travail.
+
+
+###**Traitement des incoherences des variables**
+
+Pour chaque variable, nous allons:
+ - Visualiser la distibution 
+ - Détecter l'incohérence
+ - Corriger l'incohérence
+ - Revisualiser la variable pour s'assurer que le traitement n'a pas modifié la distribution
+ 
+
+### * Traitement de la variable "zae"
+
+####**Visualisation de la distribution**
+```{r}
+
+data_welf2018 %>%
+  to_factor() %>% # Convertir les variables labellisées en facteurs
+  select(zae) %>% # Sélectionner la variable à afficher
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  # Conversion en tableau GT
+  gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+```
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'zae' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$zae))
+
+cat("\nLabels de la variable 'zae' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$zae))
+
+```
+
+####**Correction de l'incoherence**
+Nous recodons et appliquons les labels à la variable zae dans 2018 pour s'assurerer de la coherence avec la base 2021
+```{r}
+# Recodage de la variable zae
+data_welf2018 <- data_welf2018 %>%
+  mutate(
+    zae = case_when(
+      zae == 6 ~ 1,   # Kédougou
+      zae == 2 ~ 3,   # Saint-Louis-Matam
+      zae == 3 ~ 5,   # Thies-Diourbel-Louga
+      zae == 4 ~ 7,   # Kaolack-Fatick-Kaffrine
+      zae == 5 ~ 9,   # Ziguinchor-Tamba-Kolda-Sédhiou
+      zae == 1 ~ 11,  # Dakar
+      TRUE ~ NA_real_  # Toutes les autres valeurs deviennent NA
+    ))
+
+# Appliquer les labels à la variable zae
+data_welf2018$zae <- labelled(
+  data_welf2018$zae,
+  labels = c(
+    "Kédougou" = 1, 
+    "Saint-Louis-Matam" = 3, 
+    "Thies-Diourbel-Louga" = 5,
+    "Kaolack-Fatick-Kaffrine" = 7,
+    "Ziguinchor-Tamba-Kolda-Sédhiou" = 9,
+    "Dakar" = 11
+  ))
+
+# Appliquer les labels à la variable zae
+data_welf2021$zae <- labelled(
+  data_welf2021$zae,
+  labels = c(
+    "Kédougou" = 1, 
+    "Saint-Louis-Matam" = 3, 
+    "Thies-Diourbel-Louga" = 5,
+    "Kaolack-Fatick-Kaffrine" = 7,
+    "Ziguinchor-Tamba-Kolda-Sédhiou" = 9,
+    "Dakar" = 11
+  ))
+```
+
+
+####**Revisualisons la distribution apres la correction**
+```{r}
+# Affichage des tableaux
+table_2018<-data_welf2018 %>%
+  mutate(zae = to_factor(zae)) %>% # Convertir en facteur si nécessaire
+  select(zae) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  # Convertir en tableau GT
+  gt::tab_header(title = "Répartition des zones agroécologiques") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage du tableau
+table_2018
+
+```
+Nous voyons que les distributions restent les memes après la correction.
+
+
+
+### * Traitement de la variable "hnation"
+
+####**Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018<-data_welf2018 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021<-data_welf2021 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'hnation' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$hnation))
+
+cat("\nLabels de la variable 'hnation' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$hnation))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux baeses, nottament l'orthographe des labels, la présence de nouvelles modilités en 2021 et absents en 2018. Il y a egalement des incoherences au niveau des codes
+
+
+####**Correction des incoherences**
+```{r}
+# Recodage de la variable hnation
+data_welf2021 <- data_welf2021 %>%
+  mutate(hnation = case_when(
+    hnation == 1  ~ 1,   # Bénin -> Benin
+    hnation == 2  ~ 2,   # Burkina Faso -> Burkina Faso
+    hnation == 4  ~ 3,   # Cote d'Ivoire -> Côte d'Ivoire
+    hnation == 8  ~ 4,   # Guinée Bissau -> Guinée Bissau
+    hnation == 10 ~ 5,   # Mali -> Mali
+    hnation == 11 ~ 6,   # Niger -> Niger
+    hnation == 13 ~ 7,   # Sénégal -> Sénégal
+    hnation == 15 ~ 8,   # Togo -> Togo
+    hnation == 12 ~ 9,   # Nigeria -> Nigéria
+    hnation %in% c(3, 5, 6, 7, 14) ~ 10,  # Cape-vert, Gambie, Ghana, Guinée, Sierra Leone -> Autre CEDEAO
+    hnation == 17 ~ 11,  # Autre Afrique -> Autre Afrique
+    hnation == 18 ~ 12,  # Autre pays hors Afrique -> Autre pays hors Afrique
+    TRUE ~ NA_real_  # Toutes les autres valeurs deviennent NA
+  ))
+
+# Appliquer les labels à la variable hnation
+data_welf2018$hnation <- labelled(
+  data_welf2018$hnation,
+  labels = c(
+    "Benin" = 1, 
+    "Burkina Faso" = 2, 
+    "Côte d'Ivoire" = 3, 
+    "Guinée Bissau" = 4,
+    "Mali" = 5, 
+    "Niger" = 6, 
+    "Sénégal" = 7, 
+    "Togo" = 8, 
+    "Nigéria" = 9,
+    "Autre CEDEAO" = 10, 
+    "Autre Afrique" = 11, 
+    "Autre pays hors Afrique" = 12
+  ))
+
+# Appliquer les labels à la variable hnation
+data_welf2021$hnation <- labelled(
+  data_welf2021$hnation,
+  labels = c(
+    "Benin" = 1, 
+    "Burkina Faso" = 2, 
+    "Côte d'Ivoire" = 3, 
+    "Guinée Bissau" = 4,
+    "Mali" = 5, 
+    "Niger" = 6, 
+    "Sénégal" = 7, 
+    "Togo" = 8, 
+    "Nigéria" = 9,
+    "Autre CEDEAO" = 10, 
+    "Autre Afrique" = 11, 
+    "Autre pays hors Afrique" = 12
+  ))
+```
+ 
+  
+####**Revisualisation des distribtions apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018<-data_welf2018 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021<-data_welf2021 %>%
+  mutate(hnation = to_factor(hnation)) %>% # Convertir en facteur si nécessaire
+  select(hnation) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Nationalité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+### * Traitement de la variable "hdiploma"
+
+####**Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur si nécessaire
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur si nécessaire
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'hdiploma' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$hdiploma))
+
+cat("\nLabels de la variable 'hdiploma' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$hdiploma))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux baeses.
+
+
+####**Correction des incohérences**
+Ici leslabels sont codifiés de la meme maniere nous allons donc proceder a l'uniformisation de l'ortographe des labels
+```{r}
+data_welf2021$hdiploma <- labelled(
+  data_welf2021$hdiploma,
+  labels = c(
+    "Aucun"       = 0, 
+    "CEPE"    = 1,
+    "BEPC"   = 2,
+    "CAP"         = 3,
+    "BT"          = 4,
+    "BAC"         = 5,
+    "DEUG/DUT/BTS"= 6,
+    "Licence"     = 7,
+    "Maitrise"    = 8,
+    "Master/DEA/DESS" = 9,
+    "Doctorat/PHD"    = 10
+  ),
+  label = "Diplôme du chef de ménage"
+)
+
+data_welf2018$hdiploma <- labelled(
+  data_welf2018$hdiploma,
+  labels = c(
+    "Aucun"       = 0, 
+    "CEPE"    = 1,
+    "BEPC"   = 2,
+    "CAP"         = 3,
+    "BT"          = 4,
+    "BAC"         = 5,
+    "DEUG/DUT/BTS"= 6,
+    "Licence"     = 7,
+    "Maitrise"    = 8,
+    "Master/DEA/DESS" = 9,
+    "Doctorat/PHD"    = 10 
+  ),
+  label = "Diplôme du chef de ménage"
+)
+```
+
+
+####**Revisualisation de la distribution apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hdiploma = to_factor(hdiploma)) %>% # Convertir en facteur
+  select(hdiploma) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Diplôme du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+
+### Traitement de la variable "hactivi7j"
+
+####**Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'hactiv7j' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$hactiv7j))
+
+cat("\nLabels de la variable 'hactiv7j' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$hactiv7j))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux baeses.
+
+
+####**Correction des incoherences**
+```{r}
+data_welf2018$hactiv7j <- labelled(
+  data_welf2018$hactiv7j,
+  labels = c(
+    "Occupé" = 1,
+    "Chômeur" = 2, 
+    "TF cherchant un emploi" = 3,
+    "TF ne cherchant pas un emploi"= 4,
+    "Inactif"      = 5,
+    "Moins de 5 ans"= 6
+),
+label = "Activité 7 jours du CM"
+  )
+
+data_welf2021$hactiv7j <- labelled(
+  data_welf2021$hactiv7j,
+  labels = c(
+    "Occupé" = 1,
+    "Chômeur" = 2, 
+    "TF cherchant un emploi" = 3,
+    "TF ne cherchant pas un emploi"= 4,
+    "Inactif"      = 5,
+    "Moins de 5 ans"= 6
+),
+  label = "Activité 7 jours du CM"
+)
+```
+
+
+####**Revisualisation de la distribution apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hactiv7j = to_factor(hactiv7j)) %>% # Convertir en facteur
+  select(hactiv7j) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Activité des 7 derniers jours (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+### * Traitement de la variable "hcsp"
+
+####**Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'hcsp' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$hcsp))
+
+cat("\nLabels de la variable 'hcsp' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$hcsp))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux baeses.
+
+
+####**Correction des incoherences**
+Nous cosntatons que la variable a les memes codes dans les deux bases. Les incoherence se situent au niveau de l'orthographe des labels. Nous allons donc affecter les labels de la variable en 2021 a la variable en 2018
+```{r}
+val_labels(data_welf2018$hcsp) <-  val_labels(data_welf2021$hcsp)
+```
+
+
+####**Revisualisation de la distribution apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hcsp = to_factor(hcsp)) %>% # Convertir en facteur
+  select(hcsp) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Catégorie socio-professionnelle du chef de ménage(EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+
+### * Traitement de la variable "hbranch"
+
+#### **Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'hbranch' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$hbranch))
+
+cat("\nLabels de la variable 'hbranch' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$hbranch))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux baeses.
+
+Nous cosntatons que la variable est codée de la meme manière dans les deux bases. Les incoherences se situent au niveau de l'orthographe des labels. Nous allons donc affecter les labels de la variable en 2021 a la variable en 2018
+```{r}
+val_labels(data_welf2018$hbranch) <-  val_labels(data_welf2021$hbranch)
+```
+
+
+####**Revisualisation de la distribution apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(hbranch = to_factor(hbranch)) %>% # Convertir en facteur
+  select(hbranch) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Branche d'activité du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+### * Traitement de la variable "region"
+
+####**Visualisation de la distribution**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+
+```
+
+
+####**Detection de l'incoherence**
+Nous affichons les labels de la variales dans les deux bases pour voir l'incoherence
+```{r}
+
+cat("Labels de la variable 'region' dans la base 2018 :\n")
+print(labelled::val_labels(data_welf2018$region))
+
+cat("\nLabels de la variable 'region' dans la base 2021 :\n")
+print(labelled::val_labels(data_welf2021$region))
+
+```
+Nous constatons don des incoherences des labels de la varaiable hnation dans les deux bases.
+
+####**Correction des incoherences**
+Nous cosntatons que la variable est codée de la meme manière dans les deux bases. Les incoherences se situent au niveau de l'orthographe des labels. Nous allons donc affecter les labels de la variable en 2018 a la variable en 2021
+```{r}
+val_labels(data_welf2021$region) <-  val_labels(data_welf2018$region)
+```
+
+
+####**Revisualisation de la distribution apres correction**
+```{r}
+# Visualisation dans la base 2018
+table_2018 <- data_welf2018 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2018)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Visualisation dans la base 2021
+table_2021 <- data_welf2021 %>%
+  mutate(region = to_factor(region)) %>% # Convertir en facteur
+  select(region) %>% # Sélectionner la variable
+  tbl_summary(
+    missing = "always", # Afficher les valeurs manquantes
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label ~ "**Taille de l'échantillon**") %>% 
+  as_gt() %>%  
+  gt::tab_header(title = "Région de résidence du chef de ménage (EHCVM 2021)") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2021 (SEN)") %>% 
+  gt::tab_options(
+    heading.title.font.size = 16,
+    heading.title.font.weight = "bold"
+  )
+
+# Affichage des tableaux
+table_2018
+table_2021
+```
+
+
+
+####**Verifions les labels et le recodage apres l'harmonisation des vaeriables qui n'etaient pas conforme dans les deux bases**
+```{r}
+variables_problemes <- c("zae", "region", "hnation", "hdiploma", "hactiv7j", "hbranch", "hcsp")
+
+for (var in variables_problemes) {
+  cat("Variable :", var, "\n")
+  cat("Labels 2018 :\n")
+  print(labelled::val_labels(data_welf2018[[var]]))
+  cat("\nLabels 2021 :\n")
+  print(labelled::val_labels(data_welf2021[[var]]))
+  cat("\n------------------------------------\n")
+}
+```
+
+
+####**Verifionsompare les labels des variables, les labels des valeurs et les types des variables entre deux bases de donnée**
+```{r}
+#Fonction qui compare les labels des variables, les labels des valeurs et les types des variables entre les deux bases
+
+compare_data <- function(df1, df2) {
+  vars_com <- intersect(names(df1), names(df2))
+  different_labels <- list()
+  var_diff_labels <- list()
+  type_diff <- list()
+  
+  for (var in vars_com) {
+    # 🔹 Comparaison des labels des variables
+    label1 <- attr(df1[[var]], "label")
+    label2 <- attr(df2[[var]], "label")
+    
+    if (!identical(label1, label2)) {
+      different_labels[[var]] <- list("Label 2018" = label1, "Label 2021" = label2)
+    }
+    
+    # 🔹 Comparaison des labels des valeurs des variables labellisées
+    labels_2018 <- if (labelled::is.labelled(df1[[var]])) labelled::val_labels(df1[[var]]) else NULL
+    labels_2021 <- if (labelled::is.labelled(df2[[var]])) labelled::val_labels(df2[[var]]) else NULL
+    
+    if (!identical(labels_2018, labels_2021)) {
+      var_diff_labels[[var]] <- list("Labels 2018" = labels_2018, "Labels 2021" = labels_2021)
+    }
+    
+    # 🔹 Comparaison des types des variables
+    type1 <- class(df1[[var]])
+    type2 <- class(df2[[var]])
+    
+    if (!identical(type1, type2)) {
+      type_diff[[var]] <- list("Type 2018" = type1, "Type 2021" = type2)
+    }
+  }
+  
+  # 🔥 Affichage des résultats
+  if (length(different_labels) == 0) {
+    print("✅ Les labels des variables sont identiques entre 2018 et 2021.")
+  } else {
+    print("⚠️ Labels des variables différents :")
+    print(different_labels)
+  }
+  
+  if (length(var_diff_labels) == 0) {
+    print("✅ Les labels des valeurs sont identiques entre 2018 et 2021.")
+  } else {
+    print("⚠️ Labels des valeurs différents :")
+    print(var_diff_labels)
+  }
+  
+  if (length(type_diff) == 0) {
+    print("✅ Les types de variables sont identiques entre 2018 et 2021.")
+  } else {
+    print("⚠️ Variables avec des types différents :")
+    print(type_diff)
+  }
+}
+```
+
+####**Appel de la fonction**
+```{r}
+compare_data(data_welf2018, data_welf2021)
+
+```
+
+
+Apres execution du code ci-desssous nosu constatons que les labels des variables "grappe" et "menage ne sont pas les memes dans les deux bases. Nous allons donc les harmoniser.
+
+####** Harmonisation des labels
+```{r}
+# Définir les labels corrects et cohérents entre les deux bases
+var_labels <- c(
+  "grappe" = "Numéro grappe",
+  "menage" = "Numéro ménage"
+)
+
+# Appliquer les labels à la base 2018
+for (var in names(var_labels)) {
+  attr(data_welf2018[[var]], "label") <- var_labels[var]
+}
+
+# Appliquer les labels à la base 2021
+for (var in names(var_labels)) {
+  attr(data_welf2021[[var]], "label") <- var_labels[var]
+}
+
+```
+
+# Fusion des deux bases
+```{r}
+# Empiler les deux bases après harmonisation
+data_welf_final18_21 <- dplyr::bind_rows(data_welf2018, data_welf2021)
+data_welf_final18_21
+
+```
+
+## Quelques statistiques sur la base final
+```{r}
+data_welf_final18_21 %>%    
+  to_factor() %>%  # Conversion des variables haven_labelled en facteurs
+  select(year, hage, hgender, hdiploma, hcsp, dtot, dali, halfab) %>% 
+  tbl_summary(
+    by= year,
+    digits = list(hage~ 0, dtot~0, dali~0 ), # Affichage sans décimales pour l'âge, dtot et dali
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>% 
+  modify_header(label ~ "**Taille des échantillons**") %>% 
+  as_gt() %>%
+  gt::tab_header(title = "Statistiques sur certaines variables après fusion") %>% 
+  gt::tab_source_note(source_note = "Source : EHCVM 2018 et 2021 (SEN)") %>%
+  gt::tab_options(
+    heading.title.font.size = 20,
+    heading.title.font.weight = "bold"
+  )
+
+```
+
+
+## Sauvegarde de la base final
+```{r}
+# Sauvegarde au format Stata
+write_dta(data_welf_final18_21, "data_welf_final18_21.dta")
+
+```
+
+
+
+
+

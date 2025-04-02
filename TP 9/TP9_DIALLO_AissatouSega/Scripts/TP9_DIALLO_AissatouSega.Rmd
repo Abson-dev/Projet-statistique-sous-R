@@ -1,0 +1,610 @@
+---
+title: "EHCVM 2018 et 2021"
+author: "Aissatou Sega DIALLO"
+date: "2025-03-20"
+cours: "Projet statistique sous R"
+output: pdf_document
+header-includes:
+   - \usepackage{graphicx}  
+---
+
+
+\begin{center}
+    {\Huge \textbf{Fusion des bases Welfare EHCVM }} \\[10pt]
+\end{center}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=10cm]{../images/img1.png}
+\end{figure}
+
+
+\begin{center}
+\Large \textbf{Sous la supervision de :} \\
+\Large M. Hema
+\end{center}
+
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Ce travail pratique (TP) a pour objectif de fusionner les bases de données welfare des Enquêtes sur les Conditions de Vie des Ménages (EHCVM) de 2018 et 2021 du Sénégal, afin de créer une base de données consolidée qui permettra de réaliser des analyses comparatives. Nous procéderons à l'exploration et à la préparation des données pour des analyses statistiques futures, en traitant des problématiques telles que les valeurs manquantes, les doublons et les valeurs aberrantes. À la fin de ce TP, la base de données fusionnée sera nettoyée et prête à être exploitée pour des études ultérieures sur les conditions de vie des ménages sénégalais.
+
+
+# I.Installation et chargement des packages
+
+Cette section permet d'assurer que les bibliothèques requises sont correctement installées et chargées pour l'exécution des analyses.
+
+```{r results=FALSE, message=FALSE, warning=FALSE}
+
+libraries <- c("readr", "dplyr","labelled","tidyr", "gtsummary","haven", "utils", "ggplot2", "plotly")
+
+for (x in libraries) {
+  if (!requireNamespace(x, quietly = TRUE)) {
+    install.packages(x)
+  }
+  library(x, character.only = TRUE)
+}
+```
+
+# II.Importation des bases de données welfare
+
+Cette section consiste à importer les bases de données welfare des Enquêtes sur les Conditions de Vie des Ménages (EHCVM) afin de les préparer pour l'analyse.
+```{r}
+getwd()
+```
+
+```{r}
+welf2018 <-  haven::read_dta("../Données/ehcvm_welfare_sen2018.dta") #importation base welfare 2018
+welf2021 <-  haven::read_dta("../Données/ehcvm_welfare_sen2021.dta") #importation base welfare 2021
+
+```
+
+# III.Exploration des données :
+Cette section permettra d'examiner la structure des données et d'obtenir un aperçu des variables. Nous analyserons les premières lignes de chaque fichier afin de confirmer leur bonne importation et leur préparation pour l'analyse.
+
+```{r}
+# Cette étape permet d'examiner rapidement la structure des données
+head(welf2018)
+head(welf2021)
+
+# Vérification des dimensions des deux bases de données
+dim(welf2018)
+dim(welf2021)
+
+# Informations générales sur les variables/colonnes
+str(welf2018)
+str(welf2021)
+
+```
+
+# IV. Évaluation de la qualité des données :
+Dans cette section, l'analyse de la qualité des données sera faite en vérifiant la présence de valeurs manquantes, de doublons, et en s'assurant que les types de données correspondent bien aux variables attendues. Cette étape nous aidera à identifier d'éventuelles anomalies.
+
+
+## 1. Doublons
+
+```{r}
+# Vérification des doublons
+sum(duplicated(welf2018))  
+sum(duplicated(welf2021))  
+```
+
+Aucun doublon n'a été trouvé dans les deux bases
+
+## 2. Valeurs manquantes
+
+```{r}
+# Détection des valeurs manquantes
+summary(welf2018)
+summary(welf2021)
+
+# Calcul du pourcentage de valeurs manquantes pour chaque colonne
+colSums(is.na(welf2018)) / nrow(welf2018) * 100
+colSums(is.na(welf2021)) / nrow(welf2021) * 100
+
+# Un calcul du pourcentage de valeurs manquantes sera fait pour chaque colonne des deux bases. Le mode d'imputaton est fait en fonction de la proportion de valeurs manquantes. En effet, si la proportion de valeurs manquantes est faible (inférieure à 5-10%), une imputation (par la médiane ou la moyenne) peut être envisagée. En revanche, si cette proportion est élevée, il peut être nécessaire de supprimer les colonnes concernées ou de les traiter autrement.
+
+
+```
+
+Pour la base de données welfare 2018, les variables hactiv7j, hsectins, dnal, pcexp, hcsp, hbranch, hactiv12m, dtot, zzae et dali présentent des pourcentages relativement faibles de valeurs manquantes, variant entre 0 % et 24 %. Il en va de même pour la base welfare 2021, avec les variables hcsp, hbranch, dali, hethnie et hsectins.
+
+
+# V. Comparaison des variables et modalités entre les bases welfare 2018 et 2021
+Après la visualisation les données et vérification de la présence d'éventuelles anomalies, un procédé à une comparaison des variables et des modalités entre les bases welfare 2018 et 2021 sera engagé. Cette étape nous permettra d'identifier les divergences dans l'annotation des variables et des modalités entre les deux bases.
+
+```{r}
+#Liste des variables des deux bases 
+var2018=colnames(welf2018)
+var2021=colnames(welf2021)
+
+# Identification des variables communes aux deux bases
+var_communes <- intersect(var2018, var2021) 
+
+# Variables spécifiques à la base 2018
+var_sp2018 <- setdiff(var2018, var2021) 
+
+# Variables spécifiques à la base 2021
+var_sp2021 <- setdiff(var2021, var2018) 
+
+var_sp2018
+var_sp2021
+```
+
+Cette catégorisation montre que les deux bases partagent 34 variables communes. La base welfare 2018 comporte une seule variable unique, halfab, tandis que 13 variables sont spécifiques à la base welfare 2021 : "month", "hethnie", "halfa", "halfa2", "def_temp_prix2021m11", "def_temp_cpi", "def_temp_adj", "zali0", "dtet", "monthly_cpi", "cpi2017", "icp2017" et "dollars".
+
+Concernant la variable d’alphabétisation, il s’agit simplement d’une différence d’orthographe. Nous procéderons donc à renommer la variable de 2021 en halfab et l’inclure dans les variables communes.
+
+
+```{r}
+## Renommage de la variable 'halfa' en 'halfab'
+colnames(welf2021)[colnames(welf2021)=="halfa"] <- "halfab"
+
+# Ajout de 'halfab' à la liste des variables communes
+var_communes <- append(var_communes, "halfab")
+
+```
+Ainsi , a la suite , une vérification de la cohérence des labellisations.
+
+
+## 1. Identification des incohérences de labellisation
+
+```{r}
+
+discord_lab_var <- c() 
+
+for (var in var_communes) { 
+  
+  if(labelled::is.labelled(welf2018[[var]])){ # Vérification si la variable en 2018 est labellisée
+    
+      lab_val2018 <- labelled::val_labels(welf2018[[var]]) # Récupération des labels de la variable en 2018
+
+  }else{
+      lab_val2018 <- NULL # Si la variable en 2018 n'est pas labellisée, on l'indique par NULL
+  }
+  
+  if(labelled::is.labelled(welf2021[[var]])){ # Vérification si la variable en 2021 est labellisée
+    
+      lab_val2021 <- labelled::val_labels(welf2021[[var]]) # Récupération des labels de la variable en 2021
+  
+  }else{
+    
+      lab_val2021 <- NULL # Si la variable en 2021 n'est pas labellisée, on l'indique par NULL
+  }
+  
+  if(!identical(lab_val2018, lab_val2021)){ # Vérification de la concordance des labels entre 2018 et 2021
+    
+     discord_lab_var <- append(discord_lab_var,var) # Si les labels diffèrent, on ajoute le nom de la variable à la liste
+     print(var)
+     
+   }
+}
+
+```
+
+Il a été constaté que six variables présentent des incohérences dans leur labellisation entre les bases welfare 2018 et 2021 : "zae", "hnation", "hdiploma", "hactiv7j", "hbranch" et "hcsp". Afin de corriger ces divergences, chaque variable sera traitée individuellement, recodée et ses modalités ajustées en fonction des incohérences détectées.
+
+
+## 2. Gestion des incohérences
+
+### a) Traitement de la variable **hnation**
+
+#### Visualisation de la distribution
+```{r}
+# Visualisation de la distribution de la variable hnation en 2018
+labelled::val_labels(welf2018$hnation)
+
+# Visualisation de la distribution de la variable hnation en 2021
+labelled::val_labels(welf2021$hnation)
+
+# Transformation de la variable hnation en facteur et affichage de la distribution en 2021
+welf2021 %>%
+  to_factor() %>%  
+  select(hnation) %>% 
+  tbl_summary(missing = "always",  # Affichage des valeurs manquantes
+              missing_text = "Valeurs manquantes")  
+```
+
+
+#### Recherche de l'incoherence 
+ 
+Certaines modalités, telles que "Autres CEDEAO" en 2018, ont été subdivisées en catégories distinctes, comme c'est le cas pour la Guinée, qui figure désormais comme une modalité spécifique.
+
+
+#### Correction de l'incohérence
+
+Afin de corriger cette incohérence, la variable sera recodée dans la base welfare 2021, en combinant les modalités qui étaient regroupées sous "Autres CEDEAO" en 2018, y compris la Guinée et les autres pays concernés.
+
+```{r}
+#Recodage dans la base de 2021
+welf2021 <- welf2021 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3,  # Remplace la modalité 4 par 3
+                          `8` = 4,  
+                          `10` = 5, 
+                          `11` = 6, 
+                          `13` = 7, 
+                          `15` = 8, 
+                          `12` = 9, 
+                          `17` = 11, 
+                          `18` = 12, 
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10 
+                          ))
+
+```
+
+
+```{r}
+#Uniformisation des labels
+labelled::val_labels(welf2021$hnation) <-  labelled::val_labels(welf2018$hnation)
+
+```
+
+
+#### Contrôle des modifications
+
+```{r}
+welf2021 %>%
+  to_factor() %>% 
+  select(hnation) %>% 
+  tbl_summary(missing = "always", 
+              missing_text = "Valeurs manquantes")
+```
+
+
+### b) Traitement de la variable **hdiploma**
+
+#### Visualisation de la distribution
+
+```{r}
+# Affichage des labels de la variable hdiploma en 2018
+labelled::val_labels(welf2018$hdiploma)
+
+# Affichage des labels de la variable hdiploma en 2021
+labelled::val_labels(welf2021$hdiploma)
+
+# Résumé statistique de la variable hdiploma en 2018 avec affichage des valeurs manquantes
+welf2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+#### Recherche de l'incoherence 
+Les différences observées entre les deux bases concernent uniquement des modifications d'étiquettes (labels) sans altération des valeurs sous-jacentes.
+
+#### Correction de l'incohérence
+Il suffira donc d'affecter les labels de hdiploma dans welfare 2021 à ceux de welfare 2018 afin d'assurer une harmonisation des libellés entre les deux bases.
+
+```{r}
+#Harmonisation des labels
+val_labels(welf2018$hdiploma) <-  val_labels(welf2021$hdiploma)
+
+```
+
+#### Controle des modifications
+```{r}
+
+welf2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### c) Traitement de la variable **hactiv7j**
+
+#### Visualisation de la distribution
+
+```{r}
+# Affichage des labels de la variable hactiv7j en 2018
+labelled::val_labels(welf2018$hactiv7j)
+
+# Affichage des labels de la variable hactiv7j en 2021
+labelled::val_labels(welf2021$hactiv7j)
+
+# Résumé statistique de la variable hactiv7j dans la base 2018
+welf2018 %>% 
+  to_factor() %>%  
+  select(hactiv7j) %>%  
+  tbl_summary(missing = "always", missing_text = "NA")  # Génération du tableau avec affichage des valeurs manquantes
+
+```
+
+
+#### Recherche de l'incoherence 
+Il y a une incohérence dans l'ordre des modalités entre les bases 2018 et 2021, bien que les labels soient identiques. Cela suggère une erreur dans le codage des valeurs. Une harmonisation des modalités est nécessaire pour assurer la comparabilité des données entre les deux années.
+
+#### Correction de l'incohérence
+Pour corriger cette incohérence, il est nécessaire de réorganiser les modalités afin qu'elles correspondent exactement entre les deux bases. Une fois l'ordre des modalités ajusté dans welfare 2021, il sera alors possible d'affecter ses labels à welfare 2018 pour assurer une harmonisation complète.
+```{r}
+welf2018 <- welf2018 %>%
+  mutate(hactiv7j = dplyr::recode(hactiv7j,
+                          `2` = 4, 
+                          `3` = 2,  
+                          `4` = 3))
+
+```
+
+```{r}
+# Affectation des labels de la variable 'hactiv7j' de la base 2021 à la base 2018
+val_labels(welf2018$hactiv7j) <-  val_labels(welf2021$hactiv7j)
+```
+
+
+#### Controle des modifications
+```{r}
+welf2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### d) Traitement de la variable **hbranch**
+
+#### Visualisation de la distribution
+```{r}
+# Visualisation des labels de la variable 'hbranch' dans la base 2018
+labelled::val_labels(welf2018$hbranch)
+
+# Visualisation des labels de la variable 'hbranch' dans la base 2021
+labelled::val_labels(welf2021$hbranch)
+
+# Vérification de la distribution des valeurs manquantes pour la variable 'hbranch' dans la base 2018
+welf2018 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+#### Recherche de l'incoherence 
+Il est observé qu'en 2021, une nouvelle modalité correspondant au secteur de la sylvopasture a été ajoutée et combinée avec les secteurs de l'élevage et de la pêche, ce qui diffère de la catégorisation de 2018.
+
+#### Correction de l'incohérence
+Cette incohérence peut être corrigée par une simple affectation, similaire à celle effectuée pour les autres variables.
+```{r}
+# Affectation des labels de la variable 'hactiv7j' de la base 2021 à la base 2018
+val_labels(welf2018$hbranch) <-  val_labels(welf2021$hbranch)
+```
+
+#### Controle des modifications
+
+```{r}
+welf2018 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### v) Traitement de la variable **hcsp**
+
+#### Visualisation de la distribution
+```{r}
+# Affichage des labels de la variable hcsp pour la base welfare 2018
+labelled::val_labels(welf2018$hcsp)
+
+# Affichage des labels de la variable hcsp pour la base welfare 2021
+labelled::val_labels(welf2021$hcsp)
+
+```
+
+
+#### Recherche de l'incoherence 
+Comme la différence réside uniquement dans la labellisation de la neuvième modalité,il suffit de mettre à jour les labels de la base welfare 2021 pour les aligner sur ceux de 2018.
+
+#### Correction de l'incohérence
+Ainsi, les labels de 2018 seront affectés à ceux de 2021.
+```{r}
+#Affectation des labels de 2018 à 2021
+val_labels(welf2021$hcsp) <-  val_labels(welf2018$hcsp)
+```
+
+#### Controle des modifications
+```{r}
+welf2021 %>% 
+  to_factor() %>% 
+  select(hcsp) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### e) Traitement de la variable **zae**
+
+#### Visualisation de la distribution
+```{r}
+# Vérification des labels de la variable zae dans la base welfare 2018
+labelled::val_labels(welf2018$zae)
+
+# Vérification des labels de la variable zae dans la base welfare 2021
+labelled::val_labels(welf2021$zae)
+
+# Résumé de la distribution de la variable zae dans la base welfare 2018, avec gestion des valeurs manquantes
+welf2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+# Résumé de la distribution de la variable zae dans la base welfare 2021, avec gestion des valeurs manquantes
+welf2021 %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+#### Identification de l'incohérence
+Il a été observé que dans la base welfare 2018, la variable zae n'est pas labellisée, et les codes diffèrent entre les deux bases. En 2018, les codes sont 1, 2, 3, 4, 5 et 6, tandis qu'en 2021, ils sont 1, 3, 5, 7, 9 et 11. De plus, les codes correspondant à Kedougou et Dakar sont inversés dans la base 2018, bien qu'il faille prendre en compte les fréquences de chaque code dans les deux bases.
+
+#### Correction de l'incohérence
+Il sera d'abord nécessaire d'aligner les codes de 2018 avec ceux de 2021. Une fois cette correspondance effectuée, il sera possible d'affecter les labels appropriés à la variable dans la base welfare 2018, en suivant le même processus que pour la base welfare 2021.
+
+##### Rétablissement de l'ordre pour Kedougou et Dakar en 2018
+Afin de corriger l'inversion des codes pour Kedougou et Dakar dans la base 2018, il convient d'échanger les codes correspondants dans cette base. Cette modification permettra d'aligner l'ordre des modalités sur celui de la base 2021, garantissant ainsi la cohérence des données.```{r}
+
+```{r}
+#Correction de l'inversion de codes pour Kedougou et Dakar en 2018
+#Ce code permet d'inverser les codes pour Kedougou et Dakar dans la base de données 2018 afin de rétablir l'ordre correct. Le code modifie les valeurs de la variable zae pour aligner les codes géographiques de 2018 sur ceux de 2021, en plaçant correctement Dakar (code 1) et Kedougou (code 6).
+welf2018 <- welf2018 %>%
+  mutate(zae = dplyr::recode(zae,
+                          '1' = 6, # Kédougou remplace Dakar
+                          '2' = 2,  
+                          '3' = 3,
+                          '4' = 4, 
+                          '5' = 5,  
+                          '6' = 1   # Dakar devient Kedougou
+                          ))
+```
+
+
+##### Vérification après correction effectuée entre Kedougou et Dakar
+
+```{r}
+#Vérification après correction des codes de Kedougou et Dakar en 2018
+#Ce premier bloc permet de vérifier l'effet de la mutation dans la base de données 2018 après la correction des codes pour Kedougou et Dakar. Il affiche la distribution des modalités de la variable zae en tenant compte des valeurs manquantes.
+welf2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+
+#Harmonisation des codes géographiques dans la base 2021
+#Le deuxième bloc effectue l'harmonisation des codes géographiques dans la base 2021 en réaffectant les valeurs impaires existantes aux codes de 1 à 6. Cela permet de garantir que les codes géographiques dans les deux bases (2018 et 2021) soient uniformes et comparables.
+welf2021 <- welf2021 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1` = 1,
+    `3` = 2,
+    `5` = 3,
+    `7` = 4,
+    `9` = 5,
+    `11` = 6
+  ))
+```
+
+
+#### Controle des modifications
+
+```{r}
+#Vérification du recodage en 2021
+welf2021 %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+```{r warning=FALSE}
+# Recodage des modalités de `zae` dans la base de données 2021
+welf2021 <- welf2021 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1`  = "Kédougou",
+    `2`  = "Saint-Louis-Matam",
+    `3`  = "Thies-Diourbel-Louga",
+    `4`  = "Kaolack-Fatick-Kaffrine",
+    `5`  = "Ziguinchor-Tamba-Kolda-Sédhiou",
+    `6` = "Dakar"
+  ))
+
+```
+
+
+```{r warning=FALSE}
+# Recodage des modalités de `zae` dans la base de données 2018
+welf2018 <- welf2018 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1`  = "Kédougou",
+    `2`  = "Saint-Louis-Matam",
+    `3`  = "Thies-Diourbel-Louga",
+    `4`  = "Kaolack-Fatick-Kaffrine",
+    `5`  = "Ziguinchor-Tamba-Kolda-Sédhiou",
+    `6` = "Dakar"
+  ))
+
+
+```
+
+
+#### Vérification des modifications 
+```{r}
+# Vérification des changements dans la base de données 2018
+welf2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+```{r}
+# Vérification des changements dans la base de données 2021
+welf2021 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+Le codage et la labellisation de la variable zae sont désormais cohérents entre les deux bases. Il reste à vérifier qu'aucune différence n'existe dans la labellisation ou le codage des autres variables communes aux deux bases.
+
+## 3.Controle du traitement des données
+```{r}
+discord_lab_var <- c() 
+
+for (var in var_communes) { # Parcourir les variables communes entre les deux bases
+  
+  # Vérifier si la variable est labellisée dans la base 2018
+  if (labelled::is.labelled(welf2018[[var]])) {
+    lab_val2018 <- labelled::val_labels(welf2018[[var]]) # Récupérer les labels de la variable en 2018
+  } else {
+    lab_val2018 <- NULL # Assigner NULL si la variable n'est pas labellisée en 2018
+  }
+  
+  # Vérifier si la variable est labellisée dans la base 2021
+  if (labelled::is.labelled(welf2021[[var]])) {
+    lab_val2021 <- labelled::val_labels(welf2021[[var]]) # Récupérer les labels de la variable en 2021
+  } else {
+    label_val_2021 <- NULL # Assigner NULL si la variable n'est pas labellisée en 2021
+  }
+  
+  # Comparer les labels des deux bases
+  if (!identical(lab_val2018, lab_val2021)) {
+    discord_lab_var <- append(discord_lab_var, var)
+    print(var) 
+  }
+}
+
+```
+
+# Fusion des bases welfare 2018 et 2021
+Après avoir harmonisé le codage et la labellisation des variables communes entre les deux bases, la prochaine étape consiste à les fusionner. Cette fusion permettra de créer une base de données consolidée, comprenant les informations des deux années, afin d’effectuer des analyses comparatives et des traitements ultérieurs sur les données combinées.
+```{r}
+welf_finale <- bind_rows(welf2018, welf2021)
+```
+
+**Récupération de la nouvelle base de données**
+```{r}
+# Exporter la base de données finale en dta
+write_dta(welf_finale, "../Sorties/welf_finale.dta")
+```

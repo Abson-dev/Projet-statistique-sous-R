@@ -1,0 +1,529 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+    toc: false
+    number_sections: false
+header-includes:
+  - \usepackage{hyperref}
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage{graphicx}
+  - \usepackage{fontspec}
+  - \setmainfont{Cambria}
+  - \setsansfont{Franklin Gothic Demi Cond}
+  - \setmonofont{Courier New}
+  - \usepackage[margin=1in]{geometry}
+  - \usepackage{titlesec}
+  - \titleformat{\section}{\Huge\bfseries\color{black}}{\thesection}{1em}{}
+  - \titleformat{\subsection}{\huge\bfseries\color{black}}{\thesubsection}{1em}{}
+  - \titleformat{\subsubsection}{\LARGE\bfseries\color{black}}{\thesubsubsection}{1em}{}
+  - \usepackage{tocloft}
+  - \renewcommand{\cftsecfont}{\small}   
+  - \renewcommand{\cftsubsecfont}{\footnotesize} 
+  - \renewcommand{\cftsecpagefont}{\small}   
+  - \renewcommand{\cftsubsecpagefont}{\footnotesize}
+  - \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{=tex}
+\begin{titlepage}
+    \begin{center}
+        \textbf{\LARGE RÉPUBLIQUE DU SÉNÉGAL}\\[0.1cm]
+        \includegraphics[width=3cm]{Logo1.jpg} \\[0.1cm]  % Insère le chemin de ton logo
+        \textbf{\large Un Peuple - Un But - Une Foi}\\[0.2cm]
+        
+        \textbf{\LARGE Ministère de l'Économie, du Plan et de la Coopération}\\[0.1cm]
+        \includegraphics[width=4cm]{Logo2.png} \\[0.1cm] 
+        
+        \textbf{\large Agence Nationale de la Statistique et de la Démographie (ANSD)}\\[0.2cm]
+        
+        \includegraphics[width=4cm]{Logo3.png} \\[0.1cm]  
+        
+        \textbf{\large École Nationale de la Statistique et de l'Analyse Économique Pierre Ndiaye (ENSAE)}\\[0.4cm]
+        \includegraphics[width=3cm]{Logo4.png} \\[0.1cm]
+        
+        \textbf{\LARGE PROJET STATISTIQUES SOUS R }\\[0.3cm]
+        \textbf{\Huge \color{black} \textsf{TP9 : Merge des bases de données EHCVM 2018 et 2021}}\\[0.2cm]
+        \rule{\linewidth}{0.2mm} \\[0.5cm]
+        
+        \begin{minipage}{0.5\textwidth}
+    \begin{flushleft} \large
+        \emph{\textsf{Rédigé par :}}\\
+        \textbf{Mame Balla BOUSSO}\\
+        \textbf{Ameth FAYE}\\
+        \textbf{EDIMA Biyenda Hildégarde}\\
+        \textbf{Papa Amadou NIANG}\\
+        \textit{Elèves ingénieurs statisticiens économistes}
+    \end{flushleft}
+\end{minipage}
+        \hfill
+        \begin{minipage}{0.4\textwidth}
+            \begin{flushright} \large
+                \emph{\textsf{Sous la supervision de :}} \\
+                \textbf{M. Aboubacar HEMA}\\
+                \textit{ANALYSTE DE RECHERCHE CHEZ IFPRI }
+            \end{flushright}
+        \end{minipage}
+
+        \vfill
+
+        {\large \textsf{Année scolaire : 2024/2025}}\\[0.5cm]
+        
+    \end{center}
+\end{titlepage}
+```
+
+
+# Introduction
+
+Dans le cadre de ce projet, nous combinons les observations de la base de données EHCVM 2021 avec celles de 2018 via une opération d'append. L’objectif principal est d’harmoniser les variables afin d’assurer la cohérence de l’ensemble des données pour des analyses ultérieures.
+
+Pour ce faire, nous suivrons les étapes suivantes :
+
+1.  **Extraction et listing des variables labelisées (Base 2018)**
+    -   Extraire et vérifier la liste des variables labelisées dans la base 2018;\
+    -   Documenter les codes et modalités associées à chaque variable.
+2.  **Extraction et listing des variables correspondantes (Base 2021)**
+    -   Réaliser la même extraction pour la base 2021.\
+    -   Identifier les différences éventuelles dans les codes ou modalités par rapport à 2018.
+3.  **Analyse comparative et plan d’harmonisation**
+    -   Comparer les listes de variables des deux bases.\
+    -   Identifier les écarts et proposer des solutions (recodage, ajout de modalités, renommage avec suffixe, etc.) pour harmoniser les variables fixes.\
+    -   Documenter le plan d’action détaillé.
+4.  **Mise en œuvre et contrôle qualité**
+    -   Appliquer le plan d’harmonisation sur les données.\
+    -   Effectuer l’append des observations de 2021 à la base 2018.\
+    -   Réaliser des tests pour vérifier la cohérence globale des données.
+
+Les sections suivantes du document illustrent la démarche avec le chargement et la description des bases, l’identification des variables communes et distinctes (avec ajout de suffixes pour distinguer d’éventuelles différences de codification), le recodage des variables nécessitant un ajustement, puis la combinaison finale des bases.
+
+# Chargement des Données et Description
+
+```{r chargement-donnees, echo=TRUE, message=FALSE, warning=FALSE}
+# Chargement des bases de données
+base2018 <- haven::read_dta("data/ehcvm_welfare_SEN2018.dta")
+base2021 <- haven::read_dta("data/ehcvm_welfare_sen2021.dta")
+
+# Affichage du nombre d'observations et de variables pour chaque base
+cat("Dimensions de la base 2018 :", dim(base2018), "\n")
+cat("Dimensions de la base 2021 :", dim(base2021), "\n")
+
+# Aperçu rapide des données
+summary(base2018)
+summary(base2021)
+```
+
+# Identification des variables communes et différentes
+
+Dans cette section, nous identifions les variables présentes dans les deux bases et celles qui diffèrent. Pour les variables communes, nous vérifierons que leur codification est identique. Pour les variables présentant des différences, nous ajouterons le suffixe `_2018` ou `_2021` afin de bien distinguer l’origine de chaque modalité.
+
+```{r identification-variables, echo=TRUE}
+# Récupération des noms de colonnes
+vars_2018 <- names(base2018)
+vars_2021 <- names(base2021)
+
+# Variables communes aux deux bases
+vars_communes <- intersect(vars_2018, vars_2021)
+cat("Variables communes :", vars_communes, "\n")
+
+# Variables spécifiques à chaque base
+vars_uniques_2018 <- setdiff(vars_2018, vars_2021)
+vars_uniques_2021 <- setdiff(vars_2021, vars_2018)
+cat("Variables spécifiques à 2018 :", vars_uniques_2018, "\n")
+cat("Variables spécifiques à 2021 :", vars_uniques_2021, "\n")
+```
+
+-   **Les variables communes** :\
+    Une intersection des noms de colonnes révèle 34 variables partagées entre les deux bases (par exemple, *country*, *year*, *hhid*, etc.). Pour ces variables, il sera possible de vérifier directement que leur codification est identique.
+
+-   **Les variables spécifiques à chaque base** :\
+    La base 2018 présente une variable unique (*halphab*), tandis que la base 2021 (affichée ici comme 2021) contient 12 variables spécifiques (parmi lesquelles *month*, *hethnie*, *halfa*, *halfa2*, etc.).\
+    Il est important de noter que la variable *halphab* de 2018 a pour correspondant *halpha2* dans la base 2021. Cela indique qu'une harmonisation manuelle est nécessaire pour aligner ces deux variables équivalentes avant de procéder à la fusion des données.
+
+# Recodage et harmonisation
+
+Nous passons maintenant à l’analyse des variables communes pour vérifier leur codification. Pour les variables dont les modalités diffèrent entre 2018 et 2021, nous appliquons un recodage et/ou ajoutons un suffixe afin de conserver la provenance des données.
+
+Dans un premier temps, nous allons faire correspondre la variable halfa2 à la variable halphab en le renommant :
+
+```{r recodage-harmonisation-1, echo=TRUE}
+library(dplyr)
+
+base2021 <- base2021 %>% 
+  rename(halfab = halfa2)
+```
+
+Nous allons ensuite vérifier si les variables communes sont codifiés de la même manière :
+
+```{r recodage-harmonisation-2, echo=TRUE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(labelled)
+library(knitr)
+library(kableExtra)
+
+# Liste des variables à convertir en facteur
+vars <- c("zae", "region", "milieu", "hgender", "hmstat", "hreligion", "hnation",
+          "halfab", "heduc", "hdiploma", "hhandig", "hactiv7j", "hactiv12m", 
+          "hbranch", "hsectins", "hcsp")
+
+
+# Fonction pour extraire les codes et libellés d'une variable
+extract_labels <- function(var) {
+  if (!is.null(attr(base2018[[var]], "labels"))) {  # Vérifie si la variable a des labels
+    N <- names(attr(base2018[[var]], "labels"))  # Libellés
+    L <- unname(attr(base2018[[var]], "labels")) # Codes
+    df <- data.frame(Variable = var, Code = L, Libellé = N)
+    return(df)
+  } else {
+    return(NULL) # Retourne NULL si pas de labels
+  }
+}
+
+# Appliquer la fonction à toutes les variables
+labels_list <- lapply(vars, extract_labels)
+
+# Supprimer les NULL et fusionner les résultats en un seul tableau
+labels_table <- bind_rows(labels_list)
+
+# Afficher sous forme de tableau
+kable(labels_table, caption = "Codes et libellés des variables")
+
+kable(labels_table, caption = "Codes et libellés des variables") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                full_width = FALSE, position = "center") %>%
+  column_spec(1, bold = TRUE, color = "blue") %>%
+  column_spec(2, bold = TRUE) %>%
+  column_spec(3, width = "8cm")
+```
+
+```{r recodage-harmonisation-3, echo=TRUE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(labelled)
+library(knitr)
+library(kableExtra)
+
+# Liste des variables à convertir en facteur
+vars <- c("zae", "region", "milieu", "hgender", "hmstat", "hreligion", "hnation",
+          "halfab", "heduc", "hdiploma", "hhandig", "hactiv7j", "hactiv12m", 
+          "hbranch", "hsectins", "hcsp")
+
+
+# Fonction pour extraire les codes et libellés d'une variable
+extract_labels <- function(var) {
+  if (!is.null(attr(base2021[[var]], "labels"))) {  # Vérifie si la variable a des labels
+    N <- names(attr(base2021[[var]], "labels"))  # Libellés
+    L <- unname(attr(base2021[[var]], "labels")) # Codes
+    df <- data.frame(Variable = var, Code = L, Libellé = N)
+    return(df)
+  } else {
+    return(NULL) # Retourne NULL si pas de labels
+  }
+}
+
+# Appliquer la fonction à toutes les variables
+labels_list <- lapply(vars, extract_labels)
+
+# Supprimer les NULL et fusionner les résultats en un seul tableau
+labels_table <- bind_rows(labels_list)
+
+# Afficher sous forme de tableau
+kable(labels_table, caption = "Codes et libellés des variables")
+
+kable(labels_table, caption = "Codes et libellés des variables") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                full_width = FALSE, position = "center") %>%
+  column_spec(1, bold = TRUE, color = "blue") %>%
+  column_spec(2, bold = TRUE) %>%
+  column_spec(3, width = "8cm")
+```
+Passons maintenant à l'harmonisation des variables de la base de 2018 pour qu'elles correspondent à celles de 2021 :
+
+```{r recodage-harmonisation-4, echo=TRUE}
+library(dplyr)
+
+# Harmonisation de la base 2018 pour qu'elle corresponde aux modalités de la base 2021
+base2018 <- base2018 %>%
+  mutate(
+    # 1. Région : harmonisation de la casse et des libellés
+    region = recode(as.character(region),
+      "1"  = "dakar",
+      "2"  = "ziguinchor",
+      "3"  = "diourbel",
+      "4"  = "SAINT-LOUIS",
+      "5"  = "tambacounda",
+      "6"  = "kaolack",
+      "7"  = "thies",
+      "8"  = "louga",
+      "9"  = "fatick",
+      "10" = "kolda",
+      "11" = "matam",
+      "12" = "kaffrine",
+      "13" = "kedougou",
+      "14" = "sedhiou"
+    ),
+    
+    # 2. Milieu (identique)
+    milieu = recode(as.character(milieu),
+      "1" = "Urbain",
+      "2" = "Rural"
+    ),
+    
+    # 3. Genre
+    hgender = recode(as.character(hgender),
+      "1" = "Masculin",
+      "2" = "Féminin"
+    ),
+    
+    # 4. Statut matrimonial
+    hmstat = recode(as.character(hmstat),
+      "1" = "Célibataire",
+      "2" = "Marié(e) monogame",
+      "3" = "Marié(e) polygame",
+      "4" = "Union libre",
+      "5" = "Veuf(ve)",
+      "6" = "Divorcé(e)",
+      "7" = "Séparé(e)"
+    ),
+    
+    # 5. Religion
+    hreligion = recode(as.character(hreligion),
+      "1" = "Musulman",
+      "2" = "Chrétien",
+      "3" = "Animiste",
+      "4" = "Autre Réligion",
+      "5" = "Sans Réligion"
+    ),
+    
+    # 6. Nationalité : harmonisation des libellés
+    hnation = recode(as.character(hnation),
+      "1"  = "Bénin",
+      "2"  = "Burkina Faso",
+      "3"  = "Cote d’ivoire",  # transformation de "Côte d’Ivoire"
+      "4"  = "Guinée Bissau",
+      "5"  = "Mali",
+      "6"  = "Niger",
+      "7"  = "Sénégal",
+      "8"  = "Togo",
+      "9"  = "Nigeria",       # transformation de "Nigéria"
+      "10" = "Autre Afrique",  # fusion d' "Autre CEDEAO" et "Autre Afrique"
+      "11" = "Autre Afrique",
+      "12" = "Autre pays hors Afrique"
+    ),
+    
+    # 7. Niveau d'éducation
+    heduc = recode(as.character(heduc),
+      "1" = "Aucun",
+      "2" = "Maternelle",
+      "3" = "Primaire",
+      "4" = "Second. gl 1",
+      "5" = "Second. tech. 1",
+      "6" = "Second. gl 2",
+      "7" = "Second. tech. 2",
+      "8" = "Postsecondaire",
+      "9" = "Superieur"
+    ),
+    
+    # 8. Diplôme : harmonisation (ex. transformation en minuscules)
+    hdiploma = recode(as.character(hdiploma),
+      "0"  = "Aucun",
+      "1"  = "cepe",
+      "2"  = "bepc",
+      "3"  = "cap",
+      "4"  = "bt",
+      "5"  = "bac",
+      "6"  = "DEUG, DUT, BTS",
+      "7"  = "Licence",
+      "8"  = "Maitrise",
+      "9"  = "Master/DEA/DESS",
+      "10" = "Doctorat/Phd"
+    ),
+    
+    # 9. Handicape
+    hhandig = recode(as.character(hhandig),
+      "0" = "Non",
+      "1" = "Oui"
+    ),
+    
+    # 10. Activité sur 7 jours : réordonner et harmoniser les libellés
+    hactiv7j = recode(as.character(hactiv7j),
+      "1" = "Occupe",
+      "2" = "TF cherchant emploi",
+      "3" = "TF cherchant pas",
+      "4" = "Chomeur",
+      "5" = "Inactif",
+      "6" = "Moins de 5 ans"
+    ),
+    
+    # 11. Activité sur 12 mois
+    hactiv12m = recode(as.character(hactiv12m),
+      "1" = "Occupe",
+      "2" = "Trav. fam.",
+      "3" = "Non occupe",
+      "4" = "Moins de 5 ans"
+    ),
+    
+    # 12. Branche d'activité : harmonisation des libellés
+    hbranch = recode(as.character(hbranch),
+      "1"  = "Agriculture",
+      "2"  = "Elevage/syl./peche",
+      "3"  = "Indust. extr.",
+      "4"  = "Autr. indust.",
+      "5"  = "btp",
+      "6"  = "Commerce",
+      "7"  = "Restaurant/Hotel",
+      "8"  = "Trans./Comm.",
+      "9"  = "Education/Sante",
+      "10" = "Services perso.",
+      "11" = "Aut. services"
+    ),
+    
+    # 13. Secteur institutionnel
+    hsectins = recode(as.character(hsectins),
+      "1" = "Etat/Collectivités locales",
+      "2" = "Entreprise publique/ parapublique",
+      "3" = "Entreprise Privée",
+      "4" = "Entreprise associative",
+      "5" = "Ménage comme employeur de personnel domestique",
+      "6" = "Organisme international /Ambassade"
+    ),
+    
+    # 14. Catégorie socio-professionnelle
+    hcsp = recode(as.character(hcsp),
+      "1"  = "Cadre supérieur",
+      "2"  = "Cadre moyen/agent de maîtrise",
+      "3"  = "Ouvrier ou employé qualifié",
+      "4"  = "Ouvrier ou employé non qualifié",
+      "5"  = "Manœuvre, aide ménagère",
+      "6"  = "Stagiaire ou Apprenti rénuméré",
+      "7"  = "Stagiaire ou Apprenti non rénuméré",
+      "8"  = "Travailleur familial contribuant à une entreprise familiale",
+      "9"  = "Travailleur pour compte propre",
+      "10" = "Patron"
+    ),
+    
+    # 15. zae : recodage selon les labels de 2021
+    zae = recode(as.character(zae),
+      "1"  = "Kédougou",
+      "3"  = "Saint-Louis-Matam",
+      "5"  = "Thies-Diourbel-Louga",
+      "7"  = "Kaolack-Fatick-Kaffrine",
+      "9"  = "Ziguinchor-Tamba-Kolda-Sédhiou",
+      "11" = "Dakar"
+    )
+  )
+```
+
+Dans notre cas, la base 2018 a été recodée de manière à adopter exactement les mêmes modalités que la base 2021. Ainsi, nous avons :
+
+- Uniformisé la casse et les libellés : Par exemple, les régions ont été harmonisées en passant de libellés majuscules (comme « DAKAR ») à des formats identiques (ex. « dakar » ou « SAINT-LOUIS ») pour assurer une lecture cohérente.
+
+- Aligné les catégories communes : Les variables telles que le milieu de résidence, le genre, le statut matrimonial, la religion, la nationalité, le niveau d’éducation, le diplôme, l’activité et la branche d’activité ont été recodées pour garantir que chaque modalité représente exactement le même concept dans les deux périodes.
+
+- Standardisé les variables spécifiques : LA variable zae , bien qu’existante dans la base 2018, n’était pas encore codifiées. En l'affectant les mêmes labels que dans la base 2021, nous assurons une cohérence totale lors de la fusion des jeux de données.
+
+Cette démarche permet ainsi de s’assurer que toute analyse comparative entre 2018 et 2021 repose sur des variables homogènes et comparables, éliminant ainsi les biais liés aux différences de codification.
+
+# Append des bases de données
+
+Une fois l’harmonisation effectuée, nous pouvons procéder à l’append des deux bases afin de constituer une base finale homogène.
+
+```{r append-bases, echo=TRUE}
+base2021 <- base2021 %>% 
+  rename(month_2021 = month,
+         hethnie_2021 = hethnie,
+         halfa_2021 = halfa,
+         def_temp_prix2021m11_2021 = def_temp_prix2021m11,
+         def_temp_cpi_2021 = def_temp_cpi,
+         def_temp_adj_2021 = def_temp_adj,
+         zali0_2021 = zali0,
+         dtet_2021 = dtet,
+         monthly_cpi_2021 = monthly_cpi,
+         cpi2017_2021 = cpi2017,
+         icp2017_2021 = icp2017,
+         dollars_2021 = dollars
+         )
+```
+
+```{r}
+base2018 <- labelled::to_factor(base2018)
+base2021 <- labelled::to_factor(base2021)
+
+# Définition de l'ordre commun des variables
+common_vars <- c("country", "year", "hhid", "grappe", "menage", "vague",
+                 "zae", "region", "milieu", "hhweight", "hhsize",
+                 "eqadu1", "eqadu2", "hgender", "hage", "hmstat",
+                 "hreligion", "hnation", "halfab", "heduc", "hdiploma",
+                 "hhandig", "hactiv7j", "hactiv12m", "hbranch",
+                 "hsectins", "hcsp", "dali", "dnal", "dtot", "pcexp",
+                 "zzae", "zref", "def_spa", "def_temp")
+
+# Réorganisation des colonnes dans la base 2018
+base2018 <- base2018 %>% 
+  select(all_of(common_vars))
+
+# Réorganisation des colonnes dans la base 2021
+base2021 <- base2021 %>% 
+  select(all_of(common_vars))
+
+# Fusion des deux bases (bind_rows() complétera par NA les colonnes manquantes, le cas échéant)
+data_final_intermediaire <- bind_rows(base2018, base2021)
+
+# Création d'un dataframe avec les variables supplémentaires de base2021 (et les clés nécessaires)
+base2021 <- haven::read_dta("data/ehcvm_welfare_sen2021.dta")
+base2021 <- base2021 %>% 
+  rename(month_2021 = month,
+         hethnie_2021 = hethnie,
+         halfa_2021 = halfa,
+         def_temp_prix2021m11_2021 = def_temp_prix2021m11,
+         def_temp_cpi_2021 = def_temp_cpi,
+         def_temp_adj_2021 = def_temp_adj,
+         zali0_2021 = zali0,
+         dtet_2021 = dtet,
+         monthly_cpi_2021 = monthly_cpi,
+         cpi2017_2021 = cpi2017,
+         icp2017_2021 = icp2017,
+         dollars_2021 = dollars
+         )
+extra_vars <- base2021 %>% 
+  select(hhid, year, month_2021, hethnie_2021, halfa_2021, 
+         def_temp_prix2021m11_2021, def_temp_cpi_2021, 
+         def_temp_adj_2021,zali0_2021, dtet_2021, 
+         monthly_cpi_2021, cpi2017_2021, icp2017_2021, dollars_2021)
+
+# Fusion de la base finale (issu du bind_rows des bases 2018 et 2021 harmonisées) avec extra_vars
+data_final <- data_final_intermediaire %>% 
+  left_join(extra_vars, by = c("hhid", "year"))
+```
+Voici les étapes clés :
+
+- **Conversion des variables étiquetées en facteurs :**  
+  Les commandes  
+  ```r
+  base2018 <- labelled::to_factor(base2018)
+  base2021 <- labelled::to_factor(base2021)
+  ```  
+  transforment les variables étiquetées (provenant notamment de formats Stata ou SPSS) en facteurs R, assurant ainsi que les types des variables soient directement comparables entre les deux bases.
+
+- **Réorganisation et fusion des variables communes :**  
+  En définissant un vecteur `common_vars` qui liste les variables présentes dans les deux bases, on réorganise les colonnes pour qu’elles suivent le même ordre. La fusion initiale avec `bind_rows()` permet de combiner les observations des deux bases tout en remplissant les valeurs manquantes pour les variables absentes.
+
+- **Ajout des variables supplémentaires de 2021 :**  
+  Les variables spécifiques à la collecte 2021 sont extraites (après renommage pour éviter toute confusion) et jointes à la base fusionnée via une jointure sur les identifiants communs (`hhid` et `year`).
+
+L’ensemble de ces opérations garantit une base de données finale homogène, où les variables sont alignées et comparables, facilitant ainsi les analyses longitudinales et comparatives entre 2018 et 2021.
+
+# Saving 
+Nous exportons enfin la base de données obtenue sous format stata.
+```{r}
+# Sauvegarde de la base finale au format .dta
+haven::write_dta(data_final, "output/data_final.dta")
+```
+

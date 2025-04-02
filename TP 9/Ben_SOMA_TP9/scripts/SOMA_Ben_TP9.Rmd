@@ -1,0 +1,889 @@
+---
+title: 'Projet statistique sous R et Python: TP9'
+author: |
+  <div style="display: flex; justify-content: space-between;">
+    <div>
+      Rédigé par :
+      SOMA Ben Idriss Diloma
+      Élève Ingénieur Statisticien Économiste
+    </div>
+    <div style="text-align: right;">
+      Sous la supervision de :
+      M. Aboubacar Hema
+      Research Analyst
+    </div>
+  </div>
+date: 'Année scolaire : 2024/2025'
+output:
+   html_document:
+    theme: cerulean
+    css: custom.css
+---
+
+<!-- Logos alignés en haut de la page -->
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="LOGO3.jpg" height="80" style="margin-right: 20px;">
+  <img src="LOGO2.jpg" height="80" style="margin-right: 20px;">
+  <img src="LOGO1.jpg" height="80">
+</div>
+
+---
+
+```{r setup, include=FALSE, }
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
+```
+
+
+Ce TP consiste à vérifier toutes les incohérences  entre  les bases welfares de EHCVM de 2018 et 2021 du Burkina Faso et ensuite les merger . 
+
+#I.Importation des packages 
+
+```{r}
+library(haven)
+library(gtsummary)
+library(haven)
+library(dplyr)
+library(forcats)
+library(tidyr)
+library(tibble)
+library(forcats)
+library(labelled)
+library(kableExtra)
+```  
+
+##Importations des bases welfare 2018 et 2021 
+
+
+```{r}
+welfare2018 <- haven::read_dta("../données/ehcvm_welfare_bfa2018.dta")
+welfare2021 <- haven::read_dta("../données/ehcvm_welfare_2b_bfa2021.dta")
+```
+
+Nous allons comparer les noms des variables dans les deux bases welfares  : 2018 et 2021 
+ Nous transformons ensuite ces labels en tableaux (data frames) et les fusionnons afin d’obtenir une correspondance entre les labels des deux années. Cela nous permet de conserver toutes les variables, même si elles ne sont présentes que dans une seule année.
+ 
+ 
+# II. Vérification des incohérences entre les bases 
+
+```{r}
+
+# Récupérer les labels en évitant les erreurs
+var_2018 <- tryCatch(var_label(welfare2018), error = function(e) list())
+var_2021 <- tryCatch(var_label(welfare2021), error = function(e) list())
+
+# Convertir en dataframe en s'assurant de garder la bonne correspondance variable-label
+df_2018 <- if (length(var_2018) > 0) {
+  data.frame(Variable = names(var_2018), Label_2018 = sapply(var_2018, function(x) ifelse(is.null(x), NA, x)), stringsAsFactors = FALSE)
+} else {
+  data.frame(Variable = character(), Label_2018 = character(), stringsAsFactors = FALSE)
+}
+
+df_2021 <- if (length(var_2021) > 0) {
+  data.frame(Variable = names(var_2021), Label_2021 = sapply(var_2021, function(x) ifelse(is.null(x), NA, x)), stringsAsFactors = FALSE)
+} else {
+  data.frame(Variable = character(), Label_2021 = character(), stringsAsFactors = FALSE)
+}
+
+# Fusionner en conservant toutes les variables
+df_final <- full_join(df_2018, df_2021, by = "Variable")
+
+```
+
+```{r}
+df_final %>%
+  kable("html") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  
+```
+
+
+La variable halfab dans la base welfare 2018 semble être  équivalente aux deux varibales halfa et halfa2 dans la base  welfare 2021 car ces variables renvoient à l'alphabétisation du chef de ménage . 
+
+
+```{r}
+var_label(welfare2018$halfab)
+
+```
+
+```{r}
+var_label(welfare2021$halfa)
+
+```
+
+```{r}
+var_label(welfare2021$halfa2)
+```
+
+Nous allons filtrer la base welfare2021 par la colonne halfa et halfa2
+
+```{r}
+
+# Garder uniquement les colonnes halfa et halfa2
+mabase_filtrée <- welfare2021 %>% select(halfa, halfa2)
+
+
+
+```
+
+Presque toute personne qui a repondu oui pour la variable halfa a repondu oui pour la variable halfa2 et vice verca . 
+Nous allons vérifier ça . 
+
+```{r}
+table(welfare2021$halfa)
+```
+
+```{r}
+table(welfare2021$halfa2)
+```
+On remarque que ces deux variables n'ont pas les mêmes nombres d'observations pour chaque modalité . 
+
+les variables alphab de welfare 2018 et alpha2 de welfare  2021 renoient la même information  d'après notre analyse . 
+
+```{r}
+colnames(welfare2021)
+```
+
+```{r}
+colnames(welfare2018)
+```
+Nous allons rénommer la variable halfa2  en halfab 
+
+```{r}
+
+# Renommer la variable dans welfare2021
+welfare2021 <- welfare2021 %>%
+  rename(halfab = halfa2)
+
+# Modifier le label (description)
+var_label(welfare2021)$halfab <- "Alphabetisation du CM"
+
+
+```
+
+
+On va homogéniser la variable Vague dans les deux bases  de 2018 et 2021 
+
+```{r}
+# Modifier le label (description)
+var_label(welfare2021)$vague <- "Vague"
+
+```
+
+Nous récupérons les labels des variables des bases de données de 2018 et 2021 tout en évitant les erreurs. Ensuite, nous transformons ces labels en tableaux  pour assurer une correspondance entre chaque variable et son label. Enfin, nous fusionnons les deux tableaux afin de conserver l’ensemble des variables, même si certaines ne sont présentes que dans une seule des deux années.
+
+
+
+### Transformons les labels en facteurs 
+
+
+```{r}
+welfare2018 <- welfare2018 %>% labelled::to_factor() 
+
+```
+
+```{r}
+welfare2021 <- welfare2021 %>% labelled::to_factor() 
+```
+
+```{r}
+head(welfare2018, 10) %>%
+  kable("html", caption = "10 prémières observations welfare2018") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+```
+
+```{r}
+head(welfare2021, 10) %>%
+  kable("html", caption = "10 prémières observations welfare2021") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+```
+
+#Liste des variables de type facteurs 
+
+```{r}
+factor_cols <- sapply(welfare2018, is.factor)
+names(welfare2018)[factor_cols]  # Liste des colonnes de type facteur
+
+```
+# Variables et leurs labels 
+
+Dans cette analyse, nous allons comparer les labels des variables catégorielles communes entre les bases de données welfare2018 et welfare2021. L'objectif est d'identifier les différences de labels entre les deux bases afin d'assurer la cohérence des données.
+Étapes du processus :
+
+    Identifier les colonnes communes entre les deux bases (welfare2018 et welfare2021).
+
+    Sélectionner ces colonnes dans chaque base pour garantir qu'on compare des éléments similaires.
+
+    Convertir les variables catégorielles en facteurs pour permettre la comparaison des labels.
+
+    Identifier les colonnes catégorielles communes après la conversion en facteurs.
+
+    Comparer les labels des variables catégorielles communes et construire un tableau récapitulatif des différences.
+
+    Afficher uniquement les colonnes dont les labels diffèrent entre les deux bases.
+
+```{r}
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles (facteurs) dans chaque base après conversion
+facteurs_base1 <- names(base1_facteurs)[sapply(base1_facteurs, is.factor)]
+facteurs_base2 <- names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(facteurs_base1, facteurs_base2)
+
+# Comparer les labels des colonnes catégorielles communes
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+  
+  identique <- identical(labels_base1, labels_base2)
+  list(colonne = col, identiques = identique, 
+       labels_base1 = labels_base1, labels_base2 = labels_base2)
+})
+
+
+```
+
+
+```{r}
+comparaison_labels
+```
+
+
+On voit qu'il ya 6 colonnes ou ya des incohérences dans les noms des colonnes 
+
+on va maintenant récoder les noms des labels  de ces variables 
+
+### Fonction pour rénommer les labels  
+
+```{r}
+renommer_labels <- function(df, colonne, correspondance) {
+  # Vérifier si la colonne est présente
+  if (!(colonne %in% names(df))) {
+    stop("La colonne spécifiée n'existe pas dans le dataframe.")
+  }
+  
+  # Vérifier si la colonne est bien un facteur ou une variable labellisée
+  if (!is.factor(df[[colonne]]) && !is.labelled(df[[colonne]])) {
+    stop("La colonne spécifiée doit être un facteur ou une variable labellisée.")
+  }
+
+  # Mettre à jour les niveaux du facteur avec fct_recode
+  if (is.factor(df[[colonne]])) {
+    df[[colonne]] <- fct_recode(df[[colonne]], !!!correspondance)
+  }
+
+  # Mettre à jour les labels avec val_labels()
+  if (is.labelled(df[[colonne]])) {
+    valeurs_existantes <- names(correspondance)  # Anciennes valeurs
+    if (!all(valeurs_existantes %in% unique(df[[colonne]]))) {
+      warning("Certaines anciennes valeurs ne sont pas présentes dans la colonne. Cela peut introduire des NA.")
+    }
+    
+    nouvelles_labels <- setNames(as.numeric(correspondance), valeurs_existantes)
+    val_labels(df[[colonne]]) <- nouvelles_labels
+  }
+
+  return(df)
+}
+
+```
+
+pour la variable hbranch 
+
+```{r}
+# Convertir la colonne en facteur
+welfare2018 <- welfare2018 %>%
+  mutate(hbranch = as_factor(hbranch))
+
+# Correspondance entre les labels de la Base 1 et ceux de la Base 2
+correspondance_hbranch <- c(
+  "Elevage/syl./peche" = "Elevage/peche"
+)
+
+
+# Appliquer la fonction renommer_labels pour modifier les labels
+welfare2018 <- renommer_labels(welfare2018, "hbranch", correspondance_hbranch)
+
+```
+
+On verifie si les modifications ont biien été appliquées . 
+
+```{r}
+table(welfare2018$hbranch)
+```
+
+### Pour la variable région  
+
+Nous mettons à jour les labels de certaines variables pour assurer une correspondance cohérente entre les bases de données. Ici, nous harmonisons les noms de régions en modifiant les labels afin d’éliminer les différences d’écriture.
+
+```{r}
+
+# Correspondance des nouveaux labels
+correspondance_region <- c("Hauts-Bassins" = "Hauts Bassins")
+
+# Appliquer la fonction renommer_labels pour modifier les labels
+welfare2018 <- renommer_labels(welfare2018, "region", correspondance_region)
+
+
+```
+
+
+
+```{r}
+
+# Correspondance des nouveaux labels
+correspondance_region <- c( "Boucle du Mouhoun" = "Boucle du Mouhoum")
+
+# Appliquer la fonction renommer_labels pour modifier les labels
+welfare2021 <- renommer_labels(welfare2021, "region", correspondance_region)
+
+
+
+```
+
+Nous allons de nouveau vérifier les variables ou il y a des incohérences entre les labels  sous forme de tableau . 
+
+
+
+```{r}
+
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+
+
+
+# Affichage du tableau comparaison_labels avec kableExtra
+tableau_comparaison %>% kable("html", caption = "Compararaison labels  différents ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+
+
+```
+
+vérifions les modalités pour la variable region 
+
+```{r}
+table(welfare2021$region)
+```
+# Variable hnation 
+
+Nous allons regler les incohérences entre les deux bases pour cette variable . 
+
+```{r}
+# Correspondance des nouveaux labels (ajoute toutes les corrections nécessaires)
+correspondance_pays <- c(
+  "Benin" = "Bénin"
+ )
+
+# Appliquer la fonction renommer_labels pour modifier les labels de la colonne hnation
+welfare2021 <- renommer_labels(welfare2021, "hnation", correspondance_pays)
+
+```
+
+
+  ,
+  "Cap-vert" = "Cape-Vert",
+
+```{r}
+correspondance_pays <- c(
+  "Côte d'Ivoire" = "Cote d'ivoire"
+ )
+
+# Appliquer la fonction renommer_labels pour modifier les labels de la colonne hnation
+welfare2021 <- renommer_labels(welfare2021, "hnation", correspondance_pays)
+
+
+```
+
+```{r}
+correspondance_pays <- c(
+   "Guinée"= "Guinee"
+ )
+
+# Appliquer la fonction renommer_labels pour modifier les labels de la colonne hnation
+welfare2021 <- renommer_labels(welfare2021, "hnation", correspondance_pays)
+
+```
+
+```{r}
+correspondance_pays <- c(
+  "Cap-vert" = "Cape-vert"
+ )
+
+# Appliquer la fonction renommer_labels pour modifier les labels de la colonne hnation
+welfare2021 <- renommer_labels(welfare2021, "hnation", correspondance_pays)
+```
+
+Nous allons vérifier si les modifications ont été prises en compte en affichant les variables communes  avec des labels et contenat des erreurs . 
+
+```{r}
+
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+
+
+tableau_comparaison %>% kable("html", caption = "Compararaison labels des colonnes  ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+```
+
+```{r}
+table(welfare2021$hnation)
+```
+Nous allons maintenant corriger toutes les incohérences pour la variable hnation entre les deux bases . 
+
+```{r}
+
+
+# Définition des labels pour chaque base
+labels_2018 <- c("Benin", "Burkina Faso", "Côte d'Ivoire", "Guinée Bissau", "Mali", "Niger", "Sénégal", "Togo", "Nigéria", "Autre CEDEAO", "Autre Afrique", "Autre pays hors Afrique")
+labels_2021 <- c("Benin", "Burkina Faso", "Cap-vert", "Côte d'Ivoire", "Gambie", "Ghana", "Guinée", "Guinée Bissau", "Liberia", "Mali", "Niger", "Nigeria", "Sénégal", "Serra-Leonne", "Togo", "Autre Afrique", "Autre pays hors Afrique")
+
+# Fusionner les labels pour créer une liste complète et cohérente
+labels_unifies <- unique(c(labels_2018, labels_2021))
+
+# Fonction pour harmoniser les labels
+harmoniser_labels <- function(df, variable, labels_ref) {
+  df %>%
+    mutate(!!sym(variable) := factor(!!sym(variable), levels = labels_ref))
+}
+
+# Appliquer la correction aux deux bases
+welfare2018 <- harmoniser_labels(welfare2018, "hnation", labels_unifies)
+welfare2021 <- harmoniser_labels(welfare2021, "hnation", labels_unifies)
+
+
+```
+
+Nous allons maintenant voir si ces modifications ont bien été prises en compte 
+
+```{r}
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+tableau_comparaison %>% kable("html", caption = "Compararaison labels ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+
+```
+
+```{r}
+tableau_comparaison
+```
+
+
+```{r}
+table(welfare2018$hnation)
+```
+
+
+```{r}
+table(welfare2021$hnation)
+```
+
+## Variable heduc 
+Nous allons corriger les incohérences pour la variable heduc 
+
+```{r}
+
+# Convertir la colonne en facteur
+welfare2018 <- welfare2018 %>%
+  mutate(heduc = as_factor(heduc))
+
+# Correspondance entre les labels de la Base 1 et ceux de la Base 2
+correspondance_educ <- c(
+  "Postprimaire général"="Second. gl 1", "Postprimaire  technique"="Second. tech. 1", "Secondaire général"="Second. gl 2", "Secondaire technique"="Second. tech. 2" )
+
+# Modifier les labels
+welfare2018 <- welfare2018 %>%
+  mutate(heduc = fct_recode(heduc, !!!correspondance_educ))
+
+
+```
+
+
+Nous allons afficher les colonnes communes aux deux bases avec des labels différents 
+
+```{r}
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+
+tableau_comparaison %>%
+  kable("html", caption = "Compararaison labels ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+```
+
+## Pour la variable hcsp
+
+```{r}
+
+
+# Convertir la colonne en facteur
+welfare2021 <- welfare2021 %>%
+  mutate(hcsp = as_factor(hcsp))
+
+# Correspondance entre les labels de la Base 1 et ceux de la Base 2
+correspondance_hcsp <- c( "Aide familial" = "Travailleur Familial contribuant pour une entreprise familial")
+  
+
+# Modifier les labels
+welfare2021 <- welfare2021 %>%
+  mutate(hcsp = fct_recode(hcsp, !!!correspondance_hcsp))
+
+
+```
+
+
+On va une fois de plus observer si les incohérences ont été corrigées 
+
+
+
+```{r}
+
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+
+tableau_comparaison %>%
+  kable("html", caption = "Comparaison labels ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+
+```
+
+
+
+```{r}
+# Définition des labels pour chaque base
+labels_2018_hactiv7j <- c("Occupe", "Chomeur", "TF cherchant emploi", "TF cherchant pas", "Inactif", "Moins de 5 ans")
+labels_2021_hactiv7j <- c("Occupe", "TF cherchant emploi", "TF cherchant pas", "Chomeur", "Inactif", "Moins de 5 ans")
+
+# Fusionner les labels pour créer une liste complète et cohérente
+labels_unifies_hactiv7j <- unique(c(labels_2018_hactiv7j, labels_2021_hactiv7j))
+
+# Fonction pour harmoniser les labels
+harmoniser_labels_hactiv7j <- function(df, variable, labels_ref) {
+  df %>%
+    mutate(!!sym(variable) := factor(!!sym(variable), levels = labels_ref))
+}
+
+# Appliquer la correction aux deux bases pour la variable hactiv7j
+welfare2018 <- harmoniser_labels_hactiv7j(welfare2018, "hactiv7j", labels_unifies_hactiv7j)
+welfare2021 <- harmoniser_labels_hactiv7j(welfare2021, "hactiv7j", labels_unifies_hactiv7j)
+```
+
+
+On va une fois de plus observer si les incohérences ont été corrigées 
+
+
+
+```{r}
+# Identifier les colonnes communes aux deux bases
+colonnes_communes <- intersect(names(welfare2018), names(welfare2021))
+
+# Sélectionner uniquement les colonnes communes
+base1_communes <- welfare2018 %>% select(all_of(colonnes_communes))
+base2_communes <- welfare2021 %>% select(all_of(colonnes_communes))
+
+# Fonction pour convertir les colonnes labelled en facteurs
+convertir_en_facteur <- function(df) {
+  df %>% mutate(across(where(is.labelled), ~ as_factor(.)))
+}
+
+# Convertir les colonnes en facteurs
+base1_facteurs <- convertir_en_facteur(base1_communes)
+base2_facteurs <- convertir_en_facteur(base2_communes)
+
+# Identifier les colonnes catégorielles communes
+colonnes_facteurs_communes <- intersect(
+  names(base1_facteurs)[sapply(base1_facteurs, is.factor)],
+  names(base2_facteurs)[sapply(base2_facteurs, is.factor)]
+)
+
+# Construire un tableau comparatif uniquement pour les labels différents
+comparaison_labels <- lapply(colonnes_facteurs_communes, function(col) {
+  labels_base1 <- levels(base1_facteurs[[col]])
+  labels_base2 <- levels(base2_facteurs[[col]])
+
+  identique <- identical(labels_base1, labels_base2)
+
+  if (!identique) {
+    tibble(
+      Colonne = col,
+      Type = c("Labels Base 1", "Labels Base 2"),
+      Labels = c(paste(labels_base1, collapse = ", "),
+                 paste(labels_base2, collapse = ", "))
+    )
+  } else {
+    NULL  # Ne rien ajouter si les labels sont identiques
+  }
+})
+
+# Transformer en tableau final en supprimant les NULL
+tableau_comparaison <- bind_rows(comparaison_labels)
+
+tableau_comparaison %>%
+  kable("html", caption = "Comparaison labels ") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+```
+A présent toutes les incohérences entre les bases ont été reglées . Nous pouvons maintenat passer au merge .
+
+
+# Partie merge 
+
+
+Pour merger nous allons empiler les deux bases 
+
+
+```{r}
+base_merge <- bind_rows(welfare2018,welfare2021)
+```
+
+
+
+```{r}
+# Affichage du tableau comparaison_labels avec kableExtra
+
+
+head(base_merge, 10) %>%
+  kable("html", caption = "Aperçu des 10 peremières observations base_merge") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+
+```
+
+les 10 dernières observations 
+
+
+```{r}
+
+
+tail(base_merge, 10) %>%
+  kable("html", caption = "Les 10 dernières lignes de base_merge") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "responsive"))
+
+
+```
+
+
+
+
+
+
+
+
+
+

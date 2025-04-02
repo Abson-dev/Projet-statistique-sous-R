@@ -265,7 +265,16 @@ nutrition_summary <- child_baseline %>%
 # Affichage du tableau
 nutrition_summary
 
+
 ```
+L’analyse des données nutritionnelles des enfants au Baseline révèle une grande variabilité dans les apports alimentaires. En moyenne, les enfants consomment environ 405 kcal par jour avec un écart-type de 307 kcal, ce qui indique des différences notables entre les individus. Certains enfants bénéficient d’un apport énergétique adéquat, tandis que d’autres sont nettement en dessous des recommandations, soulevant des préoccupations quant à la qualité et la quantité des aliments consommés.
+L’apport en protéines est en moyenne de 13 g avec un écart-type de 16 g, illustrant une hétérogénéité importante. Si certains enfants reçoivent suffisamment de protéines essentielles à leur croissance, d’autres en consomment très peu, ce qui peut avoir des conséquences sur leur développement musculaire et leur santé globale. Le même constat peut être fait pour les lipides, dont la consommation moyenne est de 7 g avec un écart-type de 14 g, reflétant des disparités importantes dans la disponibilité des sources de matières grasses.
+
+Concernant les micronutriments, les résultats mettent en évidence des apports souvent insuffisants. L’apport moyen en calcium est de 76 mg, bien en dessous des recommandations nutritionnelles, ce qui peut poser un risque pour la santé osseuse des enfants. Le fer, élément clé pour la prévention de l’anémie, est consommé à hauteur de 5 mg en moyenne, avec un écart-type de 6 mg, suggérant qu’une partie des enfants est potentiellement à risque de carence. La situation est similaire pour le zinc, dont la consommation moyenne est de 2 mg, un apport relativement faible pour assurer un bon fonctionnement immunitaire et une croissance optimale.
+
+Les vitamines présentent également des tendances préoccupantes. La vitamine B6 et la vitamine B12 affichent des moyennes proches de zéro, ce qui témoigne d’un manque probable d’aliments riches en ces nutriments essentiels, comme la viande, le poisson ou les produits laitiers. En revanche, la consommation de vitamine C montre une forte variabilité, avec une moyenne de 21 mg et un écart-type de 67 mg, indiquant que certains enfants ont accès à des fruits et légumes riches en vitamine C, tandis que d’autres en consomment très peu.
+
+Ces résultats suggèrent des inégalités marquées dans l’alimentation des enfants. La forte dispersion des valeurs montre que certains groupes bénéficient d’un apport nutritionnel plus équilibré, tandis que d’autres souffrent de déficits potentiellement préoccupants. Une analyse plus approfondie permettrait d’explorer les facteurs expliquant ces écarts, notamment en fonction du niveau socio-économique des ménages ou des zones géographiques étudiées
 
 
 
