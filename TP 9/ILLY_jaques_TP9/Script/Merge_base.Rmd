@@ -1,0 +1,577 @@
+---
+title: "Merge de bases welfare"
+author: "ILLY Jacques"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Ce travail consiste consiste à merger les bases welfare des EHCVM 2018 ET 2021 en une seule base.
+Pour cela, nous prenons pour le Burkina Faso.
+
+# **I-Installation des outils**
+
+## 1-Installation et Telechargement des packages nécessaires
+```{r }
+# Nous donnons à packages le vecteurs des packages
+packages <- c("dplyr", "haven", "readr", "gt", "labelled", "questionr", "utils","cardx" , "survey", "gtsummary")
+#Installation 
+for(pack in packages){
+  if(!requireNamespace(pack, quietly = TRUE)){
+    install.packages(pack)
+  }
+  #telechargement
+  library(pack, character.only = TRUE)
+}
+
+```
+
+## 2-Installation des bases
+```{r }
+#installation de welfare 2018
+welfare18 <- read_dta("../Données/ehcvm_welfare_bfa2018.dta")
+#installation de welfare 2021
+welfare21 <- read_dta("../Données/ehcvm_welfare_bfa2021.dta")
+
+```
+
+# **II- Inspection des donnés**
+
+## 1-Aperçu des premières et dernières observations
+```{r }
+#base welfare18
+head(welfare18)
+tail(welfare18)
+#base welfare21
+head(welfare21)
+tail(welfare21)
+```
+
+## 2-Structure des bases
+```{r }
+#base welfare18
+str(welfare18)
+#base welfare21
+str(welfare21)
+```
+
+```{r }
+#base welfare18
+summary(welfare18)
+#base welfare21
+summary(welfare21)
+```
+
+
+## 3-Les dimensions des bases et les noms des variables 
+
+### Dimension
+```{r }
+#base welfare18
+print("La base welfare18 a respestivement d'observation et de variable")
+dim(welfare18)
+#base welfare21
+print("La base welfare21 a respestivement d'observation et de variable")
+dim(welfare21)
+```
+
+### Noms des variables
+
+```{r }
+print("Les noms des variables de la base welfare18 sont :")
+#base welfare18
+names(welfare18)
+print("Les noms des variables de la base welfare21 sont :")
+#base welfare21
+names(welfare21)
+
+```
+
+### Les variables dont leurs noms se diffèrent dans les deux bases
+```{r }
+#les variables qui ne sont pas commun aux deux bases
+nam_welfare18 <- colnames(welfare18) # extraction des noms des variables dans chaque bases
+nam_welfare21 <- colnames(welfare21)
+# Affichages des variables non commun
+
+#comparaisons des colonnes 
+if (identical(sort(nam_welfare21)#la fonction "sort" est utilisé pour trier vecteur nam_welfare par ordre croissante(alphab) pour faciliter la comparaison, 
+              ,sort(nam_welfare18))){
+  print("Les deux bases ont les mêmes colonnes.")
+}else{
+  print("Les deux bases n'ont pas les mêmes colonnes.")
+  #Les variables présente dans welfare18 et non dans welfare21
+  var_non_commun18 <- setdiff(nam_welfare18, nam_welfare21)
+  #Les variables présente dans welfare21 et non dans welfare18
+  var_non_commun21 <- setdiff(nam_welfare21, nam_welfare18)
+  
+  cat("Les variables présente dans welfare18 et non dans welfare21: ", var_non_commun18)# Affichage des variables présente dans welfare18 et non dans welfare21
+  
+  cat("\n Les variables présente dans welfare21 et non dans welfare18: ", var_non_commun21)# Affichage des variables présente dans welfare21 et non dans welfare18
+}
+
+```
+
+## 4- Les labelles
+
+### Les labelles des variables
+```{r }
+print("Les labelles des variables de la base welfare18")
+var_label(welfare18)
+
+print("Les labelles des variables de la base welfare21")
+var_label(welfare21)
+
+```
+
+### Les labelles des valeurs
+```{r }
+print("Les labelles des valeurs de la base welfare18")
+val_labels(welfare18)
+
+print("Les labelles des valeurs de la base welfare21")
+val_labels(welfare21)
+
+```
+
+### Verification de l'identité des labelle des variables.
+```{r }
+# Extraction des labelles des deux bases
+labels_welfare18 <- sapply(welfare18, function(x) attr(x, "label"))
+labels_welfare21 <- sapply(welfare21, function(x) attr(x, "label"))
+
+# Comparer les labels des variables entre welfare18 et welfare21
+if(identical(labels_welfare18, labels_welfare21)){
+  print("les labelles des variables sont identiques")
+}else{
+  print("les labelles des variables ne sont pas identiques")
+}
+
+
+```
+
+
+### Dectecter les variables de labelles différente dans les deux bases
+```{r }
+#Fonction qui Compare les labels des valeurs entre les deux bases
+compare_labels_variables <- function(df1, df2) {
+  identical_labels <- list() # a defaut, on attribut list vide à identical_labels
+  
+  # Comparer les labels des valeurs pour chaque variable
+  for (var in names(df1)) {
+    # Vérifier si les deux variables existent dans les deux bases
+    if (var %in% names(df2)) {
+      label1 <- attr(df1[[var]], "label")# on attribut le labelle de var dans df1 à label1
+      label2 <- attr(df2[[var]], "label")# on attribut le labelle de var dans df2 à label2
+      
+      # Comparer les labels des valeurs
+      if (!identical(label1, label2)) {
+        identical_labels <- append(identical_labels, var)
+        
+      }
+    }
+  }
+    if(length(identical_labels)==0){
+      print("les labelles sont identiques pour toute les variables")
+    }else{
+      print(paste("Les labels diffèrents pour la variable:", identical_labels))
+  }
+    
+  
+  
+  #return(identical_labels)
+}
+
+# Appel de la fonction
+compare_labels_variables(welfare18, welfare21)
+
+```
+
+### Dectection des variables dont leur valeurs ont des labelles différentes dans les deux bases
+```{r }
+#Fonction qui Compare les labels des valeurs entre les deux bases
+compare_labels_values <- function(df1, df2){ 
+# Extraction des variables de noms communs
+variabl_commun <- intersect(names(df1), names(df2))
+
+
+variable_label_diff <- list() #créer une liste vide 
+
+for (variable in variabl_commun) { #parcourir les variables en communs dans les deux bases
+  
+    if(labelled::is.labelled(df2[[variable]])){ #vérifier si la variable en 2018 est labéliser
+    
+    value_label18 <- labelled::val_labels(df2[[variable]]) #recupérer les labels de la variable en 2018
+    
+   }else{
+    value_label18 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labéliser
+  }
+  
+    if(labelled::is.labelled(df1[[variable]])){ #vérifier si la variable en 2021 est labéliser
+       
+       value_label21 <- labelled::val_labels(df1[[variable]]) #recupérer les labels de la variable en 2021
+       
+   }else{
+       
+       value_label21 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labéliser
+     }
+     
+    if(!identical(value_label18, value_label21)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+       variable_label_diff <- append(variable_label_diff, variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+       print(variable)
+    }
+}
+
+if(length(variable_label_diff)==0){
+      print("les labelles des modalité sont identiques pour toute")
+    }else{
+      print("Les labels des modalité diffèrents pour ces variables")                   
+  }
+    
+
+}
+
+compare_labels_values(welfare18, welfare21)
+
+```
+
+
+
+### 4- Comparaison des types de variables commun
+```{r }
+
+# Extraction des colonnes communes
+colonn_com <- intersect(names(welfare18), names(welfare21))
+
+# Initialiser les listes pour les colonnes avec types identiques et différents
+type_com <- list()
+type_diff <- list()
+
+# Comparaison des types des colonnes communes
+for (variabl in colonn_com) {#parcour toutes les variables
+  # Comparaison des classes des variables
+  if (identical(class(welfare18[[variabl]]), class(welfare21[[variabl]]))) {
+    type_com<- append(type_com, variabl)# On affect la variabl a la liste
+  } else {
+    type_diff <- append(type_diff, variabl)  # Ajouter la variable à la liste
+
+    #pour stocker les types (classes) des colonnes communes entre les deux dataframes 
+  }
+}
+
+# Afficher les résultats
+if (length(type_diff) == 0) {#mesure la longueur de la liste
+  print("Toutes les colonnes communes ont les mêmes classes.")
+} else {
+  print("Les colonnes suivantes ont des classes différentes entre les deux dataframes :")
+  print(type_diff)
+}
+
+```
+
+
+# **III-Netoyage des bases**
+
+Dans les parties précédentes nous avons vérifier que les bases ont des *dimensions* différentes ainsi que des variales communes de labelles et de noms différents. Dans cette partie, nous allons apporter des corrections (recodage des labelles et noms), et gerer les cas des *doublons* ainsi qu'autres *incohérences*.
+
+## 1- Les doublons
+```{r }
+# Verification de la présence des doublons dans chaque base welfare18
+if (sum(duplicated(welfare18))==0){# Verifie le nombre de doublons dans welfare18
+  print("La base welfare 18 n'a pas de doublons")
+}else{
+  print("ll y a de doublons au nombre de") 
+  print( sum(any(duplicated(welfare18))))#Renvoi le nombre de doublons
+}
+# Verification de la présence des doublons dans chaque base welfare21
+if (sum(duplicated(welfare21))==0){# Verifie le nombre de doublons dans welfare21
+  print("La base welfare 21 n'a pas de doublons")
+}else{
+  print("ll y a de doublons au nombre de") 
+  print( sum((duplicated(welfare21))))# Renvoi le nombre de doublons
+}
+
+```
+
+## 2-Les valeurs manquantes
+```{r }
+#Les valeurs les valeur manquantes dans chaque colonne de la base welfare18
+print("Les valeurs manques dans la base welfare18 se repartissent par colonne comme suite:")
+print(colSums(is.na(welfare18)))#Affiche le nombre des valeurs manquantes par colonnes
+
+#Les valeurs les valeur manquantes dans chaque colonne de la base welfare21
+print("Les valeurs manques dans la base welfare21 se repartissent par colonne comme suite:")
+print(colSums(is.na(welfare21)))#Affiche le nombre des valeurs manquantes par colonnes
+
+```
+
+
+## 3-Suppression des espaces dans les noms des variables
+```{r }
+if (any(grepl(" ",names(welfare18))))#verification de presence d'espace dans la base welfare18
+  {
+names(welfare18) <- gsub(" ","",names(welfare18))#Remplace les vides par les lettres suivante dans le noms de la variables
+print("Espaces supprimer avec succè dans la base walfare18")
+}else {
+  print("Aucun espace trouvé la base welfare18.")
+}
+
+if (any(grepl(" ",names(welfare21))))#verification de presence d'espace dans la base welfare21
+  {
+  names(welfare21) <- gsub(" ","",names(welfare21))#Remplace les vides par les lettres suivante dans le noms de la variables
+print("Espaces supprimer avec succè dans la base walfare21")
+}else {
+  print("Aucun espace trouvé la base welfare21.")
+}
+```
+
+
+## 4-Renommination des noms des variables et le recodage des labelles
+
+### Renommination des noms des variables
+
+Nous avons constaté en II) que la variables *halfa* et *halfab* contiennent les mêmes informations dans leurs bases respectives. Pour cela, nous allons renommer *halfa* à *halfab*
+
+```{r }
+colnames(welfare18)[colnames(welfare18)=="halfab"] <- "halfa"
+  
+```
+
+### Recodage des labelles
+
+#### *Les variables*
+On a constater dans la partie II que la variables *vague* et *halfa* est communes aux deux bases mais de labelles différents. 
+
+```{r }
+#Renommination du labelle de vague
+var_label(welfare21$vague) <- "Vague"
+#Renommination du labelle de halfa
+var_label(welfare21$halfa) <- "Alphabetisation du CM"
+
+```
+
+#### *Les valeurs(modalité) *
+
+#### *Region*
+```{r }
+# On renommes les valeurs(modalités) qui ne sont pas du même labelles 
+val_label(welfare21$region, 1) <- c("Boucle du Mouhoun")
+val_label(welfare21$region, 9) <- c("Hauts Bassins")
+#Une autre façon de faire est de considerer tous les variables de welfare18 et les affecter à welfare21 val_labels(welfare21$region) <-val_labels(welfare18$region). La base welfare21 aura desormain tous les labelles de welfare18
+
+```
+
+#### *hnation*
+Pour cette variable, on va recoder et regrouper les pays de la CEDEAO dans la base welfare21 et ensuite affecter les labelles de welfare18 à welfare21.
+
+```{r }
+# Recodages des modalités
+welfare21 <- welfare21 %>% mutate(hnation=dplyr::recode(hnation, 
+                       '4'=3, # on renmplacer la valeur à gauche par celle de la droite
+                        '8'=4,
+                        '11'=6,
+                        '10'=5,
+                        '15'=8,
+                        '13'=7,
+                        '17'=11,
+                        '18'=12,
+                        '12'=9,
+                        '3'=10, '5'=10, '6'=10, '7'=10, '14'=10, '9'=10
+                            ))
+
+
+#On remet à jour la labellisation 
+val_labels(welfare21$hnation) <-val_labels(welfare18$hnation)
+
+ 
+```
+
+#### *heduc*
+
+Pour cette variables, on a juste à renommer les étiquettes (labelles) des modalités de welfare18
+```{r }
+#Nous allons garder les labelles de welfare21
+
+val_labels(welfare18$heduc) <- val_labels(welfare21$heduc)
+
+```
+
+#### *hactiv7j*
+Pour cette variable, on va recoder les labelles de welfare21
+```{r }
+#Recodage des labelles
+welfare21 <- welfare21 %>% mutate(hactiv7j=dplyr::recode(hactiv7j, 
+                       '2'=3, # on renmplacer la valeur à gauche par celle de la droite
+                        '3'=4,
+                        '4'=1
+                         ))
+
+#Remise à jour de la labellisation 
+val_labels(welfare21$hactiv7j) <-val_labels(welfare18$hactiv7j)# Après avoir recoder, on donne tous les labelles des modalité de welfare18 à ceux de welfare21
+
+```
+
+#### *hbranch* et 
+Ici également, nous allons juste renommer les labelles de welfare21. A vu d'oiel, c'est une seule labellisation de différence, pour ne pas prendre de risque, nous allons affecter tous les labelles de walfare18 à welfare21
+```{r }
+val_labels(welfare21$hbranch) <-val_labels(welfare18$hbranch)#on donne tous les labelles des modalité de welfare18 à ceux de welfare21
+
+```
+
+#### *hcsp*
+```{r }
+val_labels(welfare21$hcsp) <-val_labels(welfare18$hcsp)#on donne tous les labelles des modalité de welfare18 à ceux de welfare21
+```
+
+
+# **IV-Reimportation des base et le Merge **
+
+## 1- Sauvegarde des bases
+
+Nous allons exporter les bases nettoyées dans le dossier donnée_nettoyée
+```{r }
+# On exporte les welfare dans le dossier donnée_nettoyée en leur donnant le nom welfare final
+write_dta(welfare18, "../Données/Donnée_nettoyées/welfare2018_final")
+write_dta(welfare21, "../Données/Donnée_nettoyées/welfare2021_final")
+
+```
+## 2- réimportation des bases
+Nous réimportons les bases néttoyée
+```{r }
+# importation des bases
+welfare_2018 <- read_dta("../Données/Donnée_nettoyées/welfare2018_final")
+welfare_2021 <- read_dta("../Données/Donnée_nettoyées/welfare2021_final")
+
+```
+
+
+## 3-Verification
+
+Nous allons verifier quelques corrections
+```{r }
+
+#Verification de l'identité des labelles des variables avec la fonction compare_labels_variable
+compare_labels_variables(welfare_2018, welfare_2021)
+
+#Verification de l'identité des labelles des valeurs avec la fonction compare_labels_value
+compare_labels_values(welfare_2018, welfare_2021)
+
+```
+##  4-Le merge
+
+Nous allons empiler les deux bases. Le merge ici consiste à un ajout d'observation car les individus sont différent pour ces deux bases.
+
+```{r }
+# Nous allons fair l'empilement avec bind_rows et nous allons appeler la nouvelle base simplement welfare
+
+welfare <- bind_rows(welfare_2018, welfare_2021)
+
+```
+
+Sauvegarde la base welfare dans le dossier Donnée_nettoyées
+
+```{r }
+# On exporte les welfare dans le dossier donnée_nettoyée en leur donnant le nom welfare final
+welfare <- read_dta("../Données/Donnée_nettoyées/welfare")
+```
+
+
+ Réimportation de la base welfare 
+```{r }
+# On exporte les welfare dans le dossier donnée_nettoyée en leur donnant le nom welfare final
+write_dta(welfare, "../Données/Donnée_nettoyées/welfare")
+
+```
+# **V-Statistique descriptive**
+
+Dans cette partie nous allons faire de staistique descriptive sur quelques variables.
+
+## 1-Milieu de residence, religion et emploi
+
+```{r }
+tableau_welfare1 <- welfare %>% labelled::to_factor()%>%#conversion en facteur de la base welfare
+  select(hreligion, region, milieu,  hcsp, hactiv7j, hactiv12m, hbranch, zae) %>%#On selection les variables à étudier
+  tbl_summary(#Formation du tableau
+  label=list(# Liste des valeur à labelliser
+   hreligion ~ "la religion du chef de menage(CM)", 
+   region ~ "La région du chef de menage",
+   milieu ~"Le milieu de résidence" ,
+   hcsp ~ "csp du CM",
+   hactiv7j ~ "l'activité du chef de menage en 7 jours",
+   hactiv12m ~ "l'activité du chef de menage en 12 mois",
+   hbranch ~ "la branche d'activité",
+   zae ~ "Zone agroécologique"
+     ),# On a labellisé les valeur à étudier
+   missing = "always",# Calcul en tenant compte des valeur manquante
+  missing_text="valeur manquant"#Affiche un message pour signifier les valeur manquante
+) %>% modify_header(#Modifier l'entête du tableau
+  label="statistiques descriptives") %>%as_gt() %>%#Rend le tableau compatible à la modification, permettant d'associer des couleurs ect.
+  tab_header(title="Statistique de milieu et emploi") %>%
+  #Titre du tableau
+  tab_style(#Mettons la bordure en bleu pour toutes les colonnes
+    style=cell_borders(color="blue", weight =  px(4)), locations = cells_body(columns=everything())) %>%
+  tab_style(
+    #Mettons le fonf en bleuclaire pour toute les cellule
+    style=cell_fill(color="lightblue"), locations = cells_column_labels(columns=everything())) %>% 
+  tab_style(
+    #Mettons le fonf en bleuclaire pour toute les cellule
+    style=cell_fill(color="lightblue"), locations = cells_body(columns=everything())) %>% 
+  tab_style(
+    #mettons le texte en marron et en gras
+    style=cell_text(color="black", weight="bold"  ), locations = cells_body(columns=everything()))%>%
+  #Ajouter une source de donnée au tableau
+  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2021 Burkina Faso")  
+
+# Affichage tableau
+tableau_welfare1
+
+```
+  On constate que les chefs de menage sont majoritairement musulmans, Soit **62%** de musulman,**30%** de chrétien. La région de centre occupe **11%** et les Hauts bassins **%10%** des menage recensés. C'est le fait que ces zones sont des zonnes urbaines. Par contre, les zones urbaines, en generale, occupe **46%** contre **54%** en milieu **rurale**. 
+    L'information intéressante est que les **76%** travaille pour leur compte propre. Mais il y a moin de cadre supérieure, soit seulement **1.4%**. On a également seulement **0.2%** de chomeur et **86%** de chef de ménage occupé. Il y a de quant même plus de **13%** de personne inactif. *51* de ces chef de ménage sont des agriculteurs et l'agricuture est **33%** pratiqué dans la **Grand Ouest**
+
+
+## Niveau d'etude et identé du chef de ménage
+```{r }
+tableau_welfare2 <- welfare %>% labelled::to_factor()%>%#conversion en facteur de la base welfare
+  select(hhsize, halfa, heduc, hdiploma, hgender, hmstat, hage ) %>%#On selection les variables à étudier
+  tbl_summary(#Formation du tableau
+  label=list(# Liste des valeur à labelliser
+   hhsize~ "la taille du chef de menage(CM)", 
+   halfa ~ "Le niveau d'alphabetisation du chef de menage",
+   heduc ~"Le mniveau d'étude du CM" ,
+   hdiploma ~ "Le diplome du CM",
+   hgender ~ "Le sexe du chef de menage ",
+   hmstat ~ "La statut matrimoniale du chef de menage",
+   hage ~ "L'âge duchef de melange"
+     ),# On a labellisé les valeur à étudier
+  statistic = list(hage~ "{mean}, {sd} ,{median}"),#statistique sur l'age
+   missing = "always",# Calcul en tenant compte des valeur manquante
+  missing_text="valeur manquant"#Affiche un message pour signifier les valeur manquante
+) %>% modify_header(#Modifier l'entête du tableau
+  label="statistiques descriptives") %>%as_gt() %>%#Rend le tableau compatible à la modification, permettant d'associer des couleurs ect.
+  tab_header(title="Statistique du niveau d'étude et identité") %>%
+  #Titre du tableau
+  tab_style(#Mettons la bordure en bleu pour toutes les colonnes
+    style=cell_borders(color="orange", weight =  px(4)), locations = cells_body(columns=everything())) %>%
+  tab_style(
+    #Mettons le fonf en bleuclaire pour toute les cellule
+    style=cell_fill(color="lightgreen"), locations = cells_column_labels(columns=everything())) %>% 
+  tab_style(
+    #Mettons le fonf en bleuclaire pour toute les cellule
+    style=cell_fill(color="lightgreen"), locations = cells_body(columns=everything())) %>% 
+  tab_style(
+    #mettons le texte en marron et en gras
+    style=cell_text(color="black", weight="bold"  ), locations = cells_body(columns=everything()))%>%
+  #Ajouter une source de donnée au tableau
+  gt:: tab_source_note(source_note="souce: Donné de EHCVM 2018-2021 Burkina Faso")  
+
+# Affichage tableau
+tableau_welfare2
+
+
+```
+   Une grande partie des chefs de ménage ne sont pas alphabathétisés, soit **58%**. Plus de **68%** n'ont pas fait l'école; seulement **4%** a un niveau supérieur. En terme de diplôme, les **79%** n'ont aucun diplôme; seulement **1.4%** ont la licence.      On constace églement que **85%** des chef de ménage sont des hommes; avec la majorité marié monogame.
+

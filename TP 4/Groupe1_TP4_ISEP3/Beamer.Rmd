@@ -1,0 +1,215 @@
+---
+title: "TP4_Projet_Statistique_Sous_R"
+author: "Groupe 1: Samba Dieng/  Onanena Jeanne De La Flèche / Khadidiatou Coulibaly / Tamsir Ndong"
+date: "`r Sys.Date()`"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+---
+
+
+## PLAN DE REDACTION
+
+\vspace{0.3cm}
+- **Introduction**
+
+\vspace{0.3cm}
+- **I°) Chargement des données**
+
+\vspace{0.3cm}
+- **II°) Nettoyage des chaînes de caractères**
+
+\vspace{0.3cm}
+- **III°) Recherche des correspondances exactes**
+
+\vspace{0.3cm}
+- **IV°) Gestion des non-correspondances**
+
+\vspace{0.3cm}
+- **V°) Défis rencontrés**
+
+\vspace{0.3cm}
+- **Conclusion et recommandations**
+
+---
+  
+## Introduction
+
+Lorsqu'on fusionne deux bases de données, il est fréquent que les variables censées correspondre présentent des différences de formatage ou d'écriture (accents, espaces, apostrophes, etc.).
+
+Dans ce projet, nous utilisons R pour harmoniser ces noms et vérifier les correspondances entre deux fichiers de données, tout en gérant les erreurs et les incohérences.
+
+---
+
+## I.1°) Chargement des packages et des données
+
+**Packages utilisés**
+
+- **haven** : Permet d'importer des fichiers Stata (.dta).
+- **readxl** : Permet de lire des fichiers Excel (.xlsx).
+- **labelled** : Facilite la manipulation des variables factorisées.
+- **stringi** : Fournit des fonctions pour le nettoyage et la manipulation de texte, notamment la suppression des accents et la transformation en majuscules.
+
+---
+
+## I.2°) Importation des données
+Les bases qui sont concernées sont : **HDX** et **EHCVM**.
+
+
+![](C:/Users/OUSMANE/Desktop/IM1.png)
+
+---
+
+## II°) Nettoyage des noms des communes
+
+Les noms de communes peuvent contenir des **accents**, des **apostrophes** et **d'autres caractères spéciaux**. Pour assurer une correspondance plus fiable, nous appliquons une transformation :
+
+- Suppression des **accents** (stri_trans_general(text, "Latin-ASCII"))
+- Conversion en **majuscules** (toupper(text)).
+-	Suppression des **apostrophes** (gsub("'", "", text)).
+-	Suppression des **autres caractères spéciaux** (gsub("[^A-Z0-9 ]", "", text)).
+
+---
+    
+## II.1°) Nettoyage des noms de communes dans "EHCVM"
+Ce code en R ci dessous nettoie et standardise les noms de communes en supprimant les accents, en mettant les textes en majuscules et en retirant les caractères spéciaux indésirables. Il convertit d'abord la variable en facteur, extrait les niveaux uniques des communes, puis applique une fonction de nettoyage utilisant **stri_trans_general()**, **toupper()**, et **gsub()**. Cependant, une erreur est présente : def doit être remplacé par **function()**  en R. De plus, **as.list(sapply(...))** est redondant et peut être simplifié en sapply(...).
+
+---
+
+
+![](C:/Users/OUSMANE/Desktop/IM2.png)
+---
+## II.2°) Nettoyage des noms de communes dans la base HDX
+![](C:/Users/OUSMANE/Desktop/IM3.png)
+## III°) Recherche des correspondances exactes
+On cherche d'abord les communes **présentes dans les deux bases** avec **intersect()**.
+![](C:/Users/OUSMANE/Desktop/IM4.png)
+
+---
+Ensuite, on détecte les communes absentes dans la base HDX.
+![](C:/Users/OUSMANE/Desktop/IM5.png)
+Quand une correspondance exacte n'existe pas, on peut mesurer **la proximité entre les noms**.  Nous avons les méthodes suivants:
+
+-	**Distance de Levenshtein** (stringdist::stringdist()) : Mesure le nombre d’opérations (insertion, suppression, substitution) pour transformer une chaîne en une autre.
+-	**Distance de Jaro-Winkler** (stringdist::stringdist()) : Plus adaptée aux erreurs typographiques et aux préfixes similaires.
+-	**Correspondance approximative avec** amatch() : Retourne l’indice de la meilleure correspondance.
+
+
+
+## 1. Distance de Levenshtein
+
+### Principe
+- Calcule le **nombre minimum d’opérations** nécessaires pour transformer une chaîne A en chaîne B.  
+- Les opérations sont :  
+  1. **Insertion** d’un caractère  
+  2. **Suppression** d’un caractère  
+  3. **Substitution** d’un caractère  
+
+### Exemple
+
+- Pour transformer `"Paris"` en `"Pariis"` :  
+  - On insère un “i” → 1 opération  
+  - Résultat : la **distance de Levenshtein** = 1
+
+- Pour transformer `"Marseille"` en `"Marselle"` :  
+  - Il manque un “i” → 1 insertion  
+  - Distance = 1  
+
+### Interprétation
+- Distance **0** : les deux chaînes sont identiques.  
+- Distance **1, 2…** : plus la distance est petite, plus les chaînes se ressemblent ; plus elle est grande, plus elles sont différentes.
+
+## 2. Distance de Damerau-Levenshtein
+
+### Principe
+- Semblable à la distance de Levenshtein, **mais** elle ajoute la possibilité de **transposer** deux lettres adjacentes comme une seule opération.  
+- Utile pour gérer les inversions de lettres très courantes (ex. “Marsiellle” vs “Marseille”).
+
+### Exemple
+- Pour transformer `"mries"` en `"meris"`, on a besoin de permuter “r” et “i”.  
+  - Avec Damerau-Levenshtein, **une seule opération** suffit (transposition).  
+  - Avec Levenshtein classique, ce serait deux opérations (substitutions).
+
+## 3. Distance de Hamming
+
+### Principe
+- Compte le nombre de **positions différentes** entre deux chaînes de **même longueur**.  
+- **Aucune insertion ou suppression** n’est autorisée, seulement la **substitution** de caractères.
+
+### Exemple
+- `"abcde"` vs. `"abzde"`  
+  - Seule la 3e lettre est différente (“c” vs. “z”) → distance de Hamming = 1  
+- `"ab"` vs. `"ba"`  
+  - Les deux positions diffèrent → distance = 2  
+
+### Limite
+- Ne s’applique qu’aux chaînes de la même longueur.
+
+## 4. Distances Jaro et Jaro-Winkler
+
+### Jaro
+- **Compare** les positions des caractères entre deux chaînes et tient compte du nombre de **correspondances** et de **transpositions**.  
+- Produit une **similarité** entre 0 et 1 (1 = identique, 0 = très différent).  
+- Dans certains outils (ex. `stringdist`), on obtient la **distance** = `1 - similarité`.
+
+### Jaro-Winkler
+- **Extension** de Jaro qui accorde **plus de poids** aux **premiers caractères** identiques.  
+- Particulièrement adapté pour les noms (personnes, communes…).
+
+### Exemple
+- “MARTHA” vs. “MARHTA”  
+  - Très proches pour Jaro/Jaro-Winkler : mêmes lettres, ordre presque similaire.  
+  - On obtient donc une **similarité** élevée → distance faible.
+
+## 5. Distance ou similarité de Jaccard
+
+### Principe
+- On voit chaque chaîne comme un **ensemble** de caractères (ou de mots).  
+- La **similarité de Jaccard** =  
+  \[
+    \frac{\text{taille de l'intersection}}{\text{taille de l'union}}
+  \]  
+- La distance de Jaccard = `1 - (similarité de Jaccard)`.
+
+### Exemple
+- Chaîne A : “paris” → `{p, a, r, i, s}`  
+- Chaîne B : “mars” → `{m, a, r, s}`  
+  - Intersection : `{a, r, s}` → taille = 3  
+  - Union : `{p, a, r, i, s, m}` → taille = 6  
+  - Similarité de Jaccard = 3/6 = 0,5 → Distance = 0,5
+
+## 6. Similarité cosinus (Cosine similarity)
+
+### Principe
+- Conçu plutôt pour comparer des **phrases** ou **textes** plus longs.  
+- Transforme chaque texte en un **vecteur** (par exemple de fréquences de mots).  
+- Calcule l’**angle** entre ces vecteurs : plus l’angle est petit, plus la similarité est grande.
+
+### Exemple
+- On construit un vecteur de la forme `[nb_occurrences_mot1, nb_occurrences_mot2, ...]`.  
+- On calcule  
+  \[
+    \text{similarité\_cosinus} = \frac{A \cdot B}{\|A\|\|B\|}
+  \]  
+- Très utilisé pour la comparaison de documents.
+
+## 7. Méthode phonétique (ex. Soundex, Metaphone)
+
+### Principe
+- Compare la **prononciation** au lieu de l’orthographe exacte.  
+- Transforme chaque mot en un **code** (Soundex, Metaphone, etc.).  
+- Deux mots qui se prononcent de façon similaire obtiendront des **codes proches** ou identiques.
+
+### Exemple
+- “Marseille” vs “Marsay”  
+  - On génère un code Soundex pour chacun (ex. “M624”...).  
+  - Si les codes sont identiques ou très semblables, on juge les mots similaires phonétiquement.
+
+### Avantages et limites
+- **Avantage** : Gère les erreurs où la prononciation reste proche malgré une orthographe fautive.  
+- **Limite** : Peut confondre des homonymes.
+

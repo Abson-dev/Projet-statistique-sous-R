@@ -1,0 +1,827 @@
+---
+title: 'TP9 : Merge des bases welfare 2018 et 2021'
+author: "FALL Ndeye Ramatoulaye Ndoye"
+date: "2025-03-27"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#TP9: Merge des bases welfare des EHCVM 2018 et 2021  du Sénégal en une seule base
+
+
+L'objectif de ce travail pratique (TP) est de fusionner les bases de données welfare des Enquêtes sur les Conditions de Vie des Ménages (EHCVM) 2018 et 2021 du Sénégal, afin de créer une base de données unifiée permettant des analyses comparatives. Nous allons explorer et préparer les données pour d'éventuelles analyses statistiques, en traitant des aspects comme les valeurs manquantes, les doublons, et les valeurs aberrantes. À la fin de ce TP, la base fusionnée sera nettoyée et prête pour des analyses plus poussées, comme des études sur les conditions de vie des ménages au Sénégal.
+
+
+
+# 1. Installation et chargement des packages
+
+Cette section assure la disponibilité des bibliothèques nécessaires.
+
+```{r results=FALSE, message=FALSE, warning=FALSE}
+
+Packages <- c("readr", "utils", "dplyr","labelled", "gtsummary","haven", "ggplot2", "tidyr", "plotly")
+
+for (x in Packages) {
+  if (!requireNamespace(x, quietly = TRUE)) {
+    install.packages(x)
+  }
+  library(x, character.only = TRUE)
+}
+```
+
+# 2. Importation des bases de données welfare
+
+
+```{r}
+getwd()
+```
+
+
+```{r}
+welfare2018 <-  haven::read_dta("../Données/ehcvm_welfare_sen2018.dta") #importation base welfare 2018
+welfare2021 <-  haven::read_dta("../Données/ehcvm_welfare_sen2021.dta") #importation base welfare 2021
+
+```
+
+# 3. Visualisation des données :
+
+Cette partie va nous permettre de voir la structure des données et d'avoir un aperçu sur les variables. Nous allons examiner les premières lignes de chaque fichier afin de nous assurer qu'ils ont été correctement lus.
+
+```{r}
+# Aperçu des premières lignes pour chaque base
+
+# Cette étape nous permet de vérifier rapidement le format des données
+head(welfare2018)
+head(welfare2021)
+
+# Vérification des dimensions des deux bases
+# On vérifie combien de lignes et de colonnes chaque base contient
+dim(welfare2018)
+dim(welfare2021)
+
+# Informations générales sur les colonnes/variables
+# On utilise str() pour examiner les types de données et les noms de variables
+str(welfare2018)
+str(welfare2021)
+
+colnames(welfare2018)
+colnames(welfare2021)
+```
+
+# 4. Vérification de la qualité des données :
+
+Nous allons maintenant vérifier la qualité des données, où nous allons analyser la présence de valeurs manquantes et de doublons, et vérifier que les types de données sont cohérents avec les variables attendues. Cette étape nous permettra d'identifier les anomalies.
+
+## a) Valeurs manquantes
+
+```{r}
+# Vérification des valeurs manquantes
+# Cette étape permet de détecter la présence de données manquantes
+summary(welfare2018)
+summary(welfare2021)
+
+# Calcul du pourcentage de valeurs manquantes pour chaque colonne
+# Nous calculons ici le pourcentage de valeurs manquantes dans chaque colonne des deux base. Si les valeurs manquantes sont faibles (moins de 5-10%), une imputation (par la médiane ou la moyenne) pourrait être une solution. Sinon, il peut être nécessaire de supprimer les colonnes ou de les traiter autrement
+
+colSums(is.na(welfare2018)) / nrow(welfare2018) * 100
+colSums(is.na(welfare2021)) / nrow(welfare2021) * 100
+
+```
+
+Pour la base welfare 2018, les variables hactiv7j, hactiv12m, hbranch, hsectins, hcsp, dali, dnal, dtot, pcexp, et zzae ont des pourcentages relativement faibles de valeurs manquantes (entre 0% et 24%). Il en est de même pour la base welfare 2021, avec les variables hbranch, hsectins, hcsp, hethnie et dali.
+
+## b) Doublons
+
+```{r}
+# Vérification des doublons
+# On vérifie s'il y a des doublons dans les deux bases
+sum(duplicated(welfare2018))  # Doublons dans la base 2018
+sum(duplicated(welfare2021))  # Doublons dans la base 2021
+```
+
+
+Aucun doublon n'a été détecté dans les deux bases
+
+
+
+# 5. Analyse comparative des bases des variables et modalités des deux bases welfare
+
+Ayant visualisé les données et vérifié la présence d'anomalies, nous allons analyser les similitudes et les différences entre les bases welfare 2018 et 2021. Cette étape nous permettra de détecter des différences d'annotation entre les variables et/ou modalités présentes entre les deux bases.
+
+```{r}
+
+variables_2018 = colnames(welfare2018) #Liste des variables de la base welfare 2018
+
+variables_2021 = colnames(welfare2021) #Liste des variables de la base welfare 2021
+
+# Identifions les variables communes
+variables_communes <- intersect(variables_2018, variables_2021) # Variables communes aux deux bases
+
+# Variables présentes exclusivement en 2018
+vars_exclu2018 <- setdiff(variables_2018, variables_2021) #Pour garder les variables de 2018 qui ne sont pas en 2021
+
+# Variables présentes exclusivement en 2021
+vars_exclu2021 <- setdiff(variables_2021, variables_2018) #Pour garder les variables de 2021 qui ne sont pas en 2018
+
+```
+
+
+```{r}
+#Visualisation des variables propres à chaque base
+print(vars_exclu2018)
+print(vars_exclu2021)
+```
+
+
+Cette catégorisation fait apparaitre que les deux bases ont 34 variables en commun, une seule variable est unique pour base welfare 2018, soit halfab et 13 pour celle de 2021 ( "month", "hethnie", "halfa", "halfa2", "def_temp_prix2021m11", "def_temp_cpi", "def_temp_adj",  "zali0", "dtet", "monthly_cpi", "cpi2017", icp2017", "dollars" )
+
+On remarque pour la variable alphabétisation, il s'agit juste d'une différence d'orthographe. Procédons à la renomination de la variable de 2021 en halfab et intégrons là aux variables communes
+
+```{r}
+# Changement halfa vers halfab
+
+colnames(welfare2021)[colnames(welfare2021)=="halfa"] <- "halfab"
+
+# Ajout à la liste des variables communes
+
+variables_communes <-  append(variables_communes,"halfab")
+
+```
+
+Maintenant, étant donné que les variables spécifiques à une seule base sont isolées et que les variables communes portent les mêmes noms dans les deux bases, nous allons vérifier la concordance de leur labellisation.
+
+## a) Recensement des incohérences
+
+```{r}
+discord_label_var <- c() 
+
+for (variable in variables_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare2018[[variable]])){ #vérifier si la variable en 2018 est labellisée
+    
+      label_val_2018 <- labelled::val_labels(welfare2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      label_val_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labellisée
+  }
+  
+  if(labelled::is.labelled(welfare2021[[variable]])){ #vérifier si la variable en 2021 est labellisée
+    
+      label_val_2021 <- labelled::val_labels(welfare2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      label_val_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labellisée
+  }
+  
+  if(!identical(label_val_2018, label_val_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     discord_label_var <- append(discord_label_var,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+
+```
+
+Nous remarquons que six(6) variables ne sont pas labellisées de la même manière dans les deux bases welfare 2018 et 2021, soit "zae", "hnation", "hdiploma", "hactiv7j", "hbranch" et "hcsp". Pour corriger ces incohérences, nous allons traiter une à une ces variables, les recoder et aligner leurs modalités selon les incohérences détextées.
+
+
+## b) Traitement des incohérences
+
+### i) Traitement de la variable **hnation**
+
+#### Visualisation de la distribution
+
+```{r}
+#voir la distribution de hnation en 2018
+labelled::val_labels(welfare2018$hnation)
+
+```
+
+```{r}
+#Voir la distribution de hnation en 2021
+labelled::val_labels(welfare2021$hnation)
+
+```
+
+
+```{r}
+welfare2021 %>%
+  to_factor() %>% #labéliser
+  select(hnation) %>% #selection des variables qui vont s'afficher
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+  
+```
+ 
+#### Detection de l'incoherence 
+ 
+Certains pays qui étaient inclus dans autres cedeao en 2018 sont devenus des modalités comme la Guinée
+
+
+
+#### Correction de l'incohérence
+
+Pour ce faire nous allons recoder la variable dans welfare 2021 et combiner les modalités qui étaient dans autre cedeao en 2018
+
+
+```{r}
+welfare2021 <- welfare2021 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3,  # Remplace la modalité 4 par 3
+                          `8` = 4,  # Remplace la modalité 8 par 4
+                          `10` = 5, # Remplace la modalité 10 par 5
+                          `11` = 6, # Remplace la modalité 11 par 6
+                          `13` = 7, # Remplace la modalité 13 par 7
+                          `15` = 8, # Remplace la modalité 15 par 8
+                          `12` = 9, # Remplace la modalité 12 par 9
+                          `17` = 11, # Remplace la modalité 17 par 11
+                          `18` = 12, # Remplace la modalité 18 par 12
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10 # Remplace les modalités (3,9,14,5,6,7) par 10
+                          ))
+
+```
+
+Maintenant que le recodage est effectué on peut aisément affecter les labels de 2018 à ceux de 2021.
+
+```{r}
+labelled::val_labels(welfare2021$hnation) <-  labelled::val_labels(welfare2018$hnation)
+
+```
+
+
+#### Vérification des changements
+
+
+```{r}
+welfare2021 %>%
+  to_factor() %>% #labéliser
+  select(hnation) %>% #selection des variables qui vont s'afficher
+  tbl_summary(missing = "always", #afficher les valeurs manquantes
+              missing_text = "Valeurs manquantes")
+```
+
+
+### ii) Traitement de la variable **hdiploma**
+
+#### Visualisation de la distribution
+
+```{r}
+labelled::val_labels(welfare2018$hdiploma)
+
+```
+
+```{r}
+labelled::val_labels(welfare2021$hdiploma)
+
+```
+
+
+
+```{r}
+
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+```
+
+#### Detection de l'incoherence 
+
+Il s'agit juste de changements de labels
+
+
+#### Correction de l'incohérence
+
+Pour cela il suffira d'affecter les labels de hdiploma dans welfare 2021 à ceux de 2018
+
+
+```{r}
+
+val_labels(welfare2018$hdiploma) <-  val_labels(welfare2021$hdiploma)
+
+```
+
+
+
+#### Vérification des changements
+
+```{r}
+
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### iii) Traitement de la variable **hactiv7j**
+
+#### Visualisation de la distribution
+
+```{r}
+labelled::val_labels(welfare2018$hactiv7j)
+
+```
+
+```{r}
+labelled::val_labels(welfare2021$hactiv7j)
+
+```
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+#### Detection de l'incoherence 
+
+Les labels sont les mêmes mais l'ordre des modalités n'est pas le même, il y a don erreur dans le codage.
+
+
+#### Correction de l'incohérence
+
+
+Pour cela nous allons changer l'ordre des modalités de sorte à ce qu'on puisse retrouver les mêmes dans welfare 2021. Ainsi l'affectation des labels de 2021 à 2018 sera possible.
+
+```{r}
+welfare2018 <- welfare2018 %>%
+  mutate(hactiv7j = dplyr::recode(hactiv7j,
+                          `2` = 4, 
+                          `3` = 2,  
+                          `4` = 3))
+
+```
+
+```{r}
+#Affectation des labels de hactiv7j 2021 à ceux de 2018
+val_labels(welfare2018$hactiv7j) <-  val_labels(welfare2021$hactiv7j)
+```
+
+
+#### Vérification des changements
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### iv) Traitement de la variable **hbranch**
+
+#### Visualisation de la distribution
+
+```{r}
+labelled::val_labels(welfare2018$hbranch)
+
+```
+
+```{r}
+labelled::val_labels(welfare2021$hbranch)
+
+```
+
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+#### Detection de l'incoherence 
+
+On remarque qu'en 2021 le secteur de la sylvopasture a été rajouté et combiné à l'élevage et la pêche, ce qui est différent pour 2018.
+
+#### Correction de l'incohérence
+
+Cette erreur peut être corrigée en faisant juste une affectation comme pour les autres variables.
+
+```{r}
+
+val_labels(welfare2018$hbranch) <-  val_labels(welfare2021$hbranch)
+```
+
+
+
+
+#### Vérification des changements
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### v) Traitement de la variable **hcsp**
+
+#### Visualisation de la distribution
+
+```{r}
+labelled::val_labels(welfare2018$hcsp)
+
+```
+
+```{r}
+labelled::val_labels(welfare2021$hcsp)
+
+```
+
+
+#### Detection de l'incoherence 
+
+La différence se situe juste dans la labellisation de la neuvième modalité. 
+
+
+#### Correction de l'incohérence
+
+Ici nous affecterons les labels de 2018 à ceux de 2021
+
+
+```{r}
+#Affectation des labels de 2018 à 2021
+val_labels(welfare2021$hcsp) <-  val_labels(welfare2018$hcsp)
+```
+
+
+
+#### Vérification des changements
+
+```{r}
+welfare2021 %>% 
+  to_factor() %>% 
+  select(hcsp) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+### vi) Traitement de la variable **zae**
+
+#### Visualisation de la distribution
+
+```{r}
+labelled::val_labels(welfare2018$zae)
+
+```
+
+```{r}
+labelled::val_labels(welfare2021$zae)
+
+```
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+```{r}
+welfare2021 %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+
+```{r}
+welfare2021 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+#### Detection de l'incoherence 
+
+Là nous remarquons que pour la base welfare 2018, la variable zae n'est non seulement pas labellisée, mais les codes diffèrent pour les deux bases, soit 1, 2, 3 , 4 , 5, et 6 pour 2018 et 1, 3, 5, 7, 9 et 11 pour 2021. En plus Kedougou et Dakar sont inversés en 2018, en faisant attention àla fréquence dans les deux bases.
+
+#### Correction de l'incohérence
+
+Nous allons d'abord faire correspondre les codes de 2018 à ceux de 2021 avant de pouvoir passer à l'affectation pour labelliser la variable dans welfare 2018 comme pour elfare 2021.
+
+#####Retablissons l'ordre pour Kedougou et Dakar en 2018
+
+
+```{r}
+
+welfare2018 <- welfare2018 %>%
+  mutate(zae = dplyr::recode(zae,
+                          `1` = 6, # Kédougou remplace Dakar
+                          `2` = 2,  # Saint-Louis-Matam
+                          `3` = 3,# Thies-Diourbel-Louga
+                          `4` = 4, # Kaolack-Fatick-Kaffrine
+                          `5` = 5,  # Ziguinchor-Tamba-Kolda-Sédhiou
+                          `6` = 1   # Dakar devient Kedougou
+                          ))
+
+```
+
+
+##### Verfifions le changement en 2018 apres mutation Kedougou et Dakar
+
+```{r}
+welfare2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+```{r}
+# Harmoniser les codes impairs en 1:6 pour 2021
+welfare2021 <- welfare2021 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1` = 1,
+    `3` = 2,
+    `5` = 3,
+    `7` = 4,
+    `9` = 5,
+    `11` = 6
+  ))
+
+```
+
+
+
+
+
+
+#### Vérification
+
+```{r}
+#pour savoir si le recodage a marché
+welfare2021 %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+```{r warning=FALSE}
+welfare2021 <- welfare2021 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1`  = "Kédougou",
+    `2`  = "Saint-Louis-Matam",
+    `3`  = "Thies-Diourbel-Louga",
+    `4`  = "Kaolack-Fatick-Kaffrine",
+    `5`  = "Ziguinchor-Tamba-Kolda-Sédhiou",
+    `6` = "Dakar"
+  ))
+
+```
+
+
+
+```{r warning=FALSE}
+welfare2018 <- welfare2018 %>%
+  mutate(zae = dplyr::recode(zae,
+    `1`  = "Kédougou",
+    `2`  = "Saint-Louis-Matam",
+    `3`  = "Thies-Diourbel-Louga",
+    `4`  = "Kaolack-Fatick-Kaffrine",
+    `5`  = "Ziguinchor-Tamba-Kolda-Sédhiou",
+    `6` = "Dakar"
+  ))
+
+```
+
+
+
+#### Vérification des changements
+
+
+```{r}
+#Affiche la distribution en 2018 après l'harmonisation finale
+welfare2018 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+
+
+
+```{r}
+#Affiche la distribution en 2021 après l'harmonisation finale
+welfare2021 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")
+
+```
+Le codage et la labellisation de la variable zae sont maintenant harmonisées dans les deux bases. Maintenant Vérifions qu'il n'existe plus aucune différence dans la labellisation ou le codage entre les variables communes des deux bases
+
+
+# 6. Vérification du traitement
+
+```{r}
+discord_label_var <- c() 
+
+for (variable in variables_communes) { #parcourir les variables en communs dans les deux bases
+  
+  if(labelled::is.labelled(welfare2018[[variable]])){ #vérifier si la variable en 2018 est labellisée
+    
+      label_val_2018 <- labelled::val_labels(welfare2018[[variable]]) #recupérer les labels de la variable en 2018
+
+  }else{
+      label_val_2018 <- NULL #Mettre vide dans le cas ou la variable en 2018 n'est pas labellisée
+  }
+  
+  if(labelled::is.labelled(welfare2021[[variable]])){ #vérifier si la variable en 2021 est labellisée
+    
+      label_val_2021 <- labelled::val_labels(welfare2021[[variable]]) #recupérer les labels de la variable en 2021
+  
+  }else{
+    
+      label_val_2021 <- NULL #Mettre vide dans le cas ou la variable en 2021 n'est pas labellisée
+  }
+  
+  if(!identical(label_val_2018, label_val_2021)){ #Vérifier si les labels de la variable  sont identiques entre 2018 et 2021
+    
+     discord_label_var <- append(discord_label_var,variable) #Si les labels diffèrent, alors ajouter le nom de la variable à la liste créer
+     print(variable)
+     
+   }
+}
+
+```
+
+On a pu vérifier qu'il n'existe plus aucun incohérence entre les deux bases. Le traitement est donc achevé et il est possible de passer au merge des deux bases
+
+
+
+# 7. Merge des bases traitées welfare 2018 et welfare 2021
+
+```{r}
+#Merge des bases
+library(dplyr)
+welfare_final <- bind_rows(welfare2018, welfare2021)
+```
+
+Maintenant nous allons visualiser la structure de la base mergée, afficher ses variables et ses dix premières lignes
+
+```{r}
+colnames(welfare_final) #Liste des variables
+
+```
+
+
+```{r}
+head(welfare_final, 10)  # Affiche les 10 premières lignes
+```
+
+
+```{r}
+str(welfare_final) #Structure de la base mergée
+```
+
+
+```{r}
+write_dta(welfare_final, "../Données/welfare_final.dta") #Enregistrement local
+```
+
+
+```{r}
+# Trier par identifiant ménage + année
+welfare_final <- welfare_final %>%
+  arrange(hhid, year)
+
+```
+
+```{r}
+head(welfare_final, 10)
+```
+
+
+
+# 8. Statistiques descriptives sur la base welfare :
+
+Maintenant que nous avons une vue sur la base mergée, nous allons sortir quelques statistiques descriptives en utilisant cette base. Nous allons faire une analyse univariée sur la dépense par tête (en cfa) et une analyse bivariée mettant en rapport la dépense par tête (en fcfa) et la région, pour avoir un aperçu sur le niveau de vie selon la région.
+
+## a) Analyse univariée
+
+Montrons les caractéristiques de la variable **pcexp** ou dépense par tête en FCFA
+
+```{r}
+welfare_final %>%
+  select(pcexp) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}; max: {max}]"),
+    digits = all_continuous() ~ 0,
+    missing = "no"
+  ) %>%
+  modify_header(label ~ "Dépense par tête (FCFA)")
+
+```
+
+
+On constate que la dépense moyenne par tête dans l’échantillon est estimée à 618 407 FCFA, avec un écart-type de 582 644 FCFA, ce qui indique une forte hétérogénéité des niveaux de vie entre les individus. Le minimum observé est de 57 610 FCFA, tandis que le maximum atteint 14 286 279 FCFA, révélant une distribution très étalée et potentiellement asymétrique, marquée par la présence de ménages très dépensiers. Cette dispersion suggère des inégalités importantes en termes de consommation individuelle
+
+
+## b) Analyse bivariée
+
+Ici nous allons analyser la distribution de la dépense par tête suivant la région.
+
+```{r}
+library(gtsummary)
+library(dplyr)
+library(haven)  #Pour que les labels apparaissent
+
+welfare_final %>%
+  mutate(region = haven::as_factor(region)) %>%
+  select(region, pcexp) %>%
+  tbl_summary(
+    by = region,
+    statistic = list(all_continuous() ~ "{mean} ({sd}) [min: {min}; max: {max}]"),
+    digits = all_continuous() ~ 0,
+    missing = "no"
+  ) %>%
+  add_overall() %>%
+  modify_header(label ~ "Région de résidence")
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(haven)
+
+welfare_final <- welfare_final %>%
+  mutate(region = haven::as_factor(region))
+
+# Calculer la moyenne par région
+depense_moyenne <- welfare_final %>%
+  group_by(region) %>%
+  summarise(pcexp_moy = mean(pcexp, na.rm = TRUE)) %>%
+  arrange(desc(pcexp_moy))
+
+# Créer le barplot
+ggplot(depense_moyenne, aes(x = reorder(region, pcexp_moy), y = pcexp_moy)) +
+  geom_col(fill = "#1f78b4") +
+  labs(
+    title = "Dépense moyenne par tête selon la région",
+    x = "Région de résidence",
+    y = "Dépense moyenne par tête (FCFA)"
+  ) +
+  scale_y_continuous(labels = scales::comma, limits = c(0, 1500000)) +  # Ajuste le max en ordonnées si besoin
+  theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold")
+  )
+
+
+```
+
+
+
+
+L’analyse de la dépense par tête selon la région révèle des disparités notables entre les zones géographiques. En moyenne, la dépense par tête dans l’échantillon est estimée à 618 407 FCFA, mais cette moyenne cache de fortes variations régionales. La région de Dakar affiche de loin la dépense la plus élevée, avec une moyenne de 1 084 479 FCFA, soit presque le double de la moyenne nationale, ce qui reflète son statut de capitale économique. À l’opposé, des régions comme Matam (466 439 FCFA) et Sédhiou (464 043 FCFA) présentent les niveaux de dépense par tête les plus faibles. Des régions telles que Thiès, Louga ou Fatick se situent autour de la moyenne nationale, tandis que d’autres comme Kolda ou Kaffrine sont légèrement en retrait. Ces écarts illustrent une inégalité spatiale du niveau de vie, suggérant que les conditions économiques varient significativement d’un territoire à l’autre, appelant à une attention particulière en matière de politiques publiques de rééquilibrage régional.
+
+
+
+
+
+

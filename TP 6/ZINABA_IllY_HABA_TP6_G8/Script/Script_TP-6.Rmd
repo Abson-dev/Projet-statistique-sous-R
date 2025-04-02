@@ -1,0 +1,460 @@
+---
+title: "TP-6"
+author: "Groupe-8"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+  word_document:
+    toc: true
+  pdf_document:
+    toc: true
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Chargement des packages necessaires 
+
+```{r}
+# Liste des packages nécessaires
+packages <- c("readr", "haven", "utils", "dplyr", "labelled", "cardx", "survey", "kableExtra",  "gtsummary")
+
+# Vérification et installation
+invisible(lapply(packages, function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, quiet = TRUE)  
+  }
+  if (!pkg %in% .packages()) {  
+    suppressMessages(library(pkg, character.only = TRUE))
+  }
+}))
+```
+
+
+## Importation de la base menage
+
+```{r}
+data_individu<- haven::read_dta("../Donnees/ehcvm_individu_tgo2018.dta")
+data_individu
+
+```
+
+## Importation de la base menage
+
+```{r}
+data_menage<- haven::read_dta("../Donnees/ehcvm_menage_tgo2018.dta")
+data_menage
+```
+
+
+## Structure des deux bases
+```{r}
+utils::str(data_individu)
+utils::str(data_menage)
+```
+
+# Statistiques avec la base indivdu
+
+## Tableau Statistique sur la base individu sans poids
+```{r}
+tableau1<- data_individu %>% labelled::to_factor()%>%
+  select (sexe, bank, mstat, alfab, diplome, educ_hi, age, internet, couvmal, moustiq)%>% 
+  tbl_summary(
+    label = list(mstat~ "Situation de famille",
+                 bank ~"Compte banquaire ou autre",
+               alfab ~"Alphabetisation",
+               diplome ~ "Diplome plus élevé",
+               educ_hi ~"Niveau d'éducation achevé", 
+               age~ "Age en année", 
+              internet~ "Individu accès a internet", 
+              couvmal~ "Individu couverture maladie",
+              moustiq~ "Dormir la dernière nuit sous une moustiquaire"),
+  statistic = list(age~"{mean} ({sd}"),
+  digits = everything()~c(0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>%modify_header(label= "Statistiques sur les individus")
+
+tableau1
+```
+
+
+## Tableau Statistique sur la base individu sans poibs selon sexe et milieu de residence
+
+```{r}
+tableau2 <- data_individu %>%
+  labelled::to_factor() %>%
+  
+  # Combiner les variables sexe et milieu en une seule variable afin de voir les statistiques par sexe et par milieu de résidence
+  mutate(sexe_milieu = interaction(sexe, milieu, sep = " - ")) %>%
+  select(sexe_milieu, bank, mstat, alfab, diplome, educ_hi, age, internet, couvmal, moustiq) %>%
+  tbl_summary(
+    by = sexe_milieu,
+    label = list(
+      mstat ~ "Situation de famille",
+      bank ~ "Compte bancaire ou autre",
+      alfab ~ "Alphabétisation",
+      diplome ~ "Diplôme plus élevé",
+      educ_hi ~ "Niveau d'éducation achevé",
+      age ~ "Âge en année",
+      internet ~ "Individu accès à internet",
+      couvmal ~ "Individu couverture maladie",
+      moustiq ~ "Dormir la dernière nuit sous une moustiquaire"),
+    statistic = list(age ~ "{mean} ({sd})"),  
+    digits = list(all_continuous() ~ 0),  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(label = "Statistiques sur les individus")
+
+tableau2
+```
+
+
+
+## Tableau statistique sur la base individu sans poibs en fonction de la region de residence 
+
+```{r}
+tableau3 <- data_individu %>%
+  labelled::to_factor() %>% 
+  select(region, bank, mstat, alfab, diplome, educ_hi, age, internet, couvmal, moustiq) %>% # Sélectionner les variables
+  tbl_summary(
+    by = region,
+    label = list(
+      mstat ~ "Situation de famille",
+      bank ~ "Compte bancaire ou autre",
+      alfab ~ "Alphabétisation",
+      diplome ~ "Diplôme plus élevé",
+      educ_hi ~ "Niveau d'éducation achevé",
+      age ~ "Âge en année",
+      internet ~ "Individu accès à internet",
+      couvmal ~ "Individu couverture maladie",
+      moustiq ~ "Dormir la dernière nuit sous une moustiquaire"),
+     statistic = list(age ~ "{mean} ({sd})"),
+     digits = everything() ~ c(0), 
+     missing = "always", 
+     missing_text = "Valeurs manquantes") %>%
+     modify_header(label = "Statistiques sur les individus") 
+
+tableau3
+```
+
+
+## Tableau statistique de la base individu avec ponderation 
+
+```{r}
+
+# Étape 1 : Convertissons les variables en facteurs pour créer un objet de conception
+tableau4<- data_individu %>%
+  labelled::to_factor() %>%
+  select(mstat, alfab, diplome, educ_hi, age, internet, couvmal, moustiq, hhweight) -> data_processed
+
+# Créons l'objet de conception avec les poids
+pondere <- svydesign(ids = ~1, data = data_processed, weights = ~hhweight)
+
+# Étape 2 : avec l'objet pondere on génére un résumé pondéré
+pondere %>%
+  tbl_svysummary(
+    label = list(
+      mstat ~ "Situation de famille", 
+      alfab ~ "Alphabetisation",
+      diplome ~ "Diplome plus élevé",
+      educ_hi ~ "Niveau d'éducation achevé", 
+      age ~ "Age en année", 
+      internet ~ "Individu accès a internet", 
+      couvmal ~ "Individu couverture maladie", 
+      moustiq ~ "Dormir la dernière nuit sous une moustiquaire"),
+    statistic = list(age ~ "{mean} ({sd})"),
+    digits = everything() ~ c(0),  
+    missing = "always",
+    missing_text = "valeurs manquantes") %>%
+    modify_header(label = "Statistiques sur lces individus")
+
+tableau4
+```
+
+
+# Statistiques avec la base menage
+
+## Tableau Statistiques descriptives avec la base menage 
+
+```{r}
+tableau1_m <-data_menage %>% 
+  labelled::to_factor()%>%
+  select (logem,eauboi_ss, eauboi_sp, elec_ac, elec_ur, elec_ua, car, toit, mur, superf,grosrum,petitrum)%>% 
+  tbl_summary(
+    label = list(logem ~"Type de logement", 
+            eauboi_ss ~"eau potable saison seche",
+            eauboi_sp ~"eau potable saison des pluies",
+            elec_ac~ "acces reseau electrique",
+            elec_ua~ "utilise reseau electrique",
+            elec_ua~ "utiliese reseau solaire",
+            car ~ "Menage a voiture",
+            toit ~"toit du chef de manage", 
+            mur~ "mur de la maison", 
+            superf ~"superficie", 
+            grosrum ~"gros rumunants", 
+            petitrum ~ "pétits rumunants"), 
+  statistic = list(superf~"{mean} ({sd}",petitrum~ "{mean} ({sd})", grosrum ~ "{mean} ({sd})"),
+  digits = everything()~c(0,0,0),
+  missing = "always",
+  missing_text = "valeurs manquantes")%>%modify_header(label= "Caracteristique de l'habitat du CM")
+
+tableau1_m
+```
+
+
+# Fusion des deux bases 
+```{r}
+data_fusion <- dplyr::left_join(data_individu, data_menage, by = "hhid")
+```
+
+## Structure de la base fusionnée
+```{r}
+utils::str(data_fusion)
+```
+
+
+## Tableau statistique avec la base fusionnée
+
+```{r}
+
+# Statistiques descriptives sur la base fusionnée
+tableau_fusion1 <- data_fusion %>%
+  labelled::to_factor() %>%
+  select(sexe, age, internet, couvmal, moustiq, logem, eauboi_ss, elec_ac, superf)%>%
+tbl_summary(    
+  label = list(
+      sexe ~ "Sexe",
+      age ~ "Âge en années",
+      internet ~ "individu accès à internet",
+      couvmal ~ "Individu couverture maladie",
+      moustiq ~ "Dormir la dernière nuit sous une moustiquaire",
+      logem ~ "Type de logement",
+      eauboi_ss ~ "eau potable en saison sèche",
+      elec_ac ~ "Accès au réseau électrique",
+      superf ~ "Superficie"),
+    statistic = list(all_continuous() ~ "{mean} ({sd})"),
+    digits = list(all_continuous() ~ 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes") %>%
+   modify_header(label = "Statistiques descriptives sur la base fusionnée")
+
+tableau_fusion1
+
+```
+
+
+## Tableau statistiques de la base fusionnée stratefié par sexe
+
+```{r}
+tableau_stratifie <- data_fusion %>%
+  labelled::to_factor() %>%
+  select( sexe, age, internet, couvmal, moustiq, logem, eauboi_ss, elec_ac, superf)%>%
+  tbl_summary(
+    by = sexe,
+    label = list(
+      age ~ "Âge en années",
+      internet ~ "individu accès à internet",
+      couvmal ~ "Individu couverture maladie",
+      moustiq ~ "Dormir la nuit dernière sous une moustiquaire",
+      logem ~ "Type de logement",
+      eauboi_ss ~ "Eau potable en saison sèche",
+      elec_ac ~ "Accès au réseau électrique",
+      superf ~ "Superficie"
+    ),
+    statistic = list(all_continuous() ~ "{mean} ({sd})"),
+    digits = list(all_continuous() ~ 0),
+    missing = "always",
+    missing_text = "Valeurs manquantes"
+  ) %>%
+  modify_header(label = "Statistiques stratifiées par sexe")
+
+tableau_stratifie
+```
+
+
+## Croisement de quelques variables
+
+### Croisement de la variabe internet et region
+
+```{r}
+# Cet tableau fait voir l'accès a internet selon les regions 
+
+tableau_croise1 <- data_fusion %>%
+  labelled::to_factor() %>%
+  tbl_cross(row = region,  
+    col = internet, 
+    percent = "row",  
+    label = list(region ~ "Region de residence",
+    internet ~ "Accès à internet"),
+    missing = "always",
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Accès à internet et region de residence**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise1
+```
+
+
+### Croisement de la variable region et mstat
+
+```{r}
+# Ce croisement nous permet de comprendre les disparités regionales selon la situation de famille
+
+tableau_croise2 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = mstat,  
+    col = region,  
+    percent = "row",  
+    label = list(
+      region ~ "Région de résidence",  
+      mstat ~ "Situation de famille"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Situation de famille et région de résidence**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise2
+```
+
+
+### Croisement de la variable eauboi_s et region.
+
+```{r}
+# Ce croisement nous permet de comprendreles disparités regionales dans l'accès a l'eau potable
+
+tableau_croise3 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = eauboi_ss,  
+    col = region,  
+    percent = "row",  
+    label = list(
+      region ~ "Région de résidence",  
+      eauboi_ss ~ "Accès à l'eau potable en saison seche"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Eau potable en saison seche et région de résidence**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise3
+```
+
+### Croisement de la variable educ_hi et couverture maladie
+
+```{r}
+# Ce croisement nous permet de verifier si le niveau d'education est correlé avec la couverture maladie universelle. On constate que plus le niveau d'eduction est élévé plus la proportion des individus couverent par la couverture maladie universelle est élévée
+
+tableau_croise4 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = educ_hi,  
+    col = couvmal,  
+    percent = "row",  
+    label = list(
+      educ_hi ~ "Niveau d'éducation achevé",  
+      couvmal ~ "Individu couverture maladie"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Niveau d'education achevé et couverture maladie**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise4
+```
+
+
+### Croisement de la variable revenu et la variable car(possedé une voiture)
+
+```{r}
+# Cela nous permet de voir la possession de voiture selon le type de logement
+
+tableau_croise5 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = logem,  
+    col = car,  
+    percent = "row",  
+    label = list(
+      car ~ "Possedé une voiture",  
+      logem~ "Type de logement"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Type de logement et possession d'une voiture**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise5
+```
+
+### Croisement de la variable region et alfab (alphabetisation)
+
+```{r}
+#Ce croisement nouspermet de voir les taux d'alphabetisation selon les regions
+
+tableau_croise6 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = alfab,  
+    col = region,  
+    percent = "row",  
+    label = list(
+      region ~ "Région de résidence",  
+      alfab ~ "Alphabetisation"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Alphabetisation et région de résidence**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise6
+```
+
+
+### Croisement de la variable diplome et sexe
+
+```{r}
+# Ce croisement nous permet de voir les  disparités educatives entre les sexes
+
+tableau_croise7 <- data_fusion %>%
+  labelled::to_factor() %>%  
+  tbl_cross(
+    row = sexe,  
+    col = diplome,  
+    percent = "row",  
+    label = list(
+      sexe ~ "Sexe",  
+      diplome ~ "Diplome le plus élevé"),
+    missing = "always",  
+    missing_text = "Valeurs manquantes") %>%
+  modify_header(
+    label = "**Diplome et sexe**",
+    stat_0 = "**Effectif**") %>%
+  bold_labels() %>%  
+  italicize_levels()
+
+tableau_croise7
+```
+
+
+En resumé nous avons mené une analyse descriptive des données issues de l'EHCVM 2018` du Togo avec les  bases menages et individus. Pour la base individu, nous avons produit des tableaux résumant des variables clés telles que le sexe, l’âge, l’éducation, l’accès à internet, la couverture maladie et l’utilisation de moustiquaires. Nous avons également stratifié ces statistiques par sexe, milieu de résidence et région, ce qui nous a permis de mettre en lumière des disparités significatives selon ces critères. En utilisant les poids de l’enquête, nous avons obtenu des estimations plus représentatives de la population. Pour la base ménage, nous avons analysé des aspects tels que le type de logement, l’accès à l’eau potable, l’électricité et la possession de biens comme les voitures, offrant ainsi une vue d’ensemble des conditions de vie.
+
+Nous avons ensuite fusionné les deux bases pour approfondir l’analyse. À l’aide de tableaux croisés, nous avons exploré les relations entre différentes variables, comme l’accès à internet selon la région, la situation de famille par région, ou encore le lien entre le niveau d’éducation et la couverture maladie. Nous avons systématiquement pris en compte les valeurs manquantes et personnalisé les tableaux pour en améliorer la clarté. Cette analyse nous a permis de mieux comprendre les caractéristiques socio-économiques de la population étudiée et d’identifier des disparités régionales et genrées.
