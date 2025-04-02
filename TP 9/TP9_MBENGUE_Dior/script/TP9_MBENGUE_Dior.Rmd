@@ -1,0 +1,535 @@
+---
+title: "welfare merger"
+author: "Dior MBENGUE"
+date: "2025-03-20"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# vérification et installation des packages
+```{r}
+#vérifier et installer les packages nécessaires
+packages <- c("haven", "utils", "dplyr", "gtsummary", "survey","labelled","compareDF")
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg, dependencies = TRUE)
+  library(pkg, character.only = TRUE)
+}
+```
+#chargement des bases welfare 2021 et 2018
+```{r}
+#chargement de la base welfare 2021
+welfare21<-haven::read_dta("../données/ehcvm_welfare_sen2021.dta")
+#chargement de la base welfare 2018
+welfare18<-haven::read_dta("../données/ehcvm_welfare_sen2018.dta")
+
+```
+
+# pour faire une bonne merge, il est important d'analyser les données de chaque base, de vérifier s'il ya similitudes et de divergences entre les variables
+```{r}
+##Vérification s'il ya des doublons
+doublon18<-welfare18[duplicated(welfare18[, c("grappe","menage")]), ]
+doublon21<-welfare21[duplicated(welfare21[, c("grappe","menage")]), ]
+
+cat("Nombre de doublons présents dans la base welfare 2018  :", nrow(doublon18), "\n")
+
+cat("Nombre de doublons présents dans la base welfare 2021  :", nrow(doublon21))
+```
+Il n'y a pas de doublons dans les deux bases
+
+
+```{r}
+##Vérification des valeurs manquantes
+print("Valeurs manquante base 2018")
+NA18 <- colSums(is.na(welfare18))
+NA18
+
+print("Valeurs manquante base 2021")
+NA21 <- colSums(is.na(welfare21))
+NA21
+
+```
+le nombre de variables ayant valeurs manquantes dans les deux bases n'est pas trés grand
+Nous en avons 2 variables qui présentent de valeurs manquantes en 2021 contre une seule en 2018
+
+```{r}
+##Présence des variables dans les deux bases ou dans une seule
+vars18 = colnames(welfare18)
+
+vars21 = colnames(welfare21) 
+
+# Identifions les variables communes
+vars_communes <- intersect(vars18, vars21) 
+
+# Variables présentes uniquement en 2018
+vars_seulement_18 <- setdiff(vars18, vars21) 
+
+# Variables présentes uniquement en 2021
+vars_seulement_21 <- setdiff(vars21, vars18) 
+
+```
+
+Sachant que halpha et halphab désigne la meme variable, renommons celle de 2021 en halfab.
+
+```{r}
+# Renommons halfa en halfab
+
+colnames(welfare21)[colnames(welfare21)=="halfa"] <- "halfab"
+
+# Ajoutons cette variable à la liste des variables communes.
+
+vars_communes <-  append(vars_communes,"halfab")
+utils::View(welfare21)
+
+```
+
+# Maintenant, nous passons à la labellisation des bases
+nous allons vérifier si les variables communes ont la meme labellisation puis nous allons vérifier s'il ya incohérence ou pas
+
+```{r}
+variable_label_diff <- c()  
+
+for (variable in vars_communes) { 
+  
+  if(labelled::is.labelled(welfare18[[variable]])){ 
+    
+      value_label18 <- labelled::val_labels(welfare18[[variable]]) 
+
+  }else{
+      value_label18 <- NULL 
+  }
+  
+  if(labelled::is.labelled(welfare21[[variable]])){ 
+    
+      value_label21 <- labelled::val_labels(welfare21[[variable]]) 
+  
+  }else{
+    
+      value_label21 <- NULL 
+  }
+  
+  if(!identical(value_label18, value_label21)){ 
+     variable_label_diff <- append(variable_label_diff,variable) 
+     print(variable)
+     
+   }
+}
+```
+Aprés avoir détecter les variables avec label différents dans les deux bases, nous allons voir si nous allons détecter une incohérence aprés les avoir afficher
+
+
+nous allons faire la visualiation de la distribution puis la détection de l'incohérence,puis la correction de l'incohérence et enfin la revisualisation pour la confirmation de la correction
+
+#nous allons commencer par la variable"hnation"
+```{r}
+# 
+labelled::val_labels(welfare18$hnation)
+```
+```{r}
+labelled::val_labels(welfare21$hnation)
+
+```
+
+
+```{r}
+welfare21 %>%
+  to_factor() %>% 
+  select(hnation) %>% 
+  tbl_summary(missing = "always", 
+              missing_text = "Valeurs manquantes")%>%
+modify_header(label="Les caractéristiques de la nation du chef de ménage")
+  
+```
+```{r}
+welfare21 <- welfare21 %>%
+  mutate(hnation = dplyr::recode(hnation,
+                          `4` = 3,  
+                          `8` = 4,  
+                          `10` = 5, 
+                          `11` = 6, 
+                          `13` = 7, 
+                          `15` = 8,
+                          `12` = 9, 
+                          `17` = 11, 
+                          `18` = 12, 
+                          `3` = 10, `5` = 10, `6` = 10, `7` = 10, `9` = 10, `14` = 10  
+                          ))
+# nous avons détecté l'erreur qui concernait la labellisation, on a décidé de recoder les modalités et on a 10 pour les pays de l'UEMOA et on a recodé les autres pays aussi pour enlever l'incohérence
+
+```
+Affectons les labels de 2018 à ceux de 2021
+
+```{r}
+labelled::val_labels(welfare21$hnation) <-  labelled::val_labels(welfare18$hnation)
+
+#Nous avons affecté les labels de 2018 à ceux de 2021, possible grace au recodage de variable qui donne les memes codes
+
+```
+
+#Revisualisation
+```{r}
+#Vérification
+welfare21 %>%
+  to_factor() %>% 
+  select(hnation) %>% 
+  tbl_summary(missing = "always", 
+              missing_text = "Valeurs manquantes")%>%
+modify_header(label="Les caractéristiques de la nation du chef de ménage")
+```
+
+
+# la variable "hdiploma"
+```{r}
+val_labels(welfare18$hdiploma)
+
+```
+```{r}
+val_labels(welfare21$hdiploma)
+```
+
+l'incohérence vient du codage des différents diplomes
+```{r}
+welfare18 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du diplome du chef de ménage")
+```
+
+```{r}
+val_labels(welfare18$hdiploma) <-  val_labels(welfare21$hdiploma)
+```
+nous avons affecté les labels de 2018 à ceux de 2021
+```{r}
+#Vérification
+welfare18 %>% 
+  to_factor() %>% 
+  select(hdiploma) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du diplome du chef de ménage")
+```
+#la variable hactivty7j
+```{r}
+val_labels(welfare18$hactiv7j)
+```
+
+
+```{r}
+val_labels(welfare21$hactiv7j)
+```
+
+Erreur de codification
+```{r}
+welfare18 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de l'activité  des 7 derniers jours du chef de ménage")
+```
+
+
+```{r}
+welfare18 <- welfare18 %>%
+  mutate(hactiv7j = dplyr::recode(hactiv7j,
+                          `2` = 4, 
+                          `3` = 2,  
+                          `4` = 3))
+#on recode avec ceux de 2021
+```
+
+```{r}
+val_labels(welfare18$hactiv7j) <-  val_labels(welfare21$hactiv7j)
+
+```
+
+```{r}
+#Visualisation et vérification
+welfare18 %>% 
+  to_factor() %>% 
+  select(hactiv7j) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de l'activité  des 7 derniers jours du chef de ménage")
+
+```
+# La variable "hbranch"
+```{r}
+val_labels(welfare18$hbranch)
+```
+
+
+```{r}
+val_labels(welfare21$hbranch)
+```
+
+#Erreur de  labellisation
+```{r}
+welfare18 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la branche activité du chef de ménage")
+```
+l'incohérence concernait la labellisation
+
+```{r}
+val_labels(welfare18$hbranch) <-  val_labels(welfare21$hbranch)
+```
+
+
+```{r}
+#Visualisation et vérification
+welfare18 %>% 
+  to_factor() %>% 
+  select(hbranch) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la branche activité du chef de ménage")
+```
+
+# La variable "hcsp"
+```{r}
+val_labels(welfare18$hcsp)
+
+```
+
+
+```{r}
+val_labels(welfare21$hcsp)
+```
+```{r}
+welfare21 %>% 
+  to_factor() %>% 
+  select(hcsp) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du CSP du chéf de ménage")
+
+```
+
+l'incohérence concerne la labellisation de "travailleur Familial contribuant pour une entreprise familial"
+```{r}
+val_labels(welfare21$hcsp) <-  val_labels(welfare18$hcsp)
+```
+
+```{r}
+welfare21 %>% 
+  to_factor() %>% 
+  select(hcsp) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques du CSP du chéf de ménage")
+```
+# La variable "zae"
+```{r}
+val_labels(welfare18$zae)
+```
+la variable "zae" n'est pas labellisée pour la base 2018
+
+```{r}
+val_labels(welfare21$zae)
+```
+
+```{r}
+welfare18 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
+```
+La codification n'est pas la meme pour les deux bases
+```{r}
+welfare21 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
+```
+
+```{r}
+welfare18 <- welfare18 %>%
+  mutate(zae = dplyr::recode(zae,
+                          `1` = 11, 
+                          `2` = 3,  
+                          `3` = 5,
+                          `4` = 7,
+                          `5` = 9,
+                          `6` = 1))
+```
+
+```{r}
+val_labels(welfare18$zae) <- val_labels(welfare21$zae)
+```
+
+```{r}
+# Visualisation et vérification
+welfare18 %>% 
+  to_factor() %>% 
+  select(zae) %>% 
+  tbl_summary(missing = "always",
+              missing_text = "NA")%>%
+modify_header(label="Les caractéristiques de la zone agroécologique")
+```
+
+```{r}
+variable_label_diff <- c()  
+
+for (variable in vars_communes) { 
+  
+  if(labelled::is.labelled(welfare18[[variable]])){ 
+    
+      value_label18 <- labelled::val_labels(welfare18[[variable]]) 
+
+  }else{
+      value_label18 <- NULL 
+  }
+  
+  if(labelled::is.labelled(welfare21[[variable]])){ 
+    
+      value_label21 <- labelled::val_labels(welfare21[[variable]]) 
+  
+  }else{
+    
+      value_label21 <- NULL 
+  }
+  
+  if(!identical(value_label18, value_label21)){ 
+     variable_label_diff <- append(variable_label_diff,variable) 
+     print(variable)
+     
+   }
+}
+
+```
+ Nous avons vu toutes les incohérences et les avons rectifiées
+ Maintenant, nous allons vérifié que les variables communes ont le meme type et sinon, corrigé
+ 
+ 
+```{r}
+
+variable_type_diff <- c()  
+
+for (variable in vars_communes) {  
+
+  type_var_18 <- class(welfare18[[variable]])  
+  type_var_21 <- class(welfare21[[variable]])  
+
+  if (!identical(type_var_18, type_var_21)) {  
+    variable_type_diff <- append(variable_type_diff, variable)  
+  }
+}
+
+print(variable_type_diff)
+
+
+
+```
+## Il n'y a pas de variables communes avec des types différents
+
+Aprés avoir vérifier les différentes choses à faire pour une bonne merge, nous allons maintenant merger les deux bases welfare avec l'aide de bind-rows
+
+```{r}
+welfare_merge <- bind_rows(welfare18,welfare21) %>% 
+                          arrange(grappe,menage)
+```
+Dans la nouvelle base, nous avons de nouveaux manquants du à la fusion et qui sont propres à 2021, on va donc faire les derniers réglements
+
+```{r}
+welfare_merge <- welfare_merge %>% 
+  labelled::to_factor()
+```
+
+```{r}
+# nous allons faire un extrait de la base
+welfare_merge[1:20,1:20]
+# Nous avons afficher les vingt premiéres lignes et colonnes
+```
+# Télécharger la nouvelle base fusionnée
+```{r}
+welfare_merge <- as.data.frame(welfare_merge)
+write.csv(welfare_merge, "welfare_merge.csv", row.names = FALSE)
+write.csv(welfare_merge, "welfare_merge.dta", row.names = FALSE)
+
+```
+
+
+# Maintenant, nous allons faire quelques statistiques sur la nouvelle base
+```{r}
+Table <- welfare_merge %>%
+  select(year, hgender, hage, hhsize,halfab, zae, pcexp) %>% 
+  tbl_summary(by = year,  
+              
+              label = list( 
+                hgender ~ "Sexe du chef de ménage",
+                hage ~ "Âge (moyenne)",
+                hhsize ~ "Taille du ménage",
+                 halfab~ "Niveau d'alphabétisation du chef de ménage",
+                zae ~ "Zone agroécologiques",
+                pcexp ~ "Dépense per capital (FCFA)"
+              ),
+              
+              missing = "no",  
+              
+              statistic = list(
+                all_continuous() ~ "{mean} ± {sd}", 
+                all_categorical() ~ "{n} ({p}%)" 
+              ),
+              
+              digits = all_continuous() ~ 1, 
+              ) %>%
+modify_header(label="Les caractéristiques du ménage")%>%
+  
+  bold_labels()
+
+Table
+
+```
+
+
+#Interprétation des résultats
+
+## Sexe du chef de ménage
+
+La proportion de ménages dirigés par des femmes augmente légèrement (de 26% à 28%).
+
+Cela peut être dû à des changements sociétaux (ex. autonomisation des femmes), économiques (ex. migration des hommes pour le travail) ou démographiques (ex. veuvage).
+
+## Age moyen du chef de ménage
+
+La taille moyenne des ménages diminue légèrement (9.2 → 8.7 personnes).
+
+Possible explication : baisse du taux de fécondité, indépendance accrue des jeunes adultes ou migration vers les villes.
+
+## Alphabétisation du chef de ménage
+
+Amélioration de l’alphabétisation (+4 points).
+
+Possible impact des politiques d’éducation ou de l’accès accru à l’information (ex. internet, campagnes de sensibilisation).
+
+## Répartition géographique
+
+Distribution stable des ménages dans les différentes zones.
+
+Aucune migration importante observée entre ces deux années.
+
+## Dépense per capita
+
+Légère augmentation des dépenses par habitant (615,630 → 621,198 FCFA).
+
+Écart-type diminue (624,819 → 536,958 FCFA) → moins d’inégalités dans les dépenses.
+
+Cela peut suggérer une stabilisation économique ou un meilleur accès aux ressources.
+
+
+# Conclusion générale
+
+Les résultats montrent des évolutions significatives entre les deux années. On observe une légère augmentation de la proportion de femmes chefs de ménage, une amélioration du niveau d’alphabétisation et une hausse des dépenses par habitant, ce qui suggère des progrès en matière d’éducation et de conditions de vie. Toutefois, le vieillissement des chefs de ménage et la diminution de la taille des ménages pourraient refléter des changements démographiques notables, tels qu’une baisse du renouvellement générationnel ou une évolution des structures familiales. Ces tendances méritent d’être suivies pour mieux comprendre leur impact sur le bien-être des ménages.
+
+

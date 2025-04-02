@@ -129,6 +129,12 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 - Theme 5: Developpement d'un package sur R : Cas du package [sdmApp](https://github.com/Abson-dev/sdmApp)
 - Theme 6: Le calcul parallele sur R
 - Theme 7: Traitement de donnees avec le package tidyverse
+  
+     Etudiants:
+  
+    **Kerencia Dyvana PAHANE SEUNKAM**
+    **Malick SENE**
+
 - Theme 8: Le package janitor
 - Theme 9: Tableaux avec gtsummary
 - Theme 10: Le package reticulate: R et Python
@@ -179,4 +185,4 @@ This course material is licensed under a Creative Commons Attribution 4.0 Intern
   
 ## Additional resources
 
-
+- [The Epidemiologist R Handbook](https://epirhandbook.com/en/)
