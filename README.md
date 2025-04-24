@@ -121,36 +121,35 @@ Ce TP consiste a merger les bases **welfare** des EHCVM 2018 ET 2021 en une seul
 
 ### TP 10
 
-(Thème 1 : Application de l'Intelligence Artificielle (IA) avec R)[https://github.com/Khadidiatou1010/IA_with_R_project]
+[Thème 1 : Application de l'Intelligence Artificielle (IA) avec R](https://github.com/Khadidiatou1010/IA_with_R_project)
 
-Thème 2 : Pratique des enquêtes avec R - High-Frequency-Checks-R
-https://github.com/Kefimba
-Thème 3 : Reproduire un livre à l'aide de R
-https://github.com/ahmadouniass/Bookdown
-Thème 4 : Suivi de la collecte des données avec R
-https://github.com/LaFleche06/Suivie-de-la-collecte-des-donnees-avec-R
-Thème 5 : Développement d'un package sur R : Cas du package sdmApp
-https://github.com/Oscar-AS/Developpement-package-sur-R-cas-de-sdmApp
-Thème 6 : Calcul parallèle
-https://github.com/Sarahlaure/Calcul_parall-le_surR_T6
-Thème 7 : Traitement de données avec le package tidyverse
-https://github.com/malickseneisep2/Tidyverse
-Thème 8 : Le package janitor
-https://github.com/DJERAKEI221/-Groupe10_Theme8_Package_Janitor
-Thème 9 : Tableaux avec gtsummary
-https://github.com/awa-d/TP10_RProject2025_TableauxAvecGtsummary
-Thème 10 : Le package reticulate: R et Python
-https://github.com/PapaAmad/Le-package-reticulate-R-et-Python
-Thème 11 : Développement de package sur R
-https://github.com/sambadieng122003/poverty
-Thème 12 : Questionnaire d'enquête avec R
-https://github.com/ameth08faye/Questionnaire-enquete-avec-R
-Thème 13 : Automatisation des rapports avec R : le package rmarkdown
-https://github.com/dior204/Theme13-Autonomisation-des-rapports-avec-R-Le-package-Rmarkdown
-Thème 14 : Tableaux de bord avec R shiny
-https://github.com/Rah-rayan/Projet-statistique-sous-R-groupe-13-Tableaux-de-bord-avec-R-shiny
-Thème 15 : Traitement des questions ouvertes: text mining
-https://github.com/MameBallaBousso/Traitement-de-questions-ouvertes-avec-R-Text-mining
+[Thème 2 : Pratique des enquêtes avec R - High-Frequency-Checks-R](https://github.com/Kefimba)
+
+[Thème 3 : Reproduire un livre à l'aide de R](https://github.com/ahmadouniass/Bookdown)
+
+[Thème 4 : Suivi de la collecte des données avec R](https://github.com/LaFleche06/Suivie-de-la-collecte-des-donnees-avec-R)
+
+[Thème 5 : Développement d'un package sur R : Cas du package sdmApp](https://github.com/Oscar-AS/Developpement-package-sur-R-cas-de-sdmApp)
+
+[Thème 6 : Calcul parallèle](https://github.com/Sarahlaure/Calcul_parall-le_surR_T6)
+
+[Thème 7 : Traitement de données avec le package tidyverse](https://github.com/malickseneisep2/Tidyverse)
+
+[Thème 8 : Le package janitor](https://github.com/DJERAKEI221/-Groupe10_Theme8_Package_Janitor)
+
+[Thème 9 : Tableaux avec gtsummary](https://github.com/awa-d/TP10_RProject2025_TableauxAvecGtsummary)
+
+[Thème 10 : Le package reticulate: R et Python](https://github.com/PapaAmad/Le-package-reticulate-R-et-Python)
+
+[Thème 11 : Développement de package sur R](https://github.com/sambadieng122003/poverty)
+
+[Thème 12 : Questionnaire d'enquête avec R](https://github.com/ameth08faye/Questionnaire-enquete-avec-R)
+
+[Thème 13 : Automatisation des rapports avec R : le package rmarkdown](https://github.com/dior204/Theme13-Autonomisation-des-rapports-avec-R-Le-package-Rmarkdown)
+
+[Thème 14 : Tableaux de bord avec R shiny](https://github.com/Rah-rayan/Projet-statistique-sous-R-groupe-13-Tableaux-de-bord-avec-R-shiny)
+
+[Thème 15 : Traitement des questions ouvertes: text mining](https://github.com/MameBallaBousso/Traitement-de-questions-ouvertes-avec-R-Text-mining)
 
  
  **Presentation: samedi 5 avril 2025**
