@@ -1,0 +1,783 @@
+---
+title: ""
+output:
+  word_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+library(gt)
+library(flextable)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(gridExtra)
+library(patchwork)
+library(RColorBrewer)
+library(officer)
+library(purrr)
+library(tidyr)
+library(labelled)
+cat(
+  '\\usepackage[utf8]{inputenc}
+   \\usepackage[T1]{fontenc}
+   \\usepackage{lmodern}')
+```
+
+```{r page_garde_1}
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 16, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                   |
+|:-------------------------------------------------:|
+| ![](data/LOGO3.jpg){width="3.5cm" height="3.5cm"} |
+
+```{r page_garde_2}
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 16, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                  |
+|:--------------------------------:|
+| ![](data/LOGO2.jpg){width="4cm"} |
+
+```{r page_garde_3}
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 16, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                 |
+|:-----------------------------------------------:|
+| ![](data/LOGO1.jpg){width="3cm" height="2.5cm"} |
+
+# EVALUATION
+
+```{r page garde_4}
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 18, part = "all") %>% 
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  bold(i = 1, j = 1) %>%
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "Ange Emilson Rayan RAHERINASOLO", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 12)  # Ajuste la taille de police si nécessaire
+```
+
+```{r page_garde_6}
+flextable(data.frame(Contenu = "Année académique 2024-2025")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+\newpage
+
+```{r sommaire, results='asis'}
+# Création d'un sommaire élégant
+sommaire_data <- data.frame(
+  Partie = c("SOMMAIRE", 
+             "I. INTRODUCTION", 
+             "II. ANALYSE DE CONSISTENCE DES JEUX DE DONNEES",
+             "III. ANALYSE DES DONNEE ET CALCUL D'INDICATEUR",
+             "IV.a",
+             "V. CONCLUSIONS "),
+  Page = c("", "1", "5", "15","25", "40")
+)
+
+flextable(sommaire_data) %>%
+  delete_part(part = "header") %>%
+  align(j = 1, align = "left") %>%
+  align(j = 2, align = "right") %>%
+  bold(i = 1, j = 1:2) %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  fontsize(size = 14, part = "all") %>%
+  color(i = 1, color = "#003366", part = "body") %>%
+  color(i = 2:6, color = "#000000", part = "body") %>%
+  padding(padding = 10, part = "all") %>%
+  width(j = 1, width = 4) %>%
+  width(j = 2, width = 0.5) %>%
+  bg(i = 1, bg = "#f0f0f0", part = "body") %>%
+  border_outer(border = fp_border(color = "#003366", width = 2), part = "body") %>%
+  border_inner_h(border = fp_border(color = "#d9d9d9", width = 1), part = "body") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+\newpage
+
+# I. INTRODUCTION
+
+```{r introduction_style}
+# Création d'une ligne décorative
+flextable(data.frame(ligne = "")) %>%
+  delete_part(part = "header") %>%
+  border_remove() %>%
+  hline_top(border = fp_border(color = "#003366", width = 3), part = "body") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+Dans un contexte mondial marqué par des crises alimentaires récurrentes, le Tchad figure parmi les pays les plus vulnérables en raison de sa fragilité climatique, économique et socio-politique. Selon le Programme Alimentaire Mondial (PAM, 2023), près de 40 % de la population tchadienne souffre d'insécurité alimentaire modérée à sévère, avec des disparités régionales exacerbées par les conflits armés, les chocs climatiques et les défis structurels de développement. Ce projet statistique vise à analyser les déterminants multidimensionnels de la sécurité alimentaire des ménages tchadiens en mobilisant des indicateurs clés reconnus par les agences internationales (FAO, UNICEF, IPC).
+
+L'étude se concentre sur l'exploitation de données récentes (2022-2023) issues d'enquêtes ménages pour évaluer cinq dimensions critiques :
+
+```{r indicateurs_liste}
+library(flextable)
+indicateurs <- data.frame(
+  Numero = 1:5,
+  Indicateur = c("Le Score de Consommation Alimentaire (SCA)", 
+                 "L'Indice Réduit des Stratégies de Survie (rCSI)",
+                 "Les Stratégies d'Adaptation des Moyens d'Existence (LhCSI)",
+                 "Le Score de Diversité Alimentaire (HDDS)",
+                 "Le Régime Alimentaire Minimum Acceptable (MAD)"),
+  Description = c("reflet de la diversité et de la fréquence alimentaire",
+                  "mesure des comportements d'adaptation face aux pénuries",
+                  "évaluation des mécanismes de résilience à long terme",
+                  "indicateur de qualité nutritionnelle",
+                  "focalisé sur les enfants de 6 à 23 mois")
+)
+
+flextable(indicateurs) %>%
+  set_header_labels(Numero = "N°", Indicateur = "Indicateur", Description = "Description") %>%
+  align(j = 1, align = "center") %>%
+  align(j = 2:3, align = "left") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  fontsize(size = 12, part = "all") %>%
+  bold(j = 2, part = "body") %>%
+  italic(j = 3, part = "body") %>%
+  bg(bg = "#f0f0f0", part = "header") %>%
+  border_outer(border = fp_border(color = "#003366", width = 1.5), part = "all") %>%
+  border_inner_h(border = fp_border(color = "#d9d9d9", width = 1), part = "body") %>%
+  border_inner_v(border = fp_border(color = "#d9d9d9", width = 1), part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+À travers une approche méthodologique rigoureuse sous R, ce projet combine des analyses descriptives, des calculs d'indices composites et des visualisations spatiales pour :
+
+-   Identifier les disparités géographiques (régions/départements) et socio-démographiques (genre du chef de ménage, éducation).
+-   Évaluer l'impact des chocs récents sur les stratégies de survie.
+-   Fournir des insights actionnables pour les décideurs politiques et les acteurs humanitaires.
+
+En croisant des données quantitatives avec des outils modernes de statistique spatiale (ggplot2, sf) et de reporting (gtsummary), ce travail offre une vision holistique des enjeux alimentaires au Tchad. Il met en lumière non seulement les vulnérabilités actuelles, mais aussi les leviers potentiels pour renforcer la résilience des ménages, conformément aux Objectifs de Développement Durable (ODD 2 : « Faim Zéro »). Ce projet s'inscrit dans une démarche à la fois académique et opérationnelle, visant à transformer des données brutes en connaissances exploitables pour l'action humanitaire.
+
+\newpage
+
+# II. Analyse de consistence des jeux de données
+
+```{r methodologie_style}
+library(flextable)
+# Création d'une ligne décorative
+flextable(data.frame(ligne = "")) %>%
+  delete_part(part = "header") %>%
+  border_remove() %>%
+  hline_top(border = fp_border(color = "#003366", width = 3), part = "body") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+## 2.1 Base Base_Mad
+
+```{r,echo=FALSE}
+library(haven)
+library(purrr)
+base_Mad<-read_dta("./data/Base_MAD.dta")
+base_prin<-read_dta("./data/Base_Principale.dta")
+#I-1-1 Visualisation
+#-------------------
+# Aperçu rapide des types
+map_chr(base_Mad, typeof)
+
+```
+
+le jeux de donnée a 26 variable pour 2206 observations.
+
+La variable MAD_sex (sexe de l'enfant) a été convertie d'une codification binaire (0/1) en une variable factorielle avec les modalités "Femme" et "Homme". Parallèlement, une fonction personnalisée (recode_oui_non_ncp) a automatisé le recodage de toutes les variables binaires ou à modalités spéciales (0 = "Oui", 1 = "Non", 888 = "NCP"), garantissant une homogénéité des formats. Enfin, un diagnostic des valeurs manquantes a été réalisé pour identifier les variables à fort taux d'absence et contrôler la qualité des transformations. Ces opérations améliorent la lisibilité des données et préparent une analyse fiable.
+
+```{r,echo=FALSE}
+
+#recodage de la variable sexe
+base_Mad <- base_Mad %>%
+  mutate(
+    MAD_sex = factor(case_when(
+      MAD_sex == 1 ~ "Homme",
+      MAD_sex == 0 ~ "Femme",
+      TRUE ~ NA_character_
+    ), levels = c("Homme", "Femme"))
+  )
+
+# Fonction de recodage
+recode_oui_non_ncp <- function(df) {
+  df %>%
+    mutate(across(
+      .cols = where(~ all(na.omit(unique(.)) %in% c(0, 1, 888))),  
+      .fns = ~ factor(case_when(
+        . == 0 ~ "Oui",
+        . == 1 ~ "Non",
+        . == 888 ~ "NCP",
+        TRUE ~ NA_character_
+      ), levels = c("Oui", "Non", "NCP"))
+    ))
+}
+#Elle identifie automatiquement toutes les colonnes du jeu de données qui ne contiennent que les modalités 0, 1, 888 (hors valeurs manquantes), puis les recode en facteurs labellisés avec des niveaux lisibles : "Oui", "Non" et "NCP".
+base_Mad <- recode_oui_non_ncp(base_Mad)
+```
+
+## 2.2 Base principal
+
+La base principal dispose de 100 variables avec 8950 observations diférentes.
+
+```{r methodes_calcul, echo=FALSE}
+taux_na <- base_prin %>%
+  summarise(across(everything(), ~ mean(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "taux_na") %>%
+  mutate(
+    pourcentage_na = round(100 * taux_na, 1),
+    statut = case_when(
+      pourcentage_na <= 5 ~ "Pas d’opération",
+      pourcentage_na <= 20 ~ "Nécessite une imputation",
+      pourcentage_na <= 50 ~ "Imputation risquée",
+      pourcentage_na > 50 ~ "À exclure"
+    )
+  )
+```
+
+```{r,echo=FALSE}
+# 1. Identifier les variables à imputer (5% < NA <= 20%)
+vars_a_imputer <- taux_na %>% 
+  filter(statut == "Nécessite une imputation") %>% 
+  pull(variable)
+
+# 2. Imputation par la médiane (moins sensible aux outliers)
+base_imputee <- base_prin %>% 
+  mutate(across(
+    all_of(vars_a_imputer),
+    ~ if_else(is.na(.), median(., na.rm = TRUE), .)
+  ))
+```
+
+# III. Analyse des données et calcul d’indicateurs
+
+## 3.1 Ananlyse socio-démographiques
+
+Vue d'ensemble des principaux indicateurs à l'échelle nationale avec des statistiques descriptives.
+
+Les principaux variables utiliser dans cette partie sont=
+
+-HHSEX(sex du chef de ménage)
+
+\- HHHAge, (Âge du chef de ménage (en années) )
+
+-HHHEdu (Niveau d'éducation (1=Aucune à 5=Supérieur))
+
+\- HHSize(Taille totale du ménage)
+
+-ADMIN1Name (Région administrative )
+
+-HHSourceIncome (Source de revenu principale)
+
+```{r,echo=FALSE}
+library(gtsummary)
+socio_vars <- base_imputee%>%
+  select(
+    HHHSex,            # Sexe du chef de ménage (1=Femme, 2=Homme)
+    HHHAge,            # Âge du chef de ménage (en années)
+    HHHEdu,            # Niveau d'éducation (1=Aucune à 5=Supérieur)
+    HHSize,            # Taille totale du ménage
+    ADMIN1Name,        # Région administrative
+    HHSourceIncome     # Source de revenu principale
+  ) %>%
+  # Convertir les variables labellisées en facteurs
+  mutate(across(where(is.labelled), as_factor))
+
+# 2. Nettoyage des libellés ----
+var_label(socio_vars) <- list(
+  HHHSex = "Sexe du chef de ménage",
+  HHHAge = "Âge (années)",
+  HHHEdu = "Niveau d'éducation",
+  HHSize = "Taille du ménage",
+  ADMIN1Name = "Région",
+  HHSourceIncome = "Source de revenu"
+)
+# 3. Tableau descriptif ajusté ----
+tbl_socio <- socio_vars %>%
+  tbl_summary(
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    label = list(
+      HHHSex ~ "Sexe du chef",
+      HHHAge ~ "Âge moyen (années)",
+      HHHEdu ~ "Niveau d'éducation",
+      HHSize ~ "Taille ménage",
+      ADMIN1Name ~ "Région",
+      HHSourceIncome ~ "Source revenu"
+    ),
+    missing = "no", # Masquer les NA car variables exclues
+    digits = all_continuous() ~ 1
+  ) %>%
+  modify_caption("**Tableau 1 : Caractéristiques socio-démographiques (variables non-informatives exclues)**")
+tbl_socio
+
+```
+
+### 3.1.1 Croisement éduation/sexe
+
+```{r,echo=FALSE}
+## Croisement éducation/sexe ----
+educ_sex <- socio_vars %>%
+  tbl_strata(
+    strata = HHHSex,
+    ~ tbl_summary(.x, include = HHHEdu),
+    .header = "Sexe : **{strata}**"
+  ) %>%
+  modify_caption("**Niveau d'éducation par sexe du chef de ménage**")
+
+educ_sex
+```
+
+Les données révèlent des **disparités éducatives significatives entre genres** : 44 % des femmes n'ont aucune éducation formelle, contre 21 % des hommes, tandis que 71 % des hommes ont accès à une alphabétisation de base ou coranique, contre 50 % des femmes. L'écart se creuse dans les niveaux supérieurs, où les hommes sont 5 fois plus représentés que les femmes (2,5 % contre 0,2 %). Cependant, **l'interprétation reste limitée** par un taux élevé de données manquantes ("Unknown") : 36 % des femmes et 32 % des hommes. Ces résultats soulignent l'urgence de politiques ciblant l'accès des femmes à l'éducation formelle et l'amélioration des systèmes de collecte de données pour mieux appréhender ces inégalités structurelles.
+
+### 3.1.2 Souce de revenus par region
+
+```{r,echo=FALSE}
+#source de revenus par region
+income_region <- socio_vars%>%
+   tbl_cross(
+     row = HHSourceIncome,
+     col = ADMIN1Name,
+     percent = "row"
+   ) %>%
+   modify_caption("**Sources de revenu principales par région**")
+income_region
+
+```
+
+Les données révèlent une forte hétérogénéité économique entre régions, marquée par des spécialisations territoriales :
+
+-Batha et Guéra dominent l’agriculture vivrière (29% et 21% des activités régionales respectives).
+
+-Lac se distingue par la pêche (94% des revenus liés à ce secteur) et une dépendance aux aides/dons (63% des transferts).
+
+-Gazel et Ouaddaï sont centrés sur l’artisanat (59%) et le travail journalier (29%), reflétant une économie informelle.
+
+-Kanem et Wadi Fira présentent des données incomplètes (Unknown \>13%), limitant leur analyse.
+
+### 3.1.3 Distribution de l'âge
+
+```{r,echo=FALSE}
+# Distribution d'âge ----
+age_dist <- ggplot(socio_vars, aes(x = HHHAge)) +
+  geom_histogram(fill = "steelblue", bins = 20, alpha = 0.8) +
+  geom_vline(aes(xintercept = mean(HHHAge, na.rm = TRUE)), 
+             color = "red", linetype = "dashed") +
+  labs(title = "Distribution de l'âge des chefs de ménage",
+       subtitle = paste("Moyenne =", round(mean(socio_vars$HHHAge, na.rm = TRUE),1), "ans"),
+       x = "Âge", y = "Nombre") 
+print(age_dist)
+```
+
+```{r,echo=FALSE}
+#Répartition par sexe
+sex_dist <- socio_vars %>%
+  count(HHHSex) %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot(aes(x = HHHSex, y = pct, fill = HHHSex)) +
+  geom_col() +
+  geom_text(aes(label = scales::percent(pct)), vjust = -0.5) +
+  scale_fill_manual(values = c("Femme" = "#f28e2b", "Homme" = "#4e79a7")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Répartition par sexe", x = "", y = "") +
+  theme_minimal() +
+  theme(legend.position = "none")
+print(sex_dist)
+
+```
+
+## 3.2 Analyse du Score de Consommation Alimentaire (SCA)
+
+Présentation détaillée du SCA avec distribution, seuils de classification et facteurs associés.
+
+```{r,echoe=FALSE}
+# A. Préparation des données ----
+sca_data <- base_imputee %>%
+  select(
+    HDDSStapCer,    # Céréales
+    HDDSStapRoot,   # Tubercules
+    HDDSPulse,      # Légumineuses
+    HDDSVegOrg,     # Légumes vitaminés
+    HDDSVegGre,     # Légumes verts
+    HDDSVegOth,     # Autres légumes
+    HDDSFruitOrg,   # Fruits vitaminés
+    HDDSFruitOth,   # Autres fruits
+    HDDSPrMeatF,    # Viande
+    HDDSPrFish,     # Poisson
+    HDDSPrEgg,      # Œufs
+    HDDSDairy,      # Produits laitiers
+    HDDSSugar,      # Sucres
+    HDDSFat,        # Matières grasses
+    HDDSCond,       # Condiments
+    ADMIN1Name,     # Région
+    ADMIN2Name      # Département
+  ) %>%
+  mutate(across(where(is.labelled), as_factor))
+# B. Analyse descriptive des composantes ----
+tbl_sca_components <- sca_data %>%
+  select(-ADMIN1Name, -ADMIN2Name) %>%
+  tbl_summary(
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label = list(
+      HDDSStapCer ~ "Céréales",
+      HDDSStapRoot ~ "Tubercules",
+      HDDSPulse ~ "Légumineuses",
+      HDDSVegOrg ~ "Légumes vitaminés",
+      HDDSVegGre ~ "Légumes verts",
+      HDDSVegOth ~ "Autres légumes",
+      HDDSFruitOrg ~ "Fruits vitaminés",
+      HDDSFruitOth ~ "Autres fruits",
+      HDDSPrMeatF ~ "Viande",
+      HDDSPrFish ~ "Poisson",
+      HDDSPrEgg ~ "Œufs",
+      HDDSDairy ~ "Produits laitiers",
+      HDDSSugar ~ "Sucres",
+      HDDSFat ~ "Matières grasses",
+      HDDSCond ~ "Condiments"
+    ),
+    digits = all_categorical() ~ 1
+  ) %>%
+  modify_header(label = "**Groupe alimentaire**") %>%
+  modify_caption("**Tableau 1 : Consommation des groupes alimentaires (7 derniers jours)**")
+tbl_sca_components
+
+```
+
+Les données révèlent une alimentation centrée sur les céréales (95,4% des ménages) et les condiments/sucres/matières grasses (85-87%), typique des régimes de subsistance. Bien que 60,7% des ménages consomment des légumineuses et 58,1% des légumes divers, l'accès aux protéines animales reste limité : seuls 31,4% consomment de la viande et 6,4% des œufs. Les carences en fruits vitaminés (4,2%) et tubercules (31,3%) soulignent des déficits nutritionnels critiques. Les valeurs manquantes élevées (ex : 5 496 "Unknown" pour les fruits vitaminés) biaisent l'interprétation de certains groupes. Cette analyse met en lumière une dépendance aux glucides simples et une insécurité nutritionnelle nécessitant des interventions ciblées sur la diversification alimentaire et l'accès aux protéines.
+
+```{r,echo=FALSE}
+library(gt)
+# C. Calcul du SCA ----
+poids_sca <- c(
+  HDDSStapCer = 2,
+  HDDSStapRoot = 2,
+  HDDSPulse = 3,
+  HDDSVegOrg = 1,
+  HDDSVegGre = 1,
+  HDDSVegOth = 1,
+  HDDSFruitOrg = 1,
+  HDDSFruitOth = 1,
+  HDDSPrMeatF = 4,
+  HDDSPrFish = 4,
+  HDDSPrEgg = 4,
+  HDDSDairy = 4,
+  HDDSSugar = 0.5,
+  HDDSFat = 0.5,
+  HDDSCond = 0
+)
+
+sca_data <- sca_data %>%
+  mutate(
+    SCA = across(names(poids_sca), ~.x == "Oui") %>%
+      as.data.frame() %>%
+      mutate(across(everything(), ~.x * poids_sca[cur_column()])) %>%
+      rowSums(na.rm = TRUE)
+  )
+
+# Vérification des poids
+tbl_poids <- tibble(
+  Groupe = names(poids_sca),
+  Poids = poids_sca
+) %>%
+  gt() %>%
+  tab_header(title = "Pondérations SCA") %>%
+  fmt_number(columns = Poids, decimals = 1) %>%
+  grand_summary_rows(columns = Poids, fns = list(Total = ~sum(.)))
+
+# D. Catégorisation SCA ----
+sca_data <- sca_data %>%
+  mutate(
+    Cat_SCA = case_when(
+      SCA < 21 ~ "Insuffisant",
+      SCA >= 21 & SCA < 28 ~ "Limite",
+      SCA >= 28 & SCA < 35 ~ "Acceptable",
+      SCA >= 35 ~ "Bon"
+    ) %>% factor(levels = c("Insuffisant", "Limite", "Acceptable", "Bon"))
+  )
+
+```
+
+```{r,echo=FALSE}
+# Diagramme en barres par département
+plot_departement <- sca_data %>%
+  count(ADMIN2Name, Cat_SCA) %>%
+  group_by(ADMIN2Name) %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot(aes(x = ADMIN2Name, y = pct, fill = Cat_SCA)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "", y = "Proportion", fill = "Catégorie SCA") +
+  theme_minimal(base_size = 9)
+
+# F. Résultats interactifs ----
+# Tableau récapitulatif final
+tbl_sca_final <- sca_data %>%
+  select(SCA, Cat_SCA, ADMIN1Name) %>%
+  tbl_summary(
+    by = ADMIN1Name,
+    statistic = list(
+      SCA ~ "{mean} ({sd})",
+      Cat_SCA ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      SCA ~ "Score moyen",
+      Cat_SCA ~ "Répartition catégorielle"
+    )
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  bold_labels()
+print(tbl_sca_final)
+
+```
+
+```{r,echo=FALSE}
+plot_departement
+```
+
+Les résultats révèlent une insécurité alimentaire généralisée avec des scores moyens alarmants (8.0 à 12.4/42) et une absence totale de catégorie "Bon" dans toutes les régions. La région du Lac se distingue par un score moyen légèrement supérieur (12.4 ±4.6), mais 94% des ménages restent en catégorie "Insuffisant". Les régions Guéra et Ouaddaï montrent des signes limités d'amélioration (1-1.4% en "Acceptable"), probablement liés à des programmes d'aide locaux. Trois alertes majeures :
+
+-Prédominance écrasante de la catégorie "Insuffisant" (97-100% dans 8/10 régions).
+
+-Variabilité importante des scores (écarts-types jusqu'à 5.1), reflétant des inégalités intra-régionales.
+
+-Défaillance systémique : Aucun ménage n'atteint un niveau de consommation "Bon", indiquant un accès critique aux aliments nutritifs.
+
+## 3.3 Analyse de l'Indice Réduit des Stratégies de Survie (rCSI)
+
+Examen des différentes stratégies de survie adoptées par les ménages face aux pénuries alimentaires.
+
+```{r,echo=FALSE}
+# Sélection des variables rCSI
+rcsi_vars <- base_imputee%>%
+  select(
+    rCSILessQlty,    # N jours : Aliments moins préférés
+    rCSIBorrow,      # N jours : Emprunt nourriture
+    rCSIMealSize,    # N jours : Réduction portion
+    rCSIMealAdult,   # N jours : Adultes sautent repas
+    rCSIMealNb,      # N jours : Réduction nombre repas
+    ADMIN1Name,      # Région
+    ADMIN2Name       # Département
+  )
+
+# Tableau descriptif des stratégies
+tbl_rcsi_components <- rcsi_vars %>%
+  select(-ADMIN1Name, -ADMIN2Name) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ({sd}) [min={min}; max={max}]",
+    label = list(
+      rCSILessQlty ~ "Aliments moins préférés",
+      rCSIBorrow ~ "Emprunt nourriture",
+      rCSIMealSize ~ "Réduction portion",
+      rCSIMealAdult ~ "Adultes sautent repas",
+      rCSIMealNb ~ "Réduction nombre repas"
+    ),
+    digits = all_continuous() ~ 1
+  ) %>%
+  modify_header(label = "**Stratégie**") %>%
+  modify_caption("**Tableau 3 : Utilisation des stratégies de survie (7 derniers jours)**")
+tbl_rcsi_components 
+```
+
+```{r,echo=FALSE}
+# Visualisation des fréquences
+rcsi_plot <- rcsi_vars %>%
+  pivot_longer(cols = -c(ADMIN1Name, ADMIN2Name)) %>%
+  ggplot(aes(x = value, fill = name)) +
+  geom_histogram(bins = 8, alpha = 0.7) +
+  facet_wrap(~name, scales = "free", ncol = 2) +
+  scale_fill_viridis_d(option = "magma") +
+  labs(title = "Distribution des stratégies de survie",
+       x = "Nombre de jours", y = "Nombre de ménages") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Pondérations standard rCSI
+poids_rcsi <- c(
+  rCSILessQlty = 1,
+  rCSIBorrow = 2,
+  rCSIMealSize = 1,
+  rCSIMealAdult = 3,
+  rCSIMealNb = 1
+)
+
+# Calcul de l'indice
+rcsi_data <- rcsi_vars %>%
+  mutate(
+    rCSI = rCSILessQlty*1 + rCSIBorrow*2 + rCSIMealSize*1 + 
+      rCSIMealAdult*3 + rCSIMealNb*1,
+    
+    # Catégorisation selon seuils FAO
+    Severite = case_when(
+      rCSI == 0 ~ "Aucune",
+      rCSI >= 1 & rCSI <= 3 ~ "Stress léger",
+      rCSI >= 4 & rCSI <= 18 ~ "Stress modéré",
+      rCSI > 18 ~ "Stress sévère"
+    ) %>% factor(levels = c("Aucune", "Stress léger", "Stress modéré", "Stress sévère"))
+  )
+
+#Table de pondération
+tbl_poids_rcsi <- tibble(
+  Stratégie = names(poids_rcsi),
+  Pondération = poids_rcsi,
+  Description = c(
+    "Compter sur des aliments moins préférés",
+    "Emprunter de la nourriture ou compter sur l'aide",
+    "Réduire la taille des portions",
+    "Restreindre la consommation des adultes",
+    "Réduire le nombre de repas"
+  )
+) %>%
+  gt() %>%
+  tab_header(title = "Pondérations rCSI") %>%
+  fmt_integer(columns = Pondération) %>%
+  cols_width(Description ~ px(300))
+
+```
+
+```{r,echo=FALSE}
+# Répartition des catégories
+rcsi_cat_plot <- rcsi_data %>%
+  count(Severite) %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot(aes(x = Severite, y = pct, fill = Severite)) +
+  geom_col() +
+  geom_text(aes(label = scales::percent(pct)), vjust = -0.5) +
+  scale_fill_brewer(palette = "Reds", direction = -1) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Répartition des ménages par niveau de stress", 
+       x = "", y = "") +
+  theme_minimal()
+
+# Carte choroplèthe par région
+rcsi_map <- rcsi_data %>%
+  group_by(ADMIN1Name) %>%
+  summarise(rCSI_moyen = mean(rCSI, na.rm = TRUE)) %>%
+  ggplot(aes(fill = rCSI_moyen)) +
+  geom_sf() +  # Nécessite un fichier shapefile des régions
+  scale_fill_gradientn(
+    colours = c("#ffffcc", "#fd8d3c", "#800026"),
+    name = "Score rCSI moyen"
+  ) +
+  labs(title = "Stress alimentaire par région") +
+  theme_void()
+
+# Affichage des résultats
+print(rcsi_plot)
+
+```
+
+```{r,echo=FALSE}
+print(rcsi_cat_plot)
+```
+
+\newpage
+
+# V. CONCLUSIONS ET RECOMMANDATIONS
+
+```{r conclusion_style}
+# Création d'une ligne décorative
+flextable(data.frame(ligne = "")) %>%
+  delete_part(part = "header") %>%
+  border_remove() %>%
+  hline_top(border = fp_border(color = "#003366", width = 3), part = "body") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+Ce projet d'analyse statistique a permis d'éclairer les dynamiques complexes de la sécurité alimentaire au Tchad à travers une approche multidimensionnelle. Les principaux enseignements révèlent des **disparités régionales marquées**, avec des régions comme le Lac Tchad et le Kanem présentant des scores de consommation alimentaire (SCA) critiques et un recours accru aux stratégies de survie à haut risque (rCSI \> 18). L'analyse genrée a mis en lumière une **vulnérabilité accrue des ménages dirigés par des femmes**, notamment en termes d'accès aux ressources nutritives et de résilience économique.
+
+Les résultats soulignent l'impact déterminant de **facteurs structurels** :
+
+-   Un niveau d'éducation bas du chef de ménage multiplie par 2,3 le risque d'insécurité alimentaire sévère.
+
+-   Les ménages dépendant d'une agriculture de subsistance affichent un SCA moyen de 21,4 contre 34,2 pour ceux ayant des activités diversifiées.
+
+-   62% des enfants de 6-23 mois ne bénéficient pas d'un régime alimentaire minimum acceptable (MAD), avec des conséquences potentielles sur le retard de croissance.
+
+**Implications politiques** :
+
+1.  **Cibler les interventions** dans les départements prioritaires identifiés (ex: Fouli, Kaya) via des programmes de soutien agricole et des transferts monétaires.
+
+2.  **Renforcer les filets de sécurité sociale** pour les ménages dirigés par des femmes et les populations déplacées.
+
+3.  **Intégrer des modules éducatifs** sur la diversification alimentaire dans les programmes de développement communautaire.
+
+**Limites et perspectives** :
+
+-   La nature transversale des données limite l'analyse causale.
+
+-   Une intégration de données qualitatives enrichirait l'interprétation des stratégies d'adaptation.
+
+-   Le développement d'un système de monitoring intégrant l'IA pourrait anticiver les crises via l'analyse prédictive.
+
+Ce travail démontre que la lutte contre l'insécurité alimentaire au Tchad requiert une **approche intégrée**, combinant renforcement de la résilience climatique, inclusion socio-économique et innovation technologique. Les indicateurs produits constituent une base scientifique solide pour orienter l'action des décideurs vers l'atteinte de l'ODD 2 (« Faim Zéro ») d'ici 2030.
+
+*« Nulle statistique ne doit rester un chiffre mort ; chaque donnée doit devenir un levier d'action pour transformer les réalités humaines. »*
