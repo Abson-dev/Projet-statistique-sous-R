@@ -136,18 +136,13 @@ Dans cette étape, nous importons plusieurs packages qui nous permettront d'effe
 - **Le package readxl** : permet de lire les fichiers Excel (formats .xls et .xlsx).
 - **Le package dplyr** :permet de filtrer, sélectionner, regrouper, trier, et effectuer d'autres opérations de transformation, facilitant ainsi la manipulation des données.
 - **Le package stringr** : fournit des fonction pour la manipublation des chaines de caractères (traitement de textes, recherche/substitution/modification des chaines de caractères ...)
-- **Le package sf** : fournit des outils pour lire, manipuler et analyser des données spatiales
-- **Le package tidyverse** : collection de packages qui facilitent la manipulation, la visualisation et l'analyse des données. Il inclut des packages comme ggplot2 (pour la visualisation), dplyr (pour la manipulation des données), tidyr (pour le nettoyage des données), et plus encore.
-- **Le package stringi** : une version plus complète du package stringr pour la manipulation des chaînes de caractères. Il propose une plus grande variété de fonctions pour le traitement de texte et est conçu pour être plus performant dans des cas plus complexes.
+
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 library(haven)    # Pour lire le fichier Stata
 library(readxl)   # Pour lire le fichier Excel
 library(dplyr)    # Pour la manipulation des données
 library(stringr)  # Pour manipuler les chaînes de caractères
-library(sf) # pour la gestion des données spatiales 
-library(tidyverse) #manipulation,visualisation et analyse 
-library(stringi) # Version plus complete de stringr
 ```
 
 \newpage
