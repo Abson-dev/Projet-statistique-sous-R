@@ -1,0 +1,1174 @@
+---
+title: "Devoir de Projet Statistique sur R"
+author: "Tamsir"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I°)  Analyse de consistence des bases de données
+
+## I.1°) Importation des bases (Base_MAD et Base_Principale)
+<br>
+
+```{r Importation1, error= TRUE,warning= FALSE, message=FALSE, echo=FALSE}
+# Utilisation de la librairie haven pour les bases.dta 
+library(haven)
+Base_MAD <- read_dta("Base_MAD.dta")
+View(Base_MAD)
+```
+
+```{r  Importation2, warning= FALSE, message=FALSE, echo=FALSE}
+# Utilisation de la librairie haven pour les bases.dta 
+library(haven)
+Base_Principale <- read_dta("Base_Principale.dta")
+View(Base_Principale)
+```
+<br>
+
+## I.2°) Vérification et suppression de doublons dans les bases (Base_MAD et Base_Principale)
+<br>
+
+```{r vérification de doublons, warning= FALSE, message=FALSE, echo=FALSE}
+# Chargement du package utile
+library(dplyr)
+
+# On sait que chaque base possède une variable d’identification unique : 'ID'
+
+# =========================
+# 🔍 Vérification dans Base_MAD
+# =========================
+
+# Étape 1 : Identifier les doublons
+doublons_MAD <- Base_MAD[duplicated(Base_MAD$ID), ]
+
+# Étape 2 : Nombre de doublons
+nb_doublons_MAD <- nrow(doublons_MAD)
+cat("Base_MAD : Nombre de doublons détectés :", nb_doublons_MAD, "\n")
+
+# Étape 3 : Affichage si présents
+if (nb_doublons_MAD > 0) {
+  cat("Doublons détectés dans Base_MAD :\n")
+  print(doublons_MAD)
+} else {
+  cat("Aucun doublon trouvé dans Base_MAD.\n")
+}
+
+# Étape 4 : Suppression des doublons (conserver la première occurrence)
+Base_MAD_sans_doublons <- Base_MAD[!duplicated(Base_MAD$ID), ]
+cat("Base_MAD nettoyée : ", nrow(Base_MAD_sans_doublons), "lignes uniques conservées.\n\n")
+
+# =========================
+# 🔍 Vérification dans Base_Principale
+# =========================
+
+# Étape 1 : Identifier les doublons
+doublons_Principale <- Base_Principale[duplicated(Base_Principale$ID), ]
+
+# Étape 2 : Nombre de doublons
+nb_doublons_Principale <- nrow(doublons_Principale)
+cat("Base_Principale : Nombre de doublons détectés :", nb_doublons_Principale, "\n")
+
+# Étape 3 : Affichage si présents
+if (nb_doublons_Principale > 0) {
+  cat("Doublons détectés dans Base_Principale :\n")
+  print(doublons_Principale)
+} else {
+  cat("Aucun doublon trouvé dans Base_Principale.\n")
+}
+
+# Étape 4 : Suppression des doublons (conserver la première occurrence)
+Base_Principale_sans_doublons <- Base_Principale[!duplicated(Base_Principale$ID), ]
+cat("Base_Principale nettoyée : ", nrow(Base_Principale_sans_doublons), "lignes uniques conservées.\n")
+```
+
+<br>
+
+Base_MAD : Nombre de doublons détectés : 0 
+Aucun doublon trouvé dans Base_MAD.
+Base_MAD nettoyée :  8950 lignes uniques conservées.
+
+Base_Principale : Nombre de doublons détectés : 0 
+Aucun doublon trouvé dans Base_Principale.
+Base_Principale nettoyée :  8950 lignes uniques conservées.
+
+<br>
+
+## I.3°) Vérification de valeurs pour les 2 bases 
+<br>
+
+
+```{r Valeurs manquantes,warning= FALSE, message=FALSE, echo=FALSE}
+# =========================
+# Fonction utilitaire : pour créer un résumé des valeurs manquantes
+# =========================
+
+resume_NA <- function(base, nom_base) {
+  # Calcul du nombre de valeurs manquantes par variable
+  nb_NA <- sapply(base, function(col) sum(is.na(col)))
+  
+  # Calcul du pourcentage de valeurs manquantes par variable
+  pct_NA <- round(100 * nb_NA / nrow(base), 2)
+  
+  # Création d’un tableau récapitulatif
+  tableau <- data.frame(
+    Base = nom_base,
+    Variable = names(nb_NA),
+    Nb_Valeurs_Manquantes = nb_NA,
+    Pourcentage_Manquant = pct_NA,
+    stringsAsFactors = FALSE
+  )
+  
+  return(tableau)
+}
+
+# =========================
+# Application aux deux bases
+# =========================
+
+# Résumé pour Base_MAD
+resume_MAD <- resume_NA(Base_MAD, "Base_MAD")
+
+# Résumé pour Base_Principale
+resume_Principale <- resume_NA(Base_Principale, "Base_Principale")
+
+# =========================
+# Fusion des deux résumés
+# =========================
+
+resume_total <- rbind(resume_MAD, resume_Principale)
+
+# =========================
+# Affichage du tableau final
+# =========================
+
+# On garde uniquement les variables avec au moins une valeur manquante
+resume_final <- resume_total[resume_total$Nb_Valeurs_Manquantes > 0, ]
+
+if (nrow(resume_final) > 0) {
+  cat("🔍 Tableau des variables avec des valeurs manquantes :\n")
+  print(resume_final)
+} else {
+  cat("✅ Aucune valeur manquante détectée dans les deux bases.\n")
+}
+
+```
+
+<br>
+
+# II°) Analyse des données et calcul d’indicateurs
+
+<br>
+
+## II.1°)	 Analyse socio-démographique des ménages
+
+<br>
+
+L'analyse portera sur les varaibles HHSize (taille du ménage), HHHSex (sexe du chef de ménage), HHHAge (Age du chef de ménage). Nos allons donner les statistiques descriptives pour chaque variable puis nous allons croiser HHHSex avec HHSize après HHHSex  et HHHAge. 
+
+<br>
+
+```{r analyse socio_démographique1, warning= FALSE, message=FALSE, echo=FALSE}
+library(gtsummary) # pour les tableaux et autres
+library(dplyr)
+
+# ============================
+# 📊 Tableau 1 : Statistiques descriptives
+# ============================
+
+# On sélectionne les variables concernées
+data_desc <- Base_Principale %>%
+  select(HHSize, HHHSex, HHHAge)
+
+# Création du tableau descriptif avec gtsummary
+tableau1 <- tbl_summary(
+  data = data_desc,
+  statistic = list(all_continuous() ~ "{mean} (±{sd})", 
+                   all_categorical() ~ "{n} ({p}%)"),
+  digits = all_continuous() ~ 1,
+  label = list(
+    HHSize ~ "Taille du ménage (HHSize)",
+    HHHSex ~ "Sexe du chef de ménage (HHHSex)",
+    HHHAge ~ "Âge du chef de ménage (HHHAge)"
+  ),
+  missing = "no"
+)
+
+# Ajout d'un titre
+tableau1 <- tableau1 %>% modify_header(label ~ "**Variable**") %>%
+  modify_caption("**Tableau 1. Statistiques descriptives des variables sociodémographiques**")
+
+# Affichage du tableau
+tableau1
+
+```
+
+<br>
+
+On remarqe la taille moyenne d'un ménage est de: **7,5**. Et que la plupart des chefs de ménage sont des hommes soit **56%** et que l'âge moyen d'un chef de ménage est de **43 ans**.
+
+<br>
+
+```{r analyse socio_démographique2, warning= FALSE, message=FALSE, echo=FALSE}
+# Charger les packages nécessaires
+library(gtsummary)
+library(haven)
+
+# ✅ Étape 1 : Convertir HHHSex en facteur (respect des labels SPSS/Stata)
+Base_Principale$HHHSex <- as_factor(Base_Principale$HHHSex)
+
+# ✅ Étape 2 : Sélection des variables nécessaires
+data_tab2 <- Base_Principale[, c("HHHSex", "HHHAge")]
+
+# ✅ Étape 3 : Création du tableau croisé
+tableau2 <- tbl_summary(
+  data = data_tab2,
+  by = HHHSex,
+  statistic = list(all_continuous() ~ "{mean} (±{sd})"),
+  digits = all_continuous() ~ 1,
+  label = HHHAge ~ "Âge du chef de ménage (HHHAge)",
+  missing = "no"
+)
+
+# ✅ Étape 4 : Ajout du titre
+tableau2 <- modify_caption(tableau2, "**Tableau 2. Âge moyen du chef de ménage selon le sexe**")
+
+# ✅ Étape 5 : Affichage
+tableau2
+```
+
+<br>
+
+ Les chefs de ménage femme sont en moyenne (**40ans**) plus jeunes que ceux qui sont des hommes (**45ans**).
+ 
+<br>
+
+```{r analyse socio_démographique3, warning= FALSE, message=FALSE, echo=FALSE}
+# ============================
+# 📊 Tableau 3 : Croisement HHHSex × HHSize (sans pipe)
+# ============================
+
+# Charger les packages nécessaires
+library(gtsummary)
+library(haven)
+
+# ✅ Étape 1 : Convertir HHHSex en facteur s'il est encore en format haven_labelled
+Base_Principale$HHHSex <- as_factor(Base_Principale$HHHSex)
+
+# ✅ Étape 2 : Sélectionner les colonnes nécessaires
+data_tab3 <- Base_Principale[, c("HHHSex", "HHSize")]
+
+# ✅ Étape 3 : Créer le tableau croisé
+tableau3 <- tbl_summary(
+  data = data_tab3,
+  by = HHHSex,
+  statistic = list(all_continuous() ~ "{mean} (±{sd})"),
+  digits = all_continuous() ~ 1,
+  label = HHSize ~ "Taille du ménage (HHSize)",
+  missing = "no"
+)
+
+# ✅ Étape 4 : Ajouter le titre du tableau
+tableau3 <- modify_caption(tableau3, "**Tableau 3. Taille moyenne du ménage selon le sexe du chef de ménage**")
+
+# ✅ Étape 5 : Afficher le tableau
+tableau3
+```
+
+<br>
+
+ En moyenne,Les ménages dirigés par des hommes (**7,8**) sont légérement plus que ceux dirgéss par des femmes (**7,3**). 
+
+<br>
+
+## II°2)	Score de consommation alimentaire (SCA)
+
+<br>
+
+### II.2.a°)	Faites une analyse descriptive des variables qui composent le SCA
+
+<br>
+
+Pour cette question les variables en question sont:HDDSStapCer ,HDDSPulse ,HDDSDairy , HDDSDairy , HDDSPrMeat , HDDSPrFish  , HDDSPrEgg , HDDSVeg , HDDSFruit , HDDSFat , HDDSSugar , HDDSCond. 
+
+```{r, error=TRUE, warning=FALSE, message=FALSE, echo=FALSE}
+# Charger les packages nécessaires
+library(gtsummary)
+library(dplyr)
+
+# Variables à analyser
+variables_hdds <- c("HDDSStapCer", "HDDSPulse", "HDDSDairy", "HDDSPrMeat", "HDDSPrFish",
+                    "HDDSPrEgg", "HDDSVeg", "HDDSFruit", "HDDSFat", "HDDSSugar", "HDDSCond")
+
+# Vérifier que toutes les variables existent dans la base
+missing_vars <- setdiff(variables_hdds, names(Base_MAD))
+
+# Analyse descriptive avec gtsummary
+tableau_hdds <- tbl_summary(
+  data = data_hdds,
+  statistic = list(
+    all_continuous() ~ "{mean} (±{sd})", # Moyenne ± écart-type
+    all_categorical() ~ "{n} ({p}%)"     # Nombre et pourcentage pour les variables catégorielles
+  ),
+  digits = all_continuous() ~ 1,  # 1 chiffre après la virgule pour les variables continues
+  missing = "no"  # Ignorer les valeurs manquantes
+) %>%
+  modify_caption("**Tableau. Analyse descriptive des groupes alimentaires HDDS**")  # Titre du tableau
+
+# Afficher le tableau descriptif
+tableau_hdds
+
+```
+
+
+<br>
+
+### II.2.b°)	Calcul du SCA
+
+<br>
+
+```{r error=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+
+```
+
+<br>
+
+### II.2.c°)	tableau illustrant le poids attribue a chaque groupe alimentaire pour le calcul du SCA
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, error=TRUE}
+# Charger le package gt
+library(gt)
+
+# Créer un tableau avec les poids attribués à chaque groupe alimentaire
+tableau_poids <- data.frame(
+  Groupe_Alimentaire = c("Céréales", "Légumineuses et Pulses", "Produits Laitiers", 
+                         "Viande et Poisson", "Œufs", "Fruits et Légumes", 
+                         "Graisses et Huiles", "Sucreries et Sucres", "Condiments et Épices"),
+  Poids = c(15, 10, 10, 15, 10, 15, 10, 5, 10),
+  Description = c("Impact majeur sur l'alimentation de base.",
+                  "Source importante de protéines et nutriments.",
+                  "Essentiels pour la nutrition, apport en calcium.",
+                  "Sources de protéines animales de haute qualité.",
+                  "Bonnes sources de protéines et de vitamines.",
+                  "Sources essentielles de vitamines et minéraux.",
+                  "Apport énergétique, mais à consommer avec modération.",
+                  "Apport énergétique, mais consommation contrôlée.",
+                  "Utilisés pour l'aromatisation des repas.")
+)
+
+# Afficher le tableau avec gt
+tableau_poids %>%
+  gt() %>%
+  tab_header(
+    title = "Poids attribués aux groupes alimentaires pour le calcul du SCA"
+  ) %>%
+  cols_label(
+    Groupe_Alimentaire = "Groupe Alimentaire",
+    Poids = "Poids (%)",
+    Description = "Description"
+  ) %>%
+  tab_spanner(
+    label = "Poids des Groupes Alimentaires", 
+    columns = vars(Poids)
+  )
+
+```
+
+<br>
+
+Ici nous avons utiliser les poids proposés par le PAM. Les poids sont normés par le PAM pour permettre une comparaison entre ménages ou zones.
+
+J’ai reconstitué les groupes standards PAM à partir de tes variables HDDS, puis attribué les poids officiellement définis, en répartissant ceux des produits animaux.
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=TRUE}
+# Charger les packages nécessaires
+library(tibble)
+library(gt)
+
+# Créer un tableau avec répartition des poids sur tes variables
+table_poids_HDDS <- tibble::tibble(
+  Variable_HDDS = c("HDDSStapCer", "HDDSPulse", "HDDSDairy",
+                    "HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg",
+                    "HDDSFat", "HDDSSugar", "HDDSCond"),
+  Groupe = c("Céréales / Tubercules", "Légumineuses", "Produits laitiers",
+             "Viande", "Poisson", "Œufs",
+             "Matières grasses", "Sucre", "Condiments"),
+  Poids = c(2, 3, 4, 
+            4/3, 4/3, 4/3,  # Répartition égale entre viande, poisson et œufs
+            0.5, 0.5, 0)
+)
+
+# Afficher joliment avec gt
+gt(table_poids_HDDS) %>%
+  tab_header(
+    title = "Tableau. Poids attribués à chaque variable HDDS pour le calcul du SCA"
+  ) %>%
+  cols_label(
+    Variable_HDDS = "Variable HDDS",
+    Groupe = "Groupe Alimentaire",
+    Poids = "Poids attribué"
+  ) %>%
+  tab_footnote(
+    footnote = "Les 3 produits animaux partagent un poids total de 4 réparti équitablement.",
+    locations = cells_body(rows = Variable_HDDS %in% c("HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg"))
+  ) %>%
+  tab_footnote(
+    footnote = "La somme totale des poids est bien égale à 16.",
+    locations = cells_title(groups = "title")
+  )
+
+```
+
+On a aussi tenté d'utiliser une autre méthode mais c'est pas trop recommandé car affecte un faible poids aux produits peu consommés mais à forte valeur nutritionnelle. Il consiste à attribuer les poids en fonction de la préférence de consommation. 
+
+
+```{r autre méthode de calcul de poids, error= TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+# Charger les packages nécessaires
+library(dplyr)
+library(tibble)
+library(gt)
+
+# Étape 1 : Définir les variables et les poids PAM associés
+groupes_hdss <- c("HDDSStapCer", "HDDSPulse", "HDDSDairy", 
+                  "HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg", 
+                  "HDDSFat", "HDDSSugar", "HDDSCond")
+
+poids_pam <- c(2, 3, 4, 
+               4/3, 4/3, 4/3,  # les trois produits animaux partagent le poids 4
+               0.5, 0.5, 0)
+
+# Étape 2 : Calculer le pourcentage de consommation (>0) pour chaque groupe
+pourcentage_conso <- sapply(groupes_hdss, function(var) {
+  # Calcul du % de ménages ayant consommé ce groupe au moins une fois
+  mean(Base_MAD[[var]] > 0, na.rm = TRUE) * 100
+})
+
+# Étape 3 : Calcul des poids ajustés (proportionnels) basés sur les % observés
+poids_obs <- (pourcentage_conso * 16) / sum(pourcentage_conso)
+
+# Étape 4 : Créer un tableau comparatif
+tableau_poids <- tibble::tibble(
+  Variable_HDDS = groupes_hdss,
+  Groupe = c("Céréales / Tubercules", "Légumineuses", "Produits laitiers",
+             "Viande", "Poisson", "Œufs",
+             "Matières grasses", "Sucre", "Condiments"),
+  Poids_PAM = poids_pam,
+  Pourcentage_Conso = round(pourcentage_conso, 1),
+  Poids_Observé = round(poids_obs, 2)
+)
+
+# Étape 5 : Affichage avec gt
+gt(tableau_poids) %>%
+  tab_header(
+    title = "Tableau. Comparaison des poids PAM et poids observés à partir des fréquences de consommation"
+  ) %>%
+  cols_label(
+    Variable_HDDS = "Variable HDDS",
+    Groupe = "Groupe Alimentaire",
+    Poids_PAM = "Poids Standard (PAM)",
+    Pourcentage_Conso = "% de consommation",
+    Poids_Observé = "Poids basé sur les données"
+  ) %>%
+  tab_footnote(
+    footnote = "Les 3 produits animaux partagent un poids total de 4 dans la méthode PAM.",
+    locations = cells_body(rows = Variable_HDDS %in% c("HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg"))
+  ) %>%
+  tab_footnote(
+    footnote = "Les poids observés sont proportionnels aux fréquences de consommation et normalisés pour totaliser 16.",
+    locations = cells_title()
+  )
+
+```
+
+<br>
+
+Pour la suite utilisant les poids proposés par le PAM. 
+
+<br>
+
+### II.2.d°)	Categoriser le SCA selon les seuil 21/35 et 28/42
+
+<br>
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, error=TRUE}
+# Supposons que tu as déjà une colonne 'SCA' (score total) dans Base_MAD
+
+# 📌 Méthode 1 : Catégorisation selon les seuils 21 / 35 (stricts)
+Base_MAD$SCA_cat_21_35 <- cut(Base_MAD$SCA,
+                              breaks = c(-Inf, 21, 35, Inf),
+                              labels = c("Consommation pauvre", 
+                                         "Consommation limite", 
+                                         "Bonne consommation"),
+                              right = TRUE)
+
+# 📌 Méthode 2 : Catégorisation selon les seuils 28 / 42 (souples)
+Base_MAD$SCA_cat_28_42 <- cut(Base_MAD$SCA,
+                              breaks = c(-Inf, 28, 42, Inf),
+                              labels = c("Consommation pauvre", 
+                                         "Consommation limite", 
+                                         "Bonne consommation"),
+                              right = TRUE)
+
+# 👁 Aperçu des fréquences de chaque catégorie selon les deux méthodes
+table_21_35 <- table(Base_MAD$SCA_cat_21_35)
+table_28_42 <- table(Base_MAD$SCA_cat_28_42)
+
+# Afficher les résultats
+print("📊 Distribution des ménages selon les seuils 21 / 35 :")
+print(table_21_35)
+
+print("📊 Distribution des ménages selon les seuils 28 / 42 :")
+print(table_28_42)
+```
+
+
+<br>
+
+## II.3°)	L’indice réduit des stratégies de survie (rCSI)
+
+<br>
+
+L'indice réduit des stratégies de survie, basé sur la consommation, est utilisé pour évaluer le niveau de stress d'un ménage dû à une pénurie alimentaire. Il mesure les stratégies comportementales que les gens appliquent lorsqu'ils n'ont pas accès à suffisamment de nourriture ou lorsqu'ils prévoient une diminution de la sécurité alimentaire.
+
+<br>
+
+### II.3.a°)	Analyse descriptive des variables qui composent le rCSI
+
+<br>
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, error=TRUE}
+# Charger les packages nécessaires
+library(gtsummary)
+library(dplyr)
+
+# Étape 1 : Définir les variables rCSI
+rcsi_vars <- c("rCSILessQlty", "rCSIBorrow", "rCSIMealSize", "rCSIMealAdult", "rCSIMealNb")
+
+# Vérifier la présence des variables dans la base de données
+missing_vars <- setdiff(rcsi_vars, names(Base_MAD))
+
+if(length(missing_vars) > 0) {
+  cat("Les variables suivantes sont manquantes dans la base : ", missing_vars)
+} else {
+  cat("Toutes les variables sont présentes.")
+}
+
+# Étape 2 : Créer un sous-ensemble de la base contenant seulement ces variables
+rcsi_data <- Base_MAD[, rcsi_vars]
+
+# Étape 3 : Calculer les statistiques descriptives
+tableau_rcsi <- rcsi_data %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ c("{mean} (±{sd})", "{median}", "{min} - {max}")),
+    digits = all_continuous() ~ 1,
+    label = list(
+      rCSILessQlty ~ "Moins bonne qualité des aliments",
+      rCSIBorrow ~ "Recours à l’emprunt",
+      rCSIMealSize ~ "Réduction taille repas",
+      rCSIMealAdult ~ "Réduction chez adultes",
+      rCSIMealNb ~ "Réduction nb de repas"
+    ),
+    missing = "no"
+  ) %>%
+  modify_caption("**Tableau. Analyse descriptive du rCSI**") %>%
+  bold_labels()
+
+# Étape 4 : Afficher le tableau final
+tableau_rcsi
+
+```
+
+Pour celà on va s'intérésser sur les variables: **rCSILessQlty** ,**rCSIBorrow** , **rCSIMealSize** , **rCSIMealAdult** , **rCSIMealNb**.
+
+<br>
+
+
+```{r , error=TRUE, warning=FALSE, echo=FALSE, message=FALSE}
+# 🔁 Charger les packages nécessaires
+library(gtsummary)
+library(gt)
+library(dplyr)
+
+# 🎯 Étape 1 : Définir les noms des variables rCSI
+rcsi_vars <- c("rCSILessQlty", "rCSIBorrow", "rCSIMealSize", 
+               "rCSIMealAdult", "rCSIMealNb")
+
+# ✅ TEST : Vérifier que toutes les variables existent dans la base
+missing_vars <- setdiff(rcsi_vars, names(Base_MAD))
+if (length(missing_vars) > 0) {
+  stop("⛔ Les variables suivantes sont absentes de la base 'Base_MAD' : ",
+       paste(missing_vars, collapse = ", "))
+} else {
+  print("✅ Toutes les variables sont présentes dans la base.")
+}
+
+# 🧮 Étape 2 : Créer un tableau de statistiques descriptives
+# On extrait d'abord les données de manière explicite
+rcsi_data <- Base_MAD[, rcsi_vars]
+
+# Affichage de quelques premières lignes pour vérifier la structure des données
+print(head(rcsi_data))
+
+# Vérification des types de données pour chaque variable
+print(sapply(rcsi_data, class))
+
+# Assurer que toutes les données sont numériques ou catégorielles avant de créer le tableau
+rcsi_data <- rcsi_data %>%
+  mutate(across(everything(), as.factor))  # Change les types si nécessaire
+
+# Créer le tableau avec tbl_summary
+tableau_rcsi <- rcsi_data %>%
+  tbl_summary(
+    statistic = list(
+      all_continuous() ~ c("{mean} (±{sd})", "{median}", "{min} - {max}")
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      rCSILessQlty ~ "Moins bonne qualité des aliments",
+      rCSIBorrow ~ "Recours à l’emprunt",
+      rCSIMealSize ~ "Réduction taille repas",
+      rCSIMealAdult ~ "Réduction chez adultes",
+      rCSIMealNb ~ "Réduction nb de repas"
+    ),
+    missing = "no"
+  ) %>%
+  modify_caption("**Tableau. Analyse descriptive des composantes du rCSI**") %>%
+  bold_labels()
+
+# 👁️ Étape 3 : Affichage du tableau
+tableau_rcsi
+
+```
+
+<br>
+
+**Analyse**: 
+
+<br>
+
+### II.3.b)	Calculer l’indice réduit des stratégies de survie
+
+<br>
+
+Le rCSI (reduced Coping Strategy Index) est un score composite qui mesure la fréquence de recours à des stratégies alimentaires d’adaptation en cas d’insécurité. Il est utilisé par le PAM et d’autres agences pour évaluer la vulnérabilité alimentaire.
+
+<br>
+
+```{r calcul du rCSI, message=FALSE, warning=FALSE, echo=FALSE, error=TRUE}
+# ✅ Étape 1 : S'assurer que les valeurs ne dépassent pas 7 jours (logique PAM)
+Base_MAD$rCSILessQlty  <- pmin(Base_MAD$rCSILessQlty, 7)
+Base_MAD$rCSIBorrow    <- pmin(Base_MAD$rCSIBorrow, 7)
+Base_MAD$rCSIMealSize  <- pmin(Base_MAD$rCSIMealSize, 7)
+Base_MAD$rCSIMealAdult <- pmin(Base_MAD$rCSIMealAdult, 7)
+Base_MAD$rCSIMealNb    <- pmin(Base_MAD$rCSIMealNb, 7)
+
+# ✅ Étape 2 : Calcul du score pondéré (rCSI)
+Base_MAD$rCSI <- (Base_MAD$rCSILessQlty * 1) +
+                 (Base_MAD$rCSIBorrow * 2) +
+                 (Base_MAD$rCSIMealSize * 1) +
+                 (Base_MAD$rCSIMealAdult * 3) +
+                 (Base_MAD$rCSIMealNb * 1)
+
+# ✅ Étape 3 : Résumé statistique du score rCSI
+summary(Base_MAD$rCSI)
+
+# ✅ Étape 2 : Calcul du score pondéré (rCSI)
+Base_MAD$rCSI <- (Base_MAD$rCSILessQlty * 1) +
+                 (Base_MAD$rCSIBorrow * 2) +
+                 (Base_MAD$rCSIMealSize * 1) +
+                 (Base_MAD$rCSIMealAdult * 3) +
+                 (Base_MAD$rCSIMealNb * 1)
+
+# ✅ Étape 3 : Résumé statistique du score rCSI
+summary(Base_MAD$rCSI)
+
+```
+<br>
+
+### II.3.c)	Faites un tableau illustrant le poids attribue a chaque variable pour le calcul du rCSI (la somme totale des poids doit etre egale a 21)
+
+<br>
+
+```{r, error=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+# 📌 Créer un data frame avec les variables et les poids de base
+poids_rcsi <- data.frame(
+  Comportement = c(
+    "Moins bonne qualité des aliments",
+    "Emprunt nourriture/argent",
+    "Réduction taille repas",
+    "Adultes mangent moins",
+    "Réduction du nb de repas"
+  ),
+  Variable = c("rCSILessQlty", "rCSIBorrow", "rCSIMealSize", "rCSIMealAdult", "rCSIMealNb"),
+  Poids_initial = c(1, 2, 1, 3, 1)
+)
+
+# 🎯 Calcul des poids ajustés pour que la somme soit exactement 21
+facteur_ajustement <- 21 / sum(poids_rcsi$Poids_initial)
+poids_rcsi$Poids_ajuste <- round(poids_rcsi$Poids_initial * facteur_ajustement, 2)
+
+# 🔢 Ajouter une ligne pour le total
+poids_rcsi <- rbind(
+  poids_rcsi,
+  data.frame(
+    Comportement = "Total",
+    Variable = "",
+    Poids_initial = sum(poids_rcsi$Poids_initial),
+    Poids_ajuste = sum(poids_rcsi$Poids_ajuste)
+  )
+)
+
+# 📊 Affichage en tableau joli avec 'gt'
+library(gt)
+
+poids_rcsi %>%
+  gt() %>%
+  tab_header(
+    title = "Tableau. Poids attribués aux variables du rCSI (somme ajustée à 21)"
+  ) %>%
+  fmt_number(columns = c(Poids_initial, Poids_ajuste), decimals = 2) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(rows = Comportement == "Total")
+  )
+
+```
+
+
+<br>
+
+## II.4)	Stratégies d'adaptation aux moyens d'existence (LhCSI)
+
+<br>
+
+Les indicateurs de stratégies d'adaptation des moyens de subsistance (LCS) sont des indicateurs mesurés au niveau des ménages qui sont relativement simples et qui sont en corrélation avec d'autres mesures de la sécurité alimentaire et de la vulnérabilité. Ils sont basés sur une série de questions concernant la manière dont les ménages parviennent à faire face aux chocs qui mettent à mal leurs moyens de subsistance. Les indicateurs LCS évaluent les capacités d’adaptation et de production des ménages à moyen et à long terme et leur impact futur sur les besoins alimentaires. L'indicateur des stratégies d'adaptation des moyens de subsistance existe en deux versions. L'une pour la sécurité alimentaire (LCS-FS) et l'autre pour les besoins essentiels (LCS-EN). Pour le cadre de l’examen on s’interesse a LCS-FS.
+
+<br>
+
+### II.4.a) Analyse descriptive des variables qui composent le LhCSI
+
+<br>
+
+Pour faire l'analyse on va s'intérésser aux variables suivantes: LhCSIStress1, LhCSIStress2, LhCSIStress3, LhCSIStress4, LhCSICrisis1, LhCSICrisis2, LhCSICrisis3, LhCSIEmergency1, LhCSIEmergency2, LhCSIEmergency3.
+
+<br>
+
+```{r analyse descriptive sur LhCSI, message=FALSE, warning=FALSE, echo=FALSE, error=TRUE}
+# Charger les packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(gt)
+
+# ✅ Étape 1 : Sélection des variables concernées
+variables_lhcsi <- c(
+  "LhCSIStress1", "LhCSIStress2", "LhCSIStress3", "LhCSIStress4",
+  "LhCSICrisis1", "LhCSICrisis2", "LhCSICrisis3",
+  "LhCSIEmergency1", "LhCSIEmergency2", "LhCSIEmergency3"
+)
+
+# ✅ Étape 2 : Extraction des données correspondantes dans Base_MAD
+donnees_lhcsi <- Base_MAD[, variables_lhcsi]
+
+# ✅ Étape 3 : Création du tableau descriptif avec gtsummary
+tableau_lhcsi <- donnees_lhcsi %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ c("{mean} (±{sd})", "{median}", "{min} - {max}")),
+    digits = all_continuous() ~ 1,
+    missing = "no",
+    label = list(
+      LhCSIStress1 ~ "Stress 1",
+      LhCSIStress2 ~ "Stress 2",
+      LhCSIStress3 ~ "Stress 3",
+      LhCSIStress4 ~ "Stress 4",
+      LhCSICrisis1 ~ "Crise 1",
+      LhCSICrisis2 ~ "Crise 2",
+      LhCSICrisis3 ~ "Crise 3",
+      LhCSIEmergency1 ~ "Urgence 1",
+      LhCSIEmergency2 ~ "Urgence 2",
+      LhCSIEmergency3 ~ "Urgence 3"
+    )
+  ) %>%
+  modify_caption("**Tableau. Statistiques descriptives des composantes du LhCSI**") %>%
+  bold_labels()
+
+# ✅ Étape 4 : Affichage du tableau final avec gt
+tableau_lhcsi
+
+```
+
+<br>
+
+**Analyse**: 
+
+<br>
+
+### II.4.b)	Quelle est la proportion de menage en situation de stress, de crise et d’urgence en 2022 et 2023 ?
+
+<br>
+
+```{r proportion de menage en situation de stress et urgence en 2022 et 2023, error=TRUE}
+# 📦 Charger les bibliothèques nécessaires
+library(dplyr)
+library(gt)
+
+# ✅ Étape 1 : Identifier le statut de chaque ménage
+Base_MAD <- Base_MAD %>%
+  mutate(
+    # Vérifie s’il y a au moins une stratégie d'urgence activée
+    Urgence = ifelse(rowSums(select(., LhCSIEmergency1, LhCSIEmergency2, LhCSIEmergency3), na.rm = TRUE) > 0, 1, 0),
+
+    # Vérifie s’il y a au moins une stratégie de crise (et aucune d’urgence)
+    Crise = ifelse(Urgence == 0 & rowSums(select(., LhCSICrisis1, LhCSICrisis2, LhCSICrisis3), na.rm = TRUE) > 0, 1, 0),
+
+    # Vérifie s’il y a au moins une stratégie de stress (et aucune de crise ni urgence)
+    Stress = ifelse(Urgence == 0 & Crise == 0 & rowSums(select(., LhCSIStress1, LhCSIStress2, LhCSIStress3, LhCSIStress4), na.rm = TRUE) > 0, 1, 0),
+
+    # Statut final par ménage (un seul statut selon hiérarchie)
+    Statut_LhCSI = case_when(
+      Urgence == 1 ~ "Urgence",
+      Crise == 1 ~ "Crise",
+      Stress == 1 ~ "Stress",
+      TRUE ~ "Aucun"
+    )
+  )
+
+# ✅ Étape 2 : Calculer les proportions par type de stratégie
+proportions_statuts <- Base_MAD %>%
+  group_by(Statut_LhCSI) %>%
+  summarise(Nombre = n(), .groups = "drop") %>%
+  mutate(Proportion = round(100 * Nombre / sum(Nombre), 1))
+
+# ✅ Étape 3 : Affichage sous forme de tableau joli avec gt
+proportions_statuts %>%
+  gt() %>%
+  tab_header(
+    title = "📊 Répartition des ménages selon le type de stratégie de survie (LhCSI)"
+  ) %>%
+  cols_label(
+    Statut_LhCSI = "Type de stratégie",
+    Nombre = "Nombre de ménages",
+    Proportion = "Proportion (%)"
+  ) %>%
+  fmt_number(columns = Proportion, decimals = 1)
+
+
+```
+
+<br>
+
+**Analyse**: On voit que tous les ménages utilisent la stratégie de l'urgence. 
+
+<br>
+
+## II.5)	Score de diversité alimentaire des ménages:
+
+<br>
+
+## II.5.a)	Analyse descriptive des variables qui composent le module HDDS
+
+<br>
+
+Pour l'analyse nous allons nous intérésser aux variables: HDDSStapCer, HDDSPulse, HDDSDairy, HDDSDairy, HDDSPrMeat, HDDSPrFish, HDDSPrEgg, HDDSFat, HDDSSugar, HDDSCond.
+
+```{r analyse sur la diversité alimentaire,error=TRUE,message=FALSE, warning=FALSE, echo=FALSE}
+# 📦 Chargement des bibliothèques nécessaires
+library(gtsummary)
+library(dplyr)
+
+# ✅ Étape 1 : Définir les variables à analyser (sans doublons)
+variables_hdds <- c("HDDSStapCer", "HDDSPulse", "HDDSDairy",
+                    "HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg",
+                    "HDDSFat", "HDDSSugar", "HDDSCond")
+
+# ✅ Étape 2 : Vérifier que toutes les variables existent dans la base
+variables_hdds <- variables_hdds[variables_hdds %in% names(Base_MAD)]
+
+# ✅ Étape 3 : Créer un tableau de statistiques descriptives
+tableau_hdds <- Base_MAD[, variables_hdds] %>%
+  tbl_summary(
+    type = all_continuous() ~ "continuous",  # Type des variables
+    statistic = list(
+      all_continuous() ~ "{mean} (±{sd})\nMin: {min}, Max: {max}\nNA: {n_miss}"
+    ),
+    digits = all_continuous() ~ 1,  # Arrondir à 1 décimale
+    missing = "always"  # Afficher toujours le nombre de valeurs manquantes
+  ) %>%
+  modify_caption("**📊 Tableau : Statistiques descriptives des groupes alimentaires (HDDS)**")
+
+# ✅ Étape 4 : Affichage du tableau
+tableau_hdds
+
+```
+
+**Analyse**: 
+
+
+<br>
+
+## II.5.b)	b)	Calculer le score de diversité alimentaire des ménages c’est a dire le nombre total de groupes alimentaires consommés par les membres du ménage.
+
+<br>
+
+```{r score de diversié alimentaire, error= TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+#  Charger les bibliothèques nécessaires
+library(dplyr)
+
+# ✅ Étape 1 : Définir les variables du module HDDS
+variables_hdds <- c("HDDSStapCer", "HDDSPulse", "HDDSDairy",
+                    "HDDSPrMeat", "HDDSPrFish", "HDDSPrEgg",
+                    "HDDSFat", "HDDSSugar", "HDDSCond")
+
+# ✅ Étape 2 : Vérifier que les variables existent dans la base
+variables_hdds <- variables_hdds[variables_hdds %in% names(Base_MAD)]
+
+# ✅ Étape 3 : S'assurer que les variables sont binaires (0/1)
+# Si certaines sont codées différemment (par ex. fréquence), il faut les recoder ici.
+# Ce code suppose que 0 = non consommé, 1 = consommé (sinon adapter ce bloc).
+# Base_MAD[, variables_hdds] <- lapply(Base_MAD[, variables_hdds], function(x) ifelse(x > 0, 1, 0))
+
+# ✅ Étape 4 : Calcul du score HDDS par ménage
+Base_MAD$HDDS_Score <- rowSums(Base_MAD[, variables_hdds], na.rm = TRUE)
+
+# ✅ Étape 5 (optionnel) : Affichage d’un résumé statistique du score
+summary(Base_MAD$HDDS_Score)
+
+```
+
+<br>
+
+## II.6°)	Score de résilience auto-évaluée (SERS)
+
+<br>
+
+Le SERS est calculé à partir de 10 sous-énoncés utilisant une échelle de Likert en cinq points (allant de « pas du tout d'accord “ à ” tout à fait d'accord ») pour saisir la perception qu'ont les ménages de leurs capacités de résilience existantes ou de leur capital de moyens de subsistance. Le score de capacité de résilience regroupe les réponses non pondérées aux 10 sous- énoncés et est normalisé pour fournir un score allant de 0 à 100.
+Le score de résilience est normalisé par la méthode minmax, transformant les résultats en un score allant de 0 (pas du tout résilient) à 100 (totalement résilient).
+
+
+<br>
+
+###  II.6.a°)	Analyse descriptive des variables qui composent le SERS
+
+<br>
+
+Pour faire l'analyse descriptive sur le SERS on s'intérésse aux variables suivantes: SERSRevenue, SERSMoyen, SERSDifficultes, SERSSurvivre, SERSFamAmis, SERSPoliticiens, SERSLecons, SERSPreparerFuture, SERSAvertissementEven. 
+
+```{r analyse descriptive sur SERS,error=TRUE,echo=FALSE, message=FALSE, warning=FALSE}
+#  Charger les bibliothèques nécessaires
+library(gtsummary)
+library(dplyr)
+
+# ✅ Étape 1 : Définir les variables du SERS
+variables_sers <- c("SERSRevenue", "SERSMoyen", "SERSDifficultes", 
+                    "SERSSurvivre", "SERSFamAmis", "SERSPoliticiens", 
+                    "SERSLecons", "SERSPreparerFuture", "SERSAvertissementEven")
+
+# ✅ Étape 2 : Vérifier que toutes les variables existent dans la base
+variables_sers <- variables_sers[variables_sers %in% names(Base_MAD)]
+
+# ✅ Étape 3 : Créer un tableau de statistiques descriptives pour le SERS
+tableau_sers <- Base_MAD[, variables_sers] %>%
+  tbl_summary(
+    type = all_continuous() ~ "continuous",  # Type des variables
+    statistic = list(
+      all_continuous() ~ "{mean} (±{sd})\nMin: {min}, Max: {max}\nNA: {n_miss}"
+    ),
+    digits = all_continuous() ~ 1,  # Arrondir à 1 décimale
+    missing = "always"  # Afficher toujours le nombre de valeurs manquantes
+  ) %>%
+  modify_caption("**📊 Tableau : Statistiques descriptives des variables composant le SERS**")
+
+# ✅ Étape 4 : Affichage du tableau
+tableau_sers
+
+```
+
+<br>
+
+### **Analyse**: 
+
+<br>
+
+###  II.6.b°)	Calculer le SERS.
+
+<br>
+
+```{r calcul SERS, echo=FALSE, warning=FALSE, message=FALSE}
+# 📦 Charger les bibliothèques nécessaires
+library(dplyr)
+
+# ✅ Étape 1 : Définir les variables du SERS
+variables_sers <- c("SERSRevenue", "SERSMoyen", "SERSDifficultes", 
+                    "SERSSurvivre", "SERSFamAmis", "SERSPoliticiens", 
+                    "SERSLecons", "SERSPreparerFuture", "SERSAvertissementEven")
+
+# ✅ Étape 2 : Vérifier que toutes les variables existent dans la base
+variables_sers <- variables_sers[variables_sers %in% names(Base_MAD)]
+
+# ✅ Étape 3 : Calculer le score brut du SERS pour chaque ménage
+# Somme des réponses des 10 sous-énoncés
+Base_MAD$SERS_Score_Brut <- rowSums(Base_MAD[, variables_sers], na.rm = TRUE)
+
+# ✅ Étape 4 : Normaliser le score du SERS avec la méthode Min-Max
+# Calcul des min et max du score brut
+x_min <- min(Base_MAD$SERS_Score_Brut, na.rm = TRUE)
+x_max <- max(Base_MAD$SERS_Score_Brut, na.rm = TRUE)
+
+# Normalisation du score (0 à 100)
+Base_MAD$SERS_Score_Normalise <- (Base_MAD$SERS_Score_Brut - x_min) * 100 / (x_max - x_min)
+
+# ✅ Étape 5 : Catégoriser le score SERS en terciles (faible, moyen, élevé)
+Base_MAD$SERS_Categorisation <- cut(Base_MAD$SERS_Score_Normalise,
+                                     breaks = c(-Inf, 33, 66, Inf),
+                                     labels = c("Faible", "Moyen", "Elevé"),
+                                     right = TRUE)
+
+# ✅ Étape 6 : Afficher le résumé des résultats
+summary(Base_MAD$SERS_Score_Normalise)  # Résumé du score normalisé
+table(Base_MAD$SERS_Categorisation)     # Comptage des catégories
+
+```
+
+<br>
+
+### **Analyse**: 
+
+<br>
+
+## II.7°)	Régime alimentaire minimum acceptable (MAD)
+
+<br>
+
+Ici on s'intérésse aux variables: PCIYCInfFormNb ,PCIYCDairyMiNb , PCIYCDairyYoNb , PCIYCStapPoNb , MAD_module , PCMADStapCer , PCMADVegOrg , PCMADStapRoo , PCMADVegGre , PCMADFruitOrg , PCMADVegFruitOth , PCMADPrMeatO, PCMADPrMeatF, PCMADPrEgg, PCMADPrFish , PCMADPulse, PCMADDairy, PCMADFatRpalm, PCMADSnfChild, PCMADSnfPowd, PCMADSnfLns, PCIYCMeals
+
+
+<br>
+
+### II.7.a°)	Créer une variable qui renseigne le nombre de groupes d’aliments consommé par un enfant.
+
+<br>
+
+```{r, error=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+# Liste des variables qui correspondent aux groupes alimentaires consommés par l'enfant
+variables_groupes_aliments <- c(
+  "HDDSStapCer", "HDDSStapRoot", "HDDSPulse", 
+  "HDDSVegOrg", "HDDSVegGre", "HDDSVegOth", 
+  "HDDSFruitOrg", "HDDSFruitOth", "HDDSPrMeatF", 
+  "HDDSPrMeatO", "HDDSPrFish", "HDDSPrEgg", 
+  "HDDSDairy", "HDDSSugar", "HDDSFat"
+)
+
+# Créer la variable "NbGroupesAlimentaires" qui compte le nombre de groupes d'aliments consommés
+Base_MAD$NbGroupesAlimentaires <- apply(Base_MAD[, variables_groupes_aliments], 1, function(x) {
+  # Compter combien de groupes ont une valeur différente de 0 (c'est-à-dire consommés)
+  sum(x > 0, na.rm = TRUE)
+})
+
+# Afficher les 6 premières lignes pour vérifier la nouvelle variable
+head(Base_MAD$NbGroupesAlimentaires)
+
+```
+
+<br>
+
+### II.7.b°)	Créer une variable DDM qui indique si l'enfant a consommé au moins cinq groupes d'aliments
+
+<br>
+
+```{r création de la variable DDM,error=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+# Créer la variable "DDM" qui indique si l'enfant a consommé au moins cinq groupes d'aliments
+Base_MAD$DDM <- ifelse(Base_MAD$NbGroupesAlimentaires >= 5, 1, 0)
+
+# Afficher les 6 premières lignes pour vérifier la nouvelle variable
+head(Base_MAD$DDM)
+
+```
+
+<br>
+
+La variable créée prends la valeur 1 si la condition est vérifiée et 0 sinon. 
+
+<br>
+
+II.7.c°)	Quelle est la proportion d'enfants âgés de 6 à 23 mois bénéficiant d'un régime alimentaire minimum acceptable
+
+<br>
+
+```{r analyse sur les enfants de 6 à 23 mois, error=TRUE,message=FALSE, warning=FALSE, message=FALSE}
+## Filtrer les ménages avec au moins un enfant de 6 à 23 mois
+base_enfants_623m <- Base_MAD[Base_MAD$HHSize23M > 0, ]
+
+# Calculer la proportion de ménages avec DDM
+proportion_DDM <- mean(base_enfants_623m$DDM == 1, na.rm = TRUE) * 100
+
+# Afficher la proportion
+cat("🔹 Proportion de ménages avec au moins un enfant de 6-23 mois ayant un DDM :", round(proportion_DDM, 1), "%\n")
+
+```
+
+<br>
+
+### II.7.d°)	Faites les statistiques descriptives de cette variable suivant le sexe du chef de menage
+
+<br>
+
+```{r stat_desc sexe VS DDM,error=TRUE, message=FALSE, echo=FALSE, warning=FALSE}
+# 📌 Charger les packages nécessaires
+library(gtsummary)
+
+# 📌 Créer une sous-base contenant uniquement les variables utiles
+base_ddm <- Base_MAD[, c("DDM", "HHHSex")]
+
+# 📌 Transformer la variable HHHSex en facteur pour qu'elle soit bien traitée comme catégorielle
+base_ddm$HHHSex <- as.factor(as.character(base_ddm$HHHSex))
+
+# 📌 Créer un tableau récapitulatif du DDM selon le sexe du chef de ménage
+tableau_ddm <- tbl_summary(
+  data = base_ddm,
+  by = HHHSex,                            # Comparaison par sexe du chef de ménage
+  statistic = DDM ~ "{n} ({p}%)",         # Affiche nombre et pourcentage
+  label = list(DDM ~ "DDM (min. 5 groupes)"),
+  missing = "no"                          # Ne pas inclure les NA
+)
+
+# 📌 Ajouter un titre au tableau
+tableau_ddm <- modify_caption(tableau_ddm, "**Tableau : DDM selon le sexe du chef de ménage**")
+
+# 📌 Afficher le tableau
+tableau_ddm
+
+```
+
+
+
+<br>
+
+**Analyse**: On constate que pour les ménages dont le chef est un homme **61%** des enfants entre 6 et 23 mois ont ey un DDM = 1 et que pour les ménages dont le chef est une femme ce pourcentage est de **56%**. 
+
+<br>
+
+```{r, error=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+# Liste des variables attendues
+variables_hdds <- c(
+  "HDDSStapCer", "HDDSPulse", "HDDSDairy", "HDDSPrMeat", "HDDSPrFish",
+  "HDDSPrEgg", "HDDSFat", "HDDSSugar", "HDDSCond"
+)
+
+# Vérifier si elles sont toutes présentes dans Base_MAD
+variables_presentes <- variables_hdds %in% names(Base_MAD)
+
+# Afficher les résultats
+data.frame(
+  Variable = variables_hdds,
+  Presente_dans_Base_MAD = variables_presentes
+)
+
+```
+

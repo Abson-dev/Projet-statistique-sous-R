@@ -1,0 +1,54 @@
+---
+title: "Rapport d’analyse statistique sur l'insécurité alimentaire au Tchad"
+author: "Papa Amadou NIANG"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output: 
+  officedown::rdocx_document: default
+---
+# 1 Introduction
+
+## 1.1 Contexte et objectifs
+
+Ce rapport présente les résultats d’une **analyse statistique** menée à partir de deux enquêtes ménages menées au Tchad.  
+L’objectif principal est de :  
+1. Vérifier la **consistance** et la **qualité** des données (Partie I).  
+2. **Calculer** une série d’indicateurs clés de la sécurité alimentaire et de la résilience (Partie II).  
+3. Réaliser une **analyse comparative** de ces indicateurs selon le genre du chef de ménage (Partie III).  
+4. Proposer un **outil interactif** (Shiny) pour visualiser ces indicateurs de façon dynamique (Partie IV).
+
+## 1.2 Jeux de données et variables clés
+
+Nous utilisons deux bases :
+
+- **Base_Principale** : données ménage (N ≈ 8 950, p ≈ 100 variables)  
+  - Identifiant : `ID`  
+  - Date de l’enquête : `SvyDate`, `YEAR`, `SvyMonth`  
+  - Localisation : `ADMIN0Name`, `ADMIN1Name`, `ADMIN2Name` (+ codes OCHA)  
+  - Caractéristiques du ménage : `HHSize`, `HHHSex`, `HHHAge`, `HHHEdu`, etc.  
+  - Variables alimentaires : SCA (`FCS*`), rCSI (`rCSI*`), HDDS (`HDDS*`), SERS (`SERS*`), LhCSI (`LhCSI*`), etc.
+
+- **Base_MAD** : alimentation des enfants 6–23 mois (N ≈ 2 200, p ≈ 26 variables)  
+  - Sexe et âge de l’enfant : `MAD_sex`, `MAD_resp_age`  
+  - Consommation par groupe : `PCMADStapCer`, `PCMADPrMeatF`, etc.  
+  - Identifiant partagé pour la jointure : `ID`
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+# Chargement des packages
+library(tidyverse)
+library(haven)
+```
+
+```{r load_data, include=FALSE}
+# Lecture des bases finales au format Stata
+Base_Principale <- read_dta("data/ehcvm/Base_Principale.dta")
+Base_MAD        <- read_dta("data/ehcvm/Base_MAD.dta")
+```
+
+```{r Apercu des bases, include=FALSE}
+# Aperçu rapide des deux tables
+glimpse(Base_Principale)
+glimpse(Base_MAD)
+```
+
+

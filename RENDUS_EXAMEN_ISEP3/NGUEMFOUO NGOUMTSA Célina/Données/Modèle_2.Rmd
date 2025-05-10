@@ -1,0 +1,15 @@
+---
+title: ""
+author: ""
+date: ""
+output:
+  word_document:
+    reference_docx: ../Données/Modèle.docx
+---
+
+```{r}
+# Exemple de chunk
+
+print(1+1)
+```
+

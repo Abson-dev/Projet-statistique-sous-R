@@ -1,0 +1,659 @@
+---
+title: ""
+author: ""
+date: ""
+output: 
+  officedown::rdocx_document:
+    #toc: true
+    #toc_depth: 3
+    fig_caption: true
+    reference_docx: ../output/Template_ad.docx
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo=FALSE,
+  warning = FALSE, 
+  message = FALSE,
+  comment = FALSE,
+  dpi = 300
+)
+```
+
+```{r packages, include=FALSE}
+# Liste des packages nécessaires
+packages <- c(
+  "tidyverse",   # Manipulation & visualisation de données : inclut : ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
+  "janitor",     # Nettoyage des données
+  "gtsummary",   # Tableaux statistiques formatés pour Word/HTML
+  "sf",          # Données spatiales (cartographie, shapefiles)
+  "haven",      # Lecture de fichiers stata(.dta)
+  "flextable",   # Mise en forme avancée de tableaux Word
+  "officer",     # Interaction avec Word (officedown)
+  "officedown",   # Intégration R Markdown → Word enrichi
+  "sf"    # 
+)
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+
+```{r page_garde_1,echo=F, fig.align='center'}
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  bold(i = 1, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding = 10, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r logo3, echo=FALSE, out.width='20%',out.height='40px', fig.align='center'}
+knitr::include_graphics("../figures/LOGO3.jpg")
+```
+
+```{r page_garde_2, echo=F,fig.align='center'}
+flextable(data.frame(Contenu = c("**********",
+                                "Un Peuple - Un But - Une Foi",
+                                "**********",
+                                "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  bold(i = c(1,3,4), j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding = 5, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r logo2, echo=FALSE, out.width='20%', out.height='40px', fig.align='center'}
+knitr::include_graphics("../figures/LOGO2.jpg")
+```
+
+```{r page_garde_3, echo=F,fig.align='center'}
+flextable(data.frame(Contenu = c("**********",
+                                "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding = 5, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r logo1, echo=FALSE, out.width='20%', out.height='40px', fig.align='center'}
+knitr::include_graphics("../figures/LOGO1.jpg")
+```
+
+```{r espace_vide, echo=F, results='asis'}
+cat("<br><br>")
+```
+
+```{r evaluation, , echo=F, fig.align='center'}
+flextable(data.frame(Contenu = "                    EVALUATION")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 16, part = "all") %>% 
+  bold(i = 1, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding = 10, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r projet_titre, echo=F, fig.align='center'}
+flextable(data.frame(Contenu = "                 Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 16, part = "all") %>% 
+  bold(i = 1, j = 1) %>%
+  italic(i = 1, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding = 5, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+
+```{r page_garde_5, echo=F}
+auteurs_data <- data.frame(
+  col1 = c("Rédigé par", "Awa Diaw", "Élève Ingénieure statisticienne économiste en 3e année (ISE1 cycle long)"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Research analyst à IFPRI"),
+  stringsAsFactors = FALSE
+)
+
+ft <- flextable(auteurs_data) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>%
+  fontsize(size = 12, part = "all") %>%
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  align(j = 1, align = "left", part = "all") %>% 
+  align(j = 2, align = "right", part = "all") %>%
+  width(j = 1:2, width = 3) %>%
+  padding(padding = 5, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+
+ft
+```
+
+```{r annee_academique, echo=F, fig.align='center'}
+flextable(data.frame(Contenu = "Année académique 2024-2025")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 12, part = "all") %>% 
+  bold(i = 1, j = 1) %>% 
+  align(align = "center", part = "all") %>% 
+  padding(padding.top = 30, part = "all") %>%
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+```{r creating certain style, include=FALSE}
+coffee_par <- fp_par(
+  text.align = "justify",
+  padding.bottom = 10, 
+  padding.top = 10,
+  border.bottom = fp_border(color = "#654321", width = 1)
+)
+
+title_text <- fp_text(
+  color = "#654321",
+  font.size = 16,
+  font.family = "Calibri",
+  bold = TRUE
+)
+
+highlight_text <- fp_text(
+  color = "#000000",
+  font.size = 12,
+  font.family = "Calibri",
+  bold = TRUE,
+  shading.color = "#E6CCB2"
+)
+```
+
+\newpage
+
+# Sommaire
+
+
+\newpage
+
+# Introduction
+Ce rapport présente une analyse statistique complète réalisée dans le cadre de l'examen de projet statistique sur R pour ISE1 cycle long[^1]. L'objectif est d'analyser un ensemble de données relatives à la sécurité alimentaire et aux stratégies d'adaptation des ménages. Ce rapport suit les instructions fournies dans le sujet d'examen et comprend une analyse de consistance des données, le calcul d'indicateurs de sécurité alimentaire, des analyses socio-démographiques et des visualisations spatiales.
+
+[^1]: 2024-2025
+
+\newpage
+
+# I. Importation et Analyse de consistance des bases
+## 1. Importation des jeux de données
+
+```{r import-data, results='hide'}
+#importations
+mad_dataset <- read_dta("../data/Base_MAD.dta")
+principal_dataset <- read_dta("../data/Base_Principale.dta")
+View(mad_dataset)
+View(principal_dataset)
+```
+
+## II. Analyse de consistance
+
+L'analyse de consistance est une étape cruciale pour s'assurer de la qualité des données avant de procéder à des analyses plus poussées.Nous allons nettoyer les bases avec janitor[@janitor2025].avant de procéder à leur fusion afin de garantir une jointure correcte. Fusionner sans nettoyage peut entraîner des erreurs, des doublons ou la perte d’informations.
+### 1. Nettoyage
+```{r data-cleaning dupli}
+# Nettoyage des noms de variables
+mad_dataset <- mad_dataset %>% clean_names()
+principal_dataset <- principal_dataset %>% clean_names()
+
+# Vérification des doublons
+doublon_maddataset <- mad_dataset %>%
+  get_dupes() %>%
+  nrow()
+
+doublon_pdataset <- principal_dataset %>%
+  get_dupes() %>%
+  nrow()
+
+# Message pour signaler les doublons dans mad_dataset
+if(doublon_maddataset > 0) {
+  message("Il y a ", doublon_maddataset, " doublons dans les données de maddataset. Les doublons seront supprimés.")
+  # Supprimer les doublons dans maddataset
+  mad_dataset_cleaned <- mad_dataset %>%
+    distinct() # Garder uniquement les lignes uniques
+} else {
+  message("Aucun doublon dans les données de maddataset.")
+}
+
+# Message pour signaler les doublons dans pdataset
+if(doublon_pdataset > 0) {
+  message("Il y a ", doublon_pdataset, " doublons dans les données de pdataset. Les doublons seront supprimés.")
+  # Supprimer les doublons dans pdataset
+  principal_dataset_cleaned <- principal_dataset %>%
+    distinct() # Garder uniquement les lignes uniques
+} else {
+  message("Aucun doublon dans les données de pdataset.")
+}
+```
+### 2. Valeurs manquantes
+```{r data-cleaning missings}
+# Comptage des valeurs manquantes dans chaque dataset
+#mad
+na_count_maddataset <- mad_dataset_cleaned %>%
+  summarise(across(everything(), ~sum(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "missing_count") %>%
+  filter(missing_count > 0) %>%
+  arrange(desc(missing_count))
+
+#principal
+na_count_pdataset <- principal_dataset %>%
+  summarise(across(everything(), ~sum(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "missing_count") %>%
+  filter(missing_count > 0) %>%
+  arrange(desc(missing_count))
+```
+- Visualisation des missings
+
+```{r visualisation-miss}
+
+# Visualisation pour le mad_dataset
+na_count_maddataset %>%
+  top_n(10, missing_count) %>%
+  ggplot(aes(x = reorder(variable, missing_count), y = missing_count)) +
+  geom_col(fill = "brown") +
+  coord_flip() +
+  labs(title = "Top 10 variables avec le plus de valeurs manquantes (mad_dataset)",
+       x = "Variables", y = "Nombre de NA") +
+  theme_minimal()
+
+# Visualisation pour le principal_dataset
+na_count_pdataset %>%
+  top_n(10, missing_count) %>%
+  ggplot(aes(x = reorder(variable, missing_count), y = missing_count)) +
+  geom_col(fill = "brown") +
+  coord_flip() +
+  labs(title = "Top 10 variables avec le plus de valeurs manquantes (principal_dataset)",
+       x = "Variables", y = "Nombre de NA") +
+  theme_minimal()
+```
+
+Dans cette analyse de consistance, nous avons standardisé les noms des variables en utilisant `clean_names()` du package `janitor`. Nous avons identifié `r doublon_maddataset` doublons dans les données de maddataset et `r doublon_pdataset` doublons dans les données de pdataset. 
+
+Concernant les valeurs manquantes, les N/A ne signifient pas toujours des données absentes. Par exemple, dans la variable `everbreast`, qui ne concerne que les femmes, un "non" pourrait expliquer la présence de N/A.
+
+## 3. Cohérence des variables
+
+Nous avons vérifié la cohérence logique entre les variables catégorielles EverBreastF et PCIYCBreastF. En effet, un enfant qui n’a jamais été allaité (`EverBreastF = 0`) ne peut pas avoir été nourri au lait maternel la veille (`PCIYCBreastF ≠ 0`).
+
+Nous filtrons donc les cas où cette règle n’est pas respectée :
+
+
+```{r consistency-check}
+coherence_check <- mad_dataset_cleaned %>%
+  filter(ever_breast_f == 0) %>%
+  filter(pciyc_breast_f != 0)
+
+message("Il y a ", nrow(coherence_check), " incohérences : des enfants déclarés comme n'ayant jamais été allaités (EverBreastF = 0) mais ayant été nourris au lait maternel la veille (PCIYCBreastF ≠ 0). Nous allons les corriger.")
+
+
+# Correction automatique : si EverBreastF == 0 alors PCIYCBreastF doit être 0
+mad_dataset_coherent <- mad_dataset_cleaned %>%
+  mutate(pciyc_breast_f = if_else(ever_breast_f == 0, 0, pciyc_breast_f))
+
+# Vérification après correction
+coherence_check2 <- mad_dataset_coherent %>%
+  filter(ever_breast_f == 0, pciyc_breast_f != 0)
+```
+C'est fait. Maintenant, il y a `r nrow(coherence_check2)` incohérences.
+
+## 4. Fusion des deux bases
+
+Nous avons utilisé right_join() car principal_dataset constitue la base principale d’analyse, contenant  `r nrow(principal_dataset)` observations. Nous souhaitons y ajouter les informations complémentaires de mad_dataset2 `r nrow(mad_dataset_coherent)`, sans perdre aucune unité statistique présente dans la base principale.
+
+```{r combine-data}
+# Combinaison des données avec la variable 'id'
+combined_dataset <- right_join(mad_dataset_coherent, principal_dataset, by = "id")
+
+# Vérification : nombre d'identifiants uniques après la fusion
+combined_dataset %>% 
+  summarise(nb_total = n(), nb_ids_uniques = n_distinct(id))
+```
+Les deux jeux de données ont été combinés avec succès. 
+
+# II. Analyse des données et calcul d'indicateurs
+
+Commençons par explorer notre base de données
+```{r exploration de combined_dataset,results='hide'}
+View(combined_dataset)
+colnames(combined_dataset)
+```
+
+## 1. Analyse socio-démographique des ménages
+
+Le tableau ci-dessus récapitule les variables sociodémographiques.Les variables sur la situation matrimoniale et l'activité du chef de ménage n'ont que des valeurs manquantes.Elles n'ont pas été prises en compte.
+
+```{r tab_variables, tab.cap="Analyse socio-démographique des ménages"}
+# Création du tableau avec les variables et leurs descriptions
+tableau_description <- data.frame(
+  Variable = c("hh_size", "hhh_sex", "hhh_age", "hhh_edu", "hh_source_income","admin1name"),
+  Description = c("Taille du ménage",
+                  "Sexe du chef de ménage",
+                  "Âge du chef de ménage",
+                  "Niveau d'éducation du chef de ménage",
+                  "Source de revenu du ménage",
+                  "Région")
+)
+
+# Convertir en flextable pour une présentation jolie
+tableauflex_analyse_sociodemo <- tableau_description %>%
+  flextable::qflextable() %>%
+  flextable::set_header_labels(values = list(Variable = "Variable", Description = "Description")) %>%
+  flextable::theme_vanilla()
+
+# Afficher le tableau
+tableauflex_analyse_sociodemo
+```
+
+
+Le tableau de l'anayse a été fait avec gtsummary [@gtsummary2025].
+
+
+```{r analyse socio-demo}
+# Appliquer le thème compact
+set_gtsummary_theme(theme_gtsummary_compact())
+
+# Convertir les colonnes "labelled" en facteurs
+combined_dataset <- combined_dataset %>%
+  mutate(
+    hhh_sex = haven::as_factor(hhh_sex),
+    hhh_edu = haven::as_factor(hhh_edu),
+    hh_source_income = haven::as_factor(hh_source_income)
+  )
+
+# Création du tableau complet avec toutes les variables sociales et démographiques
+tableau_analyse_sociodemo <- combined_dataset %>%
+  tbl_summary(
+    include = c(hh_size, hhh_sex, hhh_age, hhh_edu, hh_source_income),
+    by = admin0name,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    label = list(
+      hh_size ~ "Taille du ménage",
+      hhh_sex ~ "Sexe du chef de ménage",
+      hhh_age ~ "Âge du chef de ménage",
+      hhh_edu ~ "Niveau d'éducation du chef de ménage",
+      hh_source_income ~ "Source de revenu du ménage"
+    ),
+    missing = "no"
+  ) %>%
+  add_n() %>%
+  modify_header(label = "**Variable socio-démographiques**") %>%
+  bold_labels() %>%  # Mettre les étiquettes en gras
+  italicize_levels() %>% # Mettre les niveaux en italique
+  modify_caption("**Tableau 1. Caractéristiques socio démogarphiques des ménages tchadiens**")#%>%
+  #modify_spanning_header(c("stat_1", "stat_2") ~ "Statistiques calculées")
+
+# Conversion en objet flextable
+as_flex_table(tableau_analyse_sociodemo)
+```
+
+L'analyse socio-démographique révèle des différences significatives entre les années maddataset et pdataset concernant la distribution par sexe des chefs de ménage, leur âge moyen et la taille des ménages. On observe notamment une légère augmentation de la proportion de femmes chefs de ménage entre maddataset et pdataset.
+
+
+##2. Calcul du Score de Consommation Alimentaire (FCS)
+Le Score de Consommation Alimentaire (FCS) est un indicateur proxy de la sécurité alimentaire des ménages développé par le Programme Alimentaire Mondial (PAM).
+
+### a. Les variables nécessaires pour le calcul du FCS
+
+Ce sont les variables commençant par FCS
+
+```{r FCS-variables}
+# Sélectionner les colonnes contenant "fcs_" avec une expression régulière
+fcs_vars <- combined_dataset %>%
+  dplyr::select(matches("^fcs_"))
+# colnames(fcs_vars)
+
+```
+Les variables concernées sont : `r colnames(fcs_vars)`.
+
+### b.Calculer le score de consommation alimentaire  
+
+Les score ont été trouvé au [@wfp_fcs]
+
+```{r calcul-score}
+#across() est une fonction de dplyr qui permet d’appliquer une ou plusieurs fonctions à plusieurs colonnes en même temps
+# {r calcul-score}
+combined_dataset <- combined_dataset %>%
+  mutate(
+    # Calcul du score pondéré par groupe alimentaire (avec suppression des NA)
+    
+    # Céréales et tubercules : poids = 2
+    fcs_stap_weight = rowSums(across(c(fcs_stap), ~ . * 2), na.rm = TRUE),
+    
+    # Légumineuses : poids = 3
+    fcs_pulse_weight = rowSums(across(c(fcs_pulse), ~ . * 3), na.rm = TRUE),
+    
+    # Produits laitiers : poids = 4
+    fcs_dairy_weight = rowSums(across(c(fcs_dairy), ~ . * 4), na.rm = TRUE),
+    
+    # Viandes, poissons, œufs : poids = 4
+    fcs_meat_weight = rowSums(across(c(fcs_pr, fcs_pr_meat_f, fcs_pr_meat_o, fcs_pr_fish, fcs_pr_egg), ~ .), na.rm = TRUE) * 4,
+    
+    # Légumes : poids = 1
+    fcs_veg_weight = rowSums(across(c(fcs_veg, fcs_veg_org, fcs_veg_gre), ~ .), na.rm = TRUE) * 1,
+    
+    # Fruits : poids = 1
+    fcs_fruit_weight = rowSums(across(c(fcs_fruit, fcs_fruit_org), ~ .), na.rm = TRUE) * 1,
+    
+    # Matières grasses : poids = 0.5
+    fcs_fat_weight = rowSums(across(c(fcs_fat), ~ .), na.rm = TRUE) * 0.5,
+    
+    # Sucres : poids = 0.5
+    fcs_sugar_weight = rowSums(across(c(fcs_sugar), ~ .), na.rm = TRUE) * 0.5,
+    
+    # Condiments : poids = 0
+    fcs_condiment_weight = rowSums(across(c(fcs_cond), ~ .), na.rm = TRUE) * 0,
+    
+    # Score total FCS : somme des scores pondérés
+    fcs_score = fcs_stap_weight + fcs_pulse_weight + fcs_dairy_weight + fcs_meat_weight +
+                fcs_veg_weight + fcs_fruit_weight + fcs_fat_weight + fcs_sugar_weight +
+                fcs_condiment_weight
+  )
+
+#head(combined_dataset$fcs_score)
+
+```
+### c.	Faites un tableau illustrant les poids attribués
+
+| Groupe alimentaire              | Exemples                            | Poids FCS |
+|----------------------------------|-------------------------------------|-----------|
+| Céréales, tubercules            | Riz, pain, manioc, igname           | 2         |
+| Légumineuses                     | Haricots, lentilles, pois          | 3         |
+| Produits laitiers                | Lait, yaourt, fromage              | 4         |
+| Viandes/Poissons/Œufs            | Viande, poisson, œufs              | 4         |
+| Légumes                          | Feuilles, gombo, carottes          | 1         |
+| Fruits                           | Mangue, banane, orange             | 1         |
+| Graisses/Huiles                  | Huile, beurre, margarine           | 0.5       |
+| Sucre                            | Sucre, miel, confiture             | 0.5       |
+| Condiments                       | Sel, épices, thé, café             | 0         |
+
+
+### d. Catégorisation du SCA selon les seuil 21/35 et 28/42
+
+```{r catégorisation-sca}
+# Classification des ménages selon les seuils standards (21/35 et 28/42)
+combined_dataset <- combined_dataset %>% 
+  mutate(
+    # Catégorisation avec le seuil 21/35
+    fcs_cat_21_35 = case_when(
+      fcs_score <= 21 ~ "Pauvre",
+      fcs_score <= 35 ~ "Limite",
+      TRUE ~ "Acceptable"
+    ),
+    fcs_cat_21_35 = factor(fcs_cat_21_35, levels = c("Pauvre", "Limite", "Acceptable")),
+    
+    # Catégorisation avec le seuil 28/42
+    fcs_cat_28_42 = case_when(
+      fcs_score <= 28 ~ "Pauvre",
+      fcs_score <= 42 ~ "Limite",
+      TRUE ~ "Acceptable"
+    ),
+    fcs_cat_28_42 = factor(fcs_cat_28_42, levels = c("Pauvre", "Limite", "Acceptable"))
+  )
+```
+
+### e.	Répresentation spatiale (région et département) du SCA et de ses différentes catégorisations
+
+```{r analyse-sca-representation}
+
+# 2. Importer les données géographiques des régions du Tchad (niveau 2)
+# Charger les données shapefile
+tchad <- st_read("../data/tcd_admbnda_adm2_ocha.shp")  # Assurez-vous que le chemin est correct
+
+# Vérification des données géographiques
+view(tchad)
+
+# 4. Joindre les données FCS avec les données géographiques
+# Ajustez les noms des colonnes selon vos données
+combined_sf <- tchad %>%
+  left_join(combined_dataset, by = c("admin2Name" = "admin2name"))
+```
+
+## 4. L'indice réduit des stratégies de survie (rCSI)
+L'indice réduit des stratégies de survie (rCSI) est un indicateur clé pour évaluer le niveau de stress d'un ménage face à une pénurie alimentaire. Il mesure les comportements d'adaptation que les ménages adoptent lorsqu'ils n'ont pas accès à suffisamment de nourriture ou lorsqu'ils anticipent une diminution de leur sécurité alimentaire.
+
+### a. Analyse descriptive des variables composant le rCSI
+Commençons par examiner les variables qui composent l'indice rCSI dans notre jeu de données.
+```{r rcsi-var}
+# Sélectionner les colonnes contenant "c_rsi_" avec une expression régulière
+r_csi__vars <- combined_sf %>%
+  dplyr::select(matches("^r_csi_"))
+colnames(r_csi__vars)
+```
+
+
+```{r score-rcsi}
+# Calcul du score rCSI
+combined_sf <- combined_sf %>%
+  mutate(
+    # Calcul des scores pondérés pour chaque stratégie en utilisant rowSums et across
+    rcsi_score = rowSums(
+      across(
+        c(r_csi_less_qlty, r_csi_borrow, r_csi_meal_size, r_csi_meal_adult, r_csi_meal_nb), 
+        ~ ifelse(!is.na(.), . * c(1, 2, 1, 3, 1), 0)  # Pondération et gestion des NA
+      ), na.rm = TRUE  # Assurer que les NA sont ignorés
+  )
+)
+
+```
+| Variable                | Poids | Description                                                   |
+|-------------------------|-------|---------------------------------------------------------------|
+| r_csi_less_qlty         | 4     | Recourir à des aliments moins préférés/moins chers            |
+| r_csi_borrow            | 5     | Emprunter de la nourriture                                    |
+| r_csi_meal_size         | 3     | Réduire la taille des repas                                   |
+| r_csi_meal_adult        | 6     | Réduire la consommation des adultes au profit des enfants    |
+| r_csi_meal_nb           | 3     | Réduire le nombre de repas par jour                           |
+
+
+Le tableau ci-dessus présente les poids standards attribués à chaque stratégie d'adaptation pour le calcul de l'indice rCSI. La somme totale des poids est de 8, ce qui signifie que le score maximal théorique serait de 56 (si toutes les stratégies étaient utilisées tous les jours de la semaine).
+
+d) Représentation spatiale du rCSI par région et département
+Analysons maintenant la distribution spatiale de l'indice rCSI au niveau des régions et départements du Tchad.
+
+```{r representation-rcsi}
+# Calculer la moyenne du score rCSI par région
+rcsi_region <- combined_sf %>%
+  group_by(admin1Name) %>%
+  summarise(mean_rcsi_reg = mean(rcsi_score, na.rm = TRUE))
+
+# Calculer la moyenne du score rCSI par commune (département)
+rcsi_dep <- combined_sf %>%
+  group_by(admin2Name) %>%
+  summarise(mean_rcsi_dep = mean(rcsi_score, na.rm = TRUE))
+# Représenter la moyenne du score rCSI par région
+ggplot() +
+  geom_sf(data = rcsi_region, aes(fill = mean_rcsi_reg)) +
+  scale_fill_viridis_c() + # Utilisation d'une palette de couleurs continue
+  labs(title = "Distribution spatiale du rCSI par région",
+       fill = "Moyenne du rCSI par région") +
+  theme_minimal()
+
+# Représenter la moyenne du score rCSI par département
+ggplot() +
+  geom_sf(data = rcsi_dep, aes(fill = mean_rcsi_dep)) +
+  scale_fill_viridis_c() + # Utilisation d'une palette de couleurs continue
+  labs(title = "Distribution spatiale du rCSI par département",
+       fill = "Moyenne du rCSI par département") +
+  theme_minimal()
+
+```
+
+## 4.	Stratégies d'adaptation aux moyens d'existence (LhCSI)
+
+\newpage
+
+# Conclusion
+
+\newpage
+
+# Annexe : Formules de calculs
+
+#### Formule de calcul du **FCS** :
+
+\[
+FCS = (fcs\_stap \times 2) + (fcs\_pulse \times 3) + (fcs\_dairy \times 4) + (fcs\_pr \times 4) + (fcs\_veg \times 1) + (fcs\_fruit \times 1) + (fcs\_fat \times 0.5) + (fcs\_sugar \times 0.5) + (fcs\_cond \times 0.5)
+\]
+
+Où chaque groupe alimentaire est pondéré par la fréquence de consommation :
+
+- `fcs_stap` : Aliments de base (pondéré par 2)
+- `fcs_pulse` : Légumineuses (pondéré par 3)
+- `fcs_dairy` : Produits laitiers (pondéré par 4)
+- `fcs_pr` : Produits d'origine animale (pondéré par 4)
+- `fcs_veg` : Légumes (pondéré par 1)
+- `fcs_fruit` : Fruits (pondéré par 1)
+- `fcs_fat` : Graisses (pondéré par 0.5)
+- `fcs_sugar` : Sucre (pondéré par 0.5)
+- `fcs_cond` : Condiments (pondéré par 0.5)
+
+#### Formule de calcul du **RCSI** :
+\[
+rCSI = (r\_csi\_less\_qlty \times 1) + (r\_csi\_borrow \times 2) + (r\_csi\_meal\_size \times 1) + (r\_csi\_meal\_adult \times 3) + (r\_csi\_meal\_nb \times 1)
+\]
+
+Où :
+- \( r\_csi\_less\_qlty \) : Stratégie de réduction de la qualité alimentaire (pondéré par 1),
+- \( r\_csi\_borrow \) : Emprunter de l'argent (pondéré par 2),
+- \( r\_csi\_meal\_size \) : Réduction de la taille des repas (pondéré par 1),
+- \( r\_csi\_meal\_adult \) : Réduction du nombre de repas adultes (pondéré par 3),
+- \( r\_csi\_meal\_nb \) : Nombre de repas (pondéré par 1).
+
+\newpage
+
+
+# Table des matières
+
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Références bibliographiques
+
+
+

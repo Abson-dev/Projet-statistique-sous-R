@@ -1,0 +1,94 @@
+---
+title: "Analyse Socio-Démographique des Ménages"
+author: "Ton Nom"
+date: "2025-05-10"
+output:
+officedown::rdocx\_document:
+toc: true
+toc\_depth: 3
+mapstyles:
+Normal: \['First Paragraph']
+page\_size:
+width: 8.5
+height: 11
+page\_margins:
+bottom: 1
+top: 1
+right: 1
+left: 1
+header: 0.5
+footer: 0.5
+-----------
+
+
+Cette analyse vise à explorer les caractéristiques socio-démographiques des ménages à partir de la base de données **Base Principale**. Les étapes incluent l'importation des données, le nettoyage des doublons, l'exploration des caractéristiques des ménages et l'analyse des tendances démographiques.
+
+## Chargement des données et préparation
+
+```{r}
+
+```
+
+```{r}
+# Chargement des packages nécessaires
+library(haven)
+library(janitor)
+library(dplyr)
+
+# Importation des données
+bas_principal <- read_dta("Examen - ISEP3/Base_Principale.dta") %>%
+  clean_names()
+
+# Suppression des colonnes entièrement vides
+bas_principal <- bas_principal %>% select_if(~ !all(is.na(.)))
+
+# Suppression des doublons
+bas_principal <- bas_principal %>% distinct()
+
+# Aperçu des données nettoyées
+glimpse(bas_principal)
+```
+
+## Statistiques descriptives
+
+```
+```
+
+
+## Structure des ménages
+
+```{r structure}
+# Taille des ménages
+table(bas_principal$hhsize)
+
+# Répartition par sexe
+table(bas_principal$hhhsex)
+
+# Âge des chefs de ménage
+summary(bas_principal$hhhage)
+```
+
+## Niveau d'éducation du chef de ménage
+
+```{r education}
+# Niveau d'éducation
+table(bas_principal$hhhedu)
+```
+
+## Composition par tranche d'âge
+
+```{r composition}
+# Composition familiale
+summary(bas_principal[, c("hhsize05m", "hhsize23m", "hhsize59m", "hhsize1549m", "hhsize65abovem")])
+```
+
+## Sources de revenu
+
+```{r revenus}
+# Sources de revenu
+table(bas_principal$hhsourceincome)
+```
+
+## Conclusion
+
+Cette analyse préliminaire des caractéristiques socio-démographiques des ménages met en évidence les structures familiales, les niveaux d'éducation et les principales sources de revenu des ménages. Une analyse plus poussée pourrait inclure des croisements de variables pour explorer les corrélations entre ces facteurs.
