@@ -1,0 +1,1056 @@
+---
+title: ""
+output:
+  word_document:
+    reference_docx: ../Données/Modèle_2.docx
+    keep_md: true
+    pandoc_args: ["--output=../Sorties/NGUEMFOUO NGOUMTSA Célina_Evaluation.docx"]
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+library(flextable)
+library(haven)
+library(gt)
+library(ggplot2)
+library(scales)
+library(gtsummary)
+library(viridis) 
+library(sf)
+library(dplyr)
+library(tmap)
+```
+
+```{r page_garde_1}
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../Données/LOGO3.jpg){width="3cm" height="3cm"} |
+
+```{r page_garde_2, echo=FALSE}
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](../Données/LOGO2.jpg){width="3.5cm"} |
+
+```{r page_garde_3}
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../Données/LOGO1.jpg){width="2.5cm" height="2cm"} |
+
+# EVALUATION
+
+```{r page garde_4}
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "NGUEMFOUO NGOUMTSA Célina", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+\newpage
+
+# Introduction
+$$
+$$
+
+La sécurité alimentaire reste une préoccupation majeure dans l’analyse des conditions de vie des populations, notamment dans des contextes marqués par l’instabilité économique, les chocs climatiques ou les crises sociales. Évaluer cette sécurité ne se limite pas à la quantité de nourriture disponible, mais englobe aussi la diversité de l’alimentation, la résilience des ménages face aux chocs, ainsi que les stratégies qu’ils adoptent lorsqu’ils sont confrontés à l’insuffisance alimentaire.
+
+Le présent rapport s’inscrit dans cette démarche d’évaluation, à travers l’analyse statistique de données collectées auprès de ménages dans différentes régions. Deux bases de données nous ont été fournies : l’une portant sur les caractéristiques générales des ménages, leur situation alimentaire et nutritionnelle ; l’autre centrée sur des modules spécifiques permettant de construire des indicateurs internationaux standards de mesure de la sécurité alimentaire.
+
+L’objectif de ce travail est double. D’une part, il s’agit d’évaluer la qualité et la cohérence des données disponibles afin de garantir la fiabilité des analyses. D’autre part, à partir de ces données, produire plusieurs indicateurs quantitatifs — tels que le score de consommation alimentaire, les stratégies de survie, la diversité alimentaire, la résilience perçue ou encore l’alimentation des enfants — et en étudier la distribution au sein de la population, en tenant compte de variables socio-démographiques telles que le sexe du chef de ménage, la région ou l’année de collecte.
+
+L’ensemble de ces analyses permettra de dégager une lecture globale mais aussi territorialisée de la situation alimentaire des ménages, en identifiant les zones ou les groupes les plus vulnérables. Enfin, une proposition d’outil interactif de visualisation des indicateurs sera présentée, afin de faciliter leur exploitation dans un cadre opérationnel ou institutionnel.
+
+\newpage
+# Partie 1 : Analyse de consitence des bases de données
+$$
+$$
+
+Cette étape vise à garantir l’intégrité des jeux de données en vérifiant l’absence d’erreurs ou de contradictions internes. Cela inclut l’identification des valeurs manquantes, ainsi que la détection d’éventuels doublons dans chaque base.
+
+## 1. Importation des bases de données
+$$
+$$
+
+La première étape consite à importer les bases de données:
+
+### a. Base principale
+
+```{r importation_base_principale}
+# Importer et convertir les variables étiquetées en facteurs
+base_principale <- read_dta("../Données/Examen - ISEP3/Base_Principale.dta")%>%
+  mutate(across(where(is.labelled), ~ as_factor(.)))
+```
+
+Voici un aperçu de la base principale:
+
+```{r apercu_base_principale}
+# Premières observations de la base
+base_principale %>%
+  select(1:8) %>% #Affiche les 8 premières variables
+  head() %>%
+  flextable() %>%
+  color(part = "header", color = "black") %>% # Texte noir dans l'en-tête
+  bg(part = "header", bg = "#FFA500") %>% # Fond orange
+  set_caption("Premières observations de la base principale")
+```
+
+```{r dim_base_principale}
+# Dimension de la base
+cat("La base principale contient", nrow(base_principale), "observations  et", ncol(base_principale), "variables.")
+```
+
+### b. Base MAD
+
+```{r importation_base_MAD}
+# Importer et convertir les variables étiquetées en facteurs
+base_MAD <- read_dta("../Données/Examen - ISEP3/Base_MAD.dta")%>%
+  mutate(across(where(is.labelled), ~ as_factor(.)))
+```
+
+Voici un aperçu de la base MAD :
+
+```{r apercu_base_MAD}
+# Premières observations de la base
+base_MAD %>%
+  select(1:8) %>% #Affiche les 8 premières variables
+  head() %>%
+  flextable() %>%
+  color(part = "header", color = "black") %>% # Texte noir dans l'en-tête
+  bg(part = "header", bg = "#FFA500") %>% # Fond orange
+  set_caption("Premières observations de la base MAD")
+```
+
+```{r dim_base_MAD}
+# Dimension de la base
+cat("La base MAD contient", nrow(base_MAD), "observations  et", ncol(base_MAD), "variables.")
+```
+
+
+## 2. Doublons
+$$
+$$
+
+### a. Base principale
+
+```{r doublons_base_principale}
+cat("La base MAD contient", sum(duplicated(base_principale)), "doublons.")
+```
+
+Vérifions à présent si la variable ID contient des doublons : 
+
+```{r, doublons_base_principale_id}
+cat("La base MAD contient", sum(duplicated(base_principale[, "ID"])), "doublon dans la variable ID.")
+```
+
+### b. Base MAD
+
+```{r doublons_base_MAD}
+cat("La base MAD contient", sum(duplicated(base_MAD)), "doublons.")
+```
+
+Comme il s'agit de lignes qui se repète de manière identique, on peut supprimer les doublons.
+
+```{r suppress_doublons_MAD}
+base_MAD <- base_MAD %>%
+  distinct() # Ne selectionne ue les lignes differentes
+```
+
+Vérifions si notre base contient encore des doublons :
+
+```{r doublons_base_MAD_2}
+cat("La base MAD contient", sum(duplicated(base_MAD)), "doublon.")
+```
+
+On ne vérifira pas que la variable ID de la base MAD contient des doublons, car il s'agit d'une base individu.
+
+## 3. Valeurs manquantes
+$$
+$$
+
+Les valeurs ne seront vérifiées que sur les variables ID. Au fur et à mesure des calculs, nous vérifions les valeurs manquantes de la base et les traiterons le cas echéant.
+
+```{r valeurs_manquantes}
+cat("La base principale contient",sum(is.na(base_principale$ID)), "valeurs manquantes dans la variable ID.\n")
+cat("La base MAD contient",sum(is.na(base_MAD$ID)), "valeurs manquantes dans la variable ID.\n")
+```
+
+
+\newpage
+# Parie 2 : Analyse des données et calcul d'indicateurs
+$$
+$$
+
+## 1. Analyse socio-démographique des ménages
+$$
+$$
+
+Il s’agit de décrire les principales caractéristiques socio-démographiques des ménages étudiés en résumant les données telles que le pays où a été effectué l'enquête, la taille du ménage, le sexe, l'âge et le niveau d'éducation du chef de ménage.
+Le but est de donner une vue d’ensemble claire du profil des ménages avant de passer aux indicateurs spécifiques.
+
+* **Nom du pays**
+
+```{r ADMIN0Name}
+# Calcul des effectifs et pourcentages
+freq_df <- base_principale %>%
+  count(ADMIN0Name, name = "effectif") %>%
+  mutate(pourcentage = percent(effectif / sum(effectif)))
+# Création du flextable
+flextable(freq_df) %>%
+  set_header_labels(
+    nom_du_pays = "Pays",
+    effectif    = "Effectif",
+    pourcentage = "Pourcentage"
+  ) %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+L'enquête a été réalisée au **Tchad**.
+
+* **Taille du ménage**
+
+```{r HHSize}
+cat("La taille moyenne des ménages est", mean(base_principale$HHSize, na.rm = TRUE))
+```
+
+* **Sexe du chef de ménage**
+
+```{r HHHSex}
+sex <- base_principale %>%
+  filter(!is.na(HHHSex)) %>%
+  count(HHHSex) %>%
+  mutate(
+    pct = n / sum(n),
+    lbl = paste0(HHHSex, " (", percent(pct, accuracy = 1), ")")
+  )
+
+ggplot(sex, aes(x = "", y = pct, fill = HHHSex)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = lbl), position = position_stack(vjust = 0.5)) +
+  labs(
+    title = "Sexe des chefs de ménage",
+    fill  = "Sexe"
+  ) +
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+La plupart des chefs de ménage sont des hommes.
+
+* **Âge du chef de ménage**
+
+```{r HHHAge}
+cat("L'âge moyen des chefs de ménage est de", mean(base_principale$HHHAge, na.rm = TRUE), "ans.")
+```
+Les chefs de ménages sont donc majoritairement jeunes.
+
+* **Niveau d'éduction du chef de ménage**
+
+```{r HHHEdu}
+# Calcul des effectifs et pourcentages pour chaque modalité de HHHEdu
+edu_percent <- base_principale %>%
+  count(HHHEdu) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(edu_percent) %>%
+  set_header_labels(HHHEdu = "Niveau d'éducation", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+La plupart des chefs de ménages sot donc alphabétisés ou coraniques.
+
+
+
+## 2. Score de consommatio alimentaire (SCA)
+$$
+$$
+
+Le **score de consommation alimentaire** (SCA) est un score composite basé sur la diversité alimentaire des ménages, la fréquence des repas et l'importance nutritionnelle relative des aliments consommés.Le module SCA demande aux répondants combien de jours, au cours des 7 derniers jours, la plupart des membres de leur ménage (+50%) ont consommé chacun des produits/groupes alimentaires, à l'intérieur ou à l'extérieur de leur domicile.
+
+Le SCA évalue la sécurité alimentaire d'un ménage. Il est exprimé en pourcentage et prend en compte plusieurs facteurs, notamment :
+
+* **La diversité alimentaire** : la variété des aliments consommés.
+
+* **La fréquence des aliments** : à quelle souvent les différents aliments sont consommés.
+
+* **L'importance nutritionnelle** : la valeur nutritionnelle relative des différents groupes d'aliments. 
+
+### a. Analyse descriptive des variables composant de SCA
+
+Il s'agit des variables suivantes rangées par groupe alimentaires :
+
+* **Céréales et tubercules** : *FCSStap*, qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours de la consommation des aliments comme Riz, pâtes, pain, sorgho, millet, maïs, fonio, pomme de terre, igname, manioc, patate douce blanche.
+
+```{r FCSStap}
+# Calcul des effectifs et pourcentages
+FCSStap_percent <- base_principale %>%
+  count(FCSStap) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSStap_percent) %>%
+  set_header_labels(FCSStap = "Céréales et tubercules", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+On constate que la plupart, soit **89,32%** des ménages enquêtés ont consommé des *céréales et tubercules* durant les 7 derniers jours.
+
+* **Légumineuses** : *FCSPulse*, qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que	haricots, niébé, arachides, lentilles, noix, soja, pois d'Angole et/ou autres noix.
+
+```{r FCSPulse}
+# Calcul des effectifs et pourcentages
+FCSPulse_percent <- base_principale %>%
+  count(FCSPulse) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSPulse_percent) %>%
+  set_header_labels(FCSPulse = "Légumineuses", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+Le mode ici est 0, donc les légumineuses ne sont pas assez consommées par les méngaes enquêtés.
+
+* **Lait et produits laitiers** : *FCSDairy*, qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que lait frais / aigre, yaourt, fromage, autres produits laitiers.
+
+```{r FCSDairy}
+# Calcul des effectifs et pourcentages
+FCSDairy_percent <- base_principale %>%
+  count(FCSDairy) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSDairy_percent) %>%
+  set_header_labels(FCSDairy = "Lait et produits laitiers", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+Là également, le mode est 0, donc les ménages enquêtés ne consomment pas beaucoup de lait et produit laitiers.
+
+* **Viande, poisson et œufs** : 
+
+Il ya 5 variables (*FCSPr, FCSPrMeatF, FCSPrMeatO, FCSPrFish, FCSPrEgg*) qui concerne le groupe alimentaire *viande, poisson et œufs*. Toutefois, la variable **FCSPr** représente la fréquence de consommation, au cours des 7 derniers jours, des aliments du groupe viande, poisson et œufs. Elle est conçue pour capturer la fréquence globale de consommation de ce groupe alimentaire, en tenant compte des sous-groupes tels que la viande rouge, les abats, le poisson et les œufs. Les variables spécifiques comme FCSPrMeatF, FCSPrMeatO, FCSPrFish et FCSPrEgg détaillent la consommation de ces sous-groupes individuellement.
+
+Selon les directives du **Programme Alimentaire Mondial** (PAM), pour le calcul du Food Consumption Score (ou SCA), il est recommandé d'utiliser la fréquence globale de consommation de chaque groupe alimentaire, sans double comptage des sous-groupes. Ainsi, FCSPr suffit pour représenter le groupe viande, poisson et œufs dans le calcul du FCS. 
+  
+```{r FCSPr}
+# Calcul des effectifs et pourcentages
+FCSPr_percent <- base_principale %>%
+  count(FCSPr) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSPr_percent) %>%
+  set_header_labels(FCSPr = "Viande, poisson, Oeufs", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+
+* **Légumes** :
+
+Ici également, on a plusieurs variables (FCSVeg, FCSVegOrg, FCSVegGre) et la variable à utiliser ici est **FCSVeg**, qui couvre l’ensemble du groupe *légumes*, indépendamment de son type. 
+
+```{r FCSVeg}
+# Calcul des effectifs et pourcentages
+FCSVeg_percent <- base_principale %>%
+  count(FCSVeg) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSVeg_percent) %>%
+  set_header_labels(FCSVeg = "Légumes", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+D'après ce tableau, on peut conclure que les légumes sont moyennement consommés.
+
+* **Fruits** :
+
+La variable qui nous interesse ici est *FCSFruit* qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que banane, pomme, citron, mangue, papaye, abricot, pêche, etc. 
+  
+```{r FCSFruit}
+# Calcul des effectifs et pourcentages
+FCSFruit_percent <- base_principale %>%
+  count(FCSFruit) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSFruit_percent) %>%
+  set_header_labels(FCSFruit = "Fruits", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+La plupart des ménages enquêtés n'ont pas consommé de fruits durant les 7 derniers jours.
+
+* **Huiles et graisses** : *FCSFat* qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que huile végétale, huile de palme, beurre de karité, margarine, autres huiles / matières grasses.
+
+```{r FCSFat}
+# Calcul des effectifs et pourcentages
+FCSFat_percent <- base_principale %>%
+  count(FCSFat) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSFat_percent) %>%
+  set_header_labels(FCSFat = "Huiles et graisses", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+Comme le montre le tableau, les ménages enquêtés consomment en quantitéles huiles et graisses.
+
+* **Sucres**: *FCSSugar* qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que sucre, miel, confiture, gâteau, bonbons, biscuits, viennoiserie et autres produits sucrés (boissons sucrées).
+
+```{r FCSSugar}
+# Calcul des effectifs et pourcentages
+FCSSugar_percent <- base_principale %>%
+  count(FCSSugar) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSSugar_percent) %>%
+  set_header_labels(FCSSugar = "Sucres", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+Les sucres sont également consommés en quantité par les ménages enquêtés.
+
+* **Condiments** :	*FCSCond* qui donne la fréquence (en jours) de consommation au cours des 7 derniers jours des aliments tels que thé, café/cacao, sel, ail, épices, levure/levure chimique, tomate/sauce, viande ou poisson comme condiment, condiments incluant des petites quantités de lait/thé, café.	
+
+```{r FCSCond}
+# Calcul des effectifs et pourcentages
+FCSCond_percent <- base_principale %>%
+  count(FCSCond) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(FCSCond_percent) %>%
+  set_header_labels(FCSCond = "Condiments", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+Les condiments sont également assez consommés par les ménages enquêtés.
+
+### b. Calcul du score de consommation alimentaire
+
+```{r SCA}
+# Calcul du score de consommation alimentaire (FCS)
+base_principale <- base_principale %>%
+  mutate(FCS = FCSStap * 2 +
+                FCSPulse * 3 +
+                FCSDairy * 4 +
+                FCSPr * 4 +
+                FCSVeg * 1 +
+                FCSFruit * 1 +
+                FCSSugar * 0.5 +
+                FCSFat * 0.5)
+```
+
+Voici un résumé de l'indice calculé :
+
+```{r summary_SCA}
+# Créer un résumé statistique
+summary_fcs <- summary(base_principale$FCS)
+# Transformer en data frame
+summary_df <- data.frame(
+  Statistique = names(summary_fcs),
+  Valeur = as.numeric(summary_fcs)
+)
+# Afficher avec flextable
+flextable(summary_df) %>%
+  set_header_labels(Statistique = "Statistique", Valeur = "Valeur") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+```
+
+cet indice vaut en moyenne **47%** par ménage.
+
+### c. Tableau illustratif des poids attribué à chaque groupe alimentaire
+
+```{r poids_SCA}
+# Création de la table des poids
+fcs_weights <- tibble::tibble(
+  Groupe = c("Céréales, racines, tubercules", "Légumineuses", "Produits laitiers",
+             "Viandes, poissons, œufs", "Légumes", "Fruits", 
+             "Sucre", "Graisses"),
+  Variable = c("FCSStap", "FCSPulse", "FCSDairy", "FCSPr", "FCSVeg", "FCSFruit", 
+               "FCSSugar", "FCSFat"),
+  Poids = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Ajouter une ligne Total
+fcs_weights_total <- fcs_weights %>%
+  bind_rows(tibble(Groupe = "Total", Variable = "", Poids = sum(fcs_weights$Poids)))
+
+# Création du flextable
+flextable(fcs_weights_total) %>%
+  set_header_labels(Groupe = "Groupe alimentaire", 
+                    Variable = "Variable utilisée", 
+                    Poids = "Poids") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500") %>%
+  bold(i = nrow(fcs_weights_total), bold = TRUE) %>%
+  bg(i = nrow(fcs_weights_total), bg = "#FFF2CC") %>%
+  autofit()
+```
+
+### d. Catégorisation selon les seuils :
+
+* **Seuils 21/35** :
+
+Il s'agit ici de classer les ménages qui ont un SCA inférieur à 21 comme *Consommation pauvre*, entre 21 et 35 comme *Consommation limite* et supérieure à 35 comme *Consommation acceptable*.
+
+```{r seuil_21/35}
+# Catégorisation avec les seuils 21 / 35
+base_principale <- base_principale %>%
+  mutate(FCS_cat_2135 = case_when(
+    FCS < 21 ~ "Consommation pauvre",
+    FCS >= 21 & FCS < 35 ~ "Consommation limite",
+    FCS >= 35 ~ "Consommation acceptable"
+  ))
+```
+
+Voici la répartition des ménages enquêtés suivant cette catégorisation :
+
+```{r pie_cat_21/35}
+cat21_35 <- base_principale %>%
+  filter(!is.na(FCS_cat_2135)) %>%
+  count(FCS_cat_2135) %>%
+  mutate(
+    pct = n / sum(n),
+    lbl = percent(pct, accuracy = 1), # On garde seulement le pourcentage
+    FCS_cat_2135 = factor(
+      FCS_cat_2135, 
+      levels = c("Consommation acceptable", "Consommation limite", "Consommation pauvre")
+    )
+  )
+
+ggplot(cat21_35, aes(x = "", y = pct, fill = FCS_cat_2135)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = lbl), 
+            position = position_stack(vjust = 0.5), 
+            size = 4, 
+            color = "black") +
+  scale_fill_manual(
+    values = c(
+      "Consommation acceptable" = "#00FF00",
+      "Consommation limite" = "#FFA500",
+      "Consommation pauvre" = "#FF0000"
+    ),
+    name = "Catégorisation 21/35" # Titre de la légende
+  ) +
+  labs(
+    title = "Catégorisation au seuil 21/35"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right" # Position explicite de la légende
+  )
+```
+
+* **Seuils 28/42** :
+
+Il s'agit ici de classer les ménages qui ont un SCA inférieur à 28 comme *Consommation pauvre*, entre 28 et 42 comme *Consommation limite* et supérieure à 42 comme *Consommation acceptable*.
+
+```{r seuil_28/42}
+# Catégorisation avec les seuils 28 / 42
+base_principale <- base_principale %>%
+  mutate(FCS_cat_2842 = case_when(
+    FCS < 28 ~ "Consommation pauvre",
+    FCS >= 28 & FCS < 42 ~ "Consommation limite",
+    FCS >= 42 ~ "Consommation acceptable"
+  ))
+```
+
+Voici la répartition des ménages enquêtés suivant cette catégorisation :
+
+```{r pie_cat_28/42}
+cat28_42 <- base_principale %>%
+  filter(!is.na(FCS_cat_2842)) %>%
+  count(FCS_cat_2842) %>%
+  mutate(
+    pct = n / sum(n),
+    lbl = percent(pct, accuracy = 1), # On garde seulement le pourcentage
+    FCS_cat_2842 = factor(
+      FCS_cat_2842, 
+      levels = c("Consommation acceptable", "Consommation limite", "Consommation pauvre")
+    )
+  )
+
+ggplot(cat28_42, aes(x = "", y = pct, fill = FCS_cat_2842)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = lbl), 
+            position = position_stack(vjust = 0.5), 
+            size = 4, 
+            color = "black") +
+  scale_fill_manual(
+    values = c(
+      "Consommation acceptable" = "#00FF00",
+      "Consommation limite" = "#FFA500",
+      "Consommation pauvre" = "#FF0000"
+    ),
+    name = "Catégorisation 28/42" # Titre de la légende
+  ) +
+  labs(
+    title = "Catégorisation au seuil 28/42"
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right" # Position explicite de la légende
+  )
+```
+
+### e. Representation spatiale
+
+Faisons à présent une répartition spatiale suivant les différentes catégorisations :
+
+
+## 3. Indice réduit des stratégies de survie (rCSI)
+$$
+$$
+
+L'indice réduit des stratégies de survie, basé sur la consommation, est utilisé pour évaluer le niveau de stress d'un ménage dû à une pénurie alimentaire. Il mesure les stratégies comportementales que les gens appliquent lorsqu'ils n'ont pas accès à suffisamment de nourriture ou lorsqu'ils prévoient une diminution de la sécurité alimentaire.
+
+### a. Analyse descriptive des variables composant de rCSI :
+
+Les variables composant le rCSI sont :
+
+* **rCSILessQlty** qui donne le nombre de jours au cours des 7 derniers jours où le ménage a dû consommer des aliments moins préférés et moins chers.
+
+```{r rCSILessQlty}
+# Calcul des effectifs et pourcentages
+rCSILessQlty_percent <- base_principale %>%
+  count(rCSILessQlty) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(rCSILessQlty_percent) %>%
+  set_header_labels(rCSILessQlty = "Aliments moins préférés", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **rCSIBorrow** qui donne le nombre de jours au cours des 7 derniers jours où le ménage a dû emprunter de la nourriture ou compter sur l’aide.
+
+```{r rCSIBorrow}
+# Calcul des effectifs et pourcentages
+rCSIBorrow_percent <- base_principale %>%
+  count(rCSIBorrow) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(rCSIBorrow_percent) %>%
+  set_header_labels(rCSIBorrow = "Emprunter de la nourriture", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **rCSIMealSize** qui donne le nombre de jours au cours des 7 derniers jours où le ménage a dû diminuer la quantité consommée pendant les repas.
+
+```{r rCSIMealSize}
+# Calcul des effectifs et pourcentages
+rCSIMealSize_percent <- base_principale %>%
+  count(rCSIMealSize) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(rCSIMealSize_percent) %>%
+  set_header_labels(rCSIMealSize = "Emprunter de la nourriture", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **rCSIMealAdult** qui donne le nombre de jours au cours des 7 derniers jours où le ménage a dû restreindre la consommation des adultes  pour nourrir les enfants.
+
+```{r rCSIMealAdult}
+# Calcul des effectifs et pourcentages
+rCSIMealAdult_percent <- base_principale %>%
+  count(rCSIMealAdult) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(rCSIMealAdult_percent) %>%
+  set_header_labels(rCSIMealAdult = "Diminution de a consommmaion des adultes", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **rCSIMealNb** qui donne le nombre de jours au cours des 7 derniers jours où le ménage a dû diminuer le nombre de repas par jour.
+
+```{r rCSIMealNb}
+# Calcul des effectifs et pourcentages
+rCSIMealNb_percent <- base_principale %>%
+  count(rCSIMealNb) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(rCSIMealNb_percent) %>%
+  set_header_labels(rCSIMealNb = "Diminuer le nombre de repas par jour", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+### b. Indice réduit des stratégies de survie
+### c. Tableau illustrant le poids attribue a chaque variable pour le calcul du rCSI
+### d. Representation spatiale (region et departement) du rCSI 
+
+## 4. Indicateurs de statégies d'adaptation aux moyens d'existence
+$$
+$$
+
+Les indicateurs de stratégies d'adaptation des moyens de subsistance (LCS) sont des indicateurs mesurés au niveau des ménages qui sont relativement simples et qui sont en corrélation avec d'autres mesures de la sécurité alimentaire et de la vulnérabilité. 
+
+Dans le cadre de l’examen on s’interesse à LCS-FS.
+Niveaux de Sévérité des strategies :
+
+* **sévérité – Stress** : La première action d'un ménage confronté à un choc consiste à se débarrasser progressivement de ses actifs, par exemple en dépensant son épargne, en vendant des actifs simples ou en empruntant de l'argent. 
+Le **stress** indique une capacité réduite à faire face à des chocs futurs en raison d'une réduction actuelle des ressources ou d'une augmentation des dettes.
+
+* **sévérité - Crise** : Si la situation persiste ou s'aggrave, ils auront recours à des stratégies d'adaptation de crise, et lorsque, par exemple, les actifs productifs sont vendus ou que les dépenses de santé/médicaments essentiels sont réduites, il devient plus difficile pour la personne ou le ménage de revenir à la situation d'avant la crise. 
+La *Crise* réduit directement la productivité future, y compris la formation du capital humain.
+
+* **Sévérité - Urgence** : Enfin, le ménage peut avoir recours à la vente de son unique maison/terrain, à la mendicité ou au pillage, à la vente de son dernier animal femelle productif, ce qui est un signe d'incapacité à faire face à la crise.
+    L’ **Urgence** affecte la productivité future, mais elle est plus difficile à inverser ou plus dramatique par nature.
+
+### a. Analyse descriptive des variables composant le LhCSI
+
+* **LhCSIStress1** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du vendre des actifs/biens non productifs du ménage en raison d'un manque de nourriture.
+
+```{r LhCSIStress1}
+# Calcul des effectifs et pourcentages
+LhCSIStress1_percent <- base_principale %>%
+  count(LhCSIStress1) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIStress1_percent) %>%
+  set_header_labels(LhCSIStress1 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIStress2** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du vendre plus d’animaux (non-productifs) que d’habitude en raison d'un manque de nourriture.
+
+```{r LhCSIStress2}
+# Calcul des effectifs et pourcentages
+LhCSIStress2_percent <- base_principale %>%
+  count(LhCSIStress2) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIStress2_percent) %>%
+  set_header_labels(LhCSIStress2 = "Vente d'animaux", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIStress3** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du dépenser l’épargne en raison d'un manque de nourriture.
+
+```{r LhCSIStress3}
+# Calcul des effectifs et pourcentages
+LhCSIStress3_percent <- base_principale %>%
+  count(LhCSIStress3) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIStress3_percent) %>%
+  set_header_labels(LhCSIStress3 = "Dépense de l'épargne", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIStress4** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du emprunter de l’argent / nourriture auprès d’un prêteur formel /banque
+en raison d'un manque de nourriture.
+
+```{r LhCSIStress4}
+# Calcul des effectifs et pourcentages
+LhCSIStress4_percent <- base_principale %>%
+  count(LhCSIStress4) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIStress4_percent) %>%
+  set_header_labels(LhCSIStress4 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSICrisis1** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du réduire les dépenses non alimentaires essentielles telles que l’éducation, la santé (dont de médicaments).
+
+```{r LhCSICrisis1}
+# Calcul des effectifs et pourcentages
+LhCSICrisis1_percent <- base_principale %>%
+  count(LhCSICrisis1) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSICrisis1_percent) %>%
+  set_header_labels(LhCSICrisis1 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSICrisis2** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du vendre des biens productifs ou des moyens de transport (machine à coudre, brouette, vélo, car, etc.) en raison d'un manque de nourriture.
+
+```{r LhCSICrisis2}
+# Calcul des effectifs et pourcentages
+LhCSICrisis2_percent <- base_principale %>%
+  count(LhCSICrisis2) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSICrisis2_percent) %>%
+  set_header_labels(LhCSICrisis2 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSICrisis3** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du retirer les enfants de l’école en raison d'un manque de nourriture.
+
+```{r LhCSICrisis3}
+# Calcul des effectifs et pourcentages
+LhCSICrisis3_percent <- base_principale %>%
+  count(LhCSICrisis3) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSICrisis3_percent) %>%
+  set_header_labels(LhCSICrisis3 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIEmergency1** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du vendre la maison ou des terrains en raison d'un manque de nourriture.
+
+```{r LhCSIEmergency1}
+# Calcul des effectifs et pourcentages
+LhCSIEmergency1_percent <- base_principale %>%
+  count(LhCSIEmergency1) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIEmergency1_percent) %>%
+  set_header_labels(LhCSIEmergency1 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIEmergency2** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du mendier en raison d'un manque de nourriture.
+
+```{r LhCSIEmergency2}
+# Calcul des effectifs et pourcentages
+LhCSIEmergency2_percent <- base_principale %>%
+  count(LhCSIEmergency2) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIEmergency2_percent) %>%
+  set_header_labels(LhCSIEmergency2 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+* **LhCSIEmergency3** qui donne au cours au cours des 30 derniers jours si un membre du ménage a du vendre les derniers animaux femelles reproductrices en raison d'un manque de nourriture.
+
+```{r LhCSIEmergency3}
+# Calcul des effectifs et pourcentages
+LhCSIEmergency3_percent <- base_principale %>%
+  count(LhCSIEmergency3) %>%
+  mutate(pourcentage = percent(n / sum(n)))
+
+# Création du flextable
+flextable(LhCSIEmergency3_percent) %>%
+  set_header_labels(LhCSIEmergency3 = "Vente d'actifs et de biens", 
+                    n = "Effectif", 
+                    pourcentage = "Pourcentage") %>%
+  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#FFA500")
+
+```
+
+### b. Proportion de menage en situation de stress, de crise et d’urgence en 2022 et 2023 ?
+
+### c. Representation spatiale (region et departement) des strategies d’adaptation
+
+
+# 5. Score de diversité alimentaire des ménages
+$$
+$$
+
+# 6.	Score de résilience auto-évaluée (SERS)
+$$
+$$
+Le SERS est calculé à partir de 10 sous-énoncés utilisant une échelle de Likert en cinq points (allant de « pas du tout d'accord “ à ” tout à fait d'accord ») pour saisir la perception qu'ont les ménages de leurs capacités de résilience existantes ou de leur capital de moyens de subsistance. Le score de capacité de résilience regroupe les réponses non pondérées aux 10 sous- énoncés et est normalisé pour fournir un score allant de 0 à 100.
+Le score de résilience est normalisé par la méthode minmax, transformant les résultats en un score allant de 0 (pas du tout résilient) à 100 (totalement résilient).
+
+
+# 7. Régime alimentaire minimum acceptable (MAD)
+$$
+$$
+
+Cette section etudie la proportion d'enfants âgés de 6 à 23 mois bénéficiant d'un régime alimentaire minimum acceptable.
+
+
+# Partie 3: Analyse comparative des indicateurs calculés suivant le genre du chef de ménage.
