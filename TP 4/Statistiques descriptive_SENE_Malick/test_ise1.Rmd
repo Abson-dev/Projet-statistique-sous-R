@@ -1,0 +1,810 @@
+---
+output: 
+  officedown::rdocx_document:
+    reference_docx: Modele.docx
+---
+```{r global-options, include=FALSE}
+library(officedown)
+library(officer)
+library(flextable)
+
+knitr::opts_chunk$set(
+  echo = FALSE,      # Ne pas afficher le code
+  warning = FALSE,   # Ne pas afficher les warnings
+  message = FALSE
+)
+```
+```{r page_garde_1}
+library(tidyverse)
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL", stringsAsFactors = FALSE)) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](Figures/LOGO1.png){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](Figures/LOGO2.png){width="3.5cm"} |
+
+```{r page_garde_3}
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](Figures/LOGO3.png){width="2.5cm" height="2cm"} |
+
+
+```{r page garde_4}
+flextable(
+  data.frame(
+    Contenu = "ÉVALUATION\nProjet statistique avec R",  # \n = retour à la ligne
+    stringsAsFactors = FALSE)
+  ) %>% 
+  delete_part(part = "header") %>%          # pas d’en-tête
+  border_remove() %>%                       # aucune bordure
+  font(fontname = "Times New Roman") %>% 
+  fontsize(size = 22) %>%                   # taille du titre
+  bold() %>%                                # gras
+  align(align = "center", part = "all") %>% # centrage horizontal
+  height(height = 1.2) %>%                  # un peu d’air en hauteur
+  padding(padding = 0) %>%                  # zéro marge interne
+  set_table_properties(layout = "autofit",
+                       width  = 1)          # garde la largeur minimale
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "Malick SENE", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+
+\newpage
+# Table des matières
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Liste des figures
+
+<!---BLOCK_TOC{seq_id: 'fig'}--->
+\newpage
+
+# Liste des tables
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+
+\newpage
+
+# Partie 1 : Gestion et nettoyage des bases de données
+
+## Vérification des doublons
+
+Nous commencons par importer les library necessaires ainsi que les données.
+
+```{r importations }
+# Définition de la liste des packages requis
+packages <- c("gtsummary", "dplyr", "readr", "haven","flextable")
+
+# Vérification de l'installation et installation des packages manquants
+for (pkg in packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+
+# Chargement des packages dans l'environnement
+for (pkg in packages) {
+  library(pkg, character.only = TRUE)
+}
+# Importer les fichiers
+base_menage <- read_dta("data/base_menage.dta")
+ehcvm_menage_mli2021 <- read_dta("data/ehcvm_menage_mli2021.dta")
+ehcvm_welfare_mli2021 <- read_dta("data/ehcvm_welfare_mli2021.dta")
+food_comp_child_baseline <- read_dta("data/food_comp_child_baseline.dta")
+food_comp_child_endline <- read_dta("data/food_comp_child_endline.dta")
+food_comp_mother_baseline <- read_dta("data/food_comp_mother_baseline.dta")
+food_comp_mother_endline <- read_dta("data/food_comp_mother_endline.dta")
+```
+
+
+Maintenant, nous allons vérifier s'il existe des doublons dans les bases suivantes :
+- `food_comp_child_baseline`
+- `food_comp_child_endline`
+- `base_menage`
+
+```{r verif-doublons, include=FALSE}
+# Vérification du nombre de doublons
+nb_doublons_baseline <- sum(duplicated(food_comp_child_baseline))
+nb_doublons_endline <- sum(duplicated(food_comp_child_endline))
+nb_doublons_menage <- sum(duplicated(base_menage))
+```
+Le nombre de doublons dans la base Baseline est `r nb_doublons_baseline`.
+
+Le nombre de doublons dans la base Endline est `r nb_doublons_endline`.
+
+Le nombre de doublons dans la base Ménage est `r nb_doublons_menage`.
+
+Nous procédons donc maintenant à la suppression des doublons dans la base ménage
+```{r suppression doublons}
+base_menage <- dplyr::distinct(base_menage)
+nb_doublons_menage <- sum(duplicated(base_menage))
+
+```
+Après suppression de l'unique doublon dans la base Ménage , on retrouve alors que : 
+
+Le nombre de doublons dans la base Ménage est `r nb_doublons_menage`.
+
+## Harmonisation des bases
+
+Certaines variables dans la base `food_comp_mother_baseline` n’avaient pas des noms explicites, bien que leurs labels soient identiques à ceux des autres bases.
+
+Nous avons donc corrigé les noms pour assurer l’homogénéité entre les bases `Baseline` et `Endline`. Il sagit des variables energ_kcal(nommé V1 dans la base baseline mother) et zinc_mg(nommé V9 dans la base baseline mother) 
+
+```{r harmoniser-noms}
+# Renommer les variables mal nommées dans la base mother_baseline
+food_comp_mother_baseline <- food_comp_mother_baseline %>%
+  rename(
+    energ_kcal = V1,
+    zinc_mg = V9
+  )
+```
+Nous vérifions maintenant si les noms de variables dans les bases `food_comp_mother_baseline` et `food_comp_mother_endline` sont identiques.
+
+```{r verification-noms}
+noms_identiques <- identical(
+  names(food_comp_mother_baseline),
+  names(food_comp_mother_endline)
+)
+```
+```{r verification-noms2}
+noms_identiques_child <- identical(
+  names(food_comp_child_baseline),
+  names(food_comp_child_endline)
+)
+```
+
+Pour cela nous faisons un test logique :
+Les noms de variables sont-ils identiques entre les deux bases mother ? `r if (noms_identiques) "True" else "False"`.\
+Les noms de variables sont-ils identiques entre les deux bases child ? `r if (noms_identiques_child) "True" else "False"`.
+
+## Gestion des données manquantes
+
+Pour la correction des valeurs manquantes, nous appliquons la règle suivante :
+
+Si l’individu **n’a pas consommé de repas** (`s1_q1 == 0`), alors toutes les valeurs de consommation nutritionnelle doivent être mises à `0` (et non laissées à `NA`).
+
+```{r correction-na-nutrition, include=FALSE}
+# Liste des variables nutritionnelles à corriger
+vars_nutrition <- c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg",
+                    "iron_mg", "zinc_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+# Appliquer la correction pour food_comp_child_baseline
+food_comp_child_baseline <- food_comp_child_baseline %>%
+  mutate(across(all_of(vars_nutrition),
+                ~ ifelse(s1_q1 == 0 & is.na(.), 0, .)))
+
+# Même correction pour food_comp_child_endline
+food_comp_child_endline <- food_comp_child_endline %>%
+  mutate(across(all_of(vars_nutrition),
+                ~ ifelse(s1_q1 == 0 & is.na(.), 0, .)))
+
+# Même correction pour food_comp_mother_baseline
+food_comp_mother_baseline <- food_comp_mother_baseline %>%
+  mutate(across(all_of(vars_nutrition),
+                ~ ifelse(s1_q1 == 0 & is.na(.), 0, .)))
+
+# Même correction pour food_comp_mother_endline
+food_comp_mother_endline <- food_comp_mother_endline %>%
+  mutate(across(all_of(vars_nutrition),
+                ~ ifelse(s1_q1 == 0 & is.na(.), 0, .)))
+```
+
+La correction a été appliquée à toutes les bases. Désormais, lorsqu’un repas n’a pas été consommé (s1_q1 == 0), toutes les variables nutritionnelles sont systématiquement mises à 0 si elles étaient manquantes.
+
+## Consommation d’énergie moyenne par repas – Mères, enquête de base
+
+Nous calculons la moyenne de la variable `energ_kcal` pour les mères ayant effectivement consommé un repas lors de l’enquête de base (`food_comp_mother_baseline`), c’est-à-dire les observations où `s1_q1 == 1`.
+
+```{r conso-moy-mere-baseline, include=FALSE}
+# Filtrage et calcul de la moyenne
+conso_moy_mere_baseline <- food_comp_mother_baseline %>%
+  filter(s1_q1 == 1) %>%
+  summarise(moy_energie = mean(energ_kcal, na.rm = TRUE)) %>%
+  pull(moy_energie)
+```
+
+La consommation d’énergie moyenne par repas pour les mères lors de l’enquête de base est de `r round(conso_moy_mere_baseline, 2)` kilocalories.
+
+## Sauvegarde des bases corrigées
+
+Nous sauvegardons maintenant toutes les bases de données ayant fait l’objet de corrections sous de nouveaux noms de fichiers `.dta`.
+
+```{r sauvegarde-dta}
+# Sauvegarde des bases mères
+write_dta(food_comp_mother_baseline, "data/mother_baseline_v1.dta")
+write_dta(food_comp_mother_endline, "data/mother_endline_v1.dta")
+
+# Sauvegarde des bases enfants
+write_dta(food_comp_child_baseline, "data/child_baseline_v1.dta")
+write_dta(food_comp_child_endline, "data/child_endline_v1.dta")
+
+# Sauvegarde de la base ménage
+write_dta(base_menage, "data/base_menage_final.dta")
+```
+
+Toutes les bases ont été sauvegardées dans le dossier data/ avec des noms reflétant les versions corrigées.
+
+```{r importer les nouvelles bases sauvegardées}
+base_menage_final <- read_dta("data/base_menage_final.dta")
+child_baseline_v1 <- read_dta("data/child_baseline_v1.dta")
+child_endline_v1 <- read_dta("data/child_endline_v1.dta")
+mother_baseline_v1 <- read_dta("data/mother_baseline_v1.dta")
+mother_endline_v1 <- read_dta("data/mother_baseline_v1.dta")
+```
+
+\newpage
+
+# Partie 2 : Empilement et Fusion des données
+
+## Baseline
+
+### Empilage des bases
+
+Nous créons une base unique en empilant les données de consommation journalière des mères et des enfants pendant l’enquête de base. Une variable `groupe` permet d’identifier la source de chaque observation.
+
+```{r empilement-baseline, include=FALSE}
+# Ajouter une variable d'identification du groupe
+mother_baseline_v1 <- mother_baseline_v1 %>%
+  mutate(groupe = "mère")
+
+child_baseline_v1 <- child_baseline_v1 %>%
+  mutate(groupe = "enfant")
+
+# Empilement des deux bases
+conso_baseline_empilee <- bind_rows(mother_baseline_v1, child_baseline_v1)
+```
+
+La base conso_baseline_empilee contient désormais les consommations des mères et des enfants, avec `r nrow(conso_baseline_empilee)` observations au total.
+
+### Renommage des variables nutritionnelles – Suffixe _b (Baseline)
+
+
+Pour identifier clairement les variables issues de l’enquête de **Baseline**, nous avons renommé toutes les variables de consommation nutritionnelle en leur ajoutant le suffixe **`_b`**.
+
+Cela concerne les variables suivantes :
+`energ_kcal`, `protein_g`, `lipid_tot_g`, `calcium_mg`, `iron_mg`, `zinc_mg`, `vit_b6_mg`, `vit_b12_mcg`, `vit_c_mg`
+
+Elles ont été renommées respectivement en :  
+`energ_kcal_b`, `protein_g_b`, `lipid_tot_g_b`, ..., `vit_c_mg_b`.
+
+Nous avons utilisé la fonction `rename_with()` du package **`dplyr`**, qui permet de modifier plusieurs noms de variables à la fois.
+
+La fonction `paste0()` a été utilisée pour **concaténer automatiquement** le nom original de chaque variable avec le suffixe `_b`, sans ajouter d’espace.
+
+Exemple : `paste0("energ_kcal", "_b")` retourne `"energ_kcal_b"`.
+
+```{r}
+vars_nutrition <- c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg",
+                    "iron_mg", "zinc_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+conso_baseline_empilee <- conso_baseline_empilee %>%
+  rename_with(.cols = all_of(vars_nutrition),
+              .fn = ~ paste0(., "_b"))
+```
+
+### Consommation journalière 
+
+
+Dans la base `conso_baseline_empilee`, chaque individu (mère ou enfant) est observé jusqu’à **quatre fois par jour**, chaque observation représentant un **repas consommé** dans la journée.
+
+Les données de consommation nutritionnelle sont donc **réparties sur plusieurs lignes** pour un même individu.
+
+L’objectif ici est de :\
+- **Calculer la consommation totale journalière** en additionnant les apports en énergie et en nutriments **sur l’ensemble des repas**,\
+- Et de **rejoindre** cette information à la base initiale, de façon à ce que chaque ligne de repas contienne **à la fois l’information propre à ce repas** et **les totaux journaliers**.\
+
+Nous procédons ainsi:
+
+- Nous utilisons `group_by(hhid, s1_q2)` pour **regrouper les lignes correspondant à un même individu** (même ménage, même groupe mère/enfant).\
+- Ensuite, nous utilisons `summarise()` + `across()` pour calculer la **somme** de chaque nutriment (les colonnes terminant par `_b`), et créer de nouvelles colonnes comme `energ_kcal_b_jour`.\
+
+- À l’aide de la fonction `merge()`, nous joignons les totaux journaliers à la base `conso_baseline_empilee` en utilisant les clés communes : `hhid`, `s1_q2`.
+
+```{r resume-jour-merge, include=FALSE}
+# Étape 1 : Créer la base des totaux journaliers par individu
+resume_journalier <- conso_baseline_empilee %>%
+  group_by(hhid, s1_q2) %>%
+  summarise(across(ends_with("_b"), ~ sum(.x, na.rm = TRUE), .names = "{.col}_jour"),
+            .groups = "drop")
+
+# Étape 2 : Fusionner avec la base d'origine via merge()
+conso_baseline_finale <- merge(conso_baseline_empilee, resume_journalier,
+                               by = c("hhid", "s1_q2"),
+                               all.x = TRUE)
+```
+
+### Export de la base finale – `baseline_final.dta`
+
+Nous devons créer une base `baseline_final.dta` qui contient, pour chaque individu (mère ou enfant), **les apports nutritionnels journaliers totaux**.  
+Elle doit inclure uniquement les variables suivantes :  
+`hhid`, `s1_q2`, `energ_kcal`, `protein_g`, `lipid_tot_g`, `calcium_mg`, `iron_mg`, `zinc_mg`
+
+Un ménage (`hhid`) doit avoir :\
+- **une seule ligne mère**, identifiée par `s1_q2`,\
+- **plusieurs lignes enfants**, chaque enfant ayant son propre `s1_q2`.\
+
+Nous avons donc **choisi de conserver une ligne par individu**, ce qui implique :\
+- une seule ligne pour la mère,\
+- une ou plusieurs lignes pour les enfants d’un même ménage.
+
+Méthode utilisée :
+
+1. Sélectionner les colonnes contenant les **totaux journaliers** (`*_b_jour`)
+2. Supprimer les doublons (une ligne par `hhid` + `s1_q2`)
+3. Renommer les colonnes comme demandé
+4. Exporter la base au format `.dta`
+
+```{r export-baseline-final, include=FALSE}
+# Étape 1 : Sélection
+baseline_final <- conso_baseline_finale %>%
+  select(hhid, s1_q2,
+         energ_kcal_b_jour, protein_g_b_jour, lipid_tot_g_b_jour,
+         calcium_mg_b_jour, iron_mg_b_jour, zinc_mg_b_jour) %>%
+  distinct()
+
+# Étape 2 : Renommer les colonnes comme demandé
+baseline_final <- baseline_final %>%
+  rename(
+    energ_kcal = energ_kcal_b_jour,
+    protein_g = protein_g_b_jour,
+    lipid_tot_g = lipid_tot_g_b_jour,
+    calcium_mg = calcium_mg_b_jour,
+    iron_mg = iron_mg_b_jour,
+    zinc_mg = zinc_mg_b_jour
+  )
+
+# Étape 3 : Export
+write_dta(baseline_final, "data/baseline_final.dta")
+```
+
+## Endline
+
+Nous rassemblons les données issues de l’enquête **Endline** en une seule base regroupant :
+- les consommations journalières des **mères**,
+- et celles des **enfants**.
+
+Une variable `groupe` est ajoutée pour distinguer les deux, et les variables nutritionnelles sont renommées avec le suffixe `_e` pour indiquer qu’elles proviennent de l’enquête Endline.
+
+1. On ajoute une colonne `groupe` dans chaque base.
+2. On empile les deux bases avec `bind_rows()`.
+3. On renomme toutes les variables nutritionnelles de `energ_kcal` à `vit_c_mg` avec `rename_with()` en ajoutant le suffixe `_e`.
+
+```{r empilement-endline, include=FALSE}
+
+# Étape 1 : ajouter le groupe
+mother_endline_v1 <- mother_endline_v1 %>%
+  mutate(groupe = "mère")
+
+child_endline_v1 <- child_endline_v1 %>%
+  mutate(groupe = "enfant")
+
+# Étape 2 : empiler les deux bases
+conso_endline_empilee <- bind_rows(mother_endline_v1, child_endline_v1)
+
+# Étape 3 : renommer les variables nutritionnelles avec suffixe _e
+vars_nutrition <- c("energ_kcal", "protein_g", "lipid_tot_g", "calcium_mg",
+                    "iron_mg", "zinc_mg", "vit_b6_mg", "vit_b12_mcg", "vit_c_mg")
+
+conso_endline_empilee <- conso_endline_empilee %>%
+  rename_with(.cols = all_of(vars_nutrition),
+              .fn = ~ paste0(., "_e"))
+```
+
+
+### Résumé des consommations journalières par individu – Endline
+
+Nous souhaitons créer une base résumant, pour chaque individu, la **consommation journalière totale** (somme des 4 repas) pour tous les nutriments.  
+Cette étape correspond à la commande **`collapse`** dans Stata.
+
+
+1. On utilise `group_by()` pour regrouper les lignes correspondant au même individu (`hhid`, `s1_q2`).
+2. On applique `summarise()` avec `sum(..., na.rm = TRUE)` pour calculer les apports journaliers.
+3. Le nom de chaque variable nutritionnelle sera suffixé avec `_e_jour` pour indiquer qu’il s’agit de la somme journalière Endline.
+
+```{r collapse-endline, include=FALSE}
+# Calcul des totaux journaliers pour chaque individu
+resume_journalier_endline <- conso_endline_empilee %>%
+  group_by(hhid, s1_q2) %>%
+  summarise(across(ends_with("_e"), ~ sum(.x, na.rm = TRUE), .names = "{.col}_jour"),
+            .groups = "drop")
+```
+
+### Export de la base finale – `endline_final.dta`
+
+Nous extrayons une base finale contenant :\
+- une ligne par **individu** (mère ou enfant),\
+- avec les **consommations journalières totales** pour les principaux nutriments,\
+- et uniquement les variables demandées : `hhid`, `s1_q2`, `energ_kcal`, `protein_g`, `lipid_tot_g`, `calcium_mg`, `iron_mg`, `zinc_mg`.\
+
+Méthode utilisée :
+
+1. Nous sélectionnons les variables utiles de `resume_journalier_endline`.
+2. Nous les **renommons** pour enlever le suffixe `_e_jour`.
+3. Nous exportons la base finale au format `.dta`.
+
+Il n’est pas nécessaire d’utiliser `distinct()` ici car la base `resume_journalier_endline` a déjà été construite à partir d’un `group_by(hhid, s1_q2)` suivi d’un `summarise()`.  
+Cela garantit qu’il y a **exactement une seule ligne par individu**, ce qui respecte pleinement la structure attendue de la base finale.
+
+
+```{r export-endline-final, include=FALSE}
+
+# Étape 1 : sélection des colonnes utiles
+endline_final <- resume_journalier_endline %>%
+  select(hhid, s1_q2,
+         energ_kcal_e_jour, protein_g_e_jour, lipid_tot_g_e_jour,
+         calcium_mg_e_jour, iron_mg_e_jour, zinc_mg_e_jour) %>% 
+  distinct()
+
+# Étape 2 : renommage des colonnes pour correspondre à la consigne
+endline_final <- endline_final %>%
+  rename(
+    energ_kcal = energ_kcal_e_jour,
+    protein_g = protein_g_e_jour,
+    lipid_tot_g = lipid_tot_g_e_jour,
+    calcium_mg = calcium_mg_e_jour,
+    iron_mg = iron_mg_e_jour,
+    zinc_mg = zinc_mg_e_jour
+  )
+
+# Étape 3 : sauvegarde de la base
+write_dta(endline_final, "data/endline_final.dta")
+```
+
+## Fusion des bases Baseline et Endline – Par individu
+
+Nous fusionnons les bases `baseline_final.dta` et `endline_final.dta` de sorte que chaque individu soit représenté par **une seule ligne**, contenant :\
+- ses **informations Baseline** (suffixe `_b`)\
+- ses **informations Endline** (suffixe `_e`)
+
+La fusion est réalisée sur les variables `hhid` et `s1_q2`, qui identifient chaque individu de manière unique.
+
+Étapes de la fusion :
+
+1. Charger les deux bases depuis le dossier `data/`.
+2. Renommer les colonnes nutritionnelles pour éviter l’écrasement.
+3. Fusionner les deux bases avec `merge()` en conservant tous les individus.
+
+```{r fusion-bases-finales, include=FALSE}
+
+# Étape 1 : Charger les deux bases
+baseline_final <- read_dta("data/baseline_final.dta")
+endline_final  <- read_dta("data/endline_final.dta")
+
+# Étape 2 : Renommer les colonnes
+baseline_final <- baseline_final %>%
+  rename_with(.cols = -c(hhid, s1_q2), .fn = ~ paste0(., "_b"))
+
+endline_final <- endline_final %>%
+  rename_with(.cols = -c(hhid, s1_q2), .fn = ~ paste0(., "_e"))
+
+# Étape 3 : Fusion des deux bases
+fusion_finale <- merge(baseline_final, endline_final, by = c("hhid", "s1_q2"), all = TRUE)
+```
+
+Nous vérifions que la base fusionnée contient exactement le même nombre d’observations que les bases `baseline_final.dta` et `endline_final.dta`.
+
+```{r controle-fusion, include=FALSE}
+nb_baseline <- nrow(baseline_final)
+nb_endline <- nrow(endline_final)
+nb_fusion <- nrow(fusion_finale)
+```
+
+Nombre d’observations dans la base Baseline : `r nb_baseline`
+
+Nombre d’observations dans la base Endline : `r nb_endline`
+
+Nombre d’observations dans la base fusionnée : `r nb_fusion`
+
+## Fusion avec les caractéristiques des ménages
+
+Nous completons la base `fusion_finale` en y ajoutant les **caractéristiques socio-économiques du ménage**, extraites de la base `base_menage_final`.
+
+Les variables intégrées sont :\
+- Région, commune, village (`regionid`, `communeid`, `villageid`)\
+- Statut matrimonial (`poly`)\
+- Taille du ménage (`hhsize`)\
+- Niveau d’éducation du chef de ménage (`hh_primary`)\
+- Ratio de dépendance (`dependencyratio`)\
+- Score HFIAS (`hfias_score`)\
+- Variable de traitement (`T1`)
+
+Etape de la fusion : 
+
+1. Sélection des variables pertinentes dans `base_menage_final`
+2. Fusion par la variable `hhid` avec `fusion_finale`
+
+```{r enrichir-fusion-menage, include=FALSE}
+# Étape 1 : sélectionner les colonnes nécessaires
+caract_menage <- base_menage_final %>%
+  select(hhid, regionid, communeid, villageid, poly, hhsize, hh_primary,
+         dependencyratio, hfias_score, T1)
+
+# Étape 2 : jointure à gauche (left join)
+fusion_complete <- fusion_finale %>%
+  left_join(caract_menage, by = "hhid")
+```
+
+## Sauvegarde de la base finale complète
+
+La base `fusion_complete`, contenant à la fois :
+- les apports nutritionnels issus des enquêtes **Baseline** et **Endline**,
+- et les **caractéristiques socio-économiques** du ménage,
+est maintenant sauvegardée sous le nom **`base_finale.dta`**.
+
+```{r save-base-finale, include=FALSE}
+write_dta(fusion_complete, "data/base_finale.dta")
+base_finale <- read_dta("data/base_finale.dta")
+```
+
+# Partie 3 : Statistiques descriptives avec le package gtsummary
+
+## Tableau 1 : Apports nutritionnels moyens à Baseline et Endline
+Ce tableau présente les **moyennes et écarts-types** des principaux nutriments consommés quotidiennement par les individus,  
+au moment de l'enquête **Baseline** (début de l’étude) et **Endline** (fin de l’étude).  
+Les indicateurs analysés incluent : l’énergie (en kcal), les protéines, les lipides, le calcium, le fer et le zinc.
+
+Les variables de la Baseline sont préfixées par **_b**, celles de l’Endline par **_e**.  
+Les résultats sont exprimés sous la forme : **moyenne ± écart-type**
+
+```{r tableau-1, tab.cap="Apports nutritionnels moyens à Baseline et Endline", tab.topcaption=TRUE}
+set_gtsummary_theme(theme_gtsummary_compact())
+
+# Créer le tableau résumé
+tbl1 <- base_finale %>%
+  select(
+    energ_kcal_b, protein_g_b, lipid_tot_g_b, calcium_mg_b, iron_mg_b, zinc_mg_b,
+    energ_kcal_e, protein_g_e, lipid_tot_g_e, calcium_mg_e, iron_mg_e, zinc_mg_e
+  ) %>%
+  rename(
+    "Énergie (kcal) - Baseline" = energ_kcal_b,
+    "Protéines (g) - Baseline" = protein_g_b,
+    "Lipides (g) - Baseline" = lipid_tot_g_b,
+    "Calcium (mg) - Baseline" = calcium_mg_b,
+    "Fer (mg) - Baseline" = iron_mg_b,
+    "Zinc (mg) - Baseline" = zinc_mg_b,
+    "Énergie (kcal) - Endline" = energ_kcal_e,
+    "Protéines (g) - Endline" = protein_g_e,
+    "Lipides (g) - Endline" = lipid_tot_g_e,
+    "Calcium (mg) - Endline" = calcium_mg_e,
+    "Fer (mg) - Endline" = iron_mg_e,
+    "Zinc (mg) - Endline" = zinc_mg_e
+  ) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ± {sd}"
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Nutriment") %>%     
+  autofit() %>%
+      flextable::set_caption(                                # numérotation Word
+    autonum  = officer::run_autonum(seq_id = "tab") )
+
+tbl1
+
+```
+
+## Tableau 2 : Apports nutritionnels moyens à Endline selon la variable de traitement (T1)
+
+
+Ce tableau compare les **apports nutritionnels moyens à Endline** selon la variable `T1`,  
+qui indique si un individu appartient au **groupe de traitement** ou au **groupe témoin** dans l’étude.  
+
+Les indicateurs nutritionnels analysés sont :
+- l’énergie en kilocalories (kcal),
+- les protéines en grammes (g),
+- et les lipides en grammes (g).
+
+Les résultats sont exprimés sous la forme **moyenne ± écart-type**, pour chaque groupe.
+
+```{r tableau-2, tab.cap="Apports nutritionnels à Endline selon le traitement (T1)", tab.topcaption=TRUE}
+# Convertir T1 en facteur avec ses labels
+base_finale <- base_finale %>%
+  mutate(T1 = labelled::to_factor(T1))
+
+# Créer le tableau
+tbl2 <- base_finale %>%
+  select(T1, energ_kcal_e, protein_g_e, lipid_tot_g_e) %>%
+  tbl_summary(
+    by = T1,
+    statistic = all_continuous() ~ "{mean} ± {sd}",
+    label = list(
+      energ_kcal_e = "Énergie (kcal) – Endline",
+      protein_g_e = "Protéines (g) – Endline",
+      lipid_tot_g_e = "Lipides (g) – Endline",
+      T1 = "Traitement"
+    )
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Nutriment") %>%
+  autofit() %>%
+  set_caption(autonum = run_autonum(seq_id = "tab"))
+
+tbl2
+```
+
+
+## Tableau 3 : Apports nutritionnels à Endline selon le statut matrimonial du ménage
+
+Ce tableau présente les **apports nutritionnels moyens à Endline** selon le **statut matrimonial** du ménage,  
+indiqué par la variable `poly`, qui distingue les **ménages polygames** des **ménages monogames**.
+
+Les apports sont exprimés en **moyenne ± écart-type** pour chaque groupe.
+
+```{r tableau-3, tab.cap="Apports nutritionnels à Endline selon le statut matrimonial (polygamie)", tab.topcaption=TRUE}
+library(labelled)
+
+# Convertir la variable poly en facteur pour afficher les labels
+base_finale <- base_finale %>%
+  mutate(poly = labelled::to_factor(poly))
+
+# Construire le tableau
+tbl3 <- base_finale %>%
+  select(poly, energ_kcal_e, protein_g_e, lipid_tot_g_e) %>%
+  tbl_summary(
+    by = poly,
+    statistic = all_continuous() ~ "{mean} ± {sd}",
+    label = list(
+      energ_kcal_e = "Énergie (kcal) – Endline",
+      protein_g_e = "Protéines (g) – Endline",
+      lipid_tot_g_e = "Lipides (g) – Endline",
+      poly = "Statut matrimonial"
+    )
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Nutriment") %>%
+  autofit() %>%
+  set_caption(autonum = run_autonum(seq_id = "tab"))
+
+tbl3
+```
+
+
+## Tableau 4 : Caractéristiques des ménages
+
+Ce tableau présente des **statistiques descriptives** sur les principales caractéristiques des ménages de l’échantillon.  
+Les indicateurs incluent :
+
+- La **taille du ménage** (`hhsize`)
+- Le **niveau d’éducation primaire complété** par le chef de ménage (`hh_primary`)
+- Le **ratio de dépendance** (`dependencyratio`)
+- Le **score HFIAS** (`hfias_score`), mesurant la sécurité alimentaire du ménage.
+
+Les statistiques sont exprimées en **moyenne ± écart-type**.
+
+```{r tableau-4, tab.cap="Caractéristiques des ménages", tab.topcaption=TRUE}
+# S’assurer que hh_primary est bien affiché avec ses labels
+base_finale <- base_finale %>%
+  mutate(hh_primary = labelled::to_factor(hh_primary))
+
+tbl4 <- base_finale %>%
+  select(hhsize, hh_primary, dependencyratio, hfias_score) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ± {sd}",
+    label = list(
+      hhsize = "Taille du ménage",
+      hh_primary = "Chef de ménage a complété le primaire",
+      dependencyratio = "Ratio de dépendance",
+      hfias_score = "Score HFIAS (0 à 27)"
+    )
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Caractéristique du ménage") %>%
+  autofit() %>%
+  set_caption(autonum = run_autonum(seq_id = "tab"))
+
+tbl4
+```
+
+
+## Tableau 5 : Apports nutritionnels moyens selon le niveau d’insécurité alimentaire (HFIAS)
+
+Ce tableau présente les **apports nutritionnels moyens à Endline** en fonction du **niveau d’insécurité alimentaire**  
+des ménages, mesuré par le **score HFIAS** (Household Food Insecurity Access Scale).
+
+Les ménages ont été classés en trois groupes :
+- **Faible insécurité alimentaire** : score HFIAS ≤ 9
+- **Modérée** : entre 10 et 18
+- **Élevée** : > 18
+
+Les apports en énergie, protéines et lipides sont présentés en **moyenne ± écart-type** pour chaque groupe.
+
+```{r tableau-5, tab.cap="Apports nutritionnels selon le niveau d’insécurité alimentaire", tab.topcaption=TRUE}
+# Créer les catégories de sécurité alimentaire si ce n'est pas déjà fait
+base_finale <- base_finale %>%
+  mutate(hfias_cat = cut(hfias_score,
+                         breaks = c(-Inf, 9, 18, Inf),
+                         labels = c("Faible", "Modérée", "Élevée")))
+
+# Construire le tableau
+tbl5 <- base_finale %>%
+  select(hfias_cat, energ_kcal_e, protein_g_e, lipid_tot_g_e) %>%
+  tbl_summary(
+    by = hfias_cat,
+    statistic = all_continuous() ~ "{mean} ± {sd}",
+    label = list(
+      hfias_cat = "Niveau d’insécurité alimentaire",
+      energ_kcal_e = "Énergie (kcal) – Endline",
+      protein_g_e = "Protéines (g) – Endline",
+      lipid_tot_g_e = "Lipides (g) – Endline"
+    )
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Nutriment") %>%
+  autofit() %>%
+  set_caption(autonum = run_autonum(seq_id = "tab"))
+
+tbl5
+```
+
+
+

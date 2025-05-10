@@ -1,0 +1,1787 @@
+---
+output: 
+  officedown::rdocx_document:
+    reference_docx: Modele.docx
+---
+```{r global-options, include=FALSE}
+library(officedown)
+library(officer)
+library(flextable)
+library(haven)
+# Chargement des bibliothèques nécessaires à l’analyse
+library(tidyverse)     # Manipulation de données (select, filter, join, etc.)
+library(janitor)       # Pour nettoyer et comparer les noms de variables
+library(skimr)         # Pour produire des statistiques descriptives structurées
+library(naniar)        # Pour explorer les valeurs manquantes visuellement
+library(validate)      # Pour vérifier la validité des règles logiques sur les données
+library(knitr)         # Pour produire des tableaux propres
+library(gtsummary)
+
+knitr::opts_chunk$set(
+  echo = FALSE,      # Ne pas afficher le code
+  warning = FALSE,   # Ne pas afficher les warnings
+  message = FALSE,
+  fig.width = 10, # Largeur des figures (en pouces)
+  fig.align = "center", 
+  fig.height = 7  
+)
+# Importer les bases de données
+base_mad <- read_dta("Base_MAD.dta")
+base_principale <- read_dta("Base_Principale.dta")
+```
+```{r page_garde_1}
+library(tidyverse)
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL", stringsAsFactors = FALSE)) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](Figures/LOGO1.png){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](Figures/LOGO2.png){width="3.5cm"} |
+
+```{r page_garde_3}
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  set_table_properties(layout = "autofit", width = 1)
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](Figures/LOGO3.png){width="2.5cm" height="2cm"} |
+
+
+```{r page garde_4}
+flextable(
+  data.frame(
+    Contenu = "ÉVALUATION\nProjet statistique avec R",  # \n = retour à la ligne
+    stringsAsFactors = FALSE)
+  ) %>% 
+  delete_part(part = "header") %>%          # pas d’en-tête
+  border_remove() %>%                       # aucune bordure
+  font(fontname = "Times New Roman") %>% 
+  fontsize(size = 22) %>%                   # taille du titre
+  bold() %>%                                # gras
+  align(align = "center", part = "all") %>% # centrage horizontal
+  height(height = 1.2) %>%                  # un peu d’air en hauteur
+  padding(padding = 0) %>%                  # zéro marge interne
+  set_table_properties(layout = "autofit",
+                       width  = 1)          # garde la largeur minimale
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "Malick SENE", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+
+\newpage
+# Table des matières
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Liste des figures
+
+<!---BLOCK_TOC{seq_id: 'fig'}--->
+\newpage
+
+# Liste des tables
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+\newpage
+
+# Analyse de consistence des bases de données
+
+L’analyse de consistance vise à s'assurer que les jeux de données sont structurellement corrects, internement cohérents, et prêts à être exploités pour les analyses statistiques.
+Nous allons successivement :
+
+-Inspecter les structures des jeux base_mad et base_principale
+
+-Vérifier les valeurs manquantes et valeurs aberrantes
+
+-Contrôler la cohérence croisée (ex : présence des identifiants communs)
+
+-Identifier et documenter les corrections nécessaires
+
+## Exploration structurelle des bases
+
+L’objectif ici est de comprendre la structure et le contenu descriptif des bases base_mad et base_principale, à travers les étiquettes de variables fournies dans les fichiers.
+Les étiquettes (label) permettent de savoir ce que mesure chaque variable, ce qui est fondamental pour interpréter les données de manière correcte et éviter les erreurs lors de l’analyse.
+
+```{r exploration des bases, resultS= 'hide'}
+# Aperçu des variables dans base_mad
+head(sapply(base_mad, function(x) attr(x,"label")))
+# Aperçu variables dans base_principale
+head(sapply(base_principale, function(x) attr(x,"label")))
+```
+
+**Contenu de `base_mad`**
+
+Cette base regroupe des informations sur les enfants de moins de 2 ans, en particulier :
+
+- **Données de base de l’enfant** :
+  - `MAD_sex` : sexe de l’enfant (0 = Femme, 1 = Homme)
+  - `MAD_resp_age` : âge en mois de l’enfant
+
+- **Habitudes alimentaires spécifiques** :
+  - `EverBreastF`, `PCIYCBreastF` : allaitement
+  - `PCIYCInfFormNb`, `PCIYCDairyMiNb`, `PCIYCStapPoNb` : consommation d’aliments spécifiques comme lait en poudre, yaourt, bouillie
+
+- **Divers groupes d’aliments** (préparés, végétaux, fruits, viandes, poissons, œufs, légumineuses, produits laitiers, huiles, sucreries, etc.) :
+  - Variables comme `PCMADStapCer`, `PCMADVegOrg`, `PCMADPrMeatF`, `PCMADDairy`, etc.
+  - Codage  en : 0 (Non), 1 (Oui), 888 (Ne sait pas). Ces valeurs **888 devront être recodées** en `NA` dans les étapes suivantes.
+
+- **Nombre de repas** :
+  - `PCIYCMeals` : nombre de fois que l’enfant a consommé des aliments solides ou semi-solides
+
+- **Identifiant** :
+  - `ID` : non labellisé, mais crucial pour le rattachement au ménage
+
+Ainsi`base_mad` permet de reconstituer la diversité alimentaire infantile.
+
+
+**Contenu de `base_principale`**
+
+Cette base rassemble les informations du ménage dans lequel vit l’enfant :
+
+- **Identification géographique** :
+  - `ADMIN0Name`, `ADMIN1Name`, `ADMIN2Name` : pays, région, district
+  - `SvyDate`, `SvyMonth`, `SURVEY`, etc. : métadonnées de collecte
+
+- **Caractéristiques démographiques du ménage** :
+  - `HHSize`, `HHSize05M`, `HHSize59F`, `HHSize1549M`, etc. : tailles des sous-populations du ménage selon sexe et âge
+  - `HHHSex`, `HHHAge`, `HHHEdu`, `HHHMainActivity`, etc. : caractéristiques du chef de ménage
+
+- **Scores alimentaires et indicateurs de sécurité alimentaire** :
+  - `HDDS_*`, `FCS*`, `rCSI*`, `LhCSI*`, etc.
+  - Ils mesurent la diversité, la fréquence de consommation, ou encore les mécanismes d’adaptation aux chocs alimentaires
+
+La `base_principale` est la base socle pour les analyses de sécurité alimentaire à l’échelle du ménage.
+
+## Recodage des valeurs 888 (Ne sait pas) en NA
+
+Dans la base base_mad, plusieurs variables utilisent le code 888 pour signifier que la réponse est "ne sait pas".
+Ce code doit être converti en NA (valeur manquante standard en R) pour que les fonctions statistiques et graphiques n’interprètent pas 888 comme une valeur réelle.
+
+```{r recodage des 888 en NA}
+# Recodage des valeurs 888 en NA dans base_mad
+
+# Étape 1 : identifier les variables numériques (car ce sont elles qui peuvent contenir 888)
+vars_num <- base_mad %>% 
+  select(where(is.numeric)) %>% 
+  names()
+
+# Étape 2 : recoder la valeur 888 en NA sur toutes ces variables
+base_mad <- base_mad %>% 
+  mutate(across(all_of(vars_num), ~ na_if(., 888)))
+
+# Vérification : affichage du nombre de NA par variable après recodage
+na_counts <- base_mad %>% 
+  summarise(across(all_of(vars_num), ~ sum(is.na(.)))) %>% 
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "NA_apres_recodage")
+
+# Affichage du résultat dans un tableau clair
+knitr::kable(head(na_counts, 15), caption = "Extrait du nombre de NA après recodage (valeurs 888)")
+```
+
+- Le recodage a été appliqué **uniquement aux variables numériques**, car le code 888 est un entier, et on évite ainsi de modifier des colonnes textuelles par erreur.
+- La fonction `na_if(., 888)` remplace chaque 888 par `NA`, ce qui permet aux fonctions statistiques (`mean()`, `lm()`, `summary()`, etc.) d’ignorer ces cas comme des valeurs manquantes normales.
+- Un tableau récapitulatif (`na_counts`) a été généré pour vérifier le bon déroulement du recodage.
+- Ce traitement est essentiel pour garantir la **qualité statistique** de l’analyse à venir.
+
+\newpage
+# Analyse socio-demographique des ménages
+
+Cette partie a pour but de produire un tableau descriptif des principales caractéristiques 
+socio-démographiques des ménages. Les variables choisies permettent de comprendre :
+la structure du ménage (taille), le profil du chef de ménage (sexe, âge, éducation, statut matrimonial), et la localisation géographique (région administrative).
+
+
+```{r tableau-1-socio-demo, tab.cap="Caractéristiques socio-démographiques des ménages", tab.topcaption=TRUE}
+# Charger le thème compact
+set_gtsummary_theme(theme_gtsummary_compact())
+
+# Créer le tableau résumé
+tbl_socio <- base_principale %>%
+  select(
+    HHSize,
+    HHHSex,
+    HHHAge,
+    HHHEdu,
+    HHHMatrimonial,
+    ADMIN1Name
+  ) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ± {sd}",
+    type = all_categorical() ~ "categorical",
+    label = list(
+      HHSize ~ "Taille du ménage",
+      HHHSex ~ "Sexe du chef de ménage",
+      HHHAge ~ "Âge du chef de ménage",
+      HHHEdu ~ "Niveau d'éducation du chef",
+      HHHMatrimonial ~ "Statut matrimonial",
+      ADMIN1Name ~ "Région"
+    ),
+    missing = "no"
+  ) %>%
+  as_flex_table() %>%
+  autofit() %>%
+  flextable::set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+
+tbl_socio
+
+```
+
+
+
+**Analyse des caractéristiques socio-démographiques des ménages**
+
+Le tableau ci-dessus décrit les principales caractéristiques des ménages enquêtés (N = 8 950) :
+
+- **Taille du ménage** : La taille moyenne est de **7,55 personnes** avec un écart-type de 12,90, ce qui suggère une forte variabilité entre les ménages. Cette moyenne relativement élevée est cohérente avec des structures familiales élargies souvent observées dans certains contextes sahéliens.
+
+- **Sexe du chef de ménage** : **56 %** des chefs de ménage sont de sexe **masculin** contre **44 %** de sexe féminin. Cela traduit une répartition encore majoritairement masculine, bien que la proportion de femmes à la tête des ménages soit non négligeable.
+
+- **Âge du chef de ménage** : L'âge moyen des chefs de ménage est de **43 ans**, avec une dispersion (écart-type) de 13 ans. Cela montre une population adulte, potentiellement en âge actif et décisionnel au sein du ménage.
+
+- **Niveau d’éducation du chef** : La variable présente une répartition marquée : **62 %** des chefs ont atteint le niveau **2**, tandis que **31 %** se situent au niveau **1**, indiquant un niveau globalement faible ou modéré d'instruction dans la population étudiée.
+
+- **Statut matrimonial** : Les données sur cette variable sont manquantes (`NA`), ce qui empêche une interprétation fiable à ce stade. Une vérification ou un recodage pourrait être envisagé.
+
+- **Région** : Les ménages sont répartis sur plusieurs régions administratives, avec des proportions relativement équilibrées dans les zones comme **Batha (18 %)**, **Lac (16 %)**, **Guera (16 %)**, et **Barh-El-Gazel (13 %)**. Certaines régions comme **Wadi Fira (0,1 %)** ou **Salamat (5,4 %)** sont sous-représentées, ce qui peut traduire soit une faible densité de population, soit un échantillonnage limité dans ces zones.
+
+\newpage
+#Score de consommation alimentaire
+
+##  Analyse descriptive des composantes du SCA
+
+Ici, nous réalisons une analyse descriptive des composantes du Score de Consommation Alimentaire (SCA). 
+Le SCA est construit à partir de la fréquence de consommation (sur 7 jours) de différents groupes alimentaires, 
+pondérés selon leur valeur nutritionnelle. L’analyse descriptive suivante permet d’examiner la distribution de 
+chaque groupe avant le calcul du score composite.
+
+- Les variables utilisées (ex. : `FCSStap`, `FCSPulse`, etc.) correspondent aux **groupes alimentaires clés** selon la méthodologie du PAM pour le FCS.
+- On calcule pour chaque groupe la **moyenne de consommation sur les 7 derniers jours**, ainsi que l'**écart-type**, pour explorer les tendances générales.
+
+```{r tableau-5, tab.cap="Apports nutritionnels selon le niveau d’insécurité alimentaire", tab.topcaption=TRUE}
+library(labelled)
+
+# Étape 1 : ajouter les labels de valeurs aux variables SCA
+base_temp <- base_principale %>%
+  mutate(
+    across(
+      .cols = c(FCSStap, FCSPulse, FCSDairy, FCSPr, FCSVeg, FCSFruit, FCSFat, FCSSugar, FCSCond),
+      .fns = ~ labelled(.x, labels = c(
+        "Jamais (0 jour)" = 0,
+        "1 jour" = 1,
+        "2 jours" = 2,
+        "3 jours" = 3,
+        "4 jours" = 4,
+        "5 jours" = 5,
+        "6 jours" = 6,
+        "Tous les jours (7 jours)" = 7
+      ))
+    )
+  )
+
+# Étape 2 : convertir en facteur pour afficher les labels dans le tableau
+base_temp <- base_temp %>%
+  mutate(across(
+    .cols = c(FCSStap, FCSPulse, FCSDairy, FCSPr, FCSVeg, FCSFruit, FCSFat, FCSSugar, FCSCond),
+    .fns = labelled::to_factor
+  ))
+
+# Étape 3 : créer le tableau descriptif
+sca_vars <- base_temp %>%
+  select(FCSStap, FCSPulse, FCSDairy, FCSPr, FCSVeg, FCSFruit, FCSFat, FCSSugar, FCSCond) %>%
+  tbl_summary(
+    type = everything() ~ "categorical",
+    label = list(
+      FCSStap ~ "Céréales et tubercules",
+      FCSPulse ~ "Légumineuses",
+      FCSDairy ~ "Produits laitiers",
+      FCSPr ~ "Viandes, poissons et œufs",
+      FCSVeg ~ "Légumes",
+      FCSFruit ~ "Fruits",
+      FCSFat ~ "Matières grasses",
+      FCSSugar ~ "Sucre",
+      FCSCond ~ "Condiments"
+    ),
+    missing = "no"
+  ) %>%
+  as_flex_table() %>%
+  autofit() %>%
+  flextable::set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+
+sca_vars
+```
+
+**Analyse des résultats descriptifs des composantes du SCA**
+
+Le tableau présente la fréquence de consommation des principaux groupes alimentaires par les ménages au cours des 7 derniers jours. On observe les tendances suivantes :
+
+- **Céréales et tubercules** : Ce groupe est **quasi-universellement consommé**, avec **89 %** des ménages en consommant **tous les jours**, ce qui reflète son rôle de base dans l’alimentation.
+
+- **Légumineuses** : 28 % des ménages n’en ont pas consommé, tandis que 19 % les ont consommées 3 jours, et 21 % pendant 2 jours. Cela révèle une consommation modérée mais non systématique.
+
+- **Produits laitiers** : 45 % des ménages n'ont pas consommé de produits laitiers au cours de la semaine, traduisant une accessibilité probablement limitée. Seuls 9,4 % en consomment quotidiennement.
+
+- **Viandes, poissons et œufs** : 14 % des ménages déclarent n’en avoir consommé aucun jour, tandis que 13 % y ont accès tous les jours. La majorité (env. 60 %) les consomme entre 2 et 6 jours, reflétant une consommation irrégulière mais présente.
+
+- **Légumes** : La consommation reste modérée, avec **64 %** de ménages n’en consommant **aucun jour** et moins de 3 % les consommant quotidiennement. Ce niveau est inquiétant du point de vue nutritionnel.
+
+- **Fruits** : Encore plus alarmant, **88 %** des ménages n’ont consommé **aucun fruit** pendant la semaine, révélant un très faible accès ou disponibilité.
+
+- **Matières grasses** : 6 % des ménages n'en consomment pas, tandis que **64 %** en consomment **chaque jour**, ce qui montre une large disponibilité.
+
+- **Sucre** : 13 % des ménages n’ont pas consommé de sucre, tandis que **61 %** en consomment **tous les jours**, traduisant un usage courant.
+
+- **Condiments** : Bien que considérés comme nutritionnellement négligeables, **68 %** des ménages y ont recours quotidiennement, ce qui reflète des habitudes culinaires stables.
+
+**Conclusion** : Les données montrent que les **groupes riches en énergie (céréales, graisses, sucres)** sont bien plus consommés que les **groupes riches en micronutriments (légumes, fruits, produits laitiers)**. Cela pourrait refléter à la fois des contraintes économiques et un manque d'accès à une alimentation diversifiée.
+
+## Calcul du score de sécurité alimentaire
+
+Nous calculons maintenant le Score de Consommation Alimentaire (SCA/FCS) en appliquant les pondérations 
+officielles définies par le Programme Alimentaire Mondial (PAM).
+
+**Formule du Score de Consommation Alimentaire (SCA / FCS)**
+
+Le FCS est un score composite obtenu à partir de la fréquence de consommation de différents groupes alimentaires au cours des 7 derniers jours, pondérée selon leur valeur nutritionnelle. La formule standard du Programme Alimentaire Mondial (PAM) est la suivante :
+
+\[
+\text{FCS} = 2 \times \text{(Céréales)} + 3 \times \text{(Légumineuses)} + 4 \times \text{(Produits laitiers)} + 4 \times \text{(Viande, poisson, œufs)} + 1 \times \text{(Légumes)} + 1 \times \text{(Fruits)} + 0.5 \times \text{(Graisses)} + 0.5 \times \text{(Sucre)}
+\]
+
+Les condiments ne sont pas pris en compte dans le calcul car leur valeur nutritionnelle est négligeable. La somme des pondérations donne 16
+
+```{r calcul-sca}
+# Calcul du Score de Consommation Alimentaire (FCS)
+base_principale <- base_principale %>%
+  mutate(
+    score_fcs = (
+      2 * FCSStap +
+      3 * FCSPulse +
+      4 * FCSDairy +
+      4 * FCSPr +
+      1 * FCSVeg +
+      1 * FCSFruit +
+      0.5 * FCSFat +
+      0.5 * FCSSugar
+    )
+  )
+summary(base_principale$score_fcs)
+```
+Le Score de Consommation Alimentaire (FCS), calculé pour chaque ménage, présente la répartition statistique suivante :
+
+- **Minimum** : 0  
+- **1er quartile (Q1)** : 35,5  
+- **Médiane (Q2)** : 46  
+- **Moyenne** : 47,28  
+- **3e quartile (Q3)** : 58  
+- **Maximum** : 112
+
+Ces résultats indiquent une **variabilité importante** des habitudes alimentaires parmi les ménages. Quelques éléments d’interprétation :
+
+- La **médiane (46)**, légèrement inférieure à la moyenne, suggère une distribution **légèrement asymétrique** à droite (quelques valeurs élevées tirent la moyenne vers le haut).
+- Un **score de 0** indique une privation alimentaire extrême pour au moins un ménage — aucune consommation de groupes alimentaires pondérés, ce qui est préoccupant.
+- Le **maximum de 112** correspond à une consommation quotidienne de tous les groupes pondérés, ce qui est rare et indique un très bon accès à une alimentation variée.
+- Une majorité des ménages se situent entre **35 et 58**, ce qui peut traduire une situation alimentaire **ni critique, ni totalement satisfaisante** — à approfondir par la classification à venir.
+
+## Tableau des poids FCS
+
+Ce tableau présente les poids attribués à chaque groupe alimentaire dans le calcul du Score 
+de Consommation Alimentaire (FCS), selon les recommandations du PAM. La somme totale doit être égale à 16.
+
+```{r tableau-fcs-poids, tab.cap="Poids attribués aux groupes alimentaires dans le calcul du Score de Consommation Alimentaire", tab.topcaption=TRUE}
+# Créer un tableau de données
+poids_fcs <- tibble::tibble(
+  `Groupe alimentaire` = c(
+    "Céréales et tubercules",
+    "Légumineuses",
+    "Produits laitiers",
+    "Viande, poisson, œufs",
+    "Légumes",
+    "Fruits",
+    "Matières grasses",
+    "Sucre"
+  ),
+  `Poids` = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Ajouter une ligne de total
+poids_fcs <- poids_fcs %>%
+  bind_rows(tibble(`Groupe alimentaire` = "Total", `Poids` = sum(poids_fcs$Poids)))
+
+# Convertir en flextable
+flextable(poids_fcs) %>%
+  autofit() %>%
+  flextable::set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+```
+
+## Catégorisation du FCS selon 2 seuils
+
+Ici, on crée deux variables catégorielles à partir du score FCS : une selon les seuils 21/35, 
+et une autre selon 28/42, pour comparaison.
+
+- **Grille 1 : Seuils 21 / 35**
+  - **Pauvre** : FCS ≤ 21
+  - **Limite** : 21 < FCS ≤ 35
+  - **Acceptable** : FCS > 35
+
+- **Grille 2 : Seuils 28 / 42**
+  - **Pauvre** : FCS ≤ 28
+  - **Limite** : 28 < FCS ≤ 42
+  - **Acceptable** : FCS > 42
+
+```{r tableau-distribution-fcs, tab.cap="Distribution des ménages selon les catégories FCS (seuils 21/35 et 28/42)", tab.topcaption=TRUE, message=FALSE, warning=FALSE}
+library(gt)
+
+
+# Création des catégories si ce n'est pas déjà fait
+base_principale <- base_principale %>%
+  mutate(
+    fcs_cat_21_35 = case_when(
+      score_fcs <= 21 ~ "Pauvre",
+      score_fcs > 21 & score_fcs <= 35 ~ "Limite",
+      score_fcs > 35 ~ "Acceptable"
+    ),
+    fcs_cat_28_42 = case_when(
+      score_fcs <= 28 ~ "Pauvre",
+      score_fcs > 28 & score_fcs <= 42 ~ "Limite",
+      score_fcs > 42 ~ "Acceptable"
+    )
+  )
+
+# Résumé pour les seuils 21/35
+resume_fcs_21_35 <- base_principale %>%
+  count(Catégorie = fcs_cat_21_35) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 1))
+
+# Résumé pour les seuils 28/42
+resume_fcs_28_42 <- base_principale %>%
+  count(Catégorie = fcs_cat_28_42) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 1))
+
+# Convertir en flextable (via gt pour affichage stylé)
+tab_fcs_21_35 <- resume_fcs_21_35 %>%
+  gt() %>%
+  tab_header(title = "Distribution FCS – Seuils 21/35")
+
+tab_fcs_28_42 <- resume_fcs_28_42 %>%
+  gt() %>%
+  tab_header(title = "Distribution FCS – Seuils 28/42")
+
+# Affichage des deux tableaux
+tab_fcs_21_35
+tab_fcs_28_42
+```
+
+
+
+
+**Interprétation des résultats de la catégorisation du FCS**
+
+Deux grilles de seuils ont été appliquées au Score de Consommation Alimentaire (FCS), donnant les répartitions suivantes :
+
+- **Avec les seuils 21/35 :**
+  - **75,4 %** des ménages sont classés comme ayant une consommation **acceptable**.
+  - **19,6 %** sont en situation **limite**.
+  - **5,0 %** sont en situation **pauvre**.
+
+- **Avec les seuils 28/42 :**
+  - La part de ménages **acceptables** chute à **58,6 %**.
+  - La catégorie **limite** augmente à **28,7 %**.
+  - Les ménages **pauvres** passent à **12,7 %**.
+
+Cette comparaison montre que la grille **28/42** est plus restrictive que la grille **21/35**, identifiant une plus grande part de la population comme étant potentiellement en insécurité alimentaire.
+
+L’impact programmatique est important :
+- **Grille 21/35** : plus tolérante, peut **minimiser la gravité** des situations.
+- **Grille 28/42** : permet une **meilleure détection des ménages vulnérables**, notamment ceux en situation limite, utile pour le **ciblage des interventions**.
+
+## Représentation spatiale
+
+Dans cette section, nous proposons une visualisation géographique de la situation alimentaire des ménages à travers le territoire, à partir de leur Score de Consommation Alimentaire (SCA/FCS).
+
+L’analyse repose sur deux grilles de seuils utilisées pour catégoriser les scores FCS :
+- **Grille 1 (21/35)** : Pauvre, Limite, Acceptable
+- **Grille 2 (28/42)** : Pauvre, Limite, Acceptable
+
+Pour chaque grille, nous avons réalisé :
+- Une carte **par région** (niveau administratif 1)
+- Une carte **par département** (niveau administratif 2)
+
+Dans chaque unité géographique, nous identifions la **catégorie dominante**, c’est-à-dire celle qui regroupe la **majorité des ménages** de la zone. Cette catégorie est représentée par une couleur sur la carte.
+
+Cette méthode permet de visualiser les zones les plus affectées par l’insécurité alimentaire et de comparer les résultats selon les seuils utilisés.
+
+Ces cartes offrent ainsi une lecture intuitive de la situation alimentaire, utile pour le ciblage des interventions et la planification des ressources.
+
+```{r carte-region-fcs-2135,fig.cap= "Catégorie FCS dominante par région (seuils 21/35)", message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(viridis)
+library(ggspatial)
+
+
+# 1. Lire le shapefile des régions
+regions <- st_read("tcd_admbnda_adm1_20250212_AB.shp")  # Adapter le chemin si nécessaire
+
+# Harmoniser les noms des régions (mettre en majuscule et remplacer les accents/espaces)
+base_principale <- base_principale %>%
+  mutate(ADMIN1Name = recode(ADMIN1Name,
+    "Barh-El-Gazel" = "BARH EL GAZEL",
+    "Batha"         = "BATHA",
+    "Guera"         = "GUÉRA",
+    "Kanem"         = "KANEM",
+    "Lac"           = "LAC",
+    "Ouaddai"       = "OUADDAÏ",
+    "Salamat"       = "SALAMAT",
+    "Sila"          = "SILA",
+    "Ennedi Est"    = "ENNEDI EST",
+    "Wadi Fira"     = "WADI FIRA"
+    # Si d'autres régions existent dans les données, les ajouter ici
+  ))
+
+# 2. Identifier la catégorie FCS dominante par région
+fcs_dominante_region <- base_principale %>%
+  group_by(ADMIN1Name, fcs_cat_21_35) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN1Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)  # Garde la catégorie la plus fréquente
+
+# 3. Joindre à la géométrie
+carte_region_fcs <- regions %>%
+  left_join(fcs_dominante_region, by = c("ADM1_FR" = "ADMIN1Name"))  
+
+# Affichage carte régionale avec style cohérent
+ggplot(carte_region_fcs) +
+  geom_sf(aes(fill = fcs_cat_21_35), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Pauvre" = "#e74c3c", "Limite" = "#f1c40f", "Acceptable" = "#2ecc71"),
+    name = "Catégorie FCS (21/35)"
+  ) +
+  labs(
+    title = "Catégorie FCS dominante par région (seuils 21/35)",
+    subtitle = "Basée sur la majorité des ménages par région",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+
+```
+
+
+**Analyse de la carte régionale du Score de Consommation Alimentaire (seuils 21/35)**
+
+La carte représente, pour chaque région, la **catégorie dominante** du Score de Consommation Alimentaire (FCS), selon les seuils de classification suivants :
+- **Pauvre** : FCS ≤ 21
+- **Limite** : 21 < FCS ≤ 35
+- **Acceptable** : FCS > 35
+
+Seule la **catégorie la plus représentée** (en proportion de ménages) est affichée pour chaque région.
+
+**Principaux constats :**
+
+- Une majorité des régions apparaissent en **vert**, ce qui signifie que la **catégorie "Acceptable"** est la plus fréquente dans ces zones.
+- Cependant, plusieurs régions restent en **gris**, ce qui signifie que **les données n'ont pas permis d'identifier une catégorie dominante** dans ces zones. Cela peut être dû à l’absence des données dans ces régions ;
+
+**Interprétation opérationnelle :**
+
+- La dominance de la catégorie **"Acceptable"** est une indication rassurante à première vue, mais elle doit être interprétée avec prudence :
+  - Cela ne signifie pas que toute la région est sécurisée sur le plan alimentaire ;
+  - Il est essentiel de compléter cette lecture par l’analyse des proportions des catégories **"Pauvre"** et **"Limite"** dans chaque région ;
+  - Les résultats sont sensibles au choix des **seuils de classification**.
+
+Cette carte offre une vue d’ensemble utile pour le **ciblage géographique** des politiques alimentaires, mais doit être croisée avec les données départementales pour affiner l’intervention.
+
+Nous affichons maintenant la carte départementale du Score de Consommation Alimentaire (seuils 21/35
+
+```{r carte_region_fcs_2135, fig.cap= "Catégorie FCS dominante par departement (seuils 21/35)"}
+library(ggspatial)
+
+# 1. Lire shapefile des départements
+departements <- st_read("tcd_admbnda_adm2_20250212_AB.shp")  # Adapter le chemin
+
+# 2. Harmoniser les noms si nécessaire
+base_principale <- base_principale %>%
+  mutate(ADMIN2Name = recode(ADMIN2Name,
+    "Kaya"                = "Kaya",
+    "Kanem"               = "Kanem",
+    "Batha Est"           = "Batha Est",
+    "Ouara"               = "Ouara",
+    "Barh-El-Gazel Sud"   = "Barh El Gazel Sud",
+    "Guera"               = "Guéra",
+    "Abtouyour"           = "Abtouyour",
+    "Mamdi"               = "Mamdi",
+    "Batha Ouest"         = "Batha Ouest",
+    "Nord Kanem"          = "Nord Kanem",
+    "Barh-Signaka"        = "Bahar Signaka",      # légère différence orthographique
+    "Wayi"                = "Wayi",
+    "Fitri"               = "Fitri",
+    "Assoungha"           = "Assoungha",
+    "Kimiti"              = "Kimiti",
+    "Aboudeia"            = "Aboudeia",
+    "Mangalme"            = "Mangalmé",
+    "Wadi Hawar"          = "Wadi Hawar",
+    "Barh-El-Gazel Ouest" = "Barh El Gazel Ouest",
+    "Bahr-Azoum"          = "Bahr Azoum",
+    "Dar-Tama"            = "Dar Tama"
+  ))
+
+# 3. Calculer la catégorie dominante par département
+fcs_dominante_dept <- base_principale %>%
+  group_by(ADMIN2Name, fcs_cat_21_35) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN2Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# 4. Fusion avec la géométrie
+carte_dept_fcs <- departements %>%
+  left_join(fcs_dominante_dept, by = c("ADM2_FR" = "ADMIN2Name"))
+
+# 5. Affichage de la carte
+ggplot(carte_dept_fcs) +
+  geom_sf(aes(fill = fcs_cat_21_35), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Pauvre" = "#e74c3c", "Limite" = "#f1c40f", "Acceptable" = "#2ecc71"),
+    name = "Catégorie FCS (21/35)"
+  ) +
+  labs(
+    title = "Catégorie FCS dominante par département (seuils 21/35)",
+    subtitle = "Basée sur la majorité des ménages par département",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+```
+
+**Analyse de la carte départementale du Score de Consommation Alimentaire (seuils 21/35)**
+
+- La plupart des départements colorés apparaissent en **vert**, ce qui indique que la majorité des ménages y ont une consommation alimentaire jugée **acceptable**.
+- Certaines zones apparaissent en **gris** (catégorie `NA`), ce qui peut s’expliquer par : une **absence de données** dans ces départements ;
+
+Affichons maintenant la carte régionale du Score de Consommation Alimentaire (seuils 28/42
+
+```{r carte-region-fcs-2842, message=FALSE, warning=FALSE,fig.cap= "Catégorie FCS dominante par région (seuils 28/42)"}
+library(dplyr)
+library(ggplot2)
+library(ggspatial)
+
+# 1. Créer la table des catégories dominantes (grille 28/42)
+fcs_dominante_region_28_42 <- base_principale %>%
+  group_by(ADMIN1Name, fcs_cat_28_42) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN1Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# 2. Jointure avec les régions (assume que noms déjà harmonisés)
+carte_region_fcs_28_42 <- regions %>%
+  left_join(fcs_dominante_region_28_42, by = c("ADM1_FR" = "ADMIN1Name"))
+
+# 3. Affichage de la carte avec style cohérent
+ggplot(carte_region_fcs_28_42) +
+  geom_sf(aes(fill = fcs_cat_28_42), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Pauvre" = "#e74c3c", "Limite" = "#f1c40f", "Acceptable" = "#2ecc71"),
+    name = "Catégorie FCS (28/42)"
+  ) +
+  labs(
+    title = "Catégorie FCS dominante par région (seuils 28/42)",
+    subtitle = "Basée sur la majorité des ménages par région",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+```
+La carte présente la répartition des catégories FCS dominantes par région selon la grille de seuils 28/42. On observe que, malgré un seuil plus strict que celui de 21/35, la majorité des régions restent classées dans la catégorie "Acceptable". Toutefois, certaines zones apparaissent sans données (en gris), ce qui souligne des limitations dans la couverture de l’enquête.
+
+Passons maintenant à la carte départementale du Score de Consommation Alimentaire (seuils 28/42
+
+```{r carte-departement-fcs-2842, message=FALSE, warning=FALSE ,fig.cap= "Catégorie FCS dominante par departement (seuils 28/42)"}
+library(dplyr)
+library(ggplot2)
+library(ggspatial)
+
+# 1. Catégorie dominante par département (grille 28/42)
+fcs_dominante_dept_28_42 <- base_principale %>%
+  group_by(ADMIN2Name, fcs_cat_28_42) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN2Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# 2. Jointure avec shapefile départements (noms déjà harmonisés)
+carte_dept_fcs_28_42 <- departements %>%
+  left_join(fcs_dominante_dept_28_42, by = c("ADM2_FR" = "ADMIN2Name"))
+
+# 3. Affichage carte
+ggplot(carte_dept_fcs_28_42) +
+  geom_sf(aes(fill = fcs_cat_28_42), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Pauvre" = "#e74c3c", "Limite" = "#f1c40f", "Acceptable" = "#2ecc71"),
+    name = "Catégorie FCS (28/42)"
+  ) +
+  labs(
+    title = "Catégorie FCS dominante par département (seuils 28/42)",
+    subtitle = "Basée sur la majorité des ménages par département",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+```
+La carte révèle une situation plus contrastée que les précédentes : en appliquant la grille 28/42, plusieurs départements passent dans des catégories de consommation alimentaire plus préoccupantes. On observe clairement l’émergence de départements classés comme "Pauvres" (en rouge) et "Limites" (en jaune), indiquant une détérioration de la situation alimentaire dans ces zones avec ce seuil plus strict. Cette visualisation montre ainsi que le choix des seuils influence significativement le diagnostic territorial, et souligne la nécessité de prendre en compte les zones vulnérables même lorsque la moyenne régionale semble satisfaisante.
+
+L’analyse cartographique du Score de Consommation Alimentaire (FCS) a permis de mettre en évidence les disparités territoriales en matière de sécurité alimentaire, selon deux grilles de classification (21/35 et 28/42). À l’échelle régionale, la majorité des zones semblent dans une situation acceptable, mais une lecture plus fine au niveau départemental révèle l’existence de poches d’insécurité alimentaire préoccupantes, en particulier avec le seuil 28/42.
+
+Ces représentations spatiales confirment l’importance du **niveau d’analyse géographique** et du **choix des seuils** dans l’interprétation des résultats. Elles constituent un outil essentiel pour le **ciblage territorial** des interventions, l’allocation des ressources et la priorisation des zones à risque dans les stratégies de sécurité alimentaire.
+
+\newpage
+
+#	L’indice réduit des stratégies de survie (rCSI)
+
+## Analyse descriptive des variables qui composent le rCSI
+
+L’indice réduit des stratégies de survie (rCSI) est un indicateur composite utilisé pour évaluer la pression exercée sur un ménage en situation d’insécurité alimentaire. Il se base sur la fréquence d’adoption, au cours des 7 derniers jours, de cinq stratégies comportementales de gestion de crise alimentaire. Plus la fréquence d’adoption est élevée, plus l’indice est élevé, ce qui traduit un recours accru à des stratégies de survie.
+
+Les cinq composantes du rCSI analysées ici sont :
+- Le recours à des aliments moins préférés ou moins chers ;
+- L’emprunt de nourriture ou l’aide reçue de proches ;
+- La réduction de la taille des portions aux repas ;
+- La restriction de la consommation des adultes pour préserver celle des enfants ;
+- La réduction du nombre de repas par jour.
+
+
+```{r tableau-rcsi-descriptif, tab.cap="Analyse descriptive des composantes du rCSI", tab.topcaption=TRUE, message=FALSE, warning=FALSE}
+library(gtsummary)
+library(flextable)
+
+# Créer des versions factorielles avec libellés
+base_temp <- base_principale %>%
+  mutate(
+    rCSILessQlty = factor(rCSILessQlty, levels = 0:7, labels = c("Jamais", "1 jour", "2 jours", "3 jours", "4 jours", "5 jours", "6 jours", "Tous les 7 jours")),
+    rCSIBorrow   = factor(rCSIBorrow,   levels = 0:7, labels = c("Jamais", "1 jour", "2 jours", "3 jours", "4 jours", "5 jours", "6 jours", "Tous les 7 jours")),
+    rCSIMealSize = factor(rCSIMealSize, levels = 0:7, labels = c("Jamais", "1 jour", "2 jours", "3 jours", "4 jours", "5 jours", "6 jours", "Tous les 7 jours")),
+    rCSIMealAdult= factor(rCSIMealAdult,levels = 0:7, labels = c("Jamais", "1 jour", "2 jours", "3 jours", "4 jours", "5 jours", "6 jours", "Tous les 7 jours")),
+    rCSIMealNb   = factor(rCSIMealNb,   levels = 0:7, labels = c("Jamais", "1 jour", "2 jours", "3 jours", "4 jours", "5 jours", "6 jours", "Tous les 7 jours"))
+  )
+
+# Création du tableau résumé
+rcsi_vars <- base_temp %>%
+  select(
+    rCSILessQlty, rCSIBorrow, rCSIMealSize,
+    rCSIMealAdult, rCSIMealNb
+  ) %>%
+  rename(
+    "Moins bonne qualité d’aliments"        = rCSILessQlty,
+    "Emprunt de nourriture / aide reçue"    = rCSIBorrow,
+    "Réduction de la taille des repas"      = rCSIMealSize,
+    "Restriction des adultes"               = rCSIMealAdult,
+    "Réduction du nombre de repas"          = rCSIMealNb
+  ) %>%
+  tbl_summary(
+    type = everything() ~ "categorical",
+    missing = "no"
+  ) %>%
+  as_flex_table() %>%
+  set_header_labels(label = "Stratégie de survie") %>%
+  autofit() %>%
+  flextable::set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+
+rcsi_vars
+
+```
+Le tableau montre que la **stratégie la plus fréquemment adoptée** est le **recours à des aliments moins préférés ou moins chers**, pratiquée par 55% des ménages au moins 1 jour sur 7. Elle est suivie de près par **l’emprunt de nourriture** (53% des ménages concernés).
+
+Les comportements plus sévères, comme **réduire le nombre de repas par jour** ou **restreindre la consommation des adultes**, restent moins fréquents, bien que non négligeables (respectivement 24% et 24% des ménages les appliquent au moins 1 jour sur 7).
+
+Cela suggère que si de nombreuses familles utilisent des stratégies d’adaptation **modérées**, une part non négligeable d’entre elles bascule dans des **comportements de privation plus graves**, révélateurs d’un stress alimentaire avancé.
+
+Cette description préliminaire des variables pose les bases pour le **calcul du score rCSI global**.
+
+## Calculer l’indice réduit des stratégies de survie
+
+Le score rCSI (Reduced Coping Strategy Index) est un indicateur quantitatif obtenu en attribuant un **poids à chaque stratégie de survie**, puis en sommant les scores pour chaque ménage. Plus le score est élevé, plus le ménage applique fréquemment des stratégies de coping, traduisant une pression alimentaire plus importante.
+
+La formule utilisée ici repose sur la pondération recommandée par le Programme Alimentaire Mondial (PAM) :
+
+- rCSILessQlty × **1**
+- rCSIBorrow × **2**
+- rCSIMealSize × **1**
+- rCSIMealAdult × **3**
+- rCSIMealNb × **1**
+
+Ainsi, le score total est calculé comme suit :
+
+**rCSI = 1×(rCSILessQlty) + 2×(rCSIBorrow) + 1×(rCSIMealSize) + 3×(rCSIMealAdult) + 1×(rCSIMealNb)**
+
+
+```{r calcul-rcsi}
+# Calcul du score rCSI selon la pondération standard WFP
+base_principale <- base_principale %>%
+  mutate(
+    rcsi_score = 1 * rCSILessQlty +
+                 2 * rCSIBorrow +
+                 1 * rCSIMealSize +
+                 3 * rCSIMealAdult +
+                 1 * rCSIMealNb
+  )
+
+# Résumé statistique du score
+summary(base_principale$rcsi_score)
+```
+Le résumé statistique du score rCSI dans notre échantillon est le suivant :
+
+- **Minimum** : 0  
+- **Médiane** : 3  
+- **Moyenne** : 5.8  
+- **3e quartile** : 8  
+- **Maximum** : 56  
+
+Cela indique que :
+- Une large partie des ménages (au moins 50%) ont un score **inférieur ou égal à 3**, traduisant une utilisation faible à modérée des stratégies de survie.
+- Toutefois, certains ménages présentent des scores très élevés, allant jusqu’à **56**, ce qui révèle une situation de **stress alimentaire aigu**.
+
+Ces résultats montrent une **grande hétérogénéité** dans les comportements de coping, ce qui justifie une exploration plus fine par zone géographique ou niveau socio-économique dans les analyses suivantes.
+
+## Tableau des poids rCSI
+
+Ce tableau présente les poids attribués à chaque stratégie de survie dans le calcul de l’indice réduit des stratégies de survie (rCSI), conformément à la méthodologie standard du Programme Alimentaire Mondial (PAM). Ces poids reflètent la **gravité relative** de chaque comportement d’adaptation face à l’insécurité alimentaire. La somme totale des poids est égale à **8**, ce qui constitue la base de calcul du score global utilisé pour mesurer la pression alimentaire exercée sur les ménages.
+
+
+```{r tableau-rcsi-poids, tab.cap="Poids attribués aux composantes du rCSI", tab.topcaption=TRUE, message=FALSE, warning=FALSE}
+library(tibble)
+library(flextable)
+
+# Créer un tableau manuel avec les poids
+poids_rcsi <- tribble(
+  ~`Stratégie de survie`,                                 ~Poids,
+  "Consommer des aliments moins préférés / moins chers",     1,
+  "Emprunter de la nourriture ou dépendre d’autrui",         2,
+  "Réduire la taille des portions aux repas",                1,
+  "Réduire la consommation des adultes pour les enfants",    3,
+  "Réduire le nombre de repas par jour",                     1
+)
+
+# Créer la table stylisée
+flextable(poids_rcsi) %>%
+  autofit() %>%
+  set_caption(autonum = officer::run_autonum(seq_id = "tab")) %>%
+  add_footer_row(
+    values = c("Total", "8"),
+    colwidths = c(1, 1)
+  )
+```
+
+## Représentation spatiele du rCSI
+
+Avant de procéder à la représentation cartographique du rCSI, une **classification du score a été effectuée** afin de faciliter l’interprétation spatiale. Conformément aux recommandations du PAM, les ménages ont été répartis en trois catégories : **"Faible" (score ≤ 3), "Modéré" (score entre 4 et 18), et "Élevé" (score > 18)**. Cette catégorisation permet de mieux visualiser les niveaux de stress alimentaire par zone géographique à travers des couleurs distinctes sur les cartes.
+
+```{r rcsi-categorisation, message=FALSE, warning=FALSE}
+# Catégorisation du score rCSI selon les seuils standards WFP
+base_principale <- base_principale %>%
+  mutate(
+    rcsi_cat = case_when(
+      rcsi_score <= 3 ~ "Faible",
+      rcsi_score <= 18 ~ "Modéré",
+      rcsi_score > 18 ~ "Élevé",
+      TRUE ~ NA_character_
+    )
+  )
+```
+
+La carte ci-dessous illustre la **catégorie dominante du score rCSI** par région, sur la base de la classification en trois niveaux : **Faible**, **Modéré** et **Élevé**. Pour chaque région, on identifie la catégorie à laquelle appartient la majorité des ménages enquêtés, afin de dégager des tendances géographiques globales.
+
+
+```{r  carte-region-rcsi, fig.cap="Catégorie dominante du rCSI par région"}
+# 1. Calculer la catégorie dominante par région
+rcsi_dominante_region <- base_principale %>%
+  group_by(ADMIN1Name, rcsi_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN1Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# 2. Fusion avec shapefile des régions (noms déjà harmonisés)
+carte_rcsi_region <- regions %>%
+  left_join(rcsi_dominante_region, by = c("ADM1_FR" = "ADMIN1Name"))
+
+# 3. Affichage de la carte
+ggplot(carte_rcsi_region) +
+  geom_sf(aes(fill = rcsi_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#2ecc71", "Modéré" = "#f1c40f", "Élevé" = "#e74c3c"),
+    name = "Catégorie rCSI"
+  ) +
+  labs(
+    title = "Catégorie dominante du rCSI par région",
+    subtitle = "Niveau de stress alimentaire (selon classification PAM)",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+```
+
+La plupart des régions apparaissent en **vert**, traduisant une prévalence de comportements de coping alimentaires faibles, donc une situation relativement stable en matière de sécurité alimentaire. Cependant, certaines régions (notamment au nord et à l’ouest) se distinguent par une **catégorie “Modéré”**, ce qui indique une intensification du recours aux stratégies de survie. Aucune région ne ressort ici comme majoritairement classée en “Élevé”, mais cette analyse reste à approfondir au niveau départemental pour identifier des poches localisées de vulnérabilité plus sévère.
+
+Après l’analyse régionale, cette carte affine la lecture du score rCSI en l’affichant à l’échelle des **départements**. Pour chaque département, la **catégorie dominante** parmi les ménages enquêtés est identifiée (Faible, Modéré ou Élevé), ce qui permet de mieux localiser les zones de stress alimentaire.
+
+```{r carte-departement-rcsi, message=FALSE, warning=FALSE, fig.cap = "Catégorie dominante du rCSI par département"}
+# 1. Calcul de la catégorie dominante par département
+rcsi_dominante_dept <- base_principale %>%
+  group_by(ADMIN2Name, rcsi_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN2Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# 2. Fusion avec le shapefile des départements
+carte_rcsi_dept <- departements %>%
+  left_join(rcsi_dominante_dept, by = c("ADM2_FR" = "ADMIN2Name"))
+
+# 3. Affichage de la carte
+ggplot(carte_rcsi_dept) +
+  geom_sf(aes(fill = rcsi_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#2ecc71", "Modéré" = "#f1c40f", "Élevé" = "#e74c3c"),
+    name = "Catégorie rCSI"
+  ) +
+  labs(
+    title = "Catégorie dominante du rCSI par département",
+    subtitle = "Niveau de stress alimentaire selon la majorité des ménages",
+    caption = "Source : Données enquête ménage & shapefiles GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+
+```
+La cartographie révèle une situation plus contrastée que celle observée à l’échelle régionale. Plusieurs départements ressortent désormais en **jaune (Modéré)**, notamment dans le nord, le centre-ouest et certaines zones du sud-est, ce qui signale une intensification du recours aux stratégies d’adaptation. En revanche, une majorité de départements affichent encore un score **Faible**, illustrant une certaine résilience alimentaire. Ces disparités locales montrent l’intérêt d’une analyse fine pour un ciblage efficace des interventions.
+
+Ces constats confirment que les analyses spatiales à différents niveaux administratifs (région, département) sont essentielles pour identifier avec précision les zones à risque. Le score rCSI, en tant qu’indicateur comportemental, met en lumière les tensions alimentaires vécues par les ménages et les stratégies qu’ils mobilisent pour y faire face. 
+
+L’exploitation combinée du rCSI avec d’autres indicateurs (FCS, HDDS, etc.) offre un cadre robuste pour guider les actions humanitaires et les politiques publiques, en particulier dans un contexte de résilience et de sécurité alimentaire.
+
+#	Stratégies d'adaptation aux moyens d'existence (LhCSI):
+
+## Analyse descriptive des variables qui composent le LhCSI
+
+Cette section évalue les stratégies mises en œuvre par les ménages pour faire face à l’insécurité alimentaire. Le Livelihood Coping Strategy Index (LCS-FS) regroupe plusieurs comportements d’adaptation classés en trois niveaux de sévérité :
+
+- **Stress** : actions comme vendre des biens non essentiels ou emprunter,
+- **Crise** : actions impactant directement la capacité productive (vente d’actifs productifs, soins médicaux réduits),
+- **Urgence** : stratégies extrêmes comme mendier, vendre un terrain ou recourir à des moyens illégaux.
+
+L’objectif ici est de **décrire la fréquence d’adoption** de ces stratégies à travers les variables `LhCSIStress*`, `LhCSICrisis*` et `LhCSIEmergency*`.
+
+
+```{r tableau-lhcsi-descriptif, tab.cap="Analyse descriptive des composantes du LhCSI", tab.topcaption=TRUE, message=FALSE, warning=FALSE}
+# Vérification : on garde uniquement les colonnes avec au moins une valeur non manquante
+valid_lhcsi_vars <- base_principale %>%
+  select(starts_with("LhCSI")) %>%
+  summarise(across(everything(), ~ sum(!is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "n_non_na") %>%
+  filter(n_non_na > 0) %>%
+  pull(variable)
+# Recode manuel des modalités (0/1) en Oui / Non
+base_lhcsi <- base_principale 
+# Tableau descriptif
+tbl_lhcsi <- base_lhcsi %>%
+  select(
+    LhCSIStress1,  # Vente de biens non productifs
+    LhCSIStress2,  # Dépense des économies
+    LhCSIStress3,  # Envoi d’un membre manger ailleurs
+    LhCSIStress4,  # Achat à crédit
+    LhCSICrisis1,  # Vente d’actifs productifs
+    LhCSICrisis2,  # Réduction soins médicaux
+    LhCSICrisis3,  # Retrait d’enfants de l’école
+    LhCSIEmergency1,  # Vente maison ou terrain
+    LhCSIEmergency2,  # Mendicité / récupération
+    LhCSIEmergency3   # Activités illégales
+  ) %>%
+  tbl_summary(
+    type = everything() ~ "categorical",
+    missing = "no",
+    label = list(
+      LhCSIStress1 ~ "Vente de biens non essentiels",
+      LhCSIStress2 ~ "Utilisation des économies",
+      LhCSIStress3 ~ "Un membre mange ailleurs",
+      LhCSIStress4 ~ "Achat à crédit",
+      LhCSICrisis1 ~ "Vente de biens productifs",
+      LhCSICrisis2 ~ "Réduction des soins médicaux",
+      LhCSICrisis3 ~ "Enfants retirés de l'école",
+      LhCSIEmergency1 ~ "Vente de maison ou terrain",
+      LhCSIEmergency2 ~ "Mendicité / récupération",
+      LhCSIEmergency3 ~ "Activité illégale (vol, prostitution)"
+    )
+  ) %>%
+  modify_header(label = "**Stratégie adoptée**") %>%
+  as_flex_table() %>%
+  autofit() %>%
+  set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+
+tbl_lhcsi
+
+```
+
+Les résultats révèlent que :
+
+-19 % des ménages ont eu recours à l’achat à crédit, ce qui en fait la stratégie de stress la plus utilisée récemment.
+
+-4,7 % ont puisé dans leurs économies, tandis que 16 % déclarent avoir épuisé cette stratégie.
+
+-L’indicateur "un membre mange ailleurs" concerne 4,2 % des ménages, avec 14 % qui ne peuvent plus s’y appuyer.
+
+-La vente de biens non essentiels n’a été déclarée par aucun ménage, ce qui pourrait refléter une absence d’actifs ou une erreur de codage.
+
+Globalement, l’endettement et la consommation d’épargne apparaissent comme les premières stratégies mobilisées, révélant une fragilité croissante face aux chocs économiques.
+
+## proportion de menage en situation de stress, de crise et d’urgence en 2022 et 2023 
+
+```{r eval = FALSE}
+# Recode des modalités de LhCSI en binaire (1 si "Yes", 0 sinon)
+base_principale <- base_principale %>%
+  mutate(across(
+    starts_with("LhCSI"),
+    ~ case_when(
+      . == "Yes" ~ 1,
+      . %in% c(
+        "No", 
+        "No, because I did not need to",
+        "No, because I already sold those assets or have engaged in this activity within the last 12 months and cannot continue to do it",
+        "Not applicable (don't have children/these assets)"
+      ) ~ 0,
+      TRUE ~ NA_real_
+    )
+  ))
+
+# Création des catégories selon la sévérité
+base_principale <- base_principale %>%
+  mutate(
+    stress = if_any(starts_with("LhCSIStress"), ~ . == 1),
+    crise = if_any(starts_with("LhCSICrisis"), ~ . == 1),
+    urgence = if_any(starts_with("LhCSIEmergency"), ~ . == 1)
+  )
+
+# Calcul des proportions par année
+proportions_lhcsi <- base_principale %>%
+  filter(YEAR %in% c(2022, 2023)) %>%
+  group_by(YEAR) %>%
+  summarise(
+    Stress = mean(stress, na.rm = TRUE),
+    Crise = mean(crise, na.rm = TRUE),
+    Urgence = mean(urgence, na.rm = TRUE)
+  ) %>%
+  mutate(across(where(is.numeric), ~ round(. * 100, 1)))
+
+# Affichage simple
+print(proportions_lhcsi)
+```
+
+Les résultats montrent l'évolution des stratégies d’adaptation adoptées par les ménages face à l’insécurité alimentaire :
+
+- **Stratégies de stress** : en 2022, environ **33,5 %** des ménages ont eu recours à au moins une stratégie de stress (comme l’endettement ou l’utilisation de l’épargne), contre **17,4 %** en 2023. Cette baisse significative pourrait indiquer soit une amélioration relative de la résilience des ménages, soit une **épuisement de ces stratégies** qui ne sont plus disponibles.
+
+- **Stratégies de crise** : leur recours reste relativement stable mais légèrement en baisse, passant de **5,7 %** à **4,6 %**. Ces stratégies traduisent un **impact plus direct sur la productivité future** (comme la vente d’actifs productifs ou la réduction des soins médicaux).
+
+- **Stratégies d’urgence** : elles concernent environ **5,4 %** des ménages en 2022 et **4,8 %** en 2023. Ces stratégies signalent une **situation critique difficilement réversible**, marquant une extrême vulnérabilité.
+
+Globalement, la diminution des proportions peut indiquer soit un **retrait temporaire des stratégies**, soit un **épuisement structurel**, notamment chez les ménages les plus vulnérables qui n'ont plus de marge de manœuvre pour faire face aux chocs.
+
+\newpage
+#	Score de diversité alimentaire des ménages
+
+## Analyse descriptive des variables qui composent le module HDDS
+
+Le Score de Diversité Alimentaire des Ménages (HDDS) est un indicateur de la qualité nutritionnelle de l'alimentation des ménages, basé sur la consommation de 12 groupes alimentaires distincts au cours des 24 dernières heures. Une diversité plus élevée est généralement associée à une meilleure sécurité alimentaire. Le tableau ci-dessous présente la répartition des réponses pour chaque groupe alimentaire, indiquant la proportion de ménages ayant déclaré en avoir consommé ou non la veille de l'enquête.
+
+
+```{r}
+# Sélection des variables HDDS (commencent par HDDS, sauf le score agrégé)
+vars_hdds <- base_principale %>%
+  select(starts_with("HDDS")) %>%
+  select(-HDDS_CH)  # on exclut le score global pour ne garder que les composantes
+
+# Recoder les 0/1 en Oui / Non
+base_hdds <- vars_hdds 
+# Générer un tableau résumé avec gtsummary
+tbl_hdds <- base_hdds %>%
+  tbl_summary(
+    type = everything() ~ "categorical",
+    label = list(
+      HDDSStapCer  ~ "Céréales (riz, pain, pâte, mil, sorgho, etc.)",
+      HDDSStapRoot ~ "Racines et tubercules (manioc, pomme de terre, etc.)",
+      HDDSPulse    ~ "Légumineuses (haricots, pois, arachides, lentilles)",
+      HDDSVegOrg   ~ "Légumes orange (carottes, potiron, etc.)",
+      HDDSVegGre   ~ "Légumes verts à feuilles",
+      HDDSVegOth   ~ "Autres légumes",
+      HDDSFruitOrg ~ "Fruits orange (mangue, papaye, etc.)",
+      HDDSFruitOth ~ "Autres fruits",
+      HDDSPrMeatF  ~ "Viandes (bœuf, chèvre, volaille, etc.)",
+      HDDSPrMeatO  ~ "Abats (foie, cœur, rognons, etc.)",
+      HDDSPrFish   ~ "Poisson",
+      HDDSPrEgg    ~ "Œufs",
+      HDDSDairy    ~ "Produits laitiers (lait, yaourt, fromage)",
+      HDDSSugar    ~ "Sucre, miel, bonbons",
+      HDDSFat      ~ "Graisses (huile végétale, beurre, etc.)",
+      HDDSCond     ~ "Condiments (sel, sauce, bouillon, thé, café)"
+    ),
+    missing = "no"
+  ) %>%
+  as_flex_table() %>%
+  autofit() %>%
+  flextable::set_caption(
+    autonum = officer::run_autonum(seq_id = "tab")
+  )
+
+tbl_hdds
+
+```
+L’analyse montre que certains groupes alimentaires de base sont largement consommés :
+
+- **Céréales** : 95 % des ménages en ont consommé au moins une fois la veille, ce qui confirme leur rôle fondamental dans l'alimentation quotidienne.
+- **Condiments, graisses, sucre** : également très présents, consommés par plus de 80 % des ménages.
+
+En revanche, d'autres groupes nutritionnellement importants sont nettement moins représentés :
+
+- **Fruits orange et autres fruits** : moins de 5 % des ménages en ont consommé, suggérant un risque de **carence en vitamines**.
+- **Légumes verts à feuilles** : seulement 9 %, ce qui est préoccupant au vu de leur richesse en fer et micronutriments.
+- **Produits animaux (viande, poisson, œufs, produits laitiers)** : leur consommation varie de 31 % à 57 %, reflétant une **accessibilité modérée**, souvent liée au pouvoir d’achat ou à l’offre locale.
+
+Enfin, on note que les **légumineuses** (protéines végétales) sont consommées par environ **52 %** des ménages, ce qui est encourageant mais peut être renforcé par des actions de sensibilisation ou de distribution ciblée.
+
+La diversité alimentaire est partiellement assurée, mais des carences sont probables pour les groupes riches en micronutriments. Cette situation appelle à des interventions pour améliorer l’accès aux fruits, légumes verts et produits laitiers dans les zones concernées.
+
+## Score de diversité alimentaire
+
+Après avoir construit le score HDDS comme somme des groupes alimentaires consommés par le ménage la veille de l'enquête, nous présentons ci-dessous les statistiques descriptives du score ainsi obtenu. Ce score reflète le **niveau de diversité alimentaire** au sein des ménages, et permet d’identifier les profils les plus vulnérables ou les plus diversifiés.
+
+
+```{r}
+# Étape 1 : sélectionner les variables binaires composant le score (exclure HDDS_CH si déjà présent)
+vars_hdds_binaires <- base_principale %>%
+  select(starts_with("HDDS")) %>%
+  select(-HDDS_CH)  # on exclut le score s'il est déjà fourni
+
+# Étape 2 : s’assurer que les variables sont bien de type numérique (0/1)
+# (utile si un recodage en "Oui/Non" a été fait précédemment)
+vars_hdds_binaires <- vars_hdds_binaires %>%
+  mutate(across(everything(), ~ as.numeric(.)))
+
+# Étape 3 : calcul du score de diversité alimentaire (HDDS) par somme des groupes consommés
+base_principale <- base_principale %>%
+  mutate(
+    score_hdds = rowSums(vars_hdds_binaires, na.rm = TRUE)
+  )
+
+# Étape 4 : résumé statistique du score
+summary(base_principale$score_hdds)
+
+```
+**Interprétation des résultats**
+
+- Le **score minimum** est de **1**, indiquant qu’au moins un ménage n’a consommé qu’un seul groupe alimentaire — une situation de diversité extrêmement faible.
+- Le **score maximum** atteint **34**, ce qui signifie que certains ménages ont déclaré avoir consommé pratiquement tous les groupes alimentaires recensés dans l’enquête (plus de 30 modalités).
+- Le **score médian est de 19** et la **moyenne de 18,66**, suggérant que la **moitié des ménages consomment entre 15 et 23 groupes alimentaires**, soit une diversité relativement bonne.
+- Toutefois, la plage de variation reste **large** (écart interquartile : 23 - 15 = 8), ce qui traduit une **hétérogénéité importante** entre les ménages en termes d’accès ou d’habitudes alimentaires.
+
+Si la diversité alimentaire moyenne est encourageante, certains ménages présentent des scores faibles inquiétants. Ces écarts doivent être analysés plus finement selon des variables explicatives comme la région, la taille du ménage ou le niveau d'instruction du chef de ménage.
+
+## Représentation spatiale diversité alimentaire
+
+Afin de visualiser les disparités géographiques en matière de diversité alimentaire des ménages, nous avons produit deux cartes : l’une au niveau **régional**, l’autre au niveau **départemental**.
+
+Pour cela, le score HDDS a été **catégorisé selon les recommandations du Programme Alimentaire Mondial (PAM)** adaptées à l’échelle du score observé dans notre base :
+
+- **Faible diversité** : HDDS ≤ 12  
+- **Diversité modérée** : 13 ≤ HDDS ≤ 24  
+- **Diversité élevée** : HDDS > 24
+
+Chaque ménage a été classé selon cette grille, puis les **catégories dominantes** ont été identifiées dans chaque région et chaque département (la catégorie regroupant le plus de ménages). Les cartes ci-dessous présentent cette distribution géographique.
+
+
+```{r diversitealimentaire}
+# Catégorisation du score HDDS selon les seuils proposés
+base_principale <- base_principale %>%
+  mutate(
+    hdds_cat = case_when(
+      score_hdds <= 12 ~ "Faible",
+      score_hdds <= 24 ~ "Modérée",
+      score_hdds > 24 ~ "Élevée",
+      TRUE ~ NA_character_
+    )
+  )
+
+```
+
+
+```{r carteregion, fig.cap= "Diversité alimentaire dominante par région"}
+# Calculer la catégorie dominante par région
+hdds_dominante_region <- base_principale %>%
+  group_by(ADMIN1Name, hdds_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN1Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# Fusion avec le shapefile des régions
+carte_hdds_region <- regions %>%
+  left_join(hdds_dominante_region, by = c("ADM1_FR" = "ADMIN1Name"))
+
+# Carte ggplot
+ggplot(carte_hdds_region) +
+  geom_sf(aes(fill = hdds_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#e74c3c", "Modérée" = "#f1c40f", "Élevée" = "#2ecc71"),
+    name = "Catégorie HDDS"
+  ) +
+  labs(
+    title = "Diversité alimentaire dominante par région",
+    subtitle = "Selon le score HDDS catégorisé",
+    caption = "Source : Données enquête ménage & shapefile GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+
+```
+
+```{r cartedepartement, fig.cap="Diversité alimentaire dominante par département"}
+# Calcul de la catégorie dominante par département
+hdds_dominante_dept <- base_principale %>%
+  group_by(ADMIN2Name, hdds_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN2Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# Fusion avec shapefile départements
+carte_hdds_dept <- departements %>%
+  left_join(hdds_dominante_dept, by = c("ADM2_FR" = "ADMIN2Name"))
+
+# Carte ggplot
+ggplot(carte_hdds_dept) +
+  geom_sf(aes(fill = hdds_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#e74c3c", "Modérée" = "#f1c40f", "Élevée" = "#2ecc71"),
+    name = "Catégorie HDDS"
+  ) +
+  labs(
+    title = "Diversité alimentaire dominante par département",
+    subtitle = "Selon le score HDDS catégorisé",
+    caption = "Source : Données enquête ménage & shapefile GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", which_north = "true", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+
+```
+
+
+La première carte montre que dans la majorité des régions, la **diversité alimentaire est de niveau "modéré"**. Aucune région ne ressort avec une catégorie dominante "faible" ou "élevée", ce qui suggère :
+
+- une **consommation alimentaire assez homogène** à travers les régions couvertes par l’enquête ;
+- un **niveau intermédiaire de diversité** alimentaire, ni alarmant, ni pleinement satisfaisant ;
+- toutefois, plusieurs régions apparaissent en **gris (NA)**, indiquant une absence ou un manque de données suffisantes pour calculer une catégorie dominante.
+
+
+La deuxième carte offre une lecture plus fine :
+
+- Certains départements se distinguent avec une catégorie **"faible" (en rouge)** — en particulier un département au centre du pays — indiquant une **situation préoccupante**, où peu de groupes alimentaires sont consommés.
+- La majorité des départements restent dans la catégorie **"modérée"**, reflétant une diversité moyenne.
+- Là encore, de nombreux départements n’apparaissent pas colorés (catégorie **NA**), ce qui peut être dû à :
+  - une absence de ménages enquêtés dans ces zones,
+  - ou à un échantillonnage insuffisant pour dégager une catégorie dominante.
+
+- Ces représentations spatiales soulignent l'importance d'adopter une approche **territoriale différenciée** dans les politiques de sécurité alimentaire.
+- La **carte régionale** est utile pour une vision globale, tandis que la **carte départementale** permet d’identifier des **poches de vulnérabilité plus précises**.
+- Il est recommandé de renforcer les interventions nutritionnelles dans les départements identifiés comme "faibles", tout en maintenant les efforts dans les zones "modérées".
+
+# Score de résilience auto-évaluée (SERS): 
+
+## Analyse descriptive des variables qui composent le SERS
+Le **SERS (Self-Evaluated Resilience Score)** est un indicateur composite basé sur 10 affirmations auxquelles les ménages répondent sur une **échelle de Likert à 5 modalités**, allant de :
+
+- 1 = « Pas du tout d’accord »
+- 2 = « Pas d’accord »
+- 3 = « Neutre »
+- 4 = « D’accord »
+- 5 = « Tout à fait d’accord »
+
+Ces 10 sous-énoncés couvrent différentes dimensions de la **capacité de résilience perçue**, incluant la préparation, les ressources, la capacité à rebondir, l'entraide sociale et l'anticipation des chocs.
+
+Dans cette première étape, nous réalisons une **analyse descriptive** de la distribution des réponses à chacun des sous-énoncés, pour comprendre quelles dimensions de résilience sont perçues comme fortes ou faibles par les ménages.
+
+
+```{r score-resilience}
+# Charger les librairies utiles
+library(gtsummary)
+library(flextable)
+
+# Étape 1 : sélectionner les variables composant le SERS
+vars_sers <- base_principale %>%
+  select(starts_with("SERS"))
+
+# Étape 2 : recoder les niveaux Likert en facteurs avec labels explicites
+base_sers <- vars_sers 
+
+# Étape 3 : produire le tableau descriptif
+tbl_sers <- base_sers %>%
+  tbl_summary(
+    type = everything() ~ "categorical",
+    missing = "no",
+    label = list(
+      SERSRebondir         ~ "Capacité à rebondir après un choc",
+      SERSRevenue          ~ "Possède des sources de revenus diversifiées",
+      SERSMoyen            ~ "Dispose de moyens adaptés pour affronter les défis",
+      SERSDifficultes      ~ "Accès facile à un soutien financier en cas de besoin",
+      SERSSurvivre         ~ "Peut satisfaire ses besoins essentiels",
+      SERSFamAmis          ~ "Peut compter sur l’aide d’amis ou famille",
+      SERSPoliticiens      ~ "Bénéficie d'un soutien politique",
+      SERSLecons           ~ "A tiré des leçons des difficultés passées",
+      SERSPreparerFuture   ~ "Est bien préparé pour faire face aux futurs défis",
+      SERSAvertissementEven ~ "Reçoit des alertes précoces de futurs événements"
+    )
+  ) %>%
+  modify_header(label ~ "**Sous-énoncé de résilience**") %>%
+  as_flex_table() %>%
+  autofit() %>%
+  set_caption(autonum = officer::run_autonum(seq_id = "tab"))
+
+tbl_sers
+
+```
+
+
+**Analyse des réponses aux 10 sous-énoncés du SERS**
+
+Les résultats présentés ci-dessus montrent une grande **hétérogénéité dans la perception que les ménages ont de leur résilience**. Plusieurs points clés se dégagent :
+
+**Dimensions perçues positivement**
+
+- **Capacité à rebondir après un choc** :
+  - Plus de **52 %** des ménages se déclarent « d'accord » ou « tout à fait d'accord », ce qui traduit un **optimisme psychologique** face aux difficultés.
+  
+- **Tirer des leçons des difficultés passées** :
+  - Environ **60 %** des ménages se situent dans les modalités supérieures (modalités 4 et 5), ce qui montre un **apprentissage positif** après des épisodes difficiles.
+
+- **Préparation face aux défis futurs** :
+  - 43 % des répondants se sentent plutôt prêts à faire face aux futurs événements, même si près de **30 %** se positionnent dans le désaccord ou la neutralité.
+
+- **Réception d’alertes précoces** :
+  - 42 % des ménages indiquent recevoir des avertissements en amont, ce qui peut refléter un bon niveau d’**information communautaire**.
+
+**Dimensions perçues comme faibles ou fragiles**
+
+- **Soutien politique** :
+  - Plus de **80 %** des ménages **ne sont pas d’accord ou restent neutres** quant à la perception de bénéficier d’un appui politique. Cela reflète une **perte de confiance envers les institutions**.
+
+- **Accès facile au soutien financier** :
+  - 72 % des ménages **expriment des réserves** sur leur capacité à accéder à un soutien économique, ce qui souligne une **fragilité structurelle majeure**.
+
+- **Diversification des sources de revenus** :
+  - Près de **58 %** des ménages déclarent **ne pas disposer de revenus diversifiés**, rendant leur situation économique plus vulnérable en cas de choc.
+
+- **Réseaux d’entraide (famille/amis)** :
+  - Bien que 32 % des répondants y croient, une majorité relative (44 %) **ne se sentent pas entourés**, indiquant une **cohésion sociale inégalement perçue**.
+
+## Calculer le SERS.
+
+Le **SERS (Score de Résilience)** est un indicateur composite fondé sur 10 sous-énoncés mesurant la perception qu'ont les ménages de leur propre capacité à faire face aux chocs. Chaque sous-énoncé est noté de 1 (pas du tout d’accord) à 5 (tout à fait d’accord), selon une échelle de Likert. Le score brut (non pondéré) est obtenu en sommant les réponses aux 10 items, puis il est **normalisé entre 0 et 100** selon la formule min-max :
+
+\[
+\text{SERS normalisé} = \frac{(\text{SERS brut} - 10)}{(50 - 10)} \times 100
+\]
+
+Une fois le score obtenu, une **catégorisation en trois groupes** permet d’en faciliter l’interprétation :
+- **Faible résilience** : SERS < 33
+- **Résilience moyenne** : 33 ≤ SERS < 66
+- **Bonne résilience** : SERS ≥ 66
+
+Cette catégorisation permet d’évaluer le degré de résilience perçue dans les territoires et d’identifier les zones vulnérables.
+
+
+```{r calcul-SERS}
+# Étape 1 : reconvertir toutes les variables SERS en numériques
+# (au cas où elles auraient été transformées en facteurs plus tôt)
+base_principale <- base_principale %>%
+  mutate(across(starts_with("SERS"), ~ as.numeric(as.character(.))))
+
+# Étape 2 : calcul du score brut (somme des 10 sous-énoncés)
+base_principale <- base_principale %>%
+  mutate(
+    sers_brut = rowSums(select(., starts_with("SERS")), na.rm = TRUE)
+  )
+
+# Étape 3 : normalisation min-max du score sur une échelle de 0 à 100
+base_principale <- base_principale %>%
+  mutate(
+    sers_score = 100 * (sers_brut - 10) / (50 - 10)
+  )
+
+# Étape 4 : catégorisation en terciles
+base_principale <- base_principale %>%
+  mutate(
+    sers_cat = case_when(
+      sers_score < 33 ~ "Faible",
+      sers_score < 66 ~ "Moyen",
+      sers_score >= 66 ~ "Élevé",
+      TRUE ~ NA_character_
+    )
+  )
+
+```
+
+
+## Représentation spatiale SERS
+
+Deux cartes suivantes illustrent la **catégorie dominante du SERS** dans chaque région et département. Elles permettent de visualiser les zones géographiques où les ménages perçoivent une faible capacité à surmonter les difficultés :
+
+
+```{r}
+# Catégorie dominante par région
+sers_dom_region <- base_principale %>%
+  group_by(ADMIN1Name, sers_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN1Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# Fusion avec shapefile des régions
+carte_sers_region <- regions %>%
+  left_join(sers_dom_region, by = c("ADM1_FR" = "ADMIN1Name"))
+
+# Affichage de la carte
+ggplot(carte_sers_region) +
+  geom_sf(aes(fill = sers_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#e74c3c", "Moyen" = "#f1c40f", "Élevé" = "#2ecc71"),
+    name = "Catégorie SERS"
+  ) +
+  labs(
+    title = "Score de Résilience perçu – Catégorie dominante par région",
+    caption = "Source : Données enquête ménage & shapefile GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+```
+
+
+
+```{r}
+# Catégorie dominante par département
+sers_dom_dept <- base_principale %>%
+  group_by(ADMIN2Name, sers_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ADMIN2Name) %>%
+  slice_max(n, n = 1, with_ties = FALSE)
+
+# Fusion avec shapefile des départements
+carte_sers_dept <- departements %>%
+  left_join(sers_dom_dept, by = c("ADM2_FR" = "ADMIN2Name"))
+
+# Carte
+ggplot(carte_sers_dept) +
+  geom_sf(aes(fill = sers_cat), color = "white", size = 0.3) +
+  scale_fill_manual(
+    values = c("Faible" = "#e74c3c", "Moyen" = "#f1c40f", "Élevé" = "#2ecc71"),
+    name = "Catégorie SERS"
+  ) +
+  labs(
+    title = "Score de Résilience perçu – Catégorie dominante par département",
+    caption = "Source : Données enquête ménage & shapefile GADM"
+  ) +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "tl", style = north_arrow_fancy_orienteering()) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+```
+
+
+Sur la carte par région, on observe que **toutes les régions renseignées sont dominées par la catégorie “Faible”**, ce qui reflète une **perception générale très faible de résilience** dans la population. Certaines régions apparaissent en **gris** (NA), ce qui peut s’expliquer par l’absence ou l’insuffisance de données dans ces zones. Cette uniformité dans la faiblesse perçue est préoccupante et souligne une vulnérabilité collective face aux chocs économiques, climatiques ou sociaux.
+
+
+L’analyse à l’échelle des départements révèle davantage de **variabilité territoriale**. Bien que la majorité des départements restent dominés par une résilience perçue comme **faible**, certains départements en zones périphériques ou frontalières ne présentent pas de données disponibles (NA). Le passage à cette échelle permet d’identifier des **poches de fragilité plus fines** et des disparités internes aux régions.
+
+# Régime alimentaire minimum acceptable (MAD): 
+
+## a)	Creer une variable qui renseigne le nombre de groupes d’aliments consommé par un enfant
+
+L’un des indicateurs clés du régime alimentaire minimum acceptable (MAD) consiste à mesurer la diversité alimentaire chez les enfants âgés de 6 à 23 mois. Cela passe par le **comptage du nombre de groupes alimentaires distincts consommés** la veille de l’enquête. 
+
+Les données collectées dans `base_mad` comprennent une série de variables binaires (0 = non consommé, 1 = consommé, NA = ne sait pas) correspondant à différents groupes d’aliments (produits d’origine animale, végétale, féculents, etc.). Ces variables ont déjà été nettoyées, notamment avec le **retrait des codes "888" remplacés par des valeurs manquantes `NA`**.
+
+Nous créons ici une nouvelle variable, `nb_groupes_alim`, qui comptabilise, pour chaque enfant, le **nombre de groupes d’aliments pour lesquels la réponse est "Oui"** (valeur 1). Ce score est essentiel pour évaluer la diversité alimentaire individuelle et sera combiné par la suite avec d’autres dimensions (fréquence des repas, allaitement) dans le calcul du MAD.
+
+```{r}
+# Étape 1 : Identification des variables alimentaires (0 = Non, 1 = Oui, 888 = Ne sait pas => déjà recodé NA)
+vars_mad_alim <- base_mad %>%
+  select(starts_with("PCMAD"), starts_with("PCMAD")) %>% 
+  select(where(is.numeric)) %>%
+  names()
+
+# Étape 2 : Calcul du nombre de groupes alimentaires consommés
+base_mad <- base_mad %>%
+  mutate(
+    nb_groupes_alim = rowSums(select(., all_of(vars_mad_alim)) == 1, na.rm = TRUE)
+  )
+
+# Étape 3 : Vérification rapide
+summary(base_mad$nb_groupes_alim)
+
+```
+
+## Créer une variable DDM qui indique si l'enfant a consommé au moins cinq groupes d'aliments
+
+Selon les normes du Programme Alimentaire Mondial (PAM) et de l’UNICEF :
+- Un enfant de 6 à 23 mois satisfait à la **DDM** s’il a consommé **au moins cinq (5) groupes alimentaires différents** parmi les groupes pertinents.
+
+Nous utilisons ici la variable `nb_groupes_alim`, préalablement calculée, pour construire une variable binaire `ddm` :
+- `1` : si l’enfant a consommé **≥ 5** groupes
+- `0` : sinon
+- `NA` : si aucune information n’est disponible (cas de données manquantes)
+
+```{r}
+# Création de la variable binaire DDM (Diversité Diététique Minimale)
+base_mad <- base_mad %>%
+  mutate(
+    ddm = case_when(
+      is.na(nb_groupes_alim) ~ NA,         # Cas manquant
+      nb_groupes_alim >= 5 ~ 1,            # Respecte la DDM
+      TRUE ~ 0                             # Ne respecte pas la DDM
+    )
+  )
+
+# Résumé pour vérification
+table(base_mad$ddm, useNA = "always")
+
+```
+## Proportion d'enfants âgés de 6 à 23 mois bénéficiant d'un régime alimentaire minimum acceptable
+
+Le **MAD (Minimum Acceptable Diet)** est un indicateur composite mesurant la qualité minimale de l’alimentation d’un enfant de 6 à 23 mois. Il est atteint uniquement si **trois conditions** sont satisfaites :
+
+1. **L’enfant est allaité**, ou a reçu du lait de croissance (`PCIYCBreastF == 1` ou `EverBreastF == 1`)
+2. **Il a reçu au moins 5 groupes alimentaires différents** (`ddm == 1`)
+3. **Il a consommé une fréquence minimale de repas** adaptée à son âge (`mmf == 1`) ← (à créer ensuite si pas encore fait)
+
+Dans cette sous-question, nous mesurons la proportion d’enfants ayant un régime **globalement acceptable**, c’est-à-dire satisfaisant à ces trois critères.
+
+```{r}
+# Création d'une variable binaire "mmf" (1 si la fréquence minimale est atteinte, 0 sinon)
+
+# Rappel des règles pour MMF :
+# - Enfant allaité : >= 2 repas (6–8 mois), >= 3 repas (9–23 mois)
+# - Enfant non allaité : >= 4 repas quel que soit l'âge
+
+base_mad <- base_mad %>%
+  mutate(
+    mmf = case_when(
+      is.na(PCIYCMeals) | is.na(MAD_resp_age) ~ NA_integer_,
+      # Allaité
+      (PCIYCBreastF == 1 | EverBreastF == 1) & MAD_resp_age >= 6 & MAD_resp_age <= 8 & PCIYCMeals >= 2 ~ 1L,
+      (PCIYCBreastF == 1 | EverBreastF == 1) & MAD_resp_age >= 9 & MAD_resp_age <= 23 & PCIYCMeals >= 3 ~ 1L,
+      # Non allaité
+      (PCIYCBreastF == 0 & EverBreastF == 0) & PCIYCMeals >= 4 ~ 1L,
+      TRUE ~ 0L
+    )
+  )
+
+# Création de la variable MAD
+base_mad <- base_mad %>%
+  mutate(
+    allaitement = case_when(
+      PCIYCBreastF == 1 | EverBreastF == 1 ~ 1,
+      is.na(PCIYCBreastF) & is.na(EverBreastF) ~ NA_integer_,
+      TRUE ~ 0
+    ),
+    mad = case_when(
+      allaitement == 1 & ddm == 1 & mmf == 1 ~ 1,
+      allaitement == 0 | ddm == 0 | mmf == 0 ~ 0,
+      TRUE ~ NA_integer_
+    )
+  )
+
+# Proportion globale d'enfants avec régime MAD
+prop_mad <- base_mad %>%
+  summarise(
+    proportion_mad = mean(mad, na.rm = TRUE)
+  )
+
+# Affichage simple du résultat
+print(prop_mad)
+
+```
+Le résultat indique que seule une minorité d’enfants de 6 à 23 mois bénéficie d’un régime alimentaire répondant aux standards minimaux en termes de diversité et de fréquence. Cela implique que près de 9 enfants sur 10 dans cette tranche d’âge sont potentiellement exposés à des risques de malnutrition ou de carences nutritionnelles.
+
+## Statistiques descriptives suivant sexe 
+Ce tableau permet d’évaluer les **différences dans l’accès à un régime alimentaire minimum acceptable** selon :
+
+- **Le sexe du chef de ménage** : on peut observer si les enfants vivant dans des ménages dirigés par des femmes bénéficient autant que ceux dirigés par des hommes.
+- **L’année d’enquête** (si disponible dans `YEAR`) : permet d’étudier l’évolution du MAD dans le temps.
+
+```{r tableau-mad-sex-annee, tab.cap="Proportion d’enfants ayant un régime MAD selon le sexe du chef de ménage et l’année", tab.topcaption=TRUE, message=FALSE, warning=FALSE}
+# Préparation des données
+base_mad_avec_info <- base_mad %>%
+  left_join(base_principale %>% select(ID, HHHSex, YEAR), by = "ID") %>%
+  mutate(
+    HHHSex = haven::as_factor(HHHSex),
+    YEAR = as.factor(YEAR)
+  )
+
+# Utilisation de tbl_strata pour grouper selon l'année
+tbl_mad_par_annee <- tbl_strata(
+  data = base_mad_avec_info,
+  strata = YEAR,
+  .tbl_fun = ~ .x %>%
+    select(mad, HHHSex) %>%
+    tbl_summary(
+      by = HHHSex,
+      type = all_categorical() ~ "categorical",
+      statistic = all_categorical() ~ "{n} ({p}%)",
+      label = list(mad ~ "A un régime MAD"),
+      missing = "no"
+    )
+)
+
+# Conversion en flextable
+as_flex_table(tbl_mad_par_annee) %>%
+  autofit()
+```
+
+
+Le tableau ci-dessus présente la proportion d’enfants âgés de 6 à 23 mois ayant bénéficié d’un régime alimentaire minimum acceptable (MAD), selon deux dimensions : l’année de l’enquête (2022 ou 2023) et le sexe du chef de ménage (homme ou femme).
+
+**Constats principaux :**
+
+- **En 2022** :
+  - Les enfants issus de ménages dirigés par des **femmes** sont **7,3 %** à avoir reçu un régime alimentaire MAD.
+  - Ce taux est légèrement plus élevé dans les ménages dirigés par des **hommes**, avec **9,9 %**.
+  - Cela suggère une différence de pratiques alimentaires en défaveur des ménages dirigés par des femmes cette année-là.
+
+- **En 2023** :
+  - L’accès au MAD a augmenté pour les deux groupes :
+    - **14 %** chez les enfants dans les ménages dirigés par des femmes.
+    - **15 %** chez ceux dans les ménages dirigés par des hommes.
+  - L’écart entre les sexes semble s’être atténué par rapport à l’année précédente, et les deux groupes atteignent des niveaux similaires.
+
+**Analyse transversale :**
+
+- Une **amélioration globale** est observée entre 2022 et 2023 : la proportion d’enfants bénéficiant d’un régime MAD passe de **8,7 % à 14,6 %** en moyenne.
+- Toutefois, les niveaux **restent très faibles**, loin des standards nutritionnels recommandés, ce qui indique une situation préoccupante en matière de diversité alimentaire des jeunes enfants.
+
+**Interprétation :**
+
+Ces résultats soulignent la nécessité de renforcer les **interventions en nutrition infantile**, en particulier dans les ménages vulnérables. Il serait également pertinent d’étudier plus en profondeur les déterminants de ces différences selon le sexe du chef de ménage : accès aux ressources, pratiques culturelles, niveau d’instruction, etc.
+
+
