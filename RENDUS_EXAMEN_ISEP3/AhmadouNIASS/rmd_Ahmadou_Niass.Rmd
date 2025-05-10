@@ -1,0 +1,1366 @@
+---
+title: "Rapport d'Analyse de l'examen de Projet Statistiques avc R"
+author: "Ahmadou Niass "
+output:
+  officedown::rdocx_document:
+    mapstyles:
+      Normal: ['First Paragraph']
+    toc: true
+    toc_depth: 3
+    page_size:
+      width: 8.5
+      height: 11
+      orient: "portrait"
+    page_margins:
+      bottom: 1
+      top: 1
+      right: 1
+      left: 1
+      header: 0.5
+      footer: 0.5
+    number_sections: true
+---
+
+# Analyse de consistence des bases de données:
+
+## **Méthodologie pour l'Analyse de Consistance des Bases de Données**
+
+Dans cette analyse, nous avons développé une fonction **`analyse_base()`** pour automatiser la vérification complète de la qualité des données pour les deux bases **`base_principale`** et **`base_mad`**. L'objectif est de s'assurer que les données sont cohérentes, complètes et prêtes pour des analyses statistiques plus avancées. Voici les étapes suivies :
+
+------------------------------------------------------------------------
+
+### **1. Chargement des Données**
+
+Les deux bases ont été importées à partir de fichiers **Stata** (`.dta`) à l'aide du package **`haven`**, qui permet de conserver les labels et formats spécifiques des fichiers Stata. Cette approche garantit que les métadonnées des variables sont préservées, ce qui est essentiel pour une analyse correcte.
+
+------------------------------------------------------------------------
+
+### **2. Nettoyage des Noms de Variables**
+
+Pour garantir la cohérence des colonnes entre les deux bases, les noms des variables ont été normalisés avec **`clean_names()`** du package **`janitor`**. Cette étape permet de transformer les noms en minuscules et de remplacer les espaces et caractères spéciaux, réduisant ainsi les risques d'erreurs lors des manipulations de données.
+
+------------------------------------------------------------------------
+
+### **3. Aperçu des Données**
+
+Un aperçu des cinq premières lignes de chaque base a été généré pour vérifier la structure générale des données. Cette étape permet de détecter rapidement les erreurs de format, les incohérences potentielles et les types de données inattendus. Cela fournit également une vue rapide des premières observations pour chaque base.
+
+------------------------------------------------------------------------
+
+### **4. Dimensions des Bases**
+
+Les dimensions de chaque base, c'est-à-dire le **nombre de lignes** (observations) et le **nombre de colonnes** (variables), ont été calculées pour avoir une idée de la taille des bases et détecter d'éventuelles anomalies comme des lignes vides, des colonnes dupliquées ou des erreurs de fusion.
+
+------------------------------------------------------------------------
+
+### **5. Informations sur les Colonnes**
+
+Pour chaque base, un tableau récapitulatif des colonnes a été créé, incluant :
+
+-   Le **nom des variables**
+-   Le **type des données** (`numeric`, `character`, `factor`, `labelled`, etc.)
+-   Le **nombre de valeurs manquantes** par colonne
+-   Le **pourcentage de valeurs manquantes**
+
+Cette étape est cruciale pour identifier les variables problématiques avant de procéder à l'analyse statistique et pour évaluer la qualité des données.
+
+------------------------------------------------------------------------
+
+### **6. Détection des Doublons**
+
+Le nombre total de **doublons** a été calculé pour chaque base. Les doublons peuvent indiquer des erreurs de saisie, des erreurs lors de la fusion de plusieurs bases de données ou des entrées répétées qui doivent être corrigées avant toute analyse.
+
+------------------------------------------------------------------------
+
+### **7. Identification des Valeurs Aberrantes (IQR)**
+
+Pour chaque variable numérique, les **valeurs aberrantes** ont été détectées en utilisant la méthode de l'**IQR (Interquartile Range)**. Cette méthode identifie les valeurs anormalement basses ou élevées en se basant sur les 25e (Q1) et 75e (Q3) percentiles :
+
+-   **Limite inférieure** : $Q1 - 1.5 \times IQR$
+-   **Limite supérieure** : $Q3 + 1.5 \times IQR$
+
+Le nombre de valeurs aberrantes pour chaque variable a ensuite été compté et inclus dans le rapport final pour une inspection plus approfondie.
+
+------------------------------------------------------------------------
+
+### **8. Présentation des Résultats**
+
+Les résultats ont été présentés sous forme de tableaux stylisés avec **`gtsummary`** et **`flextable`**, incluant :
+
+-   **Aperçu des premières lignes** : Pour vérifier rapidement la structure des données.
+-   **Dimensions des bases** : Pour évaluer la taille des bases.
+-   **Informations sur les colonnes** : Pour identifier les variables problématiques.
+-   **Nombre de doublons** : Pour détecter les répétitions.
+-   **Valeurs aberrantes (IQR)** : Pour repérer les valeurs anormales.
+
+Les tables sont formatées avec un style professionnel pour assurer une présentation cohérente et esthétique des résultats, compatibles avec les rapports **Word**.
+
+------------------------------------------------------------------------
+
+### Allons y mainteneant pour la pratique :
+
+```{r setup, include=FALSE}
+# Charger les packages nécessaires
+library(haven)        # Importation des fichiers .dta
+library(dplyr)        # Manipulation des données
+library(janitor)      # Nettoyage des données
+library(flextable)    # Tableaux élégants
+library(knitr)        # Formatage des tableaux
+library(gtsummary)
+library(kableExtra)   # Mise en forme avancée des tables
+library(officer)
+library(ggplot2)
+library(sf)
+library(tidyr)
+library(tmap)
+options(warn = -1)    # Supprimer les warnings
+theme_gtsummary_journal(journal = "jama")  # Style professionnel
+
+
+```
+
+```{r load_data, message=FALSE, warning=FALSE, echo=FALSE}
+# Charger les données
+base_principale <- haven::read_dta("Base_Principale.dta")
+base_mad <- haven::read_dta("Base_mad.dta")
+```
+
+```{r analyse_bases, message=FALSE, warning=FALSE, include = FALSE}
+analyse_base <- function(base, nom_base) {
+  
+  # Nettoyage des noms de colonnes (facultatif)
+  base <- base %>% clean_names()
+  
+  # Création du style de bordure
+  bordure_epaisse <- fp_border(color = "#4472C4", width = 2)
+  bordure_fine <- fp_border(color = "#4472C4", width = 1)
+  
+  # Aperçu des premières lignes
+  flextable(head(base, 5)) %>%
+    theme_booktabs() %>%
+    bg(bg = "#4472C4", part = "header") %>%
+    color(color = "white", part = "header") %>%
+    bold(part = "header") %>%
+    bold(j = 1) %>%
+    hline_top(border = bordure_epaisse, part = "header") %>%
+    hline_bottom(border = bordure_fine, part = "header") %>%
+    hline_bottom(border = bordure_epaisse, part = "body") %>%
+    align(align = "center", part = "all") %>%
+    valign(valign = "center", part = "all") %>%
+    padding(padding = 4, part = "all") %>%
+    fontsize(size = 10, part = "all") %>%
+    set_caption(paste("Aperçu des premières lignes -", nom_base)) %>%
+    autofit() %>%
+    print()
+  
+  # Dimensions de la base
+  dim_table <- data.frame(
+    "Statistique" = c("Nombre de Lignes", "Nombre de Colonnes"),
+    "Valeur" = c(nrow(base), ncol(base))
+  )
+  
+  flextable(dim_table) %>%
+    theme_booktabs() %>%
+    bg(bg = "#4472C4", part = "header") %>%
+    color(color = "white", part = "header") %>%
+    bold(part = "header") %>%
+    bold(j = 1) %>%
+    hline_top(border = bordure_epaisse, part = "header") %>%
+    hline_bottom(border = bordure_fine, part = "header") %>%
+    hline_bottom(border = bordure_epaisse, part = "body") %>%
+    align(align = "center", part = "all") %>%
+    valign(valign = "center", part = "all") %>%
+    padding(padding = 4, part = "all") %>%
+    fontsize(size = 10, part = "all") %>%
+    set_caption(paste("Dimensions de la base -", nom_base)) %>%
+    autofit() %>%
+    print()
+  
+  # Informations sur les colonnes
+  info_table <- data.frame(
+    Variable = names(base),
+    Type = sapply(base, function(x) class(x)[1]),
+    Manquants = sapply(base, function(x) sum(is.na(x))),
+    `% Manquants` = round(sapply(base, function(x) sum(is.na(x)) / nrow(base) * 100), 2)
+  )
+  
+  flextable(info_table) %>%
+    theme_booktabs() %>%
+    bg(bg = "#4472C4", part = "header") %>%
+    color(color = "white", part = "header") %>%
+    bold(part = "header") %>%
+    bold(j = 1) %>%
+    hline_top(border = bordure_epaisse, part = "header") %>%
+    hline_bottom(border = bordure_fine, part = "header") %>%
+    hline_bottom(border = bordure_epaisse, part = "body") %>%
+    align(align = "center", part = "all") %>%
+    valign(valign = "center", part = "all") %>%
+    padding(padding = 4, part = "all") %>%
+    fontsize(size = 10, part = "all") %>%
+    set_caption(paste("Informations sur les Colonnes -", nom_base)) %>%
+    autofit() %>%
+    print()
+  
+  # Détection des doublons
+  nb_doublons <- nrow(base) - nrow(dplyr::distinct(base))
+  doublons_table <- data.frame(
+    "Statistique" = "Nombre de Doublons",
+    "Valeur" = nb_doublons
+  )
+  
+  flextable(doublons_table) %>%
+    theme_booktabs() %>%
+    bg(bg = "#4472C4", part = "header") %>%
+    color(color = "white", part = "header") %>%
+    bold(part = "header") %>%
+    bold(j = 1) %>%
+    hline_top(border = bordure_epaisse, part = "header") %>%
+    hline_bottom(border = bordure_fine, part = "header") %>%
+    hline_bottom(border = bordure_epaisse, part = "body") %>%
+    align(align = "center", part = "all") %>%
+    valign(valign = "center", part = "all") %>%
+    padding(padding = 4, part = "all") %>%
+    fontsize(size = 10, part = "all") %>%
+    set_caption(paste("Nombre de Doublons -", nom_base)) %>%
+    autofit() 
+}
+
+# Analyse des deux bases
+analyse_base(base_principale, "base_principale")
+analyse_base(base_mad, "base_mad")
+```
+
+Les bases de données analysées sont les suivantes :
+
+Base Principale (base_principale) Nombre de Lignes : 8 950
+
+Nombre de Colonnes : 108
+
+Nombre de Doublons : 0
+
+Base MAD (base_mad) Nombre de Lignes : 2 206
+
+Nombre de Colonnes : 28
+
+Nombre de Doublons : 1
+
+En résumé, la base principale est plus grande, avec un plus grand nombre de lignes et de colonnes, et ne contient aucun doublon, tandis que la base MAD est plus petite, avec 2 206 lignes et 28 colonnes, mais contient 1 doublon.
+
+# II. Analyse des données et calcul d’indicateurs:
+
+Cette analyse vise à explorer les caractéristiques socio-démographiques des ménages à partir de la base de données **Base Principale**. Les étapes incluent l'importation des données, le nettoyage des doublons, l'exploration des caractéristiques des ménages et l'analyse des tendances démographiques.
+
+## Statistiques descriptives
+
+```{r statistiques, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+base_principale <- janitor::clean_names(base_principale)
+base_principale <- janitor::remove_empty(base_principale)
+# Création du tableau gtsummary
+table_global <- base_principale %>%
+  select(hh_size) %>%
+  tbl_summary(
+    label = hh_size ~ "Taille des ménages",
+    statistic = hh_size ~ "{mean} (Moyenne) | {sd} (Ecart-type) | {min} (Min) - {max} (Max) | N = {n}",
+    missing_text = "Manquant"
+  ) %>%
+  modify_caption("**Statistiques globales sur la taille des ménages**") %>%
+  modify_header(label = "**Caractéristique**", stat_0 = "**Valeur**")
+
+# Affichage du tableau
+table_global
+
+# Tableau pour le nombre total de ménages
+table_menages <- tibble(
+  Caractéristique = "Nombre total de ménages",
+  Valeur = nrow(base_principale)
+) 
+
+# Création du tableau flextable
+table_menages_ft <- flextable(table_menages) %>%
+  theme_booktabs() %>%
+  set_caption("**Nombre total de ménages**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  autofit()
+
+
+# Fusion des tableaux
+table_final <- rbind(
+  tibble(Caractéristique = "Nombre total de ménages", Valeur = nrow(base_principale)),
+  tibble(Caractéristique = "Taille des ménages", 
+         Valeur = paste0(mean(base_principale$hh_size, na.rm = TRUE), 
+                         " (Moyenne) | ", 
+                         sd(base_principale$hh_size, na.rm = TRUE), 
+                         " (Ecart-type) | ", 
+                         min(base_principale$hh_size, na.rm = TRUE), 
+                         " (Min) - ", 
+                         max(base_principale$hh_size, na.rm = TRUE), 
+                         " (Max) | N = ", 
+                         sum(!is.na(base_principale$hh_size)))
+  )
+)
+
+# Création du tableau flextable
+table_final_ft <- flextable(table_final) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques Globales sur les Ménages**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  autofit()
+
+# Affichage du tableau
+table_final_ft
+
+```
+
+## Structure des ménages
+
+```{r structure, echo=FALSE,message=FALSE, warning=FALSE, results='asis'}
+# Nettoyage des noms de colonnes
+base_principale <- janitor::clean_names(base_principale)
+
+# Nettoyage des données
+base_principale <- base_principale %>%
+  mutate(
+    hhh_sex = factor(hhh_sex, levels = c(1, 2), labels = c("Femme", "Homme"))
+  )
+
+# 1. Taille des ménages
+table_taille_menages <- data.frame(
+  Caractéristique = "Taille des ménages",
+  Valeur = paste0(
+    mean(base_principale$hh_size, na.rm = TRUE), 
+    " (Moyenne) | ", 
+    sd(base_principale$hh_size, na.rm = TRUE), 
+    " (Ecart-type) | ", 
+    min(base_principale$hh_size, na.rm = TRUE), 
+    " (Min) - ", 
+    max(base_principale$hh_size, na.rm = TRUE), 
+    " (Max) | N = ", 
+    sum(!is.na(base_principale$hh_size))
+  )
+)
+
+# 2. Sexe du chef de ménage
+table_sexe <- base_principale %>%
+  count(hhh_sex) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2)) %>%
+  rename("Sexe du chef de ménage" = hhh_sex, "Effectif" = n) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %"))
+
+# 3. Âge des chefs de ménage
+table_age <- data.frame(
+  Caractéristique = "Âge des chefs de ménage",
+  Valeur = paste0(
+    mean(base_principale$hhh_age, na.rm = TRUE), 
+    " (Moyenne) | ", 
+    sd(base_principale$hhh_age, na.rm = TRUE), 
+    " (Ecart-type) | ", 
+    min(base_principale$hhh_age, na.rm = TRUE), 
+    " (Min) - ", 
+    max(base_principale$hhh_age, na.rm = TRUE), 
+    " (Max) | N = ", 
+    sum(!is.na(base_principale$hhh_age))
+  )
+)
+
+# 4. Fusion des tableaux
+table_final <- rbind(table_taille_menages, table_age)
+
+# 5. Création des flextables
+table_final_ft <- flextable(table_final) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques globales sur les ménages**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_sexe_ft <- flextable(table_sexe) %>%
+  theme_booktabs() %>%
+  set_caption("**Répartition des chefs de ménage par sexe**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage des tableaux
+table_final_ft
+table_sexe_ft
+
+```
+
+## Niveau d'éducation du chef de ménage
+
+```{r education, echo = FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Niveau d'éducation
+labels_hhh_edu <- c(
+  "1" = "Aucune",
+  "2" = "Alphabétisé ou Coranique",
+  "3" = "Primaire",
+  "4" = "Secondaire",
+  "5" = "Supérieur"
+)
+
+# Remplacement des valeurs par les labels
+base_principale$hhh_edu <- factor(base_principale$hhh_edu, levels = names(labels_hhh_edu), labels = labels_hhh_edu)
+
+# Création du tableau gtsummary
+table_hhh_edu <- base_principale %>%
+  select(hhh_edu) %>%
+  tbl_summary(
+    label = hhh_edu ~ "Niveau d'éducation",
+    statistic = hhh_edu ~ "{n} ({p}%)",
+    missing_text = "Manquant"
+  ) %>%
+  modify_caption("**Répartition des niveaux d'éducation (hhh_edu)**") %>%
+  modify_header(label = "Niveau d'éducation")
+
+# Affichage du tableau
+table_hhh_edu
+```
+
+## Composition par age et sexe
+
+```{r compo_men, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+
+# Sélectionner uniquement les colonnes pertinentes
+cols_pop_f <- c("hh_size05f", "hh_size23f", "hh_size59f", "hh_size5114f", 
+                "hh_size1549f", "hh_size5064f", "hh_size65above_f")
+
+cols_pop_m <- c("hh_size05m", "hh_size23m", "hh_size59m", "hh_size5114m", 
+                "hh_size1549m", "hh_size5064m", "hh_size65above_m")
+
+# Création des bases séparées pour hommes et femmes
+base_femmes <- base_principale %>% 
+  select(all_of(cols_pop_f)) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "Groupe_Age", 
+               values_to = "Effectif") %>%
+  mutate(Sexe = "Femme")
+
+base_hommes <- base_principale %>% 
+  select(all_of(cols_pop_m)) %>%
+  pivot_longer(cols = everything(), 
+               names_to = "Groupe_Age", 
+               values_to = "Effectif") %>%
+  mutate(Sexe = "Homme")
+
+# Combiner les deux bases
+base_population <- bind_rows(base_femmes, base_hommes) %>%
+  mutate(
+    Groupe_Age = case_when(
+      grepl("05", Groupe_Age) ~ "0-5 mois",
+      grepl("23", Groupe_Age) ~ "6-23 mois",
+      grepl("59", Groupe_Age) ~ "5-9 ans",
+      grepl("5114", Groupe_Age) ~ "5-14 ans",
+      grepl("1549", Groupe_Age) ~ "15-49 ans",
+      grepl("5064", Groupe_Age) ~ "50-64 ans",
+      grepl("65above", Groupe_Age) ~ "65 ans et plus",
+      TRUE ~ "Autre"
+    )
+  )
+
+# Création du tableau avec gtsummary
+table_repartition <- base_population %>%
+  tbl_summary(
+    by = Sexe,
+    statistic = list(all_continuous() ~ "{sum}"),
+    sort = list(everything() ~ "alphanumeric")
+  ) %>%
+  add_overall() %>%
+  modify_header(label = "Groupe d'âge") %>%
+  modify_caption("**Répartition de la population par sexe et groupe d'âge**")
+
+# Affichage du tableau
+table_repartition
+
+
+```
+
+## Score de consommation alimentaire (SCA):
+
+### Faites une analyse descriptive des variables qui composent le SCA
+
+```{r descriptive des variables du SCA, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Liste des variables SCA
+sca_vars <- c("fcs_stap", "fcs_pulse", "fcs_dairy", "fcs_pr", 
+              "fcs_veg", "fcs_fruit", "fcs_fat", "fcs_sugar")
+
+# Création du tableau des statistiques descriptives
+table_sca <- data.frame(
+  Variable = sca_vars,
+  Moyenne = sapply(base_principale[, sca_vars], function(x) round(mean(x, na.rm = TRUE), 2)),
+  `Ecart-type` = sapply(base_principale[, sca_vars], function(x) round(sd(x, na.rm = TRUE), 2)),
+  Min = sapply(base_principale[, sca_vars], min, na.rm = TRUE),
+  Max = sapply(base_principale[, sca_vars], max, na.rm = TRUE),
+  N = sapply(base_principale[, sca_vars], function(x) sum(!is.na(x)))
+)
+
+# Création du flextable
+table_sca_ft <- flextable(table_sca) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives des variables du SCA**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_sca_ft
+
+```
+
+### Calcul du SCA
+
+```{r Calcul du SCA, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Calcul du SCA
+base_principale <- base_principale %>%
+  mutate(sca = (fcs_stap * 2) + (fcs_pulse * 3) + (fcs_dairy * 4) +
+                 (fcs_pr * 4) + (fcs_veg * 1) + (fcs_fruit * 1) +
+                 (fcs_fat * 0.5) + (fcs_sugar * 0.5))
+
+# Aperçu du SCA
+# Création du tableau des statistiques descriptives
+table_sca_final <- data.frame(
+  Caractéristique = "SCA (Food Consumption Score)",
+  Valeur = paste0(
+    round(mean(base_principale$sca, na.rm = TRUE), 2), " (Moyenne) | ",
+    round(sd(base_principale$sca, na.rm = TRUE), 2), " (Ecart-type) | ",
+    min(base_principale$sca, na.rm = TRUE), " (Min) - ",
+    max(base_principale$sca, na.rm = TRUE), " (Max) | N = ",
+    sum(!is.na(base_principale$sca))
+  )
+)
+
+# Création du flextable
+table_sca_ft <- flextable(table_sca_final) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives du SCA (Food Consumption Score)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_sca_ft
+
+```
+
+### Faites un tableau illustrant le poids attribue a chaque groupe alimentaire pour le calcul du SCA (la somme totale des poids doit etre egale a 16)
+
+```{r tableau poids, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+poids_sca <- data.frame(
+  Groupe_Alimentaire = c("Céréales (fcsstap)", "Légumineuses (fcspulse)", 
+                         "Produits laitiers (fcsdairy)", "Protéines animales (fcspr)", 
+                         "Légumes (fcsveg)", "Fruits (fcsfruit)", 
+                         "Graisses (fcsfat)", "Sucres (fcssugar)"),
+  Poids = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Création du tableau avec gtsummary
+poids_sca_table <- poids_sca %>%
+  tbl_summary(
+    by = Groupe_Alimentaire,
+    statistic = all_categorical() ~ "{n}",
+    label = Poids ~ "Poids"
+  ) %>%
+  modify_header(label = "**Groupe Alimentaire**") %>%
+  modify_header(stat_0 = "**Poids**") %>%
+  modify_caption("**Poids attribués aux groupes alimentaires pour le calcul du SCA**") %>%
+  bold_labels()
+
+poids_sca_table
+```
+
+## Categoriser le SCA selon les seuil 21/35 et 28/42
+
+```{r catégorisation sca, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Catégorisation 21/35 et 28/42
+base_principale <- base_principale %>%
+  mutate(sca_category_21_35 = case_when(
+    sca > 35 ~ "Sécurité alimentaire",
+    sca >= 21 & sca <= 35 ~ "Sécurité alimentaire limite",
+    sca < 21 ~ "Insécurité alimentaire"
+  ),
+  sca_category_28_42 = case_when(
+    sca > 42 ~ "Sécurité alimentaire",
+    sca >= 28 & sca <= 42 ~ "Sécurité alimentaire limite",
+    sca < 28 ~ "Insécurité alimentaire"
+  ))
+
+# Fréquence des catégories
+# Fréquence des catégories 21/35
+table_21_35 <- base_principale %>%
+  count(sca_category_21_35) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2)) %>%
+  rename("Catégorie SCA (21/35)" = sca_category_21_35, "Effectif" = n) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %"))
+
+# Fréquence des catégories 28/42
+table_28_42 <- base_principale %>%
+  count(sca_category_28_42) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2)) %>%
+  rename("Catégorie SCA (28/42)" = sca_category_28_42, "Effectif" = n) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %"))
+
+# Création des flextables
+table_21_35_ft <- flextable(table_21_35) %>%
+  theme_booktabs() %>%
+  set_caption("**Fréquence des catégories SCA (21/35)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+table_28_42_ft <- flextable(table_28_42) %>%
+  theme_booktabs() %>%
+  set_caption("**Fréquence des catégories SCA (28/42)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage des tableaux
+table_21_35_ft
+table_28_42_ft
+```
+
+## Faites une répresentation spatiale (région et département) du SCA et de ses différentes catégorisations
+
+```{r chargment shp, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+# Charger les shapefiles
+regions <- st_read("shp/tcd_admbnda_adm1_20250212_AB.shp")
+departements <- st_read("shp/tcd_admbnda_adm2_20250212_AB.shp")
+```
+
+```{r  vérification des corrspondance, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+print("tregions")
+unique(regions$ADM1_PCODE)
+print("reg_bas_princ")
+unique(base_principale$adm1_ocha)
+print("dep")
+unique(departements$ADM2_PCODE)
+print("bas_princ_dep")
+unique(base_principale$adm2_ocha)
+```
+
+```{r unform pcodee, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Harmonisation des codes OCHA
+base_principale <- base_principale %>%
+  mutate(adm1_ocha = paste0("TCD", substr(adm1_ocha, 3, 4)))
+  
+# Harmonisation des codes OCHA pour les départements
+base_principale <- base_principale %>%
+  mutate(adm2_ocha = paste0("TCD", substring(adm2_ocha, 3)))
+
+```
+
+```{r rep_spa_sca, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+# Jointure avec les régions (utilise les noms en français)
+regions_sca <- regions %>%
+  left_join(base_principale, by = c("ADM1_PCODE" = "adm1_ocha"))
+
+
+
+# Visualisation des scores
+tm_shape(regions_sca) +
+  tm_polygons("sca", palette = "YlGnBu", title = "SCA par Région")
+
+# Même chose pour les départements si tu as une colonne "admin2name"
+departements_sca <- departements %>%
+  left_join(base_principale, by = c("ADM2_PCODE" = "adm2_ocha"))
+
+tm_shape(departements_sca) +
+  tm_polygons("sca", palette = "YlOrBr", title = "SCA par Département")
+
+```
+
+## L’indice réduit des stratégies de survie (rCSI):
+
+### Faites une analyse descriptive des variables qui composent le rCSI
+
+Les variables utilisées pour calculer l'Indice Réduit des Stratégies de Survie (rCSI) sont généralement des comportements que les ménages adoptent pour faire face à une pénurie alimentaire, comme :
+
+-   rCSILessQlty : Réduction de la qualité des aliments
+
+-   rCSIBorrow : Emprunt de nourriture
+
+-   rCSIMealSize : Réduction de la taille des portions
+
+-   rCSIMealAdult : Réduction des portions des adultes pour préserver les enfants
+
+-   rCSIMealNb : Réduction du nombre de repas
+
+```{r ad des varables du rcsi, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Analyse descriptive des variables du rCSI
+# Sélection des variables rCSI
+vars_rcsi <- base_principale %>%
+  select(r_csi_less_qlty, r_csi_borrow, r_csi_meal_size, r_csi_meal_adult, r_csi_meal_nb)
+
+# Création du tableau des statistiques descriptives pour les variables rCSI
+table_rcsi <- data.frame(
+  Variable = names(vars_rcsi),
+  Moyenne = sapply(vars_rcsi, function(x) round(mean(x, na.rm = TRUE), 2)),
+  `Ecart-type` = sapply(vars_rcsi, function(x) round(sd(x, na.rm = TRUE), 2)),
+  Min = sapply(vars_rcsi, min, na.rm = TRUE),
+  Max = sapply(vars_rcsi, max, na.rm = TRUE),
+  N = sapply(vars_rcsi, function(x) sum(!is.na(x)))
+)
+
+# Création du flextable
+table_rcsi_ft <- flextable(table_rcsi) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives des variables rCSI**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_rcsi_ft
+
+```
+
+### Calculer l’indice réduit des stratégies de survie
+
+```{r calcul csi, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Calcul du rCSI
+base_principale <- base_principale %>%
+  mutate(rcsi = (r_csi_less_qlty * 2) + 
+                (r_csi_borrow * 4) + 
+                (r_csi_meal_size * 2) + 
+                (r_csi_meal_adult * 5) + 
+                (r_csi_meal_nb * 8))
+
+# Vérification du rCSI
+# Création du tableau des statistiques descriptives pour le rCSI
+table_rcsi <- data.frame(
+  Caractéristique = "rCSI (Reduced Coping Strategy Index)",
+  Valeur = paste0(
+    round(mean(base_principale$rcsi, na.rm = TRUE), 2), " (Moyenne) | ",
+    round(sd(base_principale$rcsi, na.rm = TRUE), 2), " (Ecart-type) | ",
+    min(base_principale$rcsi, na.rm = TRUE), " (Min) - ",
+    max(base_principale$rcsi, na.rm = TRUE), " (Max) | N = ",
+    sum(!is.na(base_principale$rcsi))
+  )
+)
+
+# Création du flextable
+table_rcsi_ft <- flextable(table_rcsi) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives du rCSI (Reduced Coping Strategy Index)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_rcsi_ft
+
+```
+
+### Faites un tableau illustrant le poids attribue a chaque variable pour le calcul du rCSI (la somme totale des poids doit etre egale a 21)
+
+```{r tab_poids_rcsi, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Création du tableau des poids corrects
+poids_rcsi <- data.frame(
+  Strategie = c("Réduction de la qualité", 
+                "Emprunt de nourriture", 
+                "Réduction de la taille des portions", 
+                "Réduction des portions des adultes", 
+                "Réduction du nombre de repas"),
+  Poids = c(1, 4, 2, 5, 8)
+)
+
+# Vérification de la somme des poids
+print(sum(poids_rcsi$Poids))  # Doit être égal à 21
+
+# Affichage avec gtsummary
+poids_rcsi_table <- poids_rcsi %>%
+  tbl_summary(
+    by = Strategie,
+    statistic = all_categorical() ~ "{n}",
+    label = Poids ~ "Poids"
+  ) %>%
+  modify_header(label = "**Stratégie**") %>%
+  modify_header(stat_0 = "**Poids**") %>%
+  modify_caption("**Poids attribués aux stratégies pour le calcul du rCSI**") %>%
+  bold_labels()
+
+poids_rcsi_table
+```
+
+Les poids utilisés pour le calcul du rCSI (Reduced Coping Strategy Index) sont basés sur l'importance relative de chaque stratégie de survie en termes d'impact sur la sécurité alimentaire d'un ménage. Ces poids sont choisis pour refléter la sévérité des stratégies adoptées par les ménages pour faire face à une pénurie alimentaire :
+
+| **Stratégie** | **Poids** | **Justification** |
+|---------------|---------------|-------------------------------------------|
+| **Réduction de la qualité des aliments** | 2 | Cette stratégie est souvent la première à être adoptée car elle est moins sévère. Les ménages préfèrent manger des aliments moins nutritifs avant de réduire les portions ou le nombre de repas. |
+| **Emprunt de nourriture** | 4 | L'emprunt de nourriture ou la dépendance envers les amis ou voisins indique une insécurité alimentaire plus sérieuse car elle implique une dépendance extérieure. |
+| **Réduction de la taille des portions** | 2 | Cette stratégie montre une augmentation de la pression alimentaire, mais elle est moins critique que la réduction des repas ou la privation des adultes. |
+| **Réduction des portions des adultes** | 5 | Cette stratégie est plus sévère car elle met en danger la santé des adultes pour préserver les enfants, une décision souvent difficile pour les ménages. |
+| **Réduction du nombre de repas** | 8 | C'est l'une des stratégies les plus sévères, indiquant une situation de crise alimentaire où les ménages ne peuvent plus maintenir leur fréquence alimentaire habituelle. |
+
+### Faites une representation spatiale (region et departement) du rCSI
+
+```{r rep_spa_rcsi, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Jointure avec les régions
+regions_rcsi <- regions %>%
+  left_join(base_principale, by = c("ADM1_PCODE" = "adm1_ocha"))
+
+# Jointure avec les départements
+departements_rcsi <- departements %>%
+  left_join(base_principale, by = c("ADM2_PCODE" = "adm2_ocha"))
+
+# Cartes
+tm_shape(regions_rcsi) +
+  tm_polygons("rcsi", 
+              fill.scale = tm_scale(values = "YlOrRd"), 
+              fill.legend = tm_legend(title = "rCSI par Région"))
+
+tm_shape(departements_rcsi) +
+  tm_polygons("rcsi", 
+              fill.scale = tm_scale(values = "YlOrRd"), 
+              fill.legend = tm_legend(title = "rCSI par Département"))
+```
+
+## Stratégies d'adaptation aux moyens d'existence (LhCSI):
+
+Les indicateurs de stratégies d'adaptation des moyens de subsistance (LhCSI) sont généralement mesurés à partir des réponses des ménages à des questions sur les stratégies qu'ils ont adoptées pour faire face aux chocs économiques ou alimentaires. Dans la base base_principale, ces variables sont probablement nommées comme :
+
+-   lhcsi_stress1 : Stratégie de stress 1
+
+-   lhcsi_stress2 : Stratégie de stress 2
+
+-   lhcsi_stress3 : Stratégie de stress 3
+
+-   lhcsi_crisis1 : Stratégie de crise 1
+
+-   lhcsi_crisis2 : Stratégie de crise 2
+
+-   lhcsi_crisis3 : Stratégie de crise 3
+
+-   lhcsi_emergency1 : Stratégie d'urgence 1
+
+-   lhcsi_emergency2 : Stratégie d'urgence 2
+
+-   lhcsi_emergency3 : Stratégie d'urgence 3
+
+```{r ad_lhsci, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Analyse descriptive des variables LhCSI
+vars_lhcsi <- base_principale %>%
+  select(lh_csi_stress1, lh_csi_stress2, lh_csi_stress3,
+         lh_csi_crisis1, lh_csi_crisis2, lh_csi_crisis3,
+         lh_csi_emergency1, lh_csi_emergency2, lh_csi_emergency3)
+# Création du tableau des statistiques descriptives pour les variables LhCSI
+table_lhcsi <- data.frame(
+  Variable = names(vars_lhcsi),
+  Moyenne = sapply(vars_lhcsi, function(x) round(mean(x, na.rm = TRUE), 2)),
+  `Ecart-type` = sapply(vars_lhcsi, function(x) round(sd(x, na.rm = TRUE), 2)),
+  Min = sapply(vars_lhcsi, min, na.rm = TRUE),
+  Max = sapply(vars_lhcsi, max, na.rm = TRUE),
+  N = sapply(vars_lhcsi, function(x) sum(!is.na(x)))
+)
+
+# Création du flextable
+table_lhcsi_ft <- flextable(table_lhcsi) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives des variables LhCSI**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_lhcsi_ft
+
+# Distribution des stratégies LhCSI
+
+base_principale_long <- base_principale %>%
+  pivot_longer(cols = c("lh_csi_stress1", "lh_csi_stress2", "lh_csi_stress3",
+                        "lh_csi_crisis1", "lh_csi_crisis2", "lh_csi_crisis3",
+                        "lh_csi_emergency1", "lh_csi_emergency2", "lh_csi_emergency3"),
+               names_to = "strategie",
+               values_to = "frequence")
+
+ggplot(base_principale_long, aes(x = strategie, y = frequence)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Distribution des stratégies LhCSI",
+       x = "Stratégie", y = "Fréquence") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+### Classification des Ménages (Stress, Crise, Urgence)
+
+Pour le classemnt des ménages selon leur niveau de sévérité en 2022 et 2023 :
+
+```{r classmeent_meenagee, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Création des indicateurs de sévérité
+base_principale <- base_principale %>%
+  mutate(stress = ifelse(rowSums(base_principale[, c("lh_csi_stress1", "lh_csi_stress2", "lh_csi_stress3")], na.rm = TRUE) > 0, 1, 0),
+         crise = ifelse(rowSums(base_principale[, c("lh_csi_crisis1", "lh_csi_crisis2", "lh_csi_crisis3")], na.rm = TRUE) > 0, 1, 0),
+         urgence = ifelse(rowSums(base_principale[, c("lh_csi_emergency1", "lh_csi_emergency2", "lh_csi_emergency3")], na.rm = TRUE) > 0, 1, 0))
+
+# Vérification des proportions pour 2022 et 2023
+# Total des ménages par année
+total_menages <- base_principale %>%
+  group_by(year) %>%
+  summarise(total_menages = n())
+
+# Comptage des ménages par type de stratégie
+proportions_lhcsi <- base_principale %>%
+  group_by(year) %>%
+  summarise(
+    n_stress = sum(stress, na.rm = TRUE),
+    n_crise = sum(crise, na.rm = TRUE),
+    n_urgence = sum(urgence, na.rm = TRUE)
+  )
+# Calcul des proportions de stress, crise et urgence
+proportions_lhcsi <- base_principale %>%
+  group_by(year) %>%
+  summarise(
+    n_stress = sum(stress, na.rm = TRUE),
+    n_crise = sum(crise, na.rm = TRUE),
+    n_urgence = sum(urgence, na.rm = TRUE)
+  ) %>%
+  left_join(total_menages, by = "year") %>%
+  mutate(
+    prop_stress = round((n_stress / total_menages) * 100, 2),
+    prop_crise = round((n_crise / total_menages) * 100, 2),
+    prop_urgence = round((n_urgence / total_menages) * 100, 2)
+  )
+
+# Création du tableau flextable
+table_lhcsi_ft <- flextable(proportions_lhcsi) %>%
+  theme_booktabs() %>%
+  set_caption("**Proportions de ménages en stress, crise et urgence par année**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_lhcsi_ft
+
+```
+
+### Faites une representation spatiale (region et departement) des strategies d’adaptation
+
+```{r rp_spa_adaptation, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Jointure avec les régions
+regions_lhcsi <- regions %>%
+  left_join(base_principale, by = c("ADM1_PCODE" = "adm1_ocha"))
+
+# Jointure avec les départements
+departements_lhcsi <- departements %>%
+  left_join(base_principale, by = c("ADM2_PCODE" = "adm2_ocha"))
+
+# Cartes
+tm_shape(regions_lhcsi) +
+  tm_polygons("stress", 
+              fill.scale = tm_scale(values = "YlGn"), 
+              fill.legend = tm_legend(title = "Ménages en Stress par Région"))
+
+tm_shape(regions_lhcsi) +
+  tm_polygons("crise", 
+              fill.scale = tm_scale(values = "YlOrBr"), 
+              fill.legend = tm_legend(title = "Ménages en Crise par Région"))
+
+tm_shape(regions_lhcsi) +
+  tm_polygons("urgence", 
+              fill.scale = tm_scale(values = "Reds"), 
+              fill.legend = tm_legend(title = "Ménages en Urgence par Région"))
+
+```
+
+## Score de diversité alimentaire des ménages:
+
+### Analyse Descriptive des Variables du Module HDDS
+
+Le HDDS (Household Dietary Diversity Score) est une mesure de la diversité alimentaire d'un ménage, basée sur le nombre de groupes alimentaires consommés au cours d'une période donnée. Les groupes alimentaires couramment utilisés pour le calcul du HDDS incluent :
+
+-   Céréales et tubercules (hdds_stapcer, hdds_staproot)
+
+-   Légumineuses (hdds_pulse)
+
+-   Légumes (hdds_vegorg, hdds_veggre, hdds_vegoth)
+
+-   Fruits (hdds_fruitorg, hdds_fruitoth)
+
+-   Viandes et poissons (hdds_prmeat, hdds_prfish, hdds_pregg)
+
+-   Produits laitiers (hdds_dairy)
+
+-   Huiles et graisses (hdds_fat)
+
+-   Sucres et condiments (hdds_sugar, hdds_cond)
+
+```{r AD, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Analyse descriptive des variables HDDS
+# Sélection des variables HDDS
+vars_hdds <- base_principale %>%
+  select(hdds_stap_cer, hdds_stap_root, hdds_pulse, 
+         hdds_veg_org, hdds_veg_gre, hdds_veg_oth, 
+         hdds_fruit_org, hdds_fruit_oth, hdds_pr_meat, 
+         hdds_pr_fish, hdds_pr_egg, hdds_dairy, 
+         hdds_fat, hdds_sugar, hdds_cond)
+
+# Création du tableau des statistiques descriptives pour les variables HDDS
+table_hdds <- data.frame(
+  Variable = names(vars_hdds),
+  Moyenne = sapply(vars_hdds, function(x) round(mean(x, na.rm = TRUE), 2)),
+  `Ecart-type` = sapply(vars_hdds, function(x) round(sd(x, na.rm = TRUE), 2)),
+  Min = sapply(vars_hdds, min, na.rm = TRUE),
+  Max = sapply(vars_hdds, max, na.rm = TRUE),
+  N = sapply(vars_hdds, function(x) sum(!is.na(x)))
+)
+
+# Création du flextable
+table_hdds_ft <- flextable(table_hdds) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives des variables HDDS**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_hdds_ft
+
+# Visualisation de la distribution
+
+base_principale_long <- base_principale %>%
+  pivot_longer(cols = c("hdds_stap_cer", "hdds_stap_root", "hdds_pulse", 
+                            "hdds_veg_org", "hdds_veg_gre", "hdds_veg_oth", 
+                            "hdds_fruit_org", "hdds_fruit_oth", "hdds_pr_meat", 
+                            "hdds_pr_fish", "hdds_pr_egg", "hdds_dairy", 
+                            "hdds_fat", "hdds_sugar", "hdds_cond"),
+               names_to = "groupe_alimentaire",
+               values_to = "frequence")
+
+ggplot(base_principale_long, aes(x = groupe_alimentaire, y = frequence)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Distribution des groupes alimentaires (HDDS)",
+       x = "Groupe Alimentaire", y = "Fréquence") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+### Calcul du Score de Diversité Alimentaire (HDDS)
+
+Le HDDS est simplement la somme du nombre de groupes alimentaires consommés (valeurs \> 0) :
+
+```{r calcul hdds, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Calcul du HDDS
+base_principale <- base_principale %>%
+  mutate(hdds = rowSums(base_principale[, c("hdds_stap_cer", "hdds_stap_root", "hdds_pulse", 
+                            "hdds_veg_org", "hdds_veg_gre", "hdds_veg_oth", 
+                            "hdds_fruit_org", "hdds_fruit_oth", "hdds_pr_meat", 
+                            "hdds_pr_fish", "hdds_pr_egg", "hdds_dairy", 
+                            "hdds_fat", "hdds_sugar", "hdds_cond")] > 0, na.rm = TRUE))
+
+# Création du tableau des statistiques descriptives pour le HDDS
+table_hdds <- data.frame(
+  Caractéristique = "HDDS (Household Dietary Diversity Score)",
+  Valeur = paste0(
+    round(mean(base_principale$hdds, na.rm = TRUE), 2), " (Moyenne) | ",
+    round(sd(base_principale$hdds, na.rm = TRUE), 2), " (Ecart-type) | ",
+    min(base_principale$hdds, na.rm = TRUE), " (Min) - ",
+    max(base_principale$hdds, na.rm = TRUE), " (Max) | N = ",
+    sum(!is.na(base_principale$hdds))
+  )
+)
+
+# Création du flextable
+table_hdds_ft <- flextable(table_hdds) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives du HDDS (Household Dietary Diversity Score)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_hdds_ft
+
+```
+
+### Représentation Spatiale (Région et Département)
+
+```{r rep_spa_hdds, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Jointure avec les régions
+regions_hdds <- regions %>%
+  left_join(base_principale, by = c("ADM1_PCODE" = "adm1_ocha"))
+
+# Jointure avec les départements
+departements_hdds <- departements %>%
+  left_join(base_principale, by = c("ADM2_PCODE" = "adm2_ocha"))
+
+# Cartes
+tm_shape(regions_hdds) +
+  tm_polygons("hdds", 
+              fill.scale = tm_scale(values = "YlGnBu"), 
+              fill.legend = tm_legend(title = "HDDS par Région"))
+
+tm_shape(departements_hdds) +
+  tm_polygons("hdds", 
+              fill.scale = tm_scale(values = "YlOrBr"), 
+              fill.legend = tm_legend(title = "HDDS par Département"))
+```
+
+## Score de résilience auto-évaluée (SERS):
+
+### Faites une analyse descriptive des variables qui composent le SERS
+
+Le SERS (Score de Résilience) est basé sur 10 sous-énoncés utilisant une échelle de Likert en 5 points.
+
+Chacune de ces variables prend des valeurs de 1 ("pas du tout d'accord") à 5 ("tout à fait d'accord").
+
+```{r ad_var_sers, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Analyse descriptive des 10 variables du SERS
+vars_sers <- base_principale %>%
+  select(starts_with("sers"))
+
+# Création du tableau des statistiques descriptives pour les variables SERS
+table_sers <- data.frame(
+  Variable = names(vars_sers),
+  Moyenne = sapply(vars_sers, function(x) round(mean(x, na.rm = TRUE), 2)),
+  `Ecart-type` = sapply(vars_sers, function(x) round(sd(x, na.rm = TRUE), 2)),
+  Min = sapply(vars_sers, min, na.rm = TRUE),
+  Max = sapply(vars_sers, max, na.rm = TRUE),
+  N = sapply(vars_sers, function(x) sum(!is.na(x)))
+)
+
+# Création du flextable
+table_sers_ft <- flextable(table_sers) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives des 10 variables du SERS**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_sers_ft
+
+```
+
+### Calcul du SERS (Méthode Min-Max)
+
+Pour normaliser sur une échelle de 0 à 100 :
+
+```{r calcul_sers, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Calcul du score brut SERS
+# Conversion des variables SERS en numérique
+vars_sers <- base_principale %>%
+  select(starts_with("sers")) %>%
+  mutate(across(everything(), as.numeric))
+
+# Calcul du score brut SERS
+base_principale$sers_raw <- rowSums(vars_sers, na.rm = TRUE)
+
+# Normalisation du score SERS (0 à 100)
+base_principale$sers <- (100 * (base_principale$sers_raw - (ncol(vars_sers) * 1)) / 
+                         ((ncol(vars_sers) * 5) - (ncol(vars_sers) * 1)))
+
+# Création du tableau des statistiques descriptives pour le score SERS
+table_sers <- data.frame(
+  Caractéristique = "SERS (Score de Résilience)",
+  Valeur = paste0(
+    round(mean(base_principale$sers, na.rm = TRUE), 2), " (Moyenne) | ",
+    round(sd(base_principale$sers, na.rm = TRUE), 2), " (Ecart-type) | ",
+    min(base_principale$sers, na.rm = TRUE), " (Min) - ",
+    max(base_principale$sers, na.rm = TRUE), " (Max) | N = ",
+    sum(!is.na(base_principale$sers))
+  )
+)
+
+# Création du flextable
+table_sers_ft <- flextable(table_sers) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives du SERS (Score de Résilience)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_sers_ft
+
+
+```
+
+### Catégorisation du SERS
+
+```{r catg srs, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Catégorisation du SERS
+# Catégorisation du SERS
+base_principale <- base_principale %>%
+  mutate(sers_category = case_when(
+    sers < 33 ~ "Faible",
+    sers >= 33 & sers < 66 ~ "Moyen",
+    sers >= 66 ~ "Élevé"
+  ))
+
+# Création du tableau des catégories SERS
+table_sers_category <- base_principale %>%
+  count(sers_category) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2)) %>%
+  rename("Catégorie SERS" = sers_category, "Effectif" = n) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %"))
+
+# Création du flextable
+table_sers_category_ft <- flextable(table_sers_category) %>%
+  theme_booktabs() %>%
+  set_caption("**Répartition des catégories du SERS (Score de Résilience)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_sers_category_ft
+
+```
+
+### Faites une representation spatiale (region et departement) du SERS et ses categories
+
+```{r rep_spa_seers, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Jointure avec les régions
+regions_sers <- regions %>%
+  left_join(base_principale, by = c("ADM1_PCODE" = "adm1_ocha"))
+
+# Jointure avec les départements
+departements_sers <- departements %>%
+  left_join(base_principale, by = c("ADM2_PCODE" = "adm2_ocha"))
+
+# Carte du SERS
+tm_shape(regions_sers) +
+  tm_polygons("sers", 
+              fill.scale = tm_scale(values = "YlGnBu"), 
+              fill.legend = tm_legend(title = "SERS par Région"))
+
+# Carte des catégories du SERS
+tm_shape(regions_sers) +
+  tm_polygons("sers_category", 
+              fill.scale = tm_scale(values = c("Faible" = "red", "Moyen" = "orange", "Élevé" = "green")), 
+              fill.legend = tm_legend(title = "Catégories de SERS par Région"))
+
+```
+
+## Régime alimentaire minimum acceptable (MAD):
+
+### Creer une variable qui renseigne le nombre de groupes d’aliments consommé par un enfant
+
+```{r crea_var_nb_groups_aliments, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Sélection des variables alimentaires
+vars_aliments <- base_mad %>%
+  select(starts_with("PCMAD"))
+
+# Correction spécifique pour PCMADPrMeatF (2 = "Non", 1 = "Oui")
+base_mad <- base_mad %>%
+  mutate(
+    PCMADPrMeatF = ifelse(PCMADPrMeatF == 2, "Non",
+                          ifelse(PCMADPrMeatF == 1, "Oui", PCMADPrMeatF))
+  )
+
+# Création de la variable nb_groupes_aliments
+base_mad <- base_mad %>%
+  mutate(nb_groupes_aliments = rowSums(vars_aliments == 1, na.rm = TRUE))
+
+# Création du tableau des statistiques descriptives pour nb_groupes_aliments
+table_aliments <- data.frame(
+  Caractéristique = "Nombre de Groupes Alimentaires",
+  Valeur = paste0(
+    round(mean(base_mad$nb_groupes_aliments, na.rm = TRUE), 2), " (Moyenne) | ",
+    round(sd(base_mad$nb_groupes_aliments, na.rm = TRUE), 2), " (Ecart-type) | ",
+    min(base_mad$nb_groupes_aliments, na.rm = TRUE), " (Min) - ",
+    max(base_mad$nb_groupes_aliments, na.rm = TRUE), " (Max) | N = ",
+    sum(!is.na(base_mad$nb_groupes_aliments))
+  )
+)
+
+# Création du flextable
+table_aliments_ft <- flextable(table_aliments) %>%
+  theme_booktabs() %>%
+  set_caption("**Statistiques descriptives du Nombre de Groupes Alimentaires**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_aliments_ft
+
+```
+
+### Créer une variable DDM qui indique si l'enfant a consommé au moins cinq groupes d'aliments
+
+```{r au_moins_5_groups, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Création de la variable DDM
+base_mad <- base_mad %>%
+  mutate(ddm = ifelse(nb_groupes_aliments >= 5, 1, 0))
+
+# Création du tableau de distribution pour DDM
+table_ddm <- base_mad %>%
+  count(ddm) %>%
+  mutate(
+    Catégorie = ifelse(ddm == 1, "Diversité Alimentaire Adéquate (DDM = 1)", "Diversité Alimentaire Insuffisante (DDM = 0)"),
+    Pourcentage = round(n / sum(n) * 100, 2)
+  ) %>%
+  select(Catégorie, n, Pourcentage) %>%
+  rename("Effectif" = n) %>%
+  mutate(Pourcentage = paste0(Pourcentage, " %"))
+
+# Création du flextable
+table_ddm_ft <- flextable(table_ddm) %>%
+  theme_booktabs() %>%
+  set_caption("**Répartition des Ménages par Diversité Alimentaire (DDM)**") %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  autofit()
+
+# Affichage du tableau
+table_ddm_ft
+```
+
+### Quelle est la proportion d'enfants âgés de 6 à 23 mois bénéficiant d'un régime alimentaire minimum acceptable
+On remarque en fin d compte que 27% des enfants âgés bénéficiant d'un régime alimentaire minimum acceptable
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Calcul de la proportion d'enfants avec DDM
+#Puisqu'ici on déjà une variable ndicatrice avec ddm en calculant la moyenne on aura directement la proportion d'enfant de enfants âgés de 6 à 23 mois 
+prop_ddm <- mean(base_mad$ddm, na.rm = TRUE)
+prop_ddm
+
+```
+
+###	Faites les statistiques descriptives de cette variable suivant le sexe du chef de menage, l’annee.
+
+
+```{r mrge, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Fusion des deux bases sur ID
+base_merged <- base_mad %>%
+  rename(id = ID) %>%  # Renommer la colonne "ID" en "id" si nécessaire
+  left_join(base_principale, by = "id")
+
+# Vérification du résultat
+dim(base_merged)  # Dimensions de la base fusionnée
+head(base_merged)  # Aperçu des premières lignes
+```
+```{r calcul_de_hhh_sex, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# Conversion de ddm en facteur pour que les statistiques soient correctes
+base_merged$ddm <- factor(base_merged$ddm, levels = c(0, 1), labels = c("Non", "Oui"))
+
+
+```
