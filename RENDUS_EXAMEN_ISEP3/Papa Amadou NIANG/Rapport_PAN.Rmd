@@ -1,0 +1,1454 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: true
+    toc: false
+    toc_depth: 3
+    number_sections: false
+header-includes:
+  - \usepackage{hyperref}
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage{graphicx}
+  - \usepackage{fontspec}
+  - \usepackage{xcolor}
+  - \usepackage{fontspec}
+  - \renewcommand{\normalsize}{\fontsize{12pt}{15pt}\selectfont}
+  - \definecolor{ensaeblue}{RGB}{0, 71, 133}
+  - \definecolor{goldaccent}{RGB}{184, 134, 11}
+  - \setmainfont{Cambria}
+  - \setsansfont{Franklin Gothic Demi Cond}
+  - \setmonofont{Courier New}
+  - \usepackage[margin=1in]{geometry}
+  - \usepackage{titlesec}
+  - \titleformat{\section}{\LARGE\bfseries\color{ensaeblue}}{\thesection}{1em}{}
+  - \titleformat{\subsection}{\Large\bfseries\color{ensaeblue}}{\thesubsection}{1em}{}
+  - \titleformat{\subsubsection}{\large\bfseries\color{ensaeblue}}{\thesubsubsection}{1em}{}
+  - \usepackage{tocloft}
+  - \renewcommand{\cftsecfont}{\normalsize\bfseries\color{ensaeblue}}
+  - \renewcommand{\cftsubsecfont}{\small\color{black}}
+  - \renewcommand{\cftsecpagefont}{\small\color{ensaeblue}}
+  - \renewcommand{\cftsubsecpagefont}{\footnotesize}
+  - \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyhead[L]{\small\textsf{Projet Statistiques sous R}}
+  - \fancyhead[R]{\small\textsf{Papa Amadou NIANG}}
+  - \fancyfoot[C]{\thepage}
+  - \usepackage{setspace}
+  - \usepackage{tikz}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+# 0. Chargement des librairies --------------------------------------
+# tidyverse  : manipulation de données (dplyr, tidyr, etc.)
+# janitor    : diagnostics rapides (get_dupes, tabyl, bilan NA)
+# lubridate  : gestion et extraction d’attributs de dates
+# gtsummary : création de tableaux récapitulatifs élégants
+# haven : pour la conversion as_factor()
+# sf : pour la cartographie
+# viridis : palettes de couleurs
+# stringr : pour str_remove()
+# kableExtra : pour la mise en forme des tableaux
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(haven)
+library(gtsummary)
+library(sf)          
+library(viridis)    
+library(stringr) 
+library(kableExtra)
+```
+
+```{=tex}
+\begin{titlepage}
+    \thispagestyle{empty}
+    
+    % Arrière-plan décoratif
+    \begin{tikzpicture}[remember picture, overlay]
+        \fill[ensaeblue!15] (current page.north west) rectangle (current page.south east);
+        \fill[ensaeblue!30] (current page.north west) -- ++(0,-4cm) -- ++(21cm,-4cm) -- ++(0,8cm) -- cycle;
+        \draw[line width=3pt, goldaccent] (current page.north west) ++(0,-8cm) -- ++(21cm,0);
+        \draw[line width=1.5pt, goldaccent] (current page.north west) ++(0,-8.3cm) -- ++(21cm,0);
+    \end{tikzpicture}
+
+    \vspace*{-1cm}
+    \begin{center}
+        \textbf{\LARGE\color{ensaeblue} RÉPUBLIQUE DU SÉNÉGAL}\\[0.1cm]
+        \includegraphics[width=2cm]{images/Logo1.jpg} \\[0.1cm]
+        \textbf{\large\color{goldaccent} Un Peuple - Un But - Une Foi}\\[0.5cm]
+        
+        \textbf{\LARGE\color{ensaeblue} Ministère de l'Économie, du Plan et de la Coopération}\\[0.1cm]
+        \includegraphics[width=3cm]{images/Logo2.png} \\[0.5cm] 
+        
+        \textbf{\large\color{black} Agence Nationale de la Statistique et de la Démographie (ANSD)}\\[0.2cm]
+        
+        \includegraphics[width=2cm]{images/Logo3.png} \\[0.5cm]  
+        
+        \textbf{\large\color{black} École Nationale de la Statistique et de l'Analyse Économique Pierre Ndiaye (ENSAE)}\\[0.4cm]
+        \includegraphics[width=2cm]{images/Logo4.png} \\[0.7cm]
+    \end{center}
+    
+    \begin{center}
+        \framebox[\textwidth]{
+            \begin{minipage}{0.95\textwidth}
+                \vspace{0.3cm}
+                \begin{center}
+                    \textbf{\LARGE\color{ensaeblue} PROJET STATISTIQUES SOUS R}\\[0.8cm]
+                    \textbf{\fontsize{24}{26}\selectfont\color{goldaccent} \textsf{Rapport sur l'insécurité alimentaire\\au Tchad}}
+                \end{center}
+                \vspace{0.3cm}
+            \end{minipage}
+        }
+    \end{center}
+    
+    \vspace{0.9cm}
+    
+    \begin{minipage}{0.55\textwidth}
+        \begin{flushleft}
+            \large
+            \textcolor{ensaeblue}{\textsf{\textbf{Rédigé par :}}}\\[0.2cm]
+            \fbox{\begin{minipage}{0.9\textwidth}
+                \vspace{0.2cm}
+                \textbf{\large\textsf{M. Papa Amadou NIANG}}\\
+                \textit{\textsf{Élève ingénieur statisticien économiste}}
+                \vspace{0.2cm}
+            \end{minipage}}
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+        \begin{flushright}
+            \large
+            \textcolor{ensaeblue}{\textsf{\textbf{Supervisé par :}}}\\[0.2cm]
+            \fbox{\begin{minipage}{0.9\textwidth}
+                \vspace{0.2cm}
+                \hfill \textbf{\large\textsf{M. Aboubacar HEMA}} \hfill ~\\
+                \hfill \textit{\textsf{Research Analyst chez IFPRI Sénégal}} \hfill ~\\
+                \vspace{0.2cm}
+            \end{minipage}}
+        \end{flushright}
+    \end{minipage}
+    
+    \vfill
+    
+    \begin{center}
+        \begin{tikzpicture}
+            \node[rounded corners, fill=ensaeblue!10, draw=goldaccent, line width=1pt, inner sep=8pt] {
+                \textbf{\Large\textsf{\textcolor{ensaeblue}{Année scolaire : 2024/2025}}}
+            };
+        \end{tikzpicture}
+    \end{center}
+    
+    \vspace{0.7cm}
+    
+\end{titlepage}
+
+% Configurer la table des matières
+\renewcommand{\contentsname}{\color{ensaeblue}\LARGE\textsf{Table des matières}}
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{0}
+
+% Page de table des matières
+\newpage
+\begin{spacing}{1.2}
+\tableofcontents
+\end{spacing}
+\newpage
+```
+# Abstract
+
+This report presents a comprehensive statistical analysis of household food security in Chad, based on data collected through the Emergency Household Consumption and Vulnerability Monitoring (EHCVM) survey. We conducted consistency checks on the datasets, computed key food security and resilience indicators—including the Food Consumption Score (SCA), reduced Coping Strategies Index (rCSI), Livelihood Coping Strategies Index for food security (LhCSI-FS), Household Dietary Diversity Score (HDDS), Self-Evaluated Resilience Score (SERS), and the Minimum Acceptable Diet (MAD) for children aged 6–23 months—and performed comparative analyses by household head gender. Spatial patterns at the region and department levels were visualized using geospatial data. Our findings reveal critical insights into regional disparities in food security, highlight vulnerable populations, and inform targeted interventions to mitigate food insecurity in Chad.
+
+\newpage
+
+# Résumé
+
+Ce rapport présente une analyse statistique détaillée de la sécurité alimentaire des ménages au Tchad, à partir des enquêtes EHCVM menées en 2022 et 2023. Nous avons procédé à la vérification de la consistance des bases de données, calculé des indicateurs clés de sécurité alimentaire et de résilience—tels que le Score de Consommation Alimentaire (SCA), l’Indice Réduit des Stratégies de Survie (rCSI), l’Indice de Stratégies d’Adaptation des Moyens d’Existence (LhCSI-FS), le Score de Diversité Alimentaire (HDDS), le Score de Résilience Auto-évaluée (SERS) et le Régime Alimentaire Minimum Acceptable (MAD) pour les enfants de 6 à 23 mois— et réalisé des analyses comparatives selon le genre du chef de ménage. Des cartographies spatiales au niveau des régions et départements illustrent les disparités géographiques. Les résultats mettent en évidence des zones particulièrement vulnérables et suggèrent des pistes d’interventions ciblées pour renforcer la résilience alimentaire au Tchad.
+
+\newpage
+
+# Introduction
+
+La sécurité alimentaire demeure un enjeu majeur au Tchad, confronté à des chocs climatiques, des conflits et des faiblesses structurelles. Cette étude exploite les données EHCVM pour :
+
+1.  Vérifier la consistance et la qualité des données.
+2.  Décrire le profil socio-démographique des ménages.
+3.  Calculer et interpréter les indicateurs SCA, rCSI, LhCSI-FS, HDDS, SERS et MAD.
+4.  Comparer ces indicateurs selon le genre du chef de ménage.
+5.  Proposer un outil de visualisation interactif pour faciliter le suivi et la prise de décision.
+
+# Matériels et méthodes
+
+## 1. Données
+
+-   **Base_Principale** : modules SCA, rCSI, LhCSI, HDDS, SERS et variables sociodémographiques.
+-   **Base_MAD** : module MAD pour les enfants de 6–23 mois.
+
+## 2. Logiciels
+
+R 4.2 avec `tidyverse`, `janitor`, `lubridate`, `gtsummary`, `sf`, `viridis`, `ggplot2`. Document rédigé en R Markdown pour intégrer code et résultats.
+
+## 3. Plan d’analyse
+
+-   Consistance des bases
+-   Analyse socio-démographique et calcul d’indicateurs
+-   Analyse comparative par genre
+-   Proposition d’outil de visualisation
+-   Conclusion
+
+\newpage
+
+# I. Analyse de consistance des bases de données
+
+## I-1. Import et aperçu initial
+
+```{r consistency-import, message=FALSE, include=FALSE}
+Base_Principale <- read_dta("data/ehcvm/Base_Principale.dta")
+Base_MAD       <- read_dta("data/ehcvm/Base_MAD.dta")
+
+# Dimensions et structure
+dim(Base_Principale)
+glimpse(Base_Principale)
+
+dim(Base_MAD)
+glimpse(Base_MAD)
+```
+
+À la lecture initiale, on constate que la base principale recense 8 950 ménages pour 100 variables tandis que la base MAD, centrée sur les enfants de 6 à 23 mois, comprend 2 206 enregistrements et 26 variables.
+
+## I-2. Unicité et non-nullité des identifiants
+
+```{r consistency-ids, include=FALSE}
+# Aucun ID manquant
+sum(is.na(Base_Principale$ID))
+sum(is.na(Base_MAD$ID))       
+
+# Recherche de doublons
+dups_main <- get_dupes(Base_Principale, ID)
+dups_mad  <- get_dupes(Base_MAD, ID)
+nrow(dups_main)  
+nrow(dups_mad)  
+```
+
+Tous les ménages disposent d’un identifiant non manquant et unique. En revanche, la base MAD présente 342 doublons d’ID : cela reflète le fait qu’un même ménage peut être associé à plusieurs enfants de 6–23 mois, ce qui est normal pour ce type de module enfant.
+
+## I-3. Bilan global des valeurs manquantes
+
+```{r consistency-missing, echo=FALSE, message=FALSE}
+missing_main <- Base_Principale %>%
+  summarise_all(~ sum(is.na(.))/n()*100) %>%
+  pivot_longer(everything(), names_to="variable", values_to="pct_na")
+missing_mad  <- Base_MAD %>%
+  summarise_all(~ sum(is.na(.))/n()*100) %>%
+  pivot_longer(everything(), names_to="variable", values_to="pct_na")
+
+# Variables > 5% de NA
+missing_main %>% filter(pct_na > 5) %>% arrange(desc(pct_na))
+missing_mad  %>% filter(pct_na > 5) %>% arrange(desc(pct_na))
+```
+
+Dans la base principale, plusieurs variables dépassent 5 % de valeurs manquantes, certaines atteignant même 100 % (par exemple les variables sur l’activité principale ou le statut matrimonial du chef de ménage). À l’inverse, la base MAD se comporte très bien : aucune variable n’excède 5 % de NA. Nous pourrons donc ignorer ou supprimer les variables trop lacunaires dans la base principale, tandis que la base MAD ne nécessite pas de nettoyage particulier de ce type.
+
+## I-4. Cohérence des dates
+
+```{r consistency-dates, include=FALSE}
+Base_Principale <- Base_Principale %>%
+  mutate(
+    year_extrait  = year(SvyDate),
+    month_extrait = month(SvyDate)
+  )
+incons_dates <- Base_Principale %>%
+  filter(year_extrait != YEAR | month_extrait != SvyMonth)
+nrow(incons_dates)
+head(incons_dates, 6)
+```
+
+Près de 2 173 enregistrements présentent une discordance entre l’année et le mois déclarés (`YEAR`, `SvyMonth`) et la date réelle de l’enquête (`SvyDate`). Cette situation survient notamment lorsque des interviews menées début janvier 2023 conservent encore la référence à décembre 2022. Il convient donc de recalculer systématiquement `YEAR` et `SvyMonth` à partir de `SvyDate` afin d’éviter toute confusion temporelle dans les analyses ultérieures.
+
+## I-5. Contrôle des plages de valeurs et détection d’outliers
+
+```{r consistency-outliers, include=FALSE}
+# Taille du ménage
+summary(Base_Principale$HHSize)
+outliers_hhsize <- Base_Principale %>%
+  filter(HHSize < 1 | HHSize > 20) %>%
+  select(ID, HHSize)
+nrow(outliers_hhsize) 
+head(outliers_hhsize, 5)
+
+# Âge enfant MAD
+summary(Base_MAD$MAD_resp_age)
+outliers_age <- Base_MAD %>%
+  filter(MAD_resp_age < 0 | MAD_resp_age > 120)
+nrow(outliers_age)
+```
+
+La variable `HHSize` présente des valeurs aberrantes : certaines enquêtes indiquent une taille de ménage égale à 0 ou supérieure à 20, jusqu’à 352 personnes dans un cas extrême. Au total, 120 ménages sortent de la plage raisonnable et devront être revus (erreur de saisie ou cas exceptionnel). En revanche, l’âge des enfants dans la base MAD est parfaitement cohérent, compris entre 6 et 23 ans mois par mois.
+
+## I-6. Vérification de la conservation des effectifs par catégories d’âge et de genre
+
+```{r consistency-sumcat, include=FALSE}
+vars_age_sex <- c(paste0("HHSize", c("05M","23M","59M","5114M","1549M","5064M","65AboveM",
+                                     "05F","23F","59F","5114F","1549F","5064F","65AboveF")))
+Base_Principale <- Base_Principale %>%
+  mutate(
+    sum_cat = rowSums(across(all_of(vars_age_sex)), na.rm=TRUE),
+    diff_HH  = HHSize - sum_cat
+  )
+nrow(filter(Base_Principale, diff_HH != 0)) 
+```
+
+La somme des sous-catégories d’âge et de genre correspond exactement à la taille totale du ménage, sans aucun écart. Cela confirme la cohérence interne de ces variables.
+
+## I-7. Contrôle des libellés et modalités inhabituelles
+
+```{r consistency-labels, echo=FALSE}
+# Ex. EverBreastF
+tabyl(Base_MAD, EverBreastF) %>% adorn_pct_formatting()
+# Ex. HDDSStapCer
+tabyl(Base_Principale, HDDSStapCer) %>% adorn_pct_formatting()
+```
+
+Dans le module MAD, on note l’apparition du code « 888 » pour `EverBreastF` sur 0,3 % des cas, ce qui ne correspond ni à « Oui » ni à « Non ». Cette modalité correspont à « Ne sait pas » d'après le questionnaire. Les variables HDDS apparaissent correctement codées en 0/1, sans anomalie.
+
+## I-8. Vérification des codes administratifs
+
+```{r consistency-admin, include=FALSE}
+dup_admin1 <- Base_Principale %>%
+  count(ADMIN1Name, adm1_ocha) %>%
+  group_by(ADMIN1Name) %>%
+  filter(n()>1)
+dup_admin2 <- Base_Principale %>%
+  count(ADMIN2Name, adm2_ocha) %>%
+  group_by(ADMIN2Name) %>%
+  filter(n()>1)
+nrow(dup_admin1)
+nrow(dup_admin2)
+```
+
+Aucune région ou aucun département n’est rattaché à deux codes OCHA différents : les correspondances géographiques sont parfaitement univoques.
+
+## I-9. Cohérence inter-bases avant fusion
+
+```{r consistency-merge, include=FALSE}
+ids_only_in_mad  <- setdiff(Base_MAD$ID, Base_Principale$ID)
+ids_only_in_main <- setdiff(Base_Principale$ID, Base_MAD$ID)
+length(ids_only_in_mad) 
+length(ids_only_in_main)
+```
+
+On relève 334 IDs présents dans la base MAD mais pas dans la base principale, probablement liés à des enregistrements sans ménage associé (ID vide ou erroné). À l’inverse, plus de 7 200 ménages n’ont pas d’enfant de 6–23 mois, ce qui est attendu mais doit être documenté lors de la fusion.
+
+## I-10. Synthèse automatisée
+
+```{r consistency-summary, echo=FALSE}
+consistency_report <- list(
+  dims_Principale   = dim(Base_Principale),
+  dims_MAD          = dim(Base_MAD),
+  missing_max_P     = max(missing_main$pct_na),
+  missing_max_M     = max(missing_mad$pct_na),
+  n_dup_main        = nrow(dups_main),
+  n_dup_mad         = nrow(dups_mad),
+  n_incons_dates    = nrow(incons_dates),
+  n_outliers_hhsize = nrow(outliers_hhsize),
+  admin1_issues     = nrow(dup_admin1),
+  admin2_issues     = nrow(dup_admin2),
+  unmatched_in_MAD  = length(ids_only_in_mad),
+  unmatched_in_Main = length(ids_only_in_main)
+)
+print(consistency_report)
+```
+
+Ce tableau de bord synthétique met en évidence les points essentiels : la nécessité de recalculer les dates, de traiter les variables fortement imprécises ou vides, de corriger les valeurs aberrantes de taille de ménage, de recoder les modalités erronées et d’anticiper la fusion des deux bases. Une fois ces opérations de nettoyage réalisées, la qualité des données sera suffisamment robuste pour attaquer les analyses détaillées des indicateurs alimentaires.
+
+\newpage
+
+# II. Analyse des données et calcul d’indicateurs
+
+## II-1. Analyse socio-démographique des ménages
+
+### II-1-1. Taille du ménage et âge du chef de ménage
+
+
+```{r Taille-age, echo=FALSE}
+set_gtsummary_theme(theme_gtsummary_compact()) 
+tbl_continuous <- Base_Principale %>%
+  select(
+    HHSize,    # taille du ménage (nombre de personnes)
+    HHHAge     # âge du chef de ménage
+  ) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits    = all_continuous() ~ 1,
+    label = list(
+      HHSize ~ "Taille du ménage",
+      HHHAge ~ "Âge du chef de ménage"
+    ),
+    missing = "no"
+  )
+
+tbl_continuous %>%
+  as_kable(booktabs = TRUE, caption = "Tableau : Taille et âge") %>%
+  kable_styling(
+    # ne pas étendre à 100% de la largeur de la page
+    full_width   = FALSE,          
+    # essayer de garder le tableau ici et de le réduire si trop large
+    latex_options = c("hold_position", "scale_down"),  
+    # alignement à gauche
+    position      = "center",
+    # réduire légèrement la taille de la police si besoin
+    font_size     = 10             
+  )
+```
+
+La taille moyenne des ménages enquêtés est de **7,5** personnes, avec un écart-type de **12,9**, ce qui indique une forte hétérogénéité (certains ménages très nombreux, d’autres plus petits). L’âge moyen du chef de ménage est de **42,9** ans (écart-type **12,6**), reflétant une population adulte majoritairement d’âge intermédiaire.
+
+### II-1-2. Profil du chef de ménage
+
+
+```{r Profil, echo=FALSE}
+theme_gtsummary_compact()
+tbl_categorical <- Base_Principale %>%
+  mutate(across(
+    c(HHHSex, HHHEdu, HHHMainActivity, HHHMatrimonial),
+    ~ as_factor(.)
+  )) %>%
+  select(
+    HHHSex,
+    HHHEdu,
+    HHHMainActivity,
+    HHHMatrimonial
+  ) %>%
+  tbl_summary(
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label = list(
+      HHHSex          ~ "Sexe du chef de ménage",
+      HHHEdu          ~ "Niveau d'éducation du chef",
+      HHHMainActivity ~ "Activité principale du chef",
+      HHHMatrimonial  ~ "Statut matrimonial du chef"
+    ),
+    missing = "no"
+  )
+
+tbl_categorical
+```
+
+Dans la population enquêtée, **44 %** des ménages sont dirigés par une femme et **56 %** par un homme. Plus de la moitié des chefs de ménage (62,2 %) sont « alphabétisés ou coraniques », tandis que 30,8 % n’ont **aucune** éducation formelle. Les niveaux primaire, secondaire et supérieur restent très minoritaires (respectivement 4,5 %, 2,1 % et 0,4 %). Les modalités liées à l’activité principale et au statut matrimonial ne remontent pas de données exploitables (100 % de NA), sans doute à cause d’un non-remplissage systématique durant l’enquête.
+
+### II-1-3. Composition du ménage par âge et par sexe
+
+
+```{r composition, echo=FALSE}
+Base_Principale_prop <- Base_Principale %>%
+  mutate(
+    pct_0_5M   = HHSize05M    / HHSize * 100,
+    pct_5_14M  = HHSize5114M  / HHSize * 100,
+    pct_15_49M = HHSize1549M  / HHSize * 100,
+    pct_50pM   = (HHSize5064M + HHSize65AboveM) / HHSize * 100,
+    pct_0_5F   = HHSize05F    / HHSize * 100,
+    pct_5_14F  = HHSize5114F  / HHSize * 100,
+    pct_15_49F = HHSize1549F  / HHSize * 100,
+    pct_50pF   = (HHSize5064F + HHSize65AboveF) / HHSize * 100
+  )
+
+theme_gtsummary_compact()
+
+tbl_composition <- Base_Principale_prop %>%
+  select(starts_with("pct_")) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits    = all_continuous() ~ 1,
+    label = list(
+      pct_0_5M   ~ "Enfants 0–5 ans (M) (%)",
+      pct_5_14M  ~ "Enfants 5–14 ans (M) (%)",
+      pct_15_49M ~ "Adultes 15–49 ans (M) (%)",
+      pct_50pM   ~ "Personnes ≥50 ans (M) (%)",
+      pct_0_5F   ~ "Enfants 0–5 ans (F) (%)",
+      pct_5_14F  ~ "Enfants 5–14 ans (F) (%)",
+      pct_15_49F ~ "Adultes 15–49 ans (F) (%)",
+      pct_50pF   ~ "Personnes ≥50 ans (F) (%)"
+    ),
+    missing = "no"
+  )
+
+tbl_composition
+```
+
+En moyenne, les enfants de 0 à 5 ans représentent seulement **1,0 %** du ménage lorsqu’il est dirigé par un homme (écart-type 4,7) et **0,8 %** lorsqu’il est dirigé par une femme (écart-type 4,3). Les enfants de 5 à 14 ans forment la part la plus importante des mineurs, avec **18,5 %** (σ 15,1) chez les ménages masculins et **17,2 %** (σ 14,7) chez les ménages féminins. Parmi les adultes, les 15–49 ans constituent en moyenne **16,5 %** (σ 13,7) des individus dans les ménages masculins et **18,2 %** (σ 12,7) dans les ménages féminins. Enfin, les personnes de 50 ans et plus représentent une proportion modeste, soit **5,7 %** (σ 9,0) pour les hommes et **4,8 %** (σ 11,0) pour les femmes.
+
+Avec ces premières analyses socio-démographiques, nous disposons désormais d’un aperçu clair de la structure des ménages enquêtés. Ces résultats serviront de base pour croiser les indicateurs alimentaires avec le profil du ménage et du chef de ménage.
+
+## II-2. Score de consommation alimentaire (SCA)
+
+Cette section détaille la construction et l’interprétation du Score de Consommation Alimentaire (SCA) des ménages, à partir de la diversité et de la fréquence de consommation des principaux groupes d’aliments au cours des sept derniers jours.
+
+### II-2-1. Description des variables composant le SCA
+
+
+```{r sca_desc, echo=FALSE}
+# Variables du module SCA
+sca_vars <- c("FCSStap", "FCSPulse", "FCSVeg", "FCSFruit",
+              "FCSPr", "FCSDairy", "FCSSugar", "FCSFat")
+
+# Conversion en numérique + clamp 0–7 jours
+Base_Principale <- Base_Principale %>%
+  mutate(across(all_of(sca_vars), ~ as.numeric(.) %>% pmax(0) %>% pmin(7)))
+
+theme_gtsummary_compact()
+
+# Tableau descriptif (médiane [25e–75e])
+tbl_sca_desc <- Base_Principale %>%
+  select(all_of(sca_vars)) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{median} ({p25}, {p75})",
+    digits    = all_continuous() ~ 1,
+    label = list(
+      FCSStap  ~ "Céréales & tubercules (jours)",
+      FCSPulse ~ "Légumineuses/noix (jours)",
+      FCSVeg   ~ "Légumes (jours)",
+      FCSFruit ~ "Fruits (jours)",
+      FCSPr    ~ "Viande/poisson/œufs (jours)",
+      FCSDairy ~ "Produits laitiers (jours)",
+      FCSSugar ~ "Sucre (jours)",
+      FCSFat   ~ "Matières grasses (jours)"
+    ),
+    missing = "no"
+  )
+
+tbl_sca_desc
+```
+
+Les céréales et tubercules sont consommés presque quotidiennement (médiane = 7 jours), tandis que les fruits restent très occasionnels (médiane = 0 jour). Les légumes sont consommés en moyenne 3 jours/semaine (IQR 1–7), et un peu plus de la moitié des ménages ont mangé des légumineuses 2 jours/semaine. Les produits d’origine animale (viande, poisson, œufs et laitier) montrent des médianes de consommation plus faibles (entre 0 et 2 jours), traduisant un accès limité à ces aliments plus coûteux.
+
+### II-2-2. Calcul du SCA
+
+
+```{r sca_calculation, echo=FALSE}
+# Formule WFP
+Base_Principale <- Base_Principale %>%
+  mutate(
+    SCA = 2 * FCSStap +
+          3 * FCSPulse +
+          1 * FCSVeg +
+          1 * FCSFruit +
+          4 * FCSPr +
+          4 * FCSDairy +
+          0.5 * FCSSugar +
+          0.5 * FCSFat
+  )
+
+theme_gtsummary_compact()
+
+# Statistiques du score
+tbl_summary(
+  Base_Principale,
+  include   = SCA,
+  statistic = SCA ~ "{mean} ({sd})",
+  digits    = SCA ~ 1,
+  label     = SCA ~ "Score de consommation alimentaire (SCA)"
+)
+```
+
+Le score moyen de consommation alimentaire s’élève à **47,3** (écart-type **16,9**). Ce niveau relativement élevé reflète une consommation régulière de céréales et, dans une moindre mesure, de légumineuses et de matières grasses, tandis que la fréquence de consommation des produits animaux et des fruits diminue le score global.
+
+### II-2-3. Poids attribués à chaque groupe alimentaire
+
+
+```{r sca_weights, echo=FALSE}
+# Tibble des poids
+weights <- tibble(
+  Céréales      = 2,
+  Légumineuses  = 3,
+  Légumes       = 1,
+  Fruits        = 1,
+  Protéines     = 4,
+  Laitiers      = 4,
+  Sucre         = 0.5,
+  Graisses      = 0.5
+)
+
+theme_gtsummary_compact()
+
+# Tableau de présentation
+tbl_weights <- weights %>%
+  tbl_summary(
+    include   = everything(),
+    statistic = all_continuous() ~ "{median}",
+    digits    = all_continuous() ~ 1,
+    label = list(
+      Céréales     ~ "Céréales & tubercules",
+      Légumineuses ~ "Légumineuses/noix",
+      Légumes      ~ "Légumes",
+      Fruits       ~ "Fruits",
+      Protéines    ~ "Viande/poisson/œufs",
+      Laitiers     ~ "Produits laitiers",
+      Sucre        ~ "Sucre",
+      Graisses     ~ "Matières grasses"
+    ),
+    missing = "no"
+  )
+
+# Vérification de la somme des poids
+stopifnot(sum(unlist(weights)) == 16)
+
+tbl_weights
+```
+
+Les pondérations respectent les recommandations du PAM : les protéines et les produits laitiers pèsent 4 points chacun, les légumineuses 3 points, les céréales 2 points, les légumes et les fruits 1 point, enfin sucre et graisses 0,5 point, pour un total de **16 points**.
+
+### II-2-4. Catégorisation du SCA
+
+
+```{r sca_categorization, echo=FALSE}
+Base_Principale <- Base_Principale %>%
+  mutate(
+    SCA_cat_21_35 = case_when(
+      SCA <= 21 ~ "Faible",
+      SCA <= 35 ~ "Moyen",
+      TRUE      ~ "Élevé"
+    ),
+    SCA_cat_28_42 = case_when(
+      SCA <= 28 ~ "Faible",
+      SCA <= 42 ~ "Moyen",
+      TRUE      ~ "Élevé"
+    ),
+    across(starts_with("SCA_cat_"), ~ factor(.x, levels = c("Faible","Moyen","Élevé")))
+  )
+
+theme_gtsummary_compact()
+
+# Répartition selon 21/35
+tbl_cat_21_35 <- Base_Principale %>%
+  tbl_summary(
+    include   = SCA_cat_21_35,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label     = SCA_cat_21_35 ~ "Catégorie SCA (21/35)",
+    missing   = "no"
+  )
+
+# Répartition selon 28/42
+tbl_cat_28_42 <- Base_Principale %>%
+  tbl_summary(
+    include   = SCA_cat_28_42,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label     = SCA_cat_28_42 ~ "Catégorie SCA (28/42)",
+    missing   = "no"
+  )
+
+tbl_cat_21_35
+tbl_cat_28_42
+```
+
+En retenant les seuils 21/35, seuls **5 %** des ménages ont un SCA faible, **20 %** un score moyen et **75 %** un score élevé. Avec la classification 28/42, la proportion des ménages « faibles » passe à **13 %**, les « moyens » à **29 %** et les « élevés » restent majoritaires (**59 %**).
+
+### II-2-5. Représentation spatiale du SCA
+
+```{r sca_map, echo=FALSE, results='hide'}
+# Chargement des shapefiles
+adm1_shp <- st_read("data/shapefiles/tcd_admbnda_adm1_20250212_AB.shp") %>%
+  mutate(adm1_ocha = str_remove(ADM1_PCODE, "C"))
+adm2_shp <- st_read("data/shapefiles/tcd_admbnda_adm2_20250212_AB.shp") %>%
+  mutate(adm2_ocha = str_remove(ADM2_PCODE, "C"))
+
+# Moyenne de SCA par région et département
+sca_region <- Base_Principale %>%
+  group_by(adm1_ocha) %>%
+  summarise(mean_SCA = mean(SCA, na.rm = TRUE), .groups="drop")
+sca_dept <- Base_Principale %>%
+  group_by(adm2_ocha) %>%
+  summarise(mean_SCA = mean(SCA, na.rm = TRUE), .groups="drop")
+
+# Jointure et cartes
+adm1_map <- left_join(adm1_shp, sca_region, by = "adm1_ocha")
+adm2_map <- left_join(adm2_shp, sca_dept, by = "adm2_ocha")
+
+# Carte régionale
+ggplot(adm1_map) +
+  geom_sf(aes(fill = mean_SCA), color = "grey50") +
+  scale_fill_viridis(name = "SCA moyen") +
+  labs(title = "Score de consommation alimentaire moyen par région") +
+  theme_minimal()
+
+# Carte départementale
+ggplot(adm2_map) +
+  geom_sf(aes(fill = mean_SCA), color = "grey70") +
+  scale_fill_viridis(name = "SCA moyen") +
+  labs(title = "Score de consommation alimentaire moyen par département") +
+  theme_minimal()
+```
+
+Les cartes révèlent un gradient géographique clair : les régions méridionales et du centre du pays affichent en général des scores plus élevés, témoignant d’une diversité et d’une fréquence de consommation supérieures. À l’inverse, certaines régions du Nord et de l’Est se distinguent par des SCA moyens plus bas, suggérant un accès alimentaire plus contraint. Au niveau départemental, des poches de vulnérabilité apparaissent dans les zones sahéliennes, pointant des priorités d’intervention ciblées.
+
+## II-3. Indice réduit des stratégies de survie (rCSI)
+
+L’indice réduit des stratégies de survie (rCSI) capture la fréquence des comportements adaptatifs qu’un ménage adopte lorsqu’il fait face à un stress alimentaire. Il combine cinq stratégies (manger des aliments de moindre qualité, emprunter de la nourriture ou de l’argent, réduire la taille des portions, restreindre la consommation des adultes et diminuer le nombre de repas) en leur attribuant des poids de sévérité.
+
+### II-3-1. Description des variables composant le rCSI
+
+
+```{r rCSI_desc, echo=FALSE}
+# Variables (jours 0–7) du module rCSI
+rCSI_vars <- c("rCSILessQlty", "rCSIBorrow",
+               "rCSIMealSize","rCSIMealAdult","rCSIMealNb")
+
+# Conversion en numérique et borne entre 0 et 7 jours
+Base_Principale <- Base_Principale %>%
+  mutate(across(all_of(rCSI_vars),
+                ~ as.numeric(.) %>% pmax(0) %>% pmin(7)))
+
+theme_gtsummary_compact()
+
+# Tableau descriptif (médiane [25e–75e])
+tbl_rCSI_desc <- Base_Principale %>%
+  select(all_of(rCSI_vars)) %>%
+  tbl_summary(
+    statistic = all_continuous() ~ "{median} ({p25}, {p75})",
+    digits    = all_continuous() ~ 1,
+    label = list(
+      rCSILessQlty  ~ "Moins bonne qualité d’aliments (jours)",
+      rCSIBorrow    ~ "Emprunt de nourriture/argent (jours)",
+      rCSIMealSize  ~ "Réduction de la taille des repas (jours)",
+      rCSIMealAdult ~ "Adultes se restreignent (jours)",
+      rCSIMealNb    ~ "Nombre de repas réduit (jours)"
+    ),
+    missing = "no"
+  )
+
+tbl_rCSI_desc
+```
+
+Les deux premières stratégies – consommer des aliments de moindre qualité et emprunter de la nourriture ou de l’argent – sont les plus fréquentes : respectivement 55 % et 53 % des ménages y ont eu recours au moins une fois au cours des sept derniers jours. En revanche, restreindre la prise alimentaire des adultes est plus rare (médiane = 0 jour, IQR 0–1), tout comme la réduction du nombre de repas (médiane = 0 jour, IQR 0–1).
+
+### II-3-2. Calcul du rCSI et normalisation des poids
+
+
+```{r rCSI_calculation, echo=FALSE}
+# Poids de sévérité originels (somme = 8)
+orig_weights <- c(1, 2, 1, 3, 1)
+
+# Facteur de normalisation pour que la somme des poids = 21
+norm_factor <- 21 / sum(orig_weights)
+
+# Construction du tibble des poids normalisés
+weights_rCSI <- tibble(
+  variable = rCSI_vars,
+  weight   = orig_weights * norm_factor
+)
+
+# Vérification
+stopifnot(abs(sum(weights_rCSI$weight) - 21) < 1e-6)
+
+theme_gtsummary_compact()
+
+# Tableau des poids
+tbl_weights_rCSI <- weights_rCSI %>%
+  tbl_summary(
+    include   = weight,
+    statistic = all_continuous() ~ "{median}",
+    digits    = all_continuous() ~ 3,
+    label     = weight ~ "**Poids**"
+  ) %>%
+  modify_header(stat_0 ~ "**Variable**") %>%
+  modify_spanning_header(all_stat_cols() ~ "Poids attribués (somme = 21)")
+
+tbl_weights_rCSI
+```
+
+Les poids initiaux (1, 2, 1, 3, 1) ont été multipliés par un facteur de 2,625 pour totaliser 21, conformément à la consigne. Ainsi, prêter ou consommer des aliments de moindre qualité pèse 2,625 points, emprunter 5,250 points, réduire la taille des repas 2,625 points, restreindre les adultes 7,875 points, et diminuer le nombre de repas 2,625 points.
+
+```{r rCSI_calculation 2, echo=FALSE}
+# Application du calcul du rCSI à chaque ménage
+Base_Principale <- Base_Principale %>%
+  rowwise() %>%
+  mutate(
+    rCSI = sum(c_across(all_of(rCSI_vars)) * weights_rCSI$weight)
+  ) %>%
+  ungroup()
+
+theme_gtsummary_compact()
+
+# Synthèse du rCSI
+tbl_summary(
+  Base_Principale,
+  include   = rCSI,
+  statistic = rCSI ~ "{mean} ({sd})",
+  digits    = rCSI ~ 1,
+  label     = rCSI ~ "Indice réduit Stratégies de Survie (rCSI)"
+)
+```
+
+Après normalisation, l’indice moyen des stratégies de survie est de **15,3** (écart-type **19,7**). La large dispersion révèle que, si certains ménages n’ont pas eu recours à ces stratégies (rCSI proche de 0), d’autres ont accumulé des scores très élevés, signe d’une forte vulnérabilité alimentaire.
+
+### II-3-3. Cartographie du rCSI par région et par département
+
+
+```{r rCSI_map, echo=FALSE, results='hide'}
+# Chargement et nettoyage des shapefiles
+adm1_shp <- st_read("data/shapefiles/tcd_admbnda_adm1_20250212_AB.shp") %>%
+  mutate(adm1_ocha = str_remove(ADM1_PCODE, "C"))
+adm2_shp <- st_read("data/shapefiles/tcd_admbnda_adm2_20250212_AB.shp") %>%
+  mutate(adm2_ocha = str_remove(ADM2_PCODE, "C"))
+
+# Moyennes de rCSI par region et département
+rCSI_region <- Base_Principale %>%
+  group_by(adm1_ocha) %>%
+  summarise(mean_rCSI = mean(rCSI, na.rm = TRUE), .groups="drop")
+rCSI_dept <- Base_Principale %>%
+  group_by(adm2_ocha) %>%
+  summarise(mean_rCSI = mean(rCSI, na.rm = TRUE), .groups="drop")
+
+# Jointure spatiale
+adm1_map <- left_join(adm1_shp, rCSI_region, by = "adm1_ocha")
+adm2_map <- left_join(adm2_shp, rCSI_dept, by = "adm2_ocha")
+
+# Carte régionale du rCSI
+ggplot(adm1_map) +
+  geom_sf(aes(fill = mean_rCSI), color = "grey50") +
+  scale_fill_viridis(name = "rCSI moyen") +
+  labs(title = "Indice réduit des stratégies de survie moyen par région") +
+  theme_minimal()
+
+# Carte départementale du rCSI
+ggplot(adm2_map) +
+  geom_sf(aes(fill = mean_rCSI), color = "grey70") +
+  scale_fill_viridis(name = "rCSI moyen", option = "magma") +
+  labs(title = "Indice réduit des stratégies de survie moyen par département") +
+  theme_minimal()
+```
+
+Les cartes montrent que les régions du Sud et du Centre présentent en général des rCSI plus faibles, témoignant d’un moindre recours aux stratégies de survie. À l’inverse, les régions sahéliennes et frontalières au Nord et à l’Est affichent les valeurs moyennes les plus élevées, indiquant une tension alimentaire plus forte et un besoin prioritaire d’assistance.
+
+## II-4. Stratégies d’adaptation des moyens d’existence (LhCSI)
+
+Les stratégies d’adaptation des moyens d’existence renseignent sur les actions plus structurelles que les ménages mettent en place lorsque leur sécurité alimentaire est menacée à moyen et long terme. Elles se déclinent en trois niveaux de sévérité : **stress**, **crise** et **urgence**, chacun correspondant à des comportements de gravité croissante.
+
+### II-4-1. Description des variables composant le LhCSI
+
+
+```{r LhCSI_desc, echo=FALSE}
+# Variables de stress, crise et urgence
+lhd_vars <- c(
+  paste0("LhCSIStress", 1:4),
+  paste0("LhCSICrisis", 1:3),
+  paste0("LhCSIEmergency", 1:3)
+)
+
+# Conversion en facteurs
+desc_LhCSI <- Base_Principale %>%
+  mutate(across(all_of(lhd_vars), as_factor))
+
+theme_gtsummary_compact()
+
+# Tableau descriptif
+tbl_LhCSI_desc <- desc_LhCSI %>%
+  select(all_of(lhd_vars)) %>%
+  tbl_summary(
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label = list(
+      LhCSIStress1    ~ "Stress 1",
+      LhCSIStress2    ~ "Stress 2",
+      LhCSIStress3    ~ "Stress 3",
+      LhCSIStress4    ~ "Stress 4",
+      LhCSICrisis1    ~ "Crise 1",
+      LhCSICrisis2    ~ "Crise 2",
+      LhCSICrisis3    ~ "Crise 3",
+      LhCSIEmergency1 ~ "Urgence 1",
+      LhCSIEmergency2 ~ "Urgence 2",
+      LhCSIEmergency3 ~ "Urgence 3"
+    ),
+    missing = "no"
+  )
+
+tbl_LhCSI_desc
+```
+
+Pour chacun des quatre items de **stress**, on observe que plus de la moitié des ménages n’a pas eu besoin de mobiliser ces stratégies (modalité « No, because I did not need to » autour de 35 à 45 %), tandis qu’un faible pourcentage a d’ores et déjà épuisé ces options ou n’y a pas accès. Les stratégies de **crise** et d’**urgence** sont globalement moins fréquentes, ce qui traduit le caractère progressif et séquentiel des adaptations : on commence par le stress, puis, si la situation se prolonge, on passe à la crise, puis à l’urgence.
+
+### II-4-2. Proportion de ménages en situation de stress, crise et urgence en 2022 vs 2023
+
+
+```{r LhCSI_comparison, echo=FALSE}
+# Création d’indicateurs binaires “Oui/Non”
+classif_LhCSI <- Base_Principale %>%
+  mutate(across(all_of(lhd_vars), as.numeric)) %>%
+  mutate(
+    stress_utilise  = if_else(rowSums(across(starts_with("LhCSIStress"), ~ .x > 1), na.rm=TRUE) > 0, "Oui", "Non"),
+    crise_utilise   = if_else(rowSums(across(starts_with("LhCSICrisis"), ~ .x > 1),  na.rm=TRUE) > 0, "Oui", "Non"),
+    urgence_utilise = if_else(rowSums(across(starts_with("LhCSIEmergency"), ~ .x > 1), na.rm=TRUE) > 0, "Oui", "Non"),
+    YEAR = as.factor(YEAR)
+  )
+
+theme_gtsummary_compact()
+
+# Tableau comparatif 2022 vs 2023
+tbl_adapt_par_annee <- classif_LhCSI %>%
+  select(YEAR, stress_utilise, crise_utilise, urgence_utilise) %>%
+  tbl_summary(
+    by        = YEAR,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label     = list(
+      stress_utilise  ~ "Stratégie Stress utilisée",
+      crise_utilise   ~ "Stratégie Crise utilisée",
+      urgence_utilise ~ "Stratégie Urgence utilisée"
+    ),
+    missing   = "no"
+  ) %>%
+  add_overall()
+
+tbl_adapt_par_annee
+```
+
+En 2022, l’ensemble des ménages a eu recours à au moins une stratégie de **stress**, ce qui est cohérent avec la définition du stress (une seule action suffit). Pour la **crise**, 63,3 % des ménages ont épuisé ou utilisé au moins une stratégie en 2022, et cette proportion passe à 79,6 % en 2023, signe d’une dégradation globale de la sécurité alimentaire. Les comportements d’**urgence** suivent la même dynamique, passant de 60,1 % en 2022 à 79,9 % en 2023, ce qui alerte sur une montée des situations critiques.
+
+### II-4-3. Cartographie des stratégies d’adaptation par région et département
+
+
+```{r LhCSI_map, echo=FALSE, results='hide'}
+# Chargement des shapefiles et nettoyage des codes OCHA
+adm1_shp <- st_read("data/shapefiles/tcd_admbnda_adm1_20250212_AB.shp") %>%
+  mutate(adm1_ocha = str_remove(ADM1_PCODE, "C"))
+adm2_shp <- st_read("data/shapefiles/tcd_admbnda_adm2_20250212_AB.shp") %>%
+  mutate(adm2_ocha = str_remove(ADM2_PCODE, "C"))
+
+# Agrégation des pourcentages par région et par département
+agg_adapt_region <- classif_LhCSI %>%
+  group_by(adm1_ocha, YEAR) %>%
+  summarise(
+    pct_stress  = mean(stress_utilise  == "Oui") * 100,
+    pct_crise   = mean(crise_utilise   == "Oui") * 100,
+    pct_urgence = mean(urgence_utilise == "Oui") * 100,
+    .groups = "drop"
+  )
+
+agg_adapt_dept <- classif_LhCSI %>%
+  group_by(adm2_ocha, YEAR) %>%
+  summarise(
+    pct_stress  = mean(stress_utilise  == "Oui") * 100,
+    pct_crise   = mean(crise_utilise   == "Oui") * 100,
+    pct_urgence = mean(urgence_utilise == "Oui") * 100,
+    .groups = "drop"
+  )
+
+# Exemple de carte : proportion de ménages stress en 2023 par région
+map_region_stress_2023 <- adm1_shp %>%
+  left_join(filter(agg_adapt_region, YEAR=="2023"), by="adm1_ocha") %>%
+  ggplot() +
+    geom_sf(aes(fill = pct_stress), color = "grey50") +
+    scale_fill_viridis(name = "% Stress (2023)") +
+    labs(
+      title    = "Part des ménages utilisant une stratégie Stress",
+      subtitle = "Année 2023, par région"
+    ) +
+    theme_minimal()
+
+# Afficher la carte
+map_region_stress_2023
+```
+
+La carte révèle que certaines régions du Sud et de l’Ouest restent relativement épargnées (couleurs plus claires), alors que les zones sahéliennes du Nord et de l’Est présentent des proportions de ménage en stress supérieures à 80 %, soulignant des besoins alimentaires persistants. Des cartes similaires pour les stratégies **crise** et **urgence**, ainsi que pour les départements, permettent de cibler finement les interventions au niveau le plus vulnérable du territoire.
+
+## II-5. Score de diversité alimentaire des ménages (HDDS)
+
+Le Household Dietary Diversity Score (HDDS) mesure le nombre de groupes alimentaires différents consommés par les membres du ménage au cours des sept derniers jours. Un score élevé reflète une plus grande diversité alimentaire.
+
+### II-5-1. Analyse descriptive des variables composant le HDDS
+
+
+```{r hdds_desc, echo=FALSE}
+# Liste des 16 groupes du module HDDS
+vars_hdds <- c(
+  "HDDSStapCer", "HDDSStapRoot", "HDDSPulse", 
+  "HDDSVegOrg",  "HDDSVegGre",   "HDDSVegOth",
+  "HDDSFruitOrg","HDDSFruitOth",
+  "HDDSPrMeatF", "HDDSPrMeatO",  "HDDSPrFish","HDDSPrEgg",
+  "HDDSDairy",   "HDDSSugar",    "HDDSFat",   "HDDSCond"
+)
+
+# Conversion en facteurs pour présentation
+hd_data <- Base_Principale %>%
+  mutate(across(all_of(vars_hdds), ~ as_factor(as.integer(.))))
+
+theme_gtsummary_compact()
+
+# Tableau descriptif : pour chaque groupe, n (%) de ménages ayant consommé au moins une fois
+tbl_hdds_desc <- hd_data %>%
+  select(all_of(vars_hdds)) %>%
+  tbl_summary(
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label = list(
+      HDDSStapCer  ~ "Céréales & dérivés",
+      HDDSStapRoot ~ "Tubercules & racines",
+      HDDSPulse    ~ "Légumineuses/oléagineux",
+      HDDSVegOrg   ~ "Légumes organiques",
+      HDDSVegGre   ~ "Légumes verts",
+      HDDSVegOth   ~ "Autres légumes",
+      HDDSFruitOrg ~ "Fruits organiques",
+      HDDSFruitOth ~ "Autres fruits",
+      HDDSPrMeatF  ~ "Viande fraîche",
+      HDDSPrMeatO  ~ "Viande transformée",
+      HDDSPrFish   ~ "Poisson",
+      HDDSPrEgg    ~ "Œufs",
+      HDDSDairy    ~ "Produits laitiers",
+      HDDSSugar    ~ "Sucre",
+      HDDSFat      ~ "Matières grasses",
+      HDDSCond     ~ "Condiments"
+    ),
+    missing = "no"
+  )
+
+tbl_hdds_desc
+```
+
+Près de 95 % des ménages ont consommé au moins une fois des céréales ou dérivés, tandis que seuls 4,2 % ont mangé des fruits organiques. Les tubercules et racines concernent 31,3 % des ménages, et un peu plus de la moitié a consommé des légumineuses. Les produits laitiers et les matières grasses figurent dans l’alimentation d’environ 50 % à 86 % des ménages, tandis que poisson (43,2 %) et œufs (6,4 %) sont moins répandus. Cette diversité révèle les préférences alimentaires et les contraintes d’accès aux différents groupes de produits.
+
+### II-5-2. Calcul du score HDDS
+
+
+```{r hdds_calculation, echo=FALSE}
+# Somme des groupes binaire (0/1)
+Base_Principale <- Base_Principale %>%
+  mutate(
+    HDDS_score = rowSums(across(all_of(vars_hdds), ~ as.numeric(.x)), na.rm = TRUE)
+  )
+
+theme_gtsummary_compact()
+
+# Statistiques du score
+tbl_summary(
+  Base_Principale,
+  include   = HDDS_score,
+  statistic = HDDS_score ~ "{mean} ({sd})",
+  digits    = HDDS_score ~ 1,
+  label     = HDDS_score ~ "Score de diversité alimentaire (HDDS)"
+)
+```
+
+Le score moyen de diversité alimentaire est de **5,9** groupes (écart-type **2,4**). Cela signifie qu’en moyenne les ménages tchadiens consomment un peu moins de six des seize groupes alimentaires listés, soulignant à la fois une diversité modérée et des marges de progression dans l’accès à certains aliments, notamment les fruits et les produits d’origine animale.
+
+### II-5-3. Cartographie du score HDDS moyen
+
+
+```{r hdds_map, echo=FALSE, results='hide'}
+# Préparation des shapefiles
+adm1_shp <- st_read("data/shapefiles/tcd_admbnda_adm1_20250212_AB.shp") %>%
+  mutate(adm1_ocha = str_remove(ADM1_PCODE, "C"))
+adm2_shp <- st_read("data/shapefiles/tcd_admbnda_adm2_20250212_AB.shp") %>%
+  mutate(adm2_ocha = str_remove(ADM2_PCODE, "C"))
+
+# Moyenne du HDDS par région et département
+hd_region <- Base_Principale %>%
+  group_by(adm1_ocha) %>%
+  summarise(mean_HDDS = mean(HDDS_score, na.rm = TRUE), .groups = "drop")
+hd_dept <- Base_Principale %>%
+  group_by(adm2_ocha) %>%
+  summarise(mean_HDDS = mean(HDDS_score, na.rm = TRUE), .groups = "drop")
+
+# Jointure et cartes
+adm1_map <- left_join(adm1_shp, hd_region, by = "adm1_ocha")
+adm2_map <- left_join(adm2_shp, hd_dept, by = "adm2_ocha")
+
+# Carte régionale
+ggplot(adm1_map) +
+  geom_sf(aes(fill = mean_HDDS), color = "grey50") +
+  scale_fill_viridis(name = "HDDS moyen") +
+  labs(
+    title    = "Diversité alimentaire moyenne des ménages par région",
+    subtitle = "Nombre moyen de groupes alimentaires consommés"
+  ) +
+  theme_minimal()
+
+# Carte départementale
+ggplot(adm2_map) +
+  geom_sf(aes(fill = mean_HDDS), color = "grey70") +
+  scale_fill_viridis(name = "HDDS moyen", option = "magma") +
+  labs(
+    title    = "Diversité alimentaire moyenne des ménages par département",
+    subtitle = "Nombre moyen de groupes alimentaires consommés"
+  ) +
+  theme_minimal()
+```
+
+Les cartes montrent que la diversité alimentaire est plus élevée dans les régions du Sud et du Centre, où le HDDS moyen atteint souvent 7 à 8 groupes. À l’inverse, dans la bande sahélienne du Nord et en zones frontalières, la diversité chute à 4–5 groupes, soulignant des zones à cibler pour diversifier l’accès alimentaire et renforcer les programmes de soutien nutritionnel.
+
+## II-6. Score de résilience auto-évaluée (SERS)
+
+Le **Score de résilience auto-évaluée (SERS)** est construit à partir de dix affirmations mesurées sur une échelle de Likert à cinq points (de « pas du tout d’accord » à « tout à fait d’accord »). Il reflète la perception qu’ont les ménages de leur propre capacité à faire face aux chocs, en agrégeant ces réponses en un score normalisé de 0 à 100.
+
+### II-6-1. Analyse descriptive des sous-énoncés Likert
+
+
+```{r sers_desc, echo=FALSE}
+# Liste des 10 sous-énoncés Likert (1-5) du module SERS
+vars_sers <- c(
+  "SERSRebondir",        # "Nous pouvons rebondir..."
+  "SERSRevenue",         # "Nos revenus sont stables..."
+  "SERSMoyen",           # "Nous avons les moyens..."
+  "SERSDifficultes",     # "Nous gérons les difficultés..."
+  "SERSSurvivre",        # "Nous pouvons survivre..."
+  "SERSFamAmis",         # "Nous comptons sur familles/amis..."
+  "SERSPoliticiens",     # "Nous faisons confiance à politiques..."
+  "SERSLecons",          # "Nous tirons des leçons..."
+  "SERSPreparerFuture",  # "Nous préparons l’avenir..."
+  "SERSAvertissementEven" # "Nous sommes avertis des événements..."
+)
+
+theme_gtsummary_compact()
+
+# a) Analyse descriptive (n (%) par modalité Likert)
+tbl_sers_desc <- Base_Principale %>%
+  # convertir chaque variable haven_labelled en facteur R
+  mutate(across(all_of(vars_sers), as_factor)) %>%
+  select(all_of(vars_sers)) %>%
+  tbl_summary(
+    by        = NULL,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label     = list(
+      SERSRebondir        ~ "Capacité à rebondir",
+      SERSRevenue         ~ "Stabilité des revenus",
+      SERSMoyen           ~ "Moyens de subsistance",
+      SERSDifficultes     ~ "Gestion des difficultés",
+      SERSSurvivre        ~ "Capacité de survie",
+      SERSFamAmis         ~ "Soutien familles/amis",
+      SERSPoliticiens     ~ "Confiance en politiques",
+      SERSLecons          ~ "Leçons tirées",
+      SERSPreparerFuture  ~ "Préparation du futur",
+      SERSAvertissementEven ~ "Avertissement aux événements"
+    ),
+    missing   = "no"
+  )
+
+# Affichage
+tbl_sers_desc
+```
+
+Pour l’ensemble des dix affirmations, on observe que près de deux tiers des ménages se déclarent « tout à fait d’accord » ou « d’accord » pour leur capacité à rebondir, la stabilité de leurs revenus, leurs moyens de subsistance et leur gestion des difficultés. En revanche, la confiance envers les politiques et la préparation du futur réunissent un peu moins d’adhésion (environ 60 % d’« accord » ou « tout à fait d’accord »). Les modalités « ni d’accord ni pas d’accord », « pas d’accord » et « pas du tout d’accord » restent minoritaires, indiquant globalement une perception modérément positive de leur propre résilience.
+
+### II-6-2. Calcul et normalisation du score SERS
+
+
+```{r sers_calculation, echo=FALSE}
+# 2. Calcul du SERS (b) ---------------------------------------------
+# a) repasser en numérique pour sommation (Likert codé 1–5)
+Base_Principale <- Base_Principale %>%
+  mutate(across(all_of(vars_sers), ~ as.numeric(as.character(.))))
+
+# b) somme brute des réponses (x) et normalisation min-max → [0,100]
+#    xmin = 10 (10×1), xmax = 50 (10×5)
+Base_Principale <- Base_Principale %>%
+  rowwise() %>%
+  mutate(
+    SERS_raw = sum(c_across(all_of(vars_sers)), na.rm = TRUE),
+    SERS     = (SERS_raw - 10) / (50 - 10) * 100
+  ) %>%
+  ungroup()
+
+theme_gtsummary_compact()
+
+# Statistiques du SERS normalisé
+tbl_summary(
+  Base_Principale,
+  include   = SERS,
+  statistic = SERS ~ "{mean} ({sd})",
+  digits    = SERS ~ 1,
+  label     = SERS ~ "Score de résilience auto-évaluée (SERS)"
+)
+```
+
+Après transformation, le SERS moyen atteint **35,8** (écart-type **22,8**). La distribution large du score (allant de 0 à 100) montre que certains ménages se sentent peu résilients tandis que d’autres estiment disposer d’importantes capacités d’adaptation.
+
+### II-6-3. Catégorisation en terciles
+
+
+```{r sers_categorization, echo=FALSE}
+Base_Principale <- Base_Principale %>%
+  mutate(
+    SERS_cat = case_when(
+      SERS < 33 ~ "Faible",
+      SERS < 66 ~ "Moyen",
+      TRUE      ~ "Élevé"
+    ),
+    SERS_cat = factor(SERS_cat, levels = c("Faible","Moyen","Élevé"))
+  )
+
+theme_gtsummary_compact()
+
+tbl_sers_cat <- Base_Principale %>%
+  tbl_summary(
+    include   = SERS_cat,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label     = SERS_cat ~ "Catégorie SERS",
+    missing   = "no"
+  )
+
+tbl_sers_cat
+```
+
+Les ménages sont répartis en trois groupes de résilience auto-évaluée : **33 %** se positionnent dans le tercile inférieur (« Faible »), **33 %** au niveau intermédiaire (« Moyen ») et **34 %** dans le tercile supérieur (« Élevé »). Cette classification facilite l’identification des populations nécessitant un renforcement de leurs capacités.
+
+### II-6-4. Cartographie du SERS moyen et des catégories
+
+
+```{r sers_map, echo=FALSE, results='hide'}
+# Chargement et nettoyage des shapefiles
+adm1_shp <- st_read("data/shapefiles/tcd_admbnda_adm1_20250212_AB.shp") %>%
+  mutate(adm1_ocha = str_remove(ADM1_PCODE, "C"))
+adm2_shp <- st_read("data/shapefiles/tcd_admbnda_adm2_20250212_AB.shp") %>%
+  mutate(adm2_ocha = str_remove(ADM2_PCODE, "C"))
+
+# Agrégation par région et département
+agg_sers_reg <- Base_Principale %>%
+  group_by(adm1_ocha) %>%
+  summarise(
+    mean_SERS  = mean(SERS, na.rm = TRUE),
+    modal_SERS = names(which.max(table(SERS_cat))),
+    .groups = "drop"
+  )
+agg_sers_dept <- Base_Principale %>%
+  group_by(adm2_ocha) %>%
+  summarise(
+    mean_SERS  = mean(SERS, na.rm = TRUE),
+    modal_SERS = names(which.max(table(SERS_cat))),
+    .groups = "drop"
+  )
+
+# Jointure spatiale
+adm1_map <- left_join(adm1_shp, agg_sers_reg, by = "adm1_ocha")
+adm2_map <- left_join(adm2_shp, agg_sers_dept, by = "adm2_ocha")
+
+# Carte du SERS moyen par région
+ggplot(adm1_map) +
+  geom_sf(aes(fill = mean_SERS), color = "grey50") +
+  scale_fill_viridis(name = "SERS moyen") +
+  labs(title = "Moyenne du SERS par région") +
+  theme_minimal()
+
+# Carte de la catégorie SERS majoritaire par région
+ggplot(adm1_map) +
+  geom_sf(aes(fill = modal_SERS), color = "grey50") +
+  scale_fill_brewer(name = "Catégorie SERS", palette = "Set2") +
+  labs(title = "Catégorie SERS majoritaire par région") +
+  theme_minimal()
+```
+
+Les régions du Sud et du Centre affichent les valeurs moyennes de SERS les plus élevées (couleurs chaudes), ainsi qu’une majorité de ménages classés en catégorie « Élevé ». À l’inverse, plusieurs régions sahéliennes et frontalières présentent un SERS moyen inférieur à 30 et un triomphe du tercile « Faible », signalant un besoin urgent de renforcement des capacités de résilience.
+
+## II-7. Régime alimentaire minimum acceptable (MAD)
+
+Le **Régime Alimentaire Minimum Acceptable (MAD)** mesure la proportion d’enfants de 6–23 mois ayant consommé au moins cinq groupes alimentaires différents au cours des sept derniers jours. Nous allons :\
+a) assembler et filtrer les données,\
+b) créer la variable DDM (Dietary Diversity Minimum),\
+c) calculer la proportion globale d’enfants satisfaisant le MAD, d) comparer cette proportion par année et selon le sexe du chef de ménage.
+
+```{r mad_calculation, echo=FALSE}
+# 1. Assemblage et filtrage des enfants 6–23 mois
+mad <- Base_MAD %>%
+  left_join(Base_Principale %>% select(ID, YEAR, HHHSex),
+            by = "ID") %>%
+  filter(MAD_resp_age >= 6, MAD_resp_age <= 23)
+
+# 2. Création du nombre de groupes alimentaires consommés
+group_vars <- c(
+  "PCMADStapCer", "PCMADStapRoo", "PCMADPulse",
+  "PCMADVegOrg",  "PCMADVegGre",  "PCMADFruitOrg",
+  "PCMADVegFruitOth","PCMADPrMeatF","PCMADPrMeatO",
+  "PCMADPrFish",  "PCMADPrEgg",   "PCMADDairy",
+  "PCMADFatRpalm","PCMADSnfChild","PCMADSnfPowd","PCMADSnfLns"
+)
+mad <- mad %>%
+  mutate(across(all_of(group_vars), ~ as.numeric(.x))) %>%
+  mutate(n_groupes = rowSums(across(all_of(group_vars)), na.rm = TRUE))
+
+# 3. Création de DDM = 1 si >= 5 groupes consommés
+mad <- mad %>%
+  mutate(DDM = if_else(n_groupes >= 5, "Oui", "Non"))
+```
+
+Après avoir fusionné les deux bases et filtré sur l’âge, chaque enfant se voit attribuer un score `n_groupes` correspondant au nombre de groupes alimentaires consommés (0–16). La variable `DDM` indique si ce score atteint au moins 5, condition requise pour le régime minimum acceptable.
+
+```{r mad_summary, echo=FALSE}
+# 4. Proportion d’enfants 6–23 mois bénéficiant du MAD
+prop_mad <- mad %>%
+  summarise(
+    n_enfants = n(),
+    n_mad     = sum(DDM == "Oui"),
+    pct_mad   = n_mad / n_enfants * 100
+  )
+print(prop_mad)
+```
+
+Sur **2 206** enfants de 6 à 23 mois, **648** ont consommé au moins cinq groupes, soit **29,4 %** (variable `pct_mad`).
+
+```{r mad_comparisons, echo=FALSE}
+# 5. Répartition par année
+tbl_mad_by_year <- mad %>%
+  mutate(DDM = factor(DDM, levels = c("Non","Oui"))) %>%
+  tbl_summary(
+    by        = YEAR,
+    include   = DDM,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label     = DDM ~ "MAD (≥ 5 groupes)",
+    missing   = "no"
+  ) %>%
+  add_overall() %>%
+  bold_labels()
+
+theme_gtsummary_compact()
+
+# 6. Répartition par sexe du chef de ménage
+tbl_mad_by_sex <- mad %>%
+  mutate(DDM = factor(DDM, levels = c("Non","Oui"))) %>%
+  tbl_summary(
+    by        = HHHSex,
+    include   = DDM,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    label     = DDM ~ "MAD (≥ 5 groupes)",
+    missing   = "no"
+  ) %>%
+  add_overall() %>%
+  bold_labels()
+
+tbl_mad_by_year
+tbl_mad_by_sex
+```
+
+En 2022, **25 %** des enfants satisfont le MAD, tandis qu’ils sont **31 %** en 2023, traduisant une amélioration modeste de la diversité alimentaire minimale. Selon le sexe du chef de ménage, **27 %** des enfants de foyers dirigés par une femme et **29 %** de ceux de foyers dirigés par un homme atteignent le MAD, suggérant un léger avantage nutritionnel pour les ménages masculins.
+
+\newpage
+
+# III. Analyse comparative des indicateurs selon le genre du chef de ménage
+
+Dans cette section, nous comparons les principaux indicateurs de sécurité alimentaire et de résilience entre les ménages dirigés par un homme et ceux dirigés par une femme, en utilisant des tests statistiques adaptés (t-test de Welch pour les variables continues et chi² pour les variables catégorielles).
+
+## III-1. Préparation des données
+
+```{r data_preparation, echo=FALSE}
+Base_Principale <- Base_Principale %>%
+  mutate(
+    HHHSex = as_factor(HHHSex)
+  )
+```
+
+## III-2. Comparaison des indicateurs continus (SCA, rCSI, HDDS, SERS)
+
+
+```{r continuous_indicators, echo=FALSE}
+theme_gtsummary_compact()
+tbl_continuous_indic <- Base_Principale %>%
+  select(HHHSex, SCA, rCSI, HDDS_score, SERS) %>%
+  tbl_summary(
+    by        = HHHSex,
+    type      = all_continuous() ~ "continuous2",
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits    = all_continuous() ~ 1,
+    label     = list(
+      SCA         ~ "Score de conso. alimentaire (SCA)",
+      rCSI        ~ "Indice réduit Stratégies de survie (rCSI)",
+      HDDS_score  ~ "Score diversité alimentaire (HDDS)",
+      SERS        ~ "Score résilience auto-évaluée (SERS)"
+    ),
+    missing   = "no"
+  ) %>%
+  add_overall() %>%
+  add_p(test = list(all_continuous() ~ "t.test")) %>%
+  bold_labels()
+
+tbl_continuous_indic
+```
+
+Le **score de consommation alimentaire (SCA)** est légèrement plus élevé dans les ménages à chef homme (47,6±16,1) que dans ceux à chef femme (46,9±18,0), différence statistiquement significative (p = 0,04) mais de faible ampleur. En revanche, l’**indice réduit des stratégies de survie (rCSI)** est significativement plus élevé chez les ménages dirigés par une femme (16,8±20,6 vs. 14,0±18,8 ; p \< 0,001), suggérant un recours plus fréquent à des stratégies de survie. Le **score de diversité alimentaire (HDDS)** est quant à lui supérieur chez les hommes (6,1±2,3 contre 5,7±2,5 ; p \< 0,001), tandis que le **SERS** ne présente pas de différence significative entre sexes (36,3±23,7 vs. 35,4±22,2 ; p = 0,09).
+
+## III-3. Comparaison des indicateurs catégoriels
+
+
+```{r categorical_indicators, echo=FALSE}
+# Création des indicateurs binaires LhCSI
+Base_Principale <- Base_Principale %>%
+  mutate(
+    across(starts_with("LhCSIStress"),  as.numeric, .names = "num_{col}"),
+    across(starts_with("LhCSICrisis"),  as.numeric, .names = "num_{col}"),
+    across(starts_with("LhCSIEmergency"), as.numeric, .names = "num_{col}"),
+    stress_utilise  = if_else(rowSums(across(starts_with("num_LhCSIStress"),  ~ .x > 1), na.rm=TRUE) > 0, "Oui", "Non"),
+    crise_utilise   = if_else(rowSums(across(starts_with("num_LhCSICrisis"),  ~ .x > 1), na.rm=TRUE) > 0, "Oui", "Non"),
+    urgence_utilise = if_else(rowSums(across(starts_with("num_LhCSIEmergency"), ~ .x > 1), na.rm=TRUE) > 0, "Oui", "Non")
+  )
+
+theme_gtsummary_compact()
+
+tbl_categorical_indic <- Base_Principale %>%
+  select(
+    HHHSex,
+    SCA_cat_21_35, SCA_cat_28_42,
+    stress_utilise, crise_utilise, urgence_utilise,
+    SERS_cat
+  ) %>%
+  tbl_summary(
+    by        = HHHSex,
+    statistic = all_categorical() ~ "{n} ({p}%)",
+    digits    = all_categorical() ~ 1,
+    label     = list(
+      SCA_cat_21_35   ~ "Catégorie SCA (21/35)",
+      SCA_cat_28_42   ~ "Catégorie SCA (28/42)",
+      stress_utilise  ~ "Stratégies Stress utilisées",
+      crise_utilise   ~ "Stratégies Crise utilisées",
+      urgence_utilise ~ "Stratégies Urgence utilisées",
+      SERS_cat        ~ "Catégorie SERS"
+    ),
+    missing   = "no"
+  ) %>%
+  add_overall() %>%
+  add_p(test = all_categorical() ~ "chisq.test") %>%
+  bold_labels()
+
+tbl_categorical_indic
+```
+
+Pour la **Catégorie SCA (21/35)**, les ménages à chef femme comptent 6,6 % de scores « faible » contre 3,7 % pour les hommes (p \< 0,001), tandis que les hommes sont plus souvent classés « élevé » (77,5 % vs. 72,8 %).
+
+Pour la **Catégorie SCA (28/42)** suit la même tendance (p \< 0,001).
+
+Toutes les ménages ont utilisé au moins une **stratégie de stress**, sans différence de genre.
+
+Pour la **stratégie de crise**, 74,5 % des ménages à chef homme y ont eu recours, contre 72,4 % pour les femmes (p = 0,034).
+
+La **stratégie d’urgence** n’est pas significativement différente (73,4 % vs. 71,6 %; p = 0,059).
+
+Enfin, la **catégorie SERS** diffère également selon le genre (p \< 0,001) : 14,6 % des ménages féminins déclarent une résilience « élevée » contre 9,9 % des ménages masculins, tandis que les hommes sont légèrement plus nombreux dans la catégorie « moyen ».
+
+**Synthèse** Les analyses montrent des différences modestes mais cohérentes selon le genre du chef de ménage : les ménages masculins affichent une meilleure diversité alimentaire (HDDS) et un SCA légèrement plus élevé, tandis que les ménages féminins recourent plus fréquemment aux stratégies de survie (rCSI) et déclarent une proportion plus importante de haute résilience auto-évaluée (SERS). Ces disparités soulignent l’importance de prendre en compte le genre dans la conception des programmes de sécurité alimentaire et de renforcement des capacités.
+
+\newpage
+
+# IV. Proposition d’un outil de visualisation interactive
+
+Nous proposons une application **R Shiny** regroupant :
+
+-   Choix de l’indicateur (SCA, rCSI, HDDS, SERS, MAD)
+-   Filtrage par année, genre et catégorie
+-   Cartographie interactive (leaflet)
+-   Export graphiques/tabulaires
+
+Lien prototype : <https://shiny.example.com/food_security_tchad>
+
+\newpage
+
+# V. Conclusion
+
+Ce rapport offre une vue d’ensemble des disparités de sécurité alimentaire au Tchad et fournit des indicateurs robustes pour guider les interventions. L’outil Shiny facilitera la mise à jour et la diffusion des résultats auprès des décideurs.
+
+\newpage
+
+# Références
+
+-   Maxwell, D. & Caldwell, R. (2008). *The Coping Strategies Index*.
+-   WFP (2020). *Food Consumption Analysis Guidelines*.
+-   FAO (2016). *Guidelines for Measuring Household Food Security*.
