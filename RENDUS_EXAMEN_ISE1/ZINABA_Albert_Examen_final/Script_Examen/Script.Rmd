@@ -324,6 +324,7 @@ cat("Nombre total de variables avec des valeurs manquantes dans Base_Individus :
 
 ```
 
+\newpage
 
 # Analyse socio-economique des deplaces internes
 
@@ -568,6 +569,8 @@ summary(menage_ind$crowding_index)
 L'indice d'affluence médian est de 3 personnes par pièce, et la moyenne est légèrement plus élevée (environ 3.55). Un quart des ménages ont une affluence de 2 personnes par pièce ou moins, tandis qu'un quart des ménages ont une affluence de 4.5 personnes par pièce ou plus. L'affluence maximale observée est très élevée, atteignant 15 personnes par pièce dans certains ménages. Il y a également quelques données manquantes pour cette variable.
 
 
+
+\newpage
 
 # Analyse de la securite alimentaire des deplaces internes
 
