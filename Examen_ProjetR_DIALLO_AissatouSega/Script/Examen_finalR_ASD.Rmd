@@ -1,0 +1,770 @@
+---
+title: ""
+output:
+  officedown::rdocx_document:
+    toc_depth: 5        # Profondeur (titres de niveau 1 et 2)
+    number_sections: true  # Numérotation automatique des sections
+    reference_docx: ../Documents/Templates1.docx #modele de référence
+    keep_md: true
+    #pandoc_args: ["--output=../Sorties/Maquette_evaluation_R.docx"]
+---
+
+<!---BLOCK_SECTIONBREAK--->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+
+
+```{r}
+
+#Installation et importation des packages
+
+packages <- c("dplyr","flextable","officer","officedown")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../Documents/Logo SEN.png){width="3cm" height="3cm"} |
+
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4, include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "DIALLO Aissatou Sega", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+\newpage
+
+# Sommaire
+
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Liste des figures
+
+<!---BLOCK_TOC{seq_id: 'fig'}--->
+
+\newpage
+
+
+# Liste des tableaux
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+\newpage
+
+# Introduction
+
+Les déplacements internes de population constituent aujourd’hui l’un des enjeux majeurs des crises humanitaires contemporaines, en particulier dans les pays confrontés à l’instabilité politique et aux conflits prolongés. Le Soudan du Sud, théâtre de tensions récurrentes, connaît une forte mobilité forcée de ses habitants, poussés à quitter leur lieu de résidence pour chercher refuge ailleurs. L’étude qui suit s’inscrit dans cette réalité préoccupante, à travers l’exploitation des données collectées lors de l’Enquête sur les déplacements forcés réalisée en 2023.
+Dans le cadre de notre cours « Projet statistique sur R », ce travail a pour objectif de mettre en œuvre des outils d’analyse statistique afin de dresser un portrait socio-économique et démographique des populations déplacées internes. À l’aide du logiciel R et dans une approche rigoureuse fondée sur la reproductibilité, il s’agira d’évaluer la qualité des bases de données, de caractériser les ménages, de mesurer les conditions d’habitation à travers l’indice d’affluence, et d’analyser la situation alimentaire par le biais du Score de Consommation Alimentaire (SCA) et de l’Indice réduit des Stratégies de Survie (rCSI).
+Au-delà des traitements quantitatifs, cette étude se propose également de comparer certaines dimensions entre les réfugiés et les communautés hôtes, en vue de mieux comprendre les dynamiques sociales en contexte de déplacement. Le présent rapport rend compte de ces analyses, illustrées par des graphiques, des tableaux de synthèse, et des commentaires interprétatifs appuyés sur les résultats statistiques obtenus sous R.
+
+\newpage
+
+# Aperçu des données
+
+Cette section propose une première exploration des données issues de l’enquête sur les déplacements forcés au Soudan du Sud en 2023. L’objectif est d’en présenter la structure générale et d’avoir un aperçu des principales variables disponibles. Pour ce faire, des fonctions de base de R seront utilisées afin de visualiser la nature des variables, leur type. Cette étape, bien que préliminaire, est cruciale pour orienter les traitements à venir.
+
+## Chargement et importation
+Avant toute analyse, il est nécessaire de charger les bibliothèques R utiles au traitement et à la visualisation des données. Ces packages offrent des fonctions pratiques pour la manipulation, l’exploration et la représentation graphique des données. Une fois les packages activés, les bases de données collectées lors de l’enquête sont importées dans l’environnement de travail. 
+
+#### Chargement des packages nécessaires
+
+```{r package}
+#Installation et importation des packages
+
+libraries <- c("janitor","outliers","haven","naniar","lubridate","readr","gtsummary","gt","kableExtra", "summarytools","tidyverse","ggplot2")
+
+
+for (x in libraries) {
+  if (!requireNamespace(x, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(x)
+  }
+  library(x, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+```
+
+#### Chargement des bases de données 
+Dans cette étude, deux bases principales sont mobilisées : la base principale, contenant des informations au niveau des ménages (logement, conditions de vie, sécurité alimentaire, statut de réfugié, etc.), et la base individus, qui renseigne les caractéristiques socio-démographiques de chaque membre du ménage (âge, sexe, situation matrimoniale, etc.).
+
+```{r importation_base, results='hide'}
+# Importer le fichier Stata
+Individus <- read_dta("../Données/Base_Individus.dta")
+Principale <- read_dta("../Données/Base_principale.dta")
+```
+
+
+## Structure des données
+
+### Dimension des bases de données
+```{r dim_indiv}
+#Dimension de la base individus
+dim(Individus) 
+```
+
+La base Individus contient 22 092 personnes déplacées recensées au cours de l’enquête, chacune décrite par 144 variables. Ces variables peuvent inclure des informations sociodémographiques (âge, sexe, lien de parenté, niveau d’éducation), des expériences de déplacement, ou encore des besoins spécifiques liés à la situation humanitaire.
+
+```{r dim_principale}
+#Dimension de la base principale
+dim(Principale)
+```
+
+La base Principale contient 3 058 unités principales d'enquête, étant des ménages déplacés, des abris ou des familles, chacun décrit par 1 312 variables.
+
+
+\newpage
+
+# I.Analyse consistence des bases 
+L'analyse de consistence des données constitue une étape importante dans tout projet statistique, visant à garantir la qualité, l'intégrité et la fiabilité des données avant d'engager toute analyse approfondie. Dans le contexte de l'Enquête sur les déplacements forcés au Sud-Soudan en 2023, cette analyse permet de détecter d'éventuelles anomalies, incohérences ou erreurs dans les bases de données, ce qui est essentiel pour assurer des résultats d'analyse corrects et pertinents.
+L'objectif de cette section est d'examiner la consistence des bases de données disponibles en vérifiant les valeurs manquantes, les doublons ou encore les incohérences logiques entre les variables. 
+
+
+
+## Standardisation des noms des variables
+Avant toute manipulation des données, il est essentiel de s'assurer que les noms des variables sont standardisés, facilitant ainsi leur utilisation dans les analyses ultérieures.
+
+
+
+```{r exam_names, results='hide'}
+# Examinons les noms de variables actuels
+cat("Noms de variables de la base Individus avant nettoyage:\n")
+names(Individus)
+
+cat("\nNoms de variables de la base Principale avant nettoyage:\n")
+names(Principale)
+```
+
+Avant toute transformation, nous avons commencé par examiner les noms de variables des deux bases de données, Individus et Principale, afin de repérer d’éventuelles incohérences ou irrégularités (espaces, majuscules, caractères spéciaux, etc.). Cette étape préliminaire permet d’avoir une vision claire de l’état initial des noms de colonnes et de justifier l’utilité d’un nettoyage.
+
+
+
+```{r fonct_names}
+# Fonction pour nettoyer les noms de variables
+nettoyer_noms <- function(df) {
+  # Utilisation de janitor pour nettoyer les noms de variables
+  df <- clean_names(df) 
+  return(df)
+  }
+
+```
+
+
+```{r appli_fonct}
+# Application de la fonction de nettoyage
+individus_clean <- nettoyer_noms(Individus)
+principale_clean <- nettoyer_noms(Principale)
+```
+
+
+La fonction de nettoyage a ensuite été appliquée aux deux bases de données initiales. Les résultats ont été stockés dans deux nouveaux objets : individus_clean et principale_clean. Ces versions contiennent les mêmes données que les bases originales, mais avec des noms de colonnes nettoyés et standardisés.
+
+
+
+```{r après_net_names, results='hide'}
+# Affichage des noms après nettoyage
+cat("Noms de variables de la base Individus après nettoyage:\n")
+names(individus_clean)
+
+cat("\nNoms de variables de la base Principale après nettoyage:\n")
+names(principale_clean)
+```
+
+
+Après nettoyage, les nouveaux noms de colonnes ont été affichés pour s’assurer que la transformation a bien été effectuée. Cette vérification visuelle permet de confirmer que les noms sont désormais harmonisés, lisibles et exploitables dans les étapes ultérieures d’analyse.
+
+
+
+```{r verif_net }
+# Vérification des modifications apportées
+cat("\nNombre de noms modifiés dans la base Individus:", sum(names(Individus) != names(individus_clean)), "\n")
+cat("Nombre de noms modifiés dans la base Principale:", sum(names(Principale) != names(principale_clean)), "\n")
+```
+
+
+Enfin, une vérification automatique a été réalisée pour comparer les noms de colonnes avant et après nettoyage. Le script calcule le nombre de noms modifiés dans chaque base. Cela permet de mesurer l’ampleur du nettoyage et de repérer s’il y a eu beaucoup de changements à apporter, ce qui peut révéler un besoin important de standardisation dans les données brutes.
+
+## Gestion des doublons
+La présence de doublons peut affecter significativement la qualité de l'analyse. Nous allons identifier et traiter les doublons au niveau des identifiants uniques et des observations complètes.
+
+```{r doubl_indiv}
+cat("La base individu contient", sum(duplicated(individus_clean)),"doublons.")
+```
+
+```{r doubl_men}
+cat("La base ménages contient", sum(duplicated(principale_clean)),"doublons.")
+```
+
+\newpage
+
+# II.	Analyse socio-economique des deplaces internes du Sudan en 2023
+Cette section vise à dresser un portrait détaillé des conditions socio-économiques des populations déplacées internes au Soudan en 2023, à partir des données recueillies lors de l’enquête. L’objectif est de mieux comprendre les caractéristiques démographiques, les conditions de logement, ainsi que la situation alimentaire des ménages affectés. À travers une série d’analyses descriptives et comparatives, cette étude met en lumière les différences entre les ménages déplacés (réfugiés) et les membres des communautés hôtes, notamment en termes de structure par âge, de statut matrimonial, de densité d’occupation des logements et de sécurité alimentaire.
+
+
+
+## Pyramide des ages des individus
+La pyramide des âges est un outil fondamental pour analyser la structure démographique d’une population. Elle permet de visualiser la répartition des individus par groupe d’âge et par sexe, mettant en évidence la jeunesse ou le vieillissement de la population ainsi que d’éventuels déséquilibres entre hommes et femmes.
+Dans le cadre de cette étude, la pyramide des âges des déplacés internes au Soudan en 2023 permet d’appréhender les dynamiques démographiques spécifiques à cette population, souvent marquée par des déplacements forcés, la désintégration familiale ou des risques sanitaires accrus.
+
+```{r verif_NA}
+# Vérifier les valeurs manquantes et supprimer les NAs
+individus_clean <- individus_clean %>% filter(!is.na(age_years))
+
+```
+
+La pyramide des âges issue des données de l'enquête sur les déplacements forcés au Soudan du Sud en 2023 révèle une population très jeune, avec une base large représentant les enfants et adolescents, et un sommet étroit traduisant une faible proportion de personnes âgées. Cette structure démographique est caractéristique des contextes de crise humanitaire, où les taux de natalité restent élevés mais où l'espérance de vie est réduite en raison des conditions de vie précaires, des conflits armés et d’un accès limité aux services de santé. La répartition par sexe est globalement équilibrée, bien que certaines tranches d’âge, notamment les 20-25 ans et les plus de 45 ans, montrent un excédent de femmes, ce qui peut résulter d’une mortalité plus élevée chez les hommes ou de déplacements différenciés selon le sexe. Les irrégularités visibles dans certaines tranches d’âge suggèrent l’impact direct des déplacements forcés, de la violence ou de la migration sélective sur la structure démographique. Cette pyramide met ainsi en évidence la vulnérabilité d’une population majoritairement composée d’enfants et de jeunes, avec des implications importantes pour la planification humanitaire et les politiques de protection.
+
+
+```{r group_age}
+# Créer des groupes d'âge
+individus_clean$group_age <- cut(individus_clean$age_years, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Comptage du nombre d'individus par groupe d'âge et sexe
+# Filtrer pour ne garder que les entrées valides (pas de NA)
+filtre_age <- individus_clean %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(group_age, hh_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+```
+
+```{r fig-pyr, fig.cap="Pyramide des ages des individus"}
+# Créer la pyramide des âges
+ggplot(filtre_age, aes(x = group_age, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  coord_flip() +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "darkblue"), 
+                   name = "Sex") +
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+  labs(title = "Pyramide des âges", x = "Age (years)", y = "# cases") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") + theme_minimal()
+
+```
+
+## Caractéristiques des ménages
+Cette partie permet de comparer certaines caractéristiques sociodémographiques des chefs de ménage issus de deux groupes distincts : les réfugiés et les membres des communautés hôtes du Nord. En s’appuyant sur la base de données de l’enquête sur les déplacements forcés menée au Sud-Soudan en 2023, seront extraits les individus concernés puis un résumé de statistiques clés sera effectués.
+
+```{r filt_chef_men}
+# Nettoyage : Vérifions si un  'filter' existe, si oui on le supprime pour éviter conflit avec filter de dpylr
+if ("filter" %in% ls()) rm(filter)
+
+# Filtrage les chefs de ménage de la base individu et création de la variable de groupe
+base_cf <- individus_clean %>%
+  dplyr::filter(hh_03 == 1) %>%  # Chefs de ménage uniquement
+  dplyr::mutate(
+    groupe = dplyr::case_when(
+      intro_07_1 == 1 ~ "Refugees",
+      intro_07_1 == 3 ~ "Host community North",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::filter(!is.na(intro_07_1))  # Pourgarder uniquement les deux groupes ci dessus
+
+
+```
+D'abord , on procède à une étape de filtrage et de préparation des données. On extrait uniquement les individus identifiés comme chefs de ménage grâce à la variable hh_03. Puis, une nouvelle variable appelée groupe est créée à partir de la variable intro_07_1. Celle-ci permet de distinguer deux sous-populations : les réfugiés (valeur 1) et les membres de la communauté hôte du Nord (valeur 3). Les observations appartenant à d'autres groupes ou dont la modalité est manquante sont exclues.
+
+
+On sélectionne ensuite quatre variables clés (groupe, âge, sexe, situation matrimoniale). À partir de ces variables, est construit un tableau statistique comparatif entre les deux groupes, présentant des moyennes pour les variables numériques et des fréquences pour les variables catégorielles, tout en ajoutant des tests de significativité.
+
+```{r carac_chefs, tab.cap="Caractéristiques des chefs de ménages"}
+# Création du tableau descriptif
+
+base_cf <- base_cf %>%
+  mutate(
+    intro_07_1 = factor(intro_07_1,
+                        levels = c(1, 3),
+                        labels = c("Refugees", "Host community North"))
+  )
+
+Carac_chefs <- base_cf %>%
+  dplyr::select(intro_07_1, age_years, hh_02, hh_08) %>%
+  dplyr::mutate(
+    hh_02 = factor(hh_02, levels = c(1, 2), labels = c("Male", "Female")),
+    hh_08 = factor(hh_08, levels = 1:7, 
+                   labels = c("monogamous/married", "polygamous/married", 
+                              "non-formal union", "separated", "divorced", 
+                              "widow or widower", "never married"))
+  )  %>%
+  tbl_summary(
+    by = intro_07_1,
+    statistic = list(
+      all_continuous() ~ "{mean} ({min}, {max})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ c(0, 0),     # Entiers pour moyenne, min, max
+      all_categorical() ~ c(0, 1)     # 0 décimale pour n, 1 pour %
+    ),
+    label = list(
+      age_years ~ "Age du chef de ménage",
+      hh_02 ~ "Sexe du chef de ménage",
+      hh_08 ~ "Situation matrimoniale"
+    ),
+missing = "no"
+  ) %>%
+  add_p() %>%
+  modify_header(label ~ "*Caractéristique du Chef de ménage*") %>%
+  bold_labels() %>%
+  modify_spanning_header(all_stat_cols() ~ "*Group*") %>%
+  as_gt() %>%
+  tab_header(
+    title = "Caractéristiques des chefs de ménage"
+  ) %>%
+  tab_source_note(
+    source_note = "Source : Enquête sur les déplacements forcés au Sud-Soudan en 2023"
+  )
+
+# Affichage du tableau final
+Carac_chefs
+```
+
+
+Le tableau compare les caractéristiques des chefs de ménage parmi les réfugiés (N = 2 061) et la communauté hôte du nord (N = 988), selon l’enquête sur les déplacements forcés au Soudan du Sud (2023). L’âge médian est similaire dans les deux groupes (42 ans). Les réfugiés comptent proportionnellement plus de femmes chefs de ménage (45,8 % contre 36,9 %), ce qui peut indiquer une plus grande vulnérabilité. Concernant la situation matrimoniale, les chefs de ménage réfugiés sont moins souvent mariés (monogamie ou polygamie) et plus souvent séparés, divorcés, veufs ou jamais mariés que ceux de la communauté hôte. Ces différences suggèrent un impact social marqué des déplacements forcés, bien que l’absence de valeurs p empêche de juger de leur significativité statistique.
+
+
+
+## Crowding Index ou l’indice d’affluence
+
+L'indice d'affluence est le nombre de membres du menage divise par le nombre de pièces (à l'exclusion de la cuisine et des couloirs).
+
+### Calcul du nombre d'individu par ménage
+Nous avons créé une variable qui permet de retourner le nombre d'individus par ménage.
+```{r indiv_par_men}
+#Compter le nombre d'individus par ménage
+nb_individus <- individus_clean %>%
+  group_by(id) %>%
+  summarise(nbre_personnes = n())
+
+# Faire la jointure avec la base principale
+principale_clean <- principale_clean %>%
+  left_join(nb_individus, by = "id")
+
+# Remplacer les NA par 0 si certains ménages n'ont pas d'individus associés
+principale_clean$nbre_personnes[is.na(principale_clean$nbre_personnes)] <- 0
+
+```
+
+
+### Statistiques descriptives sur cette variable
+
+Nous allons fournir des statistiques descriptives de la variable calculée précédemment.
+
+
+```{r stats_nb_ind_men}
+
+# Statistiques descriptives avec tbl_summary
+  principale_clean %>%
+  select(nbre_personnes) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} | Min: {min} | Max: {max}"),
+    digits = all_continuous() ~ 1
+  )%>%
+  as_flex_table() %>%
+  fontsize(size = 9, part = "all") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  bg(bg = "#D6EAF8", part = "header") %>%
+  align(align = "center", part = "header") %>%
+  align(align = "left", j = 1) %>%
+  autofit() %>%
+  width(width = 1, j = 1) %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  hline(border = fp_border(color = "black", width = 1)) %>%
+  vline(border = fp_border(color = "black", width = 1)) %>%
+  hline_top(border = fp_border(color = "black", width = 2)) %>%
+  hline_bottom(border = fp_border(color = "black", width=2))
+
+
+
+```
+
+
+### Statistiques descriptives sur la variable renseignant le nombre de pieces du menage
+
+```{r nbre_piece}
+# Statistiques descriptives sur le nombre de pièces du ménage (hh14)
+
+# Créer le tableau de statistiques descriptives sur hh14 
+tableau_pieces <- principale_clean %>% 
+  # Sélectionner uniquement la variable d'intérêt
+  select(hh14) %>% 
+  # S'assurer que hh14 est bien numérique
+  mutate(
+    hh14 = as.numeric(hh14)
+  ) %>%
+  # Créer le tableau de statistiques descriptives
+  tbl_summary(
+    # Définir un label plus explicite
+    label = list(
+      hh14 ~ "Nombre de pièces du ménage"
+    ),
+    # Statistiques à présenter
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd}), médiane: {median}, [{min}, {max}]"
+    ),
+    # Définir le nombre de décimales
+    digits = list(
+      all_continuous() ~ c(1, 1, 0, 0)
+    ),
+    # Afficher les valeurs manquantes si présentes
+    missing = "ifany"
+  ) %>%
+  # Modifier l'en-tête de la colonne des variables
+  modify_header(label ~ "**Variable**", 
+                stat_0 ~ "**Statistiques**") %>%
+  # Mettre en gras les libellés
+  bold_labels() %>%
+  # Convertir en objet gt pour personnalisation supplémentaire
+  as_gt() %>%
+  # Ajouter une note de source
+  tab_source_note(
+    source_note = "Source : Enquête sur les déplacements forcés au Sud-Soudan en 2023"
+  )
+
+# Afficher le tableau
+tableau_pieces
+```
+
+
+### Calcul de l’indice d’affluence ou crowding index
+
+Dans cette partie , nous allons calculer l'indice d'affluence définie plus haut.
+
+```{r indice_af}
+principale_clean <- principale_clean %>%
+  filter(hh14 > 0) %>%
+  mutate(crowding_index = nbre_personnes/hh14)
+
+
+```
+
+### Proportion de menage dont le crowding index est: <1, 1<= crowding_index<2, 2<= crowding_index<3 et >=3
+
+```{r cat}
+
+# Catégorisation du crowding index
+principale_clean <- principale_clean %>%
+  mutate(crowding_cat = case_when(
+    crowding_index < 1 ~ "<1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1-2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2-3",
+    crowding_index >= 3 ~ ">=3"
+  ))
+
+
+```
+
+```{r prop}
+
+
+tableau_crowding <- principale_clean %>%
+  # Sélectionner uniquement la variable d'intérêt
+  select(crowding_cat) %>%
+  # Utiliser tbl_summary pour les statistiques descriptives
+  tbl_summary(
+    # Définir un label plus explicite pour la variable
+    label = list(
+      crowding_cat ~ "Catégorie de surpeuplement"
+    ),
+    # Afficher uniquement les pourcentages et effectifs pour les variables catégorielles
+    statistic = list(
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    # Une décimale pour les pourcentages
+    digits = list(
+      all_categorical() ~ c(0, 1)  # 0 décimale pour n, 1 pour %
+    ),
+    # Ne pas afficher les valeurs manquantes dans une ligne séparée
+    missing = "no"
+  ) %>%
+  # Modifier l'en-tête de la colonne des variables
+  modify_header(label ~ "**Catégorie**", 
+                stat_0 ~ "**Effectif et proportion**") %>%
+  # Mettre en gras les libellés des variables
+  bold_labels() %>%
+  # Convertir en objet gt pour personnalisation supplémentaire
+  as_gt() %>%
+  # Personnaliser l'apparence du tableau avec tab_options
+  tab_options(
+    heading.align = "center",                     # Centrer le titre
+    column_labels.font.weight = "bold",           # En-têtes en gras
+    table.border.top.width = px(2),               # Bordure supérieure épaisse
+    table.border.top.color = "black",
+    table.border.bottom.width = px(2),            # Bordure inférieure épaisse
+    table.border.bottom.color = "black",
+    heading.border.bottom.width = px(1),          # Ligne sous le titre
+    heading.border.bottom.color = "black",
+    column_labels.border.top.width = px(1),       # Ligne au-dessus des en-têtes
+    column_labels.border.top.color = "black", 
+    column_labels.border.bottom.width = px(1),    # Ligne sous les en-têtes
+    column_labels.border.bottom.color = "black",
+    table_body.border.bottom.width = px(1),       # Ligne sous le corps du tableau
+    table_body.border.bottom.color = "black",
+    table_body.hlines.width = px(1),              # Lignes horizontales dans le corps
+    table_body.hlines.color = "black"
+  ) %>%
+  # Ajouter une note de source
+  tab_source_note(
+    source_note = "Source: Calculs de l'auteur basés sur les données de l'enquête."
+  ) %>%
+  # Appliquer un fond bleu clair aux en-têtes (similaire à #D6EAF8)
+  tab_style(
+    style = cell_fill(color = "#D6EAF8"),
+    locations = cells_column_labels()
+  ) %>%
+  # Aligner le texte des en-têtes au centre
+  tab_style(
+    style = cell_text(align = "center", weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  # Aligner le texte de la première colonne à gauche
+  tab_style(
+    style = cell_text(align = "left"),
+    locations = cells_body(columns = 1)
+  )
+
+# Afficher le tableau
+tableau_crowding
+
+```
+
+\newpage
+
+# III.	Analyse de la securite alimentaire des deplaces internes
+
+La sécurité alimentaire constitue un enjeu central dans les situations de déplacement forcé, où l’accès régulier à une alimentation suffisante, diversifiée et nutritive est souvent compromis. Pour les populations déplacées internes, les perturbations liées aux conflits, à la perte de moyens de subsistance ou à l’absence d’infrastructures peuvent gravement affecter leur sécurité alimentaire.
+Cette section vise à évaluer la situation alimentaire des ménages déplacés au Soudan en 2023.
+
+## Score de consommation alimentaire (SCA)
+
+Le Score de Consommation Alimentaire (SCA) est un indicateur composite largement utilisé pour évaluer la sécurité alimentaire des ménages. Il repose sur trois dimensions essentielles : la diversité alimentaire, la fréquence de consommation des groupes d’aliments, et leur valeur nutritionnelle relative. Calculé sur une période de sept jours, il permet de mesurer dans quelle mesure les besoins alimentaires de base sont satisfaits.
+
+### Analyse descriptive des variables qui composent le SCA
+
+```{r stats_SCA, eval=FALSE, include=FALSE}
+# Composants du SCA
+var_SCA <- c("food_div1","food_div2","food_div3","food_div4","food_div5","food_div6","food_div7","food_div8")
+
+
+# Nettoyage des valeurs 
+principale_clean <- principale_clean %>%
+  mutate(across(
+    all_of(var_SCA),
+    ~ as.numeric(.) %>% pmax(0) %>% pmin(7)
+  ))
+
+# Format long du SCA
+long_SCA <- principale_clean %>%
+  select(all_of(var_SCA)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "jours")
+
+# Proportions
+sum_SCA <- long_SCA %>%
+  group_by(variable, jours) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  complete(variable, jours = 0:7, fill = list(n = 0)) %>%
+  group_by(variable) %>%
+  mutate(Prop = round(n / sum(n) * 100, 1)) %>%
+  ungroup()
+
+# Mise en forme pour tableau
+
+style_flextable <- function(ft) {
+  ft |>
+    flextable::set_table_properties(width = 1, layout = "autofit") |>
+    flextable::theme_booktabs() |>
+    flextable::fontsize(size = 11) |>
+    flextable::align(align = "center", part = "all")
+}
+
+tab_SCA <- sum_SCA %>%
+  mutate(jours = as.character(jours),
+         stat = paste0(n, " (", Prop, "%)")) %>%
+  select(variable, jours, stat) %>%
+  pivot_wider(names_from = variable, values_from = stat)
+
+
+style_flextable(tab_SCA)%>%
+  set_caption(
+    caption = "Effectifs et pourcentages des groupes alimentaires selon le nombre de jours (0–7)",
+    autonum = run_autonum(seq_id = "tab", bkm = "tab_manquant") 
+  ) 
+
+
+```
+
+
+### Calcul du score de consommation alimentaire
+
+Le calcul du Score de Consommation Alimentaire (SCA) repose sur la combinaison de plusieurs variables indiquant le nombre de jours, sur les sept derniers, durant lesquels les membres du ménage ont consommé différents groupes d’aliments. Chaque groupe alimentaire est pondéré en fonction de sa valeur nutritionnelle. Le score final est obtenu en multipliant la fréquence de consommation de chaque groupe par son poids correspondant, puis en faisant la somme de ces produits.
+Cette méthode permet d’obtenir un indicateur synthétique, reflétant à la fois la diversité, la fréquence et la qualité nutritionnelle de l’alimentation des ménages.
+
+```{r}
+# Définir les poids
+
+pds_SCA <- c(
+  food_div1  = 2,  # Céréales & tubercules
+  food_div2  = 3,  # Légumineuses/noix
+  food_div5  = 1,  # Légumes
+  food_div6  = 1,  # Fruits
+  food_div4  = 4,  # Viande/poisson/œufs
+  food_div3  = 4,  # Produits laitiers
+  food_div8  = 0.5,  # Sucre
+  food_div7  = 0.5   # Matières grasses
+)
+
+# Calculer le score pondéré
+principale_clean <- principale_clean %>%
+  mutate(SCA = rowSums(across(all_of(names(pds_SCA)), ~ . * pds_SCA[cur_column()])))
+
+
+
+
+
+
+```
+
+\newpage
+
+# Conclusion
