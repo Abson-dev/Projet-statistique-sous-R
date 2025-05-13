@@ -1,0 +1,1838 @@
+---
+title: ""
+output:
+  word_document:
+    toc_depth: 3        # Profondeur (titres de niveau 1 et 2)
+    number_sections: true  # Numérotation automatique des sections
+    
+    reference_docx: word_template.docx #modele de référence
+---
+
+<!---BLOCK_SECTIONBREAK--->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+```{r installation_vérification_des_packages, include=FALSE}
+
+#Installation et importation des packages
+
+packages <- c("dplyr","flextable","officer","officedown","readr","haven","gtsummary","gt","kableExtra","janitor","outliers","naniar","lubridate","rvg","ggplot2","tidyr")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                            |
+|:----------------------------------------------------------:|
+| ![](../Documents/Logo%20SEN.png){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                |
+|:----------------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                                    |
+|:------------------------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page_garde_4, include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "MBENGUE Dior", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable_obj <- flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  autofit() %>%  # Ajuste automatiquement la largeur des colonnes
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+\newpage
+
+###### Sommaire
+
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Analyse des données
+
+Il est important de faire l'analyse des données pour voir les similitudes et divergences dans les deux bases étudiées
+
+###### Chargement des bases
+
+```{r, chargement_des_bases}
+#chargement de la base welfare 2021
+indiv<-haven::read_dta("../données/Base_Individus.dta")
+#chargement de la base welfare 2018
+princip<-haven::read_dta("../données/Base_Principale.dta")
+
+```
+
+Dans cette partie, nous avons chargé les bases de données individus et principale
+
+###### Aperçu des bases
+
+```{r aperçu1, eval=FALSE, include=FALSE}
+# Aperçu de la base indiv
+head(indiv)
+View(indiv)
+# Aperçu de la base princip
+head(princip)
+glimpse(princip)
+```
+
+Ici, nous avons un apercu des bases pour avoir une premiére idée de leur constitution
+
+###### Doublons
+
+```{r doublons}
+##Vérification s'il ya des doublons
+doublon_indiv<-indiv[duplicated(indiv[, c("ID","rosterposition")]), ]
+doublon_princip<-princip[duplicated(princip[, c("ID")]), ]
+
+cat("Nombre de doublons présents dans la Base_Individus :", nrow(doublon_indiv), "\n")
+
+cat("Nombre de doublons présents dans la Base_Principale :", nrow(doublon_princip))
+```
+
+Il n'y a donc pas de doublons dans les deux bases
+
+###### Valeurs maquantes
+
+```{r val_manquantes1}
+##Vérification des valeurs manquantes
+print("Valeurs manquante base indiv")
+NA_indiv <- colSums(is.na(indiv))
+head(NA_indiv)
+
+print("Valeurs manquante princip")
+NA_princip <- colSums(is.na(princip))
+head(NA_princip)
+
+```
+
+Nous constatons que beaucoup de variables ont des valeurs manquantes. Nous allons procéder à des imputations en fonction de la nature de la variable
+
+D'abord, nous allons imputer les colonnes complétement vides
+
+```{r val_maquantes2}
+# Pour indiv
+indiv %>%
+  select(1:5) %>%
+  summarise_all(~ mean(is.na(.)) * 100)
+
+# Pour princip
+princip %>%
+  select(1:5) %>%
+  summarise_all(~ mean(is.na(.)) * 100)
+
+```
+
+```{r colonnes_vides}
+indiv_clean <- indiv %>% remove_empty("cols")
+princip_clean <- princip %>% remove_empty("cols")
+setdiff(names(indiv), names(indiv_clean))
+setdiff(names(princip), names(princip_clean))
+```
+
+Nous avons enlever toutes les colonnes vides puis vérifier avec la nouvelle base
+
+Vérification
+
+```{r reste_vide}
+# Colonnes totalement NA dans indiv_clean
+indiv_na_cols <- names(indiv_clean)[colSums(is.na(indiv_clean)) == nrow(indiv_clean)] %>%
+  head(5)  # Limite à 5 colonnes
+
+indiv_na_table <- tibble(Données = "indiv_clean", Variable = indiv_na_cols) %>%
+  flextable()
+
+# Colonnes totalement NA dans princip_clean
+princip_na_cols <- names(princip_clean)[colSums(is.na(princip_clean)) == nrow(princip_clean)] %>%
+  head(5)
+
+princip_na_table <- tibble(Données = "princip_clean", Variable = princip_na_cols) %>%
+  flextable()
+
+```
+
+Toutes les colonnes vides ont été enlevées
+
+```{r setdiff}
+setdiff(names(indiv), names(indiv_clean))
+setdiff(names(princip), names(princip_clean))
+```
+
+```{r NA_seulement}
+indiv_clean <- indiv[, colSums(!is.na(indiv)) > 0]
+princip_clean <- princip[, colSums(!is.na(princip)) > 0]
+```
+
+Nous venons d'enlever toutes les colonnes qui ont des NA seulement
+
+```{r, plus_de_60%_NA}
+# Suppression des lignes ou colonnes contenant plus de 60% de valeurs manquantes
+indiv_clean %>% janitor::remove_empty("rows", cutoff = 0.6)
+princip_clean %>% janitor::remove_empty("cols", cutoff = 0.6)
+```
+
+###### Cas des variables quantitatives
+
+```{r imputation_quanti}
+library(e1071)  # pour la fonction skewness
+
+# Fonction d'imputation avec gestion des NAs et affichage du message
+impute_variable <- function(x, varname) {
+  if (is.numeric(x)) {
+    # Calculer l'asymétrie en ignorant les valeurs manquantes
+    skw <- tryCatch(skewness(x, na.rm = TRUE), error = function(e) NA)
+    
+    # Si l'asymétrie est valide, appliquer la logique
+    if (!is.na(skw)) {
+      if (skw > 1 | skw < -1) {
+        x[is.na(x)] <- median(x, na.rm = TRUE)
+        if (varname %in% names(x)[1:10]) {
+          cat("Imputation par la médiane pour", varname, "- Skewness :", round(skw, 2), "\n")
+        }
+      } else {
+        x[is.na(x)] <- mean(x, na.rm = TRUE)
+        if (varname %in% names(x)[1:10]) {
+          cat("Imputation par la moyenne pour", varname, "- Skewness :", round(skw, 2), "\n")
+        }
+      }
+    } else {
+      x[is.na(x)] <- mean(x, na.rm = TRUE)
+      if (varname %in% names(x)[1:10]) {
+        cat("Impossible de calculer l'asymétrie pour", varname, "\n")
+      }
+    }
+  }
+  return(x)
+}
+
+# Fonction pour traiter tout le data frame mais afficher uniquement les 10 premières variables
+impute_dataframe <- function(df) {
+  for (var in names(df)) {
+    df[[var]] <- impute_variable(df[[var]], var)
+  }
+  return(df)
+}
+
+# Application aux deux bases
+indic_clean <- impute_dataframe(indiv_clean)
+princip_cleann <- impute_dataframe(princip_clean)
+
+
+```
+
+Dans cette partie, on n'a imputé les variables quantitatives suivant sa symétrie. Si elle est symétrique, on impute par rapport à la moyenne sinon par rapport à la médiane.
+
+###### Nettoyage des noms des variables
+
+Nous allons maintenant nettoyer les noms des variables
+
+```{r clean_names}
+# Nettoyage des noms de variables avec clean_names
+# Cette fonction transforme les noms de colonnes en snake_case
+names_avant_1 <- names(indiv_clean)[1:10]
+names_avant_2 <- names(princip_clean)[1:10]
+print("Noms avant nettoyage:")
+print(names_avant_1)
+print(names_avant_2)
+
+# Application de clean_names
+indiv_clean_1 <- indiv_clean %>% janitor::clean_names()
+princip_clean_2 <- princip_clean %>% janitor::clean_names()
+
+# Affichage des noms après nettoyage
+names_apres_1 <- names(indiv_clean_1)[1:10]
+names_apres_2 <- names(princip_clean_2)[1:10]
+print("Noms après nettoyage:")
+print(names_apres_1)
+print(names_apres_2)
+
+# Options disponibles pour clean_names pour la base indiv_clean_1
+# "snake_case" (par défaut)
+snake <- indiv_clean_1 %>% janitor::clean_names(case = "snake")
+# "camelCase"
+camel <- indiv_clean_1 %>% janitor::clean_names(case = "small_camel")
+# "titleCase"
+title <- indiv_clean_1 %>% janitor::clean_names(case = "title")
+# "screaming_snake"
+scream <- indiv_clean_1 %>% janitor::clean_names(case = "screaming_snake")
+
+# Comparaison des premiers noms de colonnes avec différentes options
+data.frame(
+  Original = names(indiv_clean_1)[1:5],
+  Snake = names(snake)[1:5],
+  Camel = names(camel)[1:5],
+  Title = names(title)[1:5],
+  ScreamingSnake = names(scream)[1:5]
+)
+
+# Options disponibles pour clean_names pour la base princip_clean_2
+# "snake_case" (par défaut)
+snake <- princip_clean_2 %>% janitor::clean_names(case = "snake")
+# "camelCase"
+camel <- princip_clean_2 %>% janitor::clean_names(case = "small_camel")
+# "titleCase"
+title <- princip_clean_2 %>% janitor::clean_names(case = "title")
+# "screaming_snake"
+scream <- princip_clean_2%>% janitor::clean_names(case = "screaming_snake")
+
+# Comparaison des premiers noms de colonnes avec différentes options
+data.frame(
+  Original = names(princip_clean_2)[1:5],
+  Snake = names(snake)[1:5],
+  Camel = names(camel)[1:5],
+  Title = names(title)[1:5],
+  ScreamingSnake = names(scream)[1:5]
+)
+
+```
+
+Nous avons ainsi nettoyer les noms des variables dans chacune des bases
+
+###### Incohérence dans les bases
+
+```{r incohérence}
+##Présence des variables dans les deux bases ou dans une seule
+vars_princip = colnames(princip_clean_2)
+
+vars_indiv = colnames(indiv_clean_1) 
+
+# Identifions les variables communes
+vars_communes <- intersect(vars_princip, vars_indiv) 
+
+# Variables présentes uniquement dans la base principale
+vars_seulement_princip <- setdiff(vars_princip, vars_indiv) 
+
+# Variables présentes uniquement dans la base indivudus
+vars_seulement_indiv <- setdiff(vars_princip, vars_indiv) 
+ 
+
+print(head(princip_clean_2))
+print(head(vars_seulement_princip))
+print(head(vars_communes))
+```
+
+Pour les variables communes, il n'y a pas d'incohérences au niveau des noms des variables
+
+```{r labellisation}
+variable_label_diff <- c()  
+
+for (variable in vars_communes) { 
+  
+  if(labelled::is.labelled(indiv_clean_1[[variable]])){ 
+    
+      value_label_indiv <- labelled::val_labels(indiv_clean_1[[variable]]) 
+
+  }else{
+      value_indiv <- NULL 
+  }
+  
+  if(labelled::is.labelled(princip_clean_2[[variable]])){ 
+    
+      value_label_princip <- labelled::val_labels(princip_clean_2[[variable]]) 
+  
+  }else{
+    
+      value_label_princip <- NULL 
+  }
+  
+  if(!identical(value_label_indiv, value_label_princip)){ 
+     variable_label_diff <- append(variable_label_diff,variable) 
+     print(variable)
+     
+   }
+}
+```
+
+Aprés avoir détecter les variables avec label différents dans les deux bases, nous allons voir si nous allons détecter une incohérence aprés les avoir afficher
+
+nous allons faire la visualiation de la distribution puis la détection de l'incohérence,puis la correction de l'incohérence et enfin la revisualisation pour la confirmation de la correction
+
+Nous allons commencer par la variable "start"
+
+```{r nom_var1}
+
+labelled::val_labels(indiv_clean_1$start)
+labelled::val_labels(indiv_clean_1$end)
+labelled::val_labels(indiv_clean_1$admin0)
+labelled::val_labels(indiv_clean_1$intro_camp_label)
+labelled::val_labels(indiv_clean_1$wgh_samp_resc_pop)
+labelled::val_labels(indiv_clean_1$wgh_samp_resc_str)
+
+```
+
+Il n'ya pas de labellisation pour la variable start dans la base des individus
+
+```{r nom_var}
+
+labelled::val_labels(princip_clean_2$start)
+labelled::val_labels(princip_clean_2$end)
+labelled::val_labels(princip_clean_2$admin0)
+labelled::val_labels(princip_clean_2$id)
+labelled::val_labels(princip_clean_2$intro_camp_label)
+labelled::val_labels(princip_clean_2$wgh_samp_resc_pop)
+labelled::val_labels(princip_clean_2$wgh_samp_resc_str)
+
+```
+
+Pour la variable intro_camp_label c'est labelliser
+
+On va maintenant procéder à la rectification
+
+```{r label}
+labelled::val_labels(princip_clean_2$intro_camp_label)
+```
+
+```{r vérification, eval=FALSE, include=FALSE}
+labelled::val_labels(indiv_clean_1$intro_camp_label) <- labelled::val_labels(princip_clean_2$intro_camp_label)
+```
+
+###### Types différents
+
+```{r types_différents}
+
+variable_type_diff <- c()  
+
+for (variable in vars_communes) {  
+
+  type_var_princip <- class(princip_clean_2[[variable]])  
+  type_var_indiv <- class(indiv_clean_1[[variable]])  
+
+  if (!identical(type_var_princip, type_var_indiv)) {  
+    variable_type_diff <- append(variable_type_diff, variable)  
+  }
+}
+
+print(variable_type_diff)
+
+
+```
+
+Nous avons enfin terminé l'analyse des deux bases
+
+# Analyse socio-economique des deplaces internes du Sudan en 2023
+
+## Pyramide des ages des individus
+
+```{r pyramide_des_ages, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(rvg)
+
+# Vérifier les valeurs manquantes et supprimer les NAs
+indiv_clean_1 <- indiv_clean_1 %>% filter(!is.na(age_years))
+
+# Créer des groupes d'âge
+indiv_clean_1$age_group <- cut(indiv_clean_1$age_years, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Comptage du nombre d'individus par groupe d'âge et sexe
+age_sex_distribution <- indiv_clean_1 %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(age_group, hh_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+# Créer la pyramide des âges
+pyramide_plot <- ggplot(age_sex_distribution, aes(x = age_group, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  coord_flip() +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "darkblue"), name = "Sex") +
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+  labs(title = "Pyramide des âges", x = "Âge (années)", y = "# individus") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  theme_minimal()
+
+# Afficher le graphique
+print(pyramide_plot)
+
+# Générer le fichier EMF
+pyramide_emf <- rvg::dml(ggobj = pyramide_plot)
+```
+
+Analyse des données
+
+**Répartition des âges** :
+
+-   La base de la pyramide (0-5 ans) est **plus large**, indiquant une population jeune avec un fort taux de natalité.
+
+-   Les tranches d'âge intermédiaires (25-40 ans) sont également bien représentées, ce qui suggère une population active.
+
+-   Le sommet (60-65 ans) est **plus étroit**, traduisant une proportion plus faible de personnes âgées.
+
+**équilibre homme-femme** :
+
+-   Globalement, la répartition **semble équilibrée** entre les hommes et les femmes dans la plupart des tranches d'âge.
+
+-   À partir de 50 ans, la **proportion de femmes devient plus importante**, ce qui peut indiquer une espérance de vie légèrement plus élevée chez les femmes.
+
+###### **Interprétation des tendances**
+
+**Population dynamique** : La forte proportion de jeunes suggère un potentiel de croissance économique et un besoin d'investissements dans l'éducation et l'emploi.
+
+**Vieillissement progressif** : La diminution des effectifs au sommet de la pyramide montre une transition démographique à surveiller, notamment pour les politiques de retraite et de santé.
+
+**Différences homme-femme** : L'espérance de vie plus longue des femmes peut nécessiter des politiques adaptées aux personnes âgées et à la santé féminine.
+
+## Caracteristiques du chef de menage
+
+```{r tableau_de_synthese, results='asis', echo=FALSE}
+
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(labelled)
+library(gtsummary)
+library(flextable)
+
+# Nettoyer les données
+indiv_clean_1 <- indiv_clean_1 %>%
+  labelled::to_factor() %>%
+  droplevels()
+
+# Générer le tableau de synthèse
+tbl_summary_example <- indiv_clean_1 %>%
+  tbl_summary(
+    by = intro_07_1,  
+    include = c(age_years, hh_02, hh_08),  # Variables incluses dans le tableau
+    label = list(
+      age_years ~ "AgeYears",  
+      hh_02 ~ "Sexe",  
+      hh_08 ~ "Statut matrimonial actuel" 
+    ),  
+    statistic = all_continuous() ~ "{mean} ({sd})",  
+    digits = all_continuous() ~ 2,  
+    missing = "ifany"
+  ) %>%
+  modify_header(label ~ "Caractéristiques du chef de ménage") %>%
+  as_flex_table() %>%
+  add_footer_lines("Wilcoxon rank sum test; Pearson's Chi-squared test; Fisher's exact test") %>%
+  autofit()   # Ajuster automatiquement la largeur des colonnes
+
+# Afficher le tableau
+tbl_summary_example
+```
+
+**Répartition par âge**
+
+Les jeunes enfants (0-10 ans) représentent une proportion significative de la population, ce qui indique une forte natalité ou un impact démographique marqué chez les plus jeunes.
+
+À partir de 20 ans, on observe une diminution progressive des effectifs, particulièrement après 40 ans.
+
+La tranche "60 ans et plus" est relativement faible comparée aux groupes plus jeunes, ce qui peut refléter des enjeux liés à l'espérance de vie ou aux conditions de vie difficiles.
+
+**Répartition par sexe**
+
+La distribution du sexe est presque équilibrée avec environ 49-51% dans les deux groupes.
+
+Cette parité peut indiquer une structure démographique stable sans déséquilibre majeur.
+
+**Statut matrimonial**
+
+Les réfugiés :
+
+Une forte proportion n'a jamais été mariée (54%).
+
+Le mariage monogame est dominant (35%), suivi du mariage polygame (4.7%).
+
+Une minorité est divorcée, séparée ou veuve.
+
+Communauté d'accueil :
+
+Une proportion plus élevée est mariée monogame (44% contre 35% chez les réfugiés).
+
+Les personnes veuves et divorcées ont des proportions comparables.
+
+Le taux de célibat est un peu moins élevé (47% contre 54% chez les réfugiés).
+
+Interprétation globale Dynamique démographique : La répartition par âge montre une population relativement jeune, ce qui peut avoir des implications sur les besoins en éducation, emploi et santé.
+
+Comparaison entre groupes : La communauté hôte semble avoir une proportion légèrement plus élevée de personnes mariées que les réfugiés, ce qui peut refléter des différences culturelles ou des impacts liés à l’instabilité du déplacement.
+
+Implication politique et sociale : Ces résultats peuvent guider les interventions en matière d’intégration sociale, logement et santé, notamment pour les réfugiés où le célibat est plus fréquent.
+
+## Crowding Index ou l’indice d’affluence
+
+**Nombre d'individu par ménage**
+
+```{r individu_par_ménage_et_caractéristiques, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Compter le nombre d'individus par ménage
+nb_individus_par_menage <- indiv_clean_1 %>%
+  group_by(id) %>%
+  summarise(nb_individus = n())
+
+# Affichage des statistiques descriptives sur le nombre d'individus par ménage
+print(summary(nb_individus_par_menage$nb_individus))
+
+# Création et affichage de l'histogramme
+histogram_plot <- ggplot(nb_individus_par_menage, aes(x = nb_individus)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution du nombre d'individus par ménage",
+       x = "Nombre d'individus", y = "Fréquence") +
+  theme_minimal()
+
+# Afficher le graphique
+print(histogram_plot)
+
+```
+
+Analyse de la distribution
+
+Tendance observée :
+
+La majorité des ménages ont entre 4 et 6 individus.
+
+Plus le nombre d’individus augmente, plus la fréquence diminue.
+
+La distribution est asymétrique et orientée vers la droite, ce qui montre qu’il existe quelques ménages très peuplés mais qu’ils sont rares.
+
+**Interprétation** Structure familiale typique : La concentration autour de 4-6 individus suggère des ménages composés de parents et enfants.
+
+Conditions de logement : Des ménages plus grands peuvent faire face à des défis en termes d’espace de vie et de confort.
+
+Implications socio-économiques : Les ménages nombreux nécessitent davantage de ressources, ce qui pourrait influencer les politiques de logement et d’aide sociale.
+
+```{r pieces_par_menage, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Statistiques descriptives sur le nombre de pièces par ménage
+print(summary(princip_clean_2$hh14))
+
+# Création et affichage de l'histogramme
+hist_pieces_plot <- ggplot(princip_clean_2, aes(x = hh14)) +
+  geom_histogram(binwidth = 1, fill = "coral", color = "black") +
+  labs(title = "Distribution du nombre de pièces par ménage",
+       x = "Nombre de pièces", y = "Fréquence") +
+  theme_minimal()
+
+# Afficher le graphique
+print(hist_pieces_plot)
+```
+
+La distribution est asymétrique et orientée vers la droite, ce qui signifie qu'il y a beaucoup de ménages avec 4 à 6 individus, puis une diminution progressive au-delà de ce seuil.
+
+**Interprétation des tendances** Structure familiale typique : La majorité des ménages comptent entre 4 et 6 individus, suggérant une organisation familiale classique.
+
+Ménages nombreux mais minoritaires : Au-delà de 6 individus, la fréquence diminue, ce qui peut indiquer des défis en matière de logement et de ressources.
+
+Surpeuplement possible : Certains ménages très peuplés existent, ce qui pourrait être un indicateur de conditions de logement précaires ou de forte dépendance économique.
+
+Implications sociales et économiques Les ménages plus grands nécessitent plus de ressources, ce qui peut influencer les politiques sociales et d’aide aux réfugiés.
+
+Une répartition de ce type peut informer les décisions de logement, en identifiant les besoins en termes d’espace et d’aménagement familial.
+
+**Calcul de l'indice d'affluence (Crowding Index)**
+
+```{r indice_d_affluence, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Joindre les données sur le nombre d'individus aux données sur les ménages
+menages_avec_individus <- princip_clean_2 %>%
+  select(id, hh14, intro_07_1) %>%
+  left_join(nb_individus_par_menage, by = "id")
+
+# Calculer l'indice d'affluence (crowding index)
+menages_avec_individus <- menages_avec_individus %>%
+  mutate(crowding_index = nb_individus / hh14)
+
+# Affichage des statistiques descriptives sur l'indice d'affluence
+print(summary(menages_avec_individus$crowding_index))
+
+# Création et affichage de l'histogramme
+hist_crowding_plot <- ggplot(menages_avec_individus, aes(x = crowding_index)) +
+  geom_histogram(binwidth = 0.5, fill = "lightgreen", color = "black") +
+  labs(title = "Distribution de l'indice d'affluence (Crowding Index)",
+       x = "Indice d'affluence", y = "Fréquence") +
+  theme_minimal() +
+  xlim(0, 10)  # Limiter l'axe des x pour une meilleure visualisation
+
+# Afficher le graphique
+print(hist_crowding_plot)
+
+```
+
+**Répartition** : La majorité des ménages comptent environ 5 individus, ce qui semble être la taille typique d’un foyer.
+
+**Forme de la distribution** : L’histogramme est asymétrique et orienté vers la droite, ce qui signifie que les ménages plus nombreux existent, mais sont moins fréquents.
+
+**Interprétation des tendances** Structure familiale : La concentration autour de 5 personnes par ménage reflète probablement des familles nucléaires avec enfants.
+
+Surpeuplement potentiel : La présence de ménages de grande taille peut poser des problèmes en matière de logement et d’accès aux ressources.
+
+Différences entre populations : Si l’on compare réfugiés et communauté hôte, les réfugiés pourraient avoir des ménages plus grands en raison de regroupements familiaux.
+
+**Implications socio-économiques** Logement et confort de vie : Ces résultats peuvent aider à planifier les politiques de construction et d’aménagement.
+
+Économie domestique : Les ménages nombreux peuvent être plus vulnérables économiquement et nécessiter des stratégies de survie différentes.
+
+Intervention sociale : Une forte densité dans certains foyers pourrait être un indicateur de besoins accrus en assistance sociale et sanitaire.
+
+**Proportion de crowding dans les ménages**
+
+```{r indice_d_affluence2, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Catégoriser l'indice d'affluence selon les seuils définis
+menages_avec_individus <- menages_avec_individus %>%
+  mutate(categorie_crowding = case_when(
+    crowding_index < 1 ~ "< 1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - 2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - 3",
+    crowding_index >= 3 ~ ">= 3",
+    TRUE ~ NA_character_
+  ))
+
+# Calcul des proportions par catégorie
+proportions_crowding <- menages_avec_individus %>%
+  group_by(categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des proportions en console
+print(proportions_crowding)
+
+# Création et affichage du graphique
+crowding_plot <- ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
+       x = "Indice d'affluence", y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Afficher le graphique
+print(crowding_plot)
+```
+
+**Analyse** Majorité des ménages ont un indice \>= 3 (57.9%) : Cela signifie que plus de la moitié des ménages vivent dans des conditions de forte densité, où chaque pièce est occupée par plusieurs individus.
+
+24.1% des ménages sont entre 2 - 3 : Ces ménages sont également densément peuplés, mais avec une meilleure répartition que ceux ayant un indice supérieur à 3.
+
+15.6% ont un indice 1 - 2 : Indique une répartition modérée de l'espace.
+
+Seulement 2.2% des ménages ont un indice \<1, ce qui signifie que ces ménages disposent d'un espace relativement confortable.
+
+0.2% des valeurs sont manquantes (NA), ce qui peut être dû à des données incomplètes ou des erreurs de saisie.
+
+**Implications** Conditions de vie précaires : La majorité des ménages vivent dans des espaces surpeuplés (\>= 3), ce qui peut engendrer des problèmes de santé, de confort et de qualité de vie.
+
+Besoin d’intervention : Les ménages avec un indice élevé peuvent nécessiter des mesures pour améliorer leurs conditions de logement.
+
+Comparaison entre groupes : Il pourrait être pertinent de différencier les réfugiés des membres de la communauté hôte pour voir si cette densité est spécifique à un groupe. \###### Suivant que le menage soit un refugié ou un member de la communaute d’acceuil
+
+```{r statistiques_menage_refugie, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(labelled)
+
+# Obtenir les labels pour le groupe de population
+if (any(class(menages_avec_individus$intro_07_1) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable groupe de population:\n")
+  print(labelled::val_labels(menages_avec_individus$intro_07_1))
+}
+
+# Analyse comparative entre réfugiés et communautés d'accueil
+comparaison_par_groupe <- menages_avec_individus %>%
+  group_by(intro_07_1, categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(intro_07_1) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des statistiques descriptives par groupe de population
+statistiques_par_groupe <- menages_avec_individus %>%
+  group_by(intro_07_1) %>%
+  summarise(
+    n = n(),
+    moyenne = mean(crowding_index, na.rm = TRUE),
+    mediane = median(crowding_index, na.rm = TRUE),
+    ecart_type = sd(crowding_index, na.rm = TRUE),
+    min = min(crowding_index, na.rm = TRUE),
+    max = max(crowding_index, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(statistiques_par_groupe)
+
+# Visualisation de la comparaison des proportions
+crowding_group_plot <- ggplot(comparaison_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(intro_07_1))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(title = "Indice d'affluence par groupe de population",
+       x = "Indice d'affluence", y = "Proportion (%)", fill = "Groupe de population") +
+  theme_minimal()
+
+# Afficher le graphique des proportions
+print(crowding_group_plot)
+
+# Boîte à moustaches pour comparer les distributions
+boxplot_crowding <- ggplot(menages_avec_individus, aes(x = factor(intro_07_1), y = crowding_index, fill = factor(intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution de l'indice d'affluence par groupe de population",
+       x = "Groupe de population", y = "Indice d'affluence") +
+  theme_minimal() +
+  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+
+# Afficher le boxplot
+print(boxplot_crowding)
+```
+
+Analyse des proportions Catégorie \< 1 (faible densité) :
+
+Groupe 1 : 2.6%
+
+Groupe 3 : 1.5% → Très peu de ménages bénéficient d'un espace confortable.
+
+Catégorie \>= 3 (forte densité) :
+
+Groupe 1 : 55.3%
+
+Groupe 3 : 63.4% → La majorité des ménages vivent dans des espaces surpeuplés.
+
+Catégorie 1 - 2 (densité modérée) :
+
+Groupe 1 : 17.3%
+
+Groupe 3 : 12.0% → Quelques ménages ont une occupation raisonnable par pièce.
+
+Catégorie 2 - 3 (densité élevée) :
+
+Groupe 1 : 24.7%
+
+Groupe 3 : 22.8% → Une part importante des ménages ont un taux d'affluence élevé.
+
+Valeurs NA (non renseignées) : 0.2% → Indicateur de données manquantes ou de ménages atypiques.
+
+**Interprétation des tendances** Surpeuplement majoritaire : Plus de 50% des ménages ont un indice ≥ 3, indiquant des conditions de vie précaires et un manque d’espace.
+
+Différences entre les groupes :
+
+Le Groupe 3 a une densité encore plus élevée (63.4% contre 55.3%), ce qui pourrait indiquer une vulnérabilité accrue ou des disparités socio-économiques.
+
+Groupe 1 a une meilleure répartition avec plus de ménages dans la catégorie 1 - 2, suggérant un meilleur accès au logement.
+
+**Implications socio-économiques**
+
+Les familles vivant dans des ménages très peuplés peuvent être plus vulnérables aux problèmes de santé et aux tensions sociales.
+
+Un manque d’espace peut affecter la qualité de vie, l’éducation des enfants, et l’accès aux ressources essentielles.
+
+**Perspectives d’intervention** Amélioration du logement : Mise en place de programmes pour réduire la densité des ménages surpeuplés. Approches ciblées : Les interventions pourraient être adaptées selon la population et le niveau de surpeuplement. Surveillance démographique : Ce type de données est crucial pour la planification des infrastructures et des services sociaux.
+
+**Analyse des statistiques descriptives** Groupe 1 (Rouge) :
+
+La médiane de l’indice d’affluence est autour de 3.
+
+Les valeurs varient de 0 à environ 8, avec quelques outliers au-delà de 8.
+
+La boîte est relativement compacte, indiquant une faible dispersion autour de la médiane.
+
+Groupe 3 (Bleu) :
+
+La médiane est légèrement plus élevée que celle du Groupe 1.
+
+Une plus grande dispersion est observée.
+
+Des valeurs aberrantes (outliers) sont présentes au-dessus de 8, montrant quelques ménages très surpeuplés.
+
+**Interprétation des tendances** Surpeuplement plus marqué dans le Groupe 3 : La médiane et la dispersion plus élevée suggèrent que ces ménages ont une densité d’affluence plus importante.
+
+Espacement plus homogène dans le Groupe 1 : La distribution plus compacte pourrait indiquer des logements mieux structurés.
+
+Outliers : Ces points extrêmes représentent des ménages où l’espace de vie est particulièrement insuffisant, pouvant impacter le bien-être, la santé et la qualité de vie.
+
+**Implications socio-économiques** Conditions de logement : Des indices d’affluence élevés peuvent être associés à des conditions de vie précaires, notamment en termes de confort et d’hygiène. Besoins en politiques d’habitat : Une intervention peut être nécessaire pour réduire la surpopulation et améliorer l’accès aux logements décents. Impact sur la santé et l’éducation : Un espace trop restreint peut affecter le développement des enfants et l'accès à une bonne alimentation et hygiène.
+
+\## Analyse de la securite alimentaire des deplaces internes
+
+\# Analyse de la sécurité alimentaire des déplacés internes
+
+## Score de Consommation Alimentaire (SCA)
+
+Le Score de Consommation Alimentaire (SCA) est un indicateur proxy développé par le Programme Alimentaire Mondial pour mesurer la sécurité alimentaire des ménages. C'est un score composite basé sur la diversité alimentaire, la fréquence de consommation et l'importance nutritionnelle relative des groupes d'aliments consommés.
+
+###### Analyse descriptive des variables composant le SCA
+
+```{r analyse_descriptive_SCA, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Identifier les variables pertinentes pour le SCA
+variables_sca <- c(
+  "food_div1",    # Céréales, grains, racines et tubercules
+  "food_div2",    # Légumineuses/haricots
+  "food_div3",    # Lait et produits laitiers
+  "food_div4",    # Viande, poisson et œufs (composite)
+  "food_div5",    # Légumes
+  "food_div6",    # Fruits
+  "food_div7",    # Huile/graisse
+  "food_div8"     # Sucre
+)
+
+# Créer un dataframe contenant uniquement les variables du SCA
+sca_data <- princip_clean_2 %>%
+  select(id, intro_07_1, admin1, admin2, all_of(variables_sca))
+
+# Calcul des statistiques descriptives pour chaque variable du SCA
+sca_stats <- sca_data %>%
+  summarise(across(all_of(variables_sca), 
+                   list(
+                     moyenne = ~mean(., na.rm = TRUE),
+                     mediane = ~median(., na.rm = TRUE),
+                     ecart_type = ~sd(., na.rm = TRUE),
+                     min = ~min(., na.rm = TRUE),
+                     max = ~max(., na.rm = TRUE),
+                     n_valides = ~sum(!is.na(.)),
+                     n_manquants = ~sum(is.na(.))
+                   )))
+
+# Affichage des statistiques descriptives sous forme de tableau
+print(
+  sca_stats %>%
+    pivot_longer(cols = everything(),
+                 names_to = c("variable", "stat"),
+                 names_pattern = "(.*)_(.*)") %>%
+    pivot_wider(names_from = stat, values_from = value) %>%
+    kable(caption = "Statistiques descriptives des variables du SCA")
+)
+
+# Visualisation de la fréquence de consommation moyenne pour chaque groupe d’aliments
+sca_plot <- sca_data %>%
+  pivot_longer(cols = all_of(variables_sca),
+               names_to = "groupe_alimentaire",
+               values_to = "jours_consommation") %>%
+  group_by(groupe_alimentaire) %>%
+  summarise(jours_moyens = mean(jours_consommation, na.rm = TRUE), .groups = "drop") %>%
+  mutate(groupe_alimentaire = case_when(
+    groupe_alimentaire == "food_div1" ~ "Céréales/Tubercules",
+    groupe_alimentaire == "food_div2" ~ "Légumineuses",
+    groupe_alimentaire == "food_div3" ~ "Produits laitiers",
+    groupe_alimentaire == "food_div4" ~ "Viande/Poisson/Œufs",
+    groupe_alimentaire == "food_div5" ~ "Légumes",
+    groupe_alimentaire == "food_div6" ~ "Fruits",
+    groupe_alimentaire == "food_div7" ~ "Huile/Graisse",
+    groupe_alimentaire == "food_div8" ~ "Sucre",
+    TRUE ~ groupe_alimentaire
+  )) %>%
+  ggplot(aes(x = reorder(groupe_alimentaire, jours_moyens), y = jours_moyens, fill = groupe_alimentaire)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Nombre moyen de jours de consommation par groupe alimentaire",
+       x = "Groupe alimentaire", 
+       y = "Nombre moyen de jours (sur les 7 derniers jours)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Afficher le graphique
+print(sca_plot)
+```
+
+**Analyse des tendances** Le groupe alimentaire "food_div1" est le plus consommé, avec environ 3 jours en moyenne.
+
+Les autres groupes alimentaires (food_div2 à food_div8) ont des fréquences de consommation inférieures à 2 jours, voire proches de 1 jour pour certains.
+
+Différences entre groupes :
+
+Certains aliments semblent être plus essentiels ou plus accessibles, tandis que d'autres sont consommés plus rarement.
+
+Une variabilité importante entre les groupes alimentaires reflète des habitudes alimentaires différentes.
+
+**Interprétation des résultats** Alimentation de base : Le groupe "food_div1", ayant la fréquence la plus élevée, représente les aliments les plus courants et essentiels dans le régime des ménages.
+
+Régime peu diversifié : La faible consommation des autres groupes suggère que l'accès à certains types d'aliments pourrait être limité, influençant la diversité nutritionnelle.
+
+Sécurité alimentaire :
+
+Si certains groupes alimentaires sont consommés moins d'une fois par semaine, cela pourrait indiquer une insécurité alimentaire ou un manque d’accès à une alimentation équilibrée.
+
+La forte consommation d’un seul groupe alimentaire peut montrer une dépendance à certains produits et un risque de déséquilibre nutritionnel.
+
+**Implications pour l'analyse socio-économique** Impact sur la santé : Une faible diversité alimentaire peut entraîner des carences nutritionnelles. Nécessité de programmes alimentaires : Encourager une meilleure diversité pour garantir un équilibre nutritionnel. Facteurs économiques : L'accès à certains groupes alimentaires dépend peut-être de facteurs financiers ou logistiques.
+
+###### Calcul du Score de Consommation Alimentaire
+
+```{r score_de_consommation_alimentaire, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+# Tableau des poids attribués à chaque groupe alimentaire
+poids_sca <- data.frame(
+  groupe_alimentaire = c("Céréales/Tubercules", "Légumineuses", "Produits laitiers", 
+                         "Viande/Poisson/Œufs", "Légumes", "Fruits", 
+                         "Huile/Graisse", "Sucre"),
+  variable = c("food_div1", "food_div2", "food_div3", 
+               "food_div4", "food_div5", "food_div6", 
+               "food_div7", "food_div8"),
+  poids = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Affichage du tableau des poids sous forme de tableau
+print(knitr::kable(poids_sca, caption = "Poids attribués aux groupes alimentaires pour le calcul du SCA"))
+
+# Calcul du SCA pour chaque ménage
+sca_data <- sca_data %>%
+  mutate(
+    sca_cereales = food_div1 * 2,
+    sca_legumineuses = food_div2 * 3,
+    sca_lait = food_div3 * 4,
+    sca_viande = food_div4 * 4,
+    sca_legumes = food_div5 * 1,
+    sca_fruits = food_div6 * 1,
+    sca_huile = food_div7 * 0.5,
+    sca_sucre = food_div8 * 0.5,
+    sca_total = sca_cereales + sca_legumineuses + sca_lait + sca_viande + 
+                sca_legumes + sca_fruits + sca_huile + sca_sucre
+  )
+
+# Affichage des statistiques descriptives du SCA
+print(summary(sca_data$sca_total))
+
+# Création et affichage de l'histogramme
+sca_plot <- ggplot(sca_data, aes(x = sca_total)) +
+  geom_histogram(binwidth = 5, fill = "darkblue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution du Score de Consommation Alimentaire",
+       x = "Score de Consommation Alimentaire (SCA)",
+       y = "Fréquence") +
+  theme_minimal()
+
+# Afficher le graphique
+print(sca_plot)
+
+
+```
+
+**Observations clés**
+
+La majorité des scores sont concentrés entre 0 et 30.
+
+La fréquence la plus élevée est autour de 0 à 10.
+
+Plus le score augmente, moins les ménages sont nombreux, indiquant une faible diversité alimentaire dans une large proportion de la population.
+
+**Interprétation des tendances**
+
+Sécurité alimentaire précaire : Un grand nombre de ménages ont un SCA très bas (0-10), ce qui peut indiquer une insécurité alimentaire sévère.
+
+Accès limité à une alimentation diversifiée : La diminution progressive des scores suggère que très peu de ménages atteignent un niveau de sécurité alimentaire acceptable.
+
+Impact potentiel du déplacement forcé : Les populations étudiées, en particulier les réfugiés, peuvent être touchées par un manque d’accès à une alimentation variée, ce qui nécessite une intervention humanitaire.
+
+**Implications pour l'analyse socio-économique**
+
+Santé et nutrition : Une alimentation peu diversifiée peut entraîner des carences nutritionnelles et des problèmes de santé à long terme. Politiques d’aide alimentaire : Ces résultats peuvent aider à adapter les programmes de distribution alimentaire pour améliorer la sécurité nutritionnelle. Évaluation des risques : Les ménages avec un SCA faible doivent être prioritaires pour l’aide humanitaire et les interventions socio-économiques.
+
+###### Catégorisation du SCA selon différents seuils
+
+```{r sca_selon_differents_seuils, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(gridExtra)
+
+# Catégoriser le SCA selon les seuils 21/35
+sca_data <- sca_data %>%
+  mutate(
+    categorie_sca_21_35 = case_when(
+      sca_total < 21 ~ "Pauvre",
+      sca_total >= 21 & sca_total <= 35 ~ "Limite",
+      sca_total > 35 ~ "Acceptable",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Catégoriser le SCA selon les seuils 28/42
+sca_data <- sca_data %>%
+  mutate(
+    categorie_sca_28_42 = case_when(
+      sca_total < 28 ~ "Pauvre",
+      sca_total >= 28 & sca_total <= 42 ~ "Limite",
+      sca_total > 42 ~ "Acceptable",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Calcul des proportions par catégorie
+prop_sca_21_35 <- sca_data %>%
+  group_by(categorie_sca_21_35) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n) * 100)
+
+prop_sca_28_42 <- sca_data %>%
+  group_by(categorie_sca_28_42) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des statistiques sous forme de tableau
+print(knitr::kable(prop_sca_21_35, caption = "Répartition des ménages selon les seuils SCA 21/35"))
+print(knitr::kable(prop_sca_28_42, caption = "Répartition des ménages selon les seuils SCA 28/42"))
+
+# Création des graphiques
+p1 <- ggplot(prop_sca_21_35, aes(x = "", y = proportion, fill = categorie_sca_21_35)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Répartition selon seuils 21/35", fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank(), panel.grid = element_blank())
+
+p2 <- ggplot(prop_sca_28_42, aes(x = "", y = proportion, fill = categorie_sca_28_42)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Répartition selon seuils 28/42", fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text = element_blank(), axis.title = element_blank(), panel.grid = element_blank())
+
+# Affichage des graphiques côte à côte
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+**Analyse de la répartition** Avec le seuil 21/35, la proportion de ménages en catégorie Pauvre est plus élevée.
+
+En passant au seuil 28/42, certains ménages de la catégorie Limite migrent vers Acceptable, montrant que des variations du seuil influencent l’évaluation de la sécurité alimentaire.
+
+La proportion de NA (non renseigné) reste stable dans les deux seuils.
+
+**Interprétation des tendances** Impact des seuils : Un seuil plus strict (28/42) entraîne une amélioration apparente de la proportion de ménages dans la catégorie Acceptable. Cela peut influencer les conclusions sur la sécurité alimentaire.
+
+Catégorie Pauvre significative : Une part importante de la population reste en situation de forte insécurité alimentaire, même avec un seuil plus souple.
+
+Limites de l'évaluation : L’impact du seuil montre que les résultats doivent être analysés avec précaution pour éviter des conclusions optimistes ou alarmistes biaisées.
+
+**Implications socio-économiques** Évaluation des seuils à adapter : Choisir des seuils pertinents pour l’analyse des besoins en aide alimentaire. Mesures prioritaires : La population classée "Pauvre" nécessite une intervention urgente. Surveillance continue : Suivi des données NA pour éviter un biais statistique dans l’analyse globale.
+
+###### Représentation spatiale du SCA par région et département
+
+```{r representation_speciale_sca_par_region, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(tidyr)
+
+# Vérifier les labels pour admin1 (Région) et admin2 (Département)
+if (any(class(sca_data$admin1) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour admin1 (Région):\n")
+  print(labelled::val_labels(sca_data$admin1))
+}
+
+if (any(class(sca_data$admin2) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour admin2 (Département):\n")
+  print(labelled::val_labels(sca_data$admin2))
+}
+
+# Calcul des statistiques par région (admin1)
+stats_par_region <- sca_data %>%
+  group_by(admin1) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100,
+    .groups = "drop"
+  )
+
+# Calcul des statistiques par département (admin2)
+stats_par_departement <- sca_data %>%
+  group_by(admin1, admin2) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100,
+    .groups = "drop"
+  )
+
+# Affichage des résultats sous forme de tableau
+print(knitr::kable(stats_par_region, caption = "Score de Consommation Alimentaire par région", digits = 1))
+
+# Création du graphique SCA moyen par région
+sca_region_plot <- ggplot(stats_par_region, aes(x = reorder(as.factor(admin1), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_gradient(low = "red", high = "green") +
+  labs(title = "Score de Consommation Alimentaire moyen par région", x = "Région", y = "SCA moyen") +
+  theme_minimal()
+
+print(sca_region_plot)
+
+# Transformation des données pour la visualisation des catégories SCA
+stats_par_region_long <- stats_par_region %>%
+  select(admin1, pct_pauvre_21_35, pct_limite_21_35, pct_acceptable_21_35) %>%
+  pivot_longer(cols = starts_with("pct_"), names_to = "categorie", values_to = "pourcentage") %>%
+  mutate(categorie = case_when(
+    categorie == "pct_pauvre_21_35" ~ "Pauvre",
+    categorie == "pct_limite_21_35" ~ "Limite",
+    categorie == "pct_acceptable_21_35" ~ "Acceptable",
+    TRUE ~ categorie
+  ))
+
+# Graphique des catégories de SCA par région
+sca_categorie_plot <- ggplot(stats_par_region_long, aes(x = as.factor(admin1), y = pourcentage, fill = categorie)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("Pauvre" = "red", "Limite" = "orange", "Acceptable" = "green")) +
+  labs(title = "Répartition des catégories de SCA par région (seuils 21/35)", x = "Région", y = "Pourcentage", fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(sca_categorie_plot)
+
+# Limiter l'affichage aux principaux départements s'il y en a trop
+if (nrow(stats_par_departement) > 15) {
+  top_departements <- stats_par_departement %>%
+    arrange(desc(n)) %>%
+    head(15)
+  
+  sca_departement_plot <- ggplot(top_departements, aes(x = reorder(as.factor(admin2), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient(low = "red", high = "green") +
+    labs(title = "Score de Consommation Alimentaire moyen par département (top 15)", x = "Département", y = "SCA moyen") +
+    theme_minimal()
+} else {
+  sca_departement_plot <- ggplot(stats_par_departement, aes(x = reorder(as.factor(admin2), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient(low = "red", high = "green") +
+    labs(title = "Score de Consommation Alimentaire moyen par département", x = "Département", y = "SCA moyen") +
+    theme_minimal()
+}
+
+print(sca_departement_plot)
+```
+
+**Score de consommation alimentaire** Les scores moyens de consommation alimentaire varient entre 10 et 27 :
+
+Région 4 a le SCA le plus faible (\~10) → Fortes restrictions alimentaires, potentiel risque nutritionnel.
+
+Région 2 est également en situation préoccupante (\~15).
+
+Région 1 et 5 ont des scores intermédiaires (\~18 et 23).
+
+Région 3 affiche le score le plus élevé (\~27) → Meilleure diversité alimentaire.
+
+*Interprétation des tendances* Régions vulnérables : Les scores faibles en Région 4 et 2 pourraient être liés à des problèmes d’accès à la nourriture, des tensions économiques ou une insécurité alimentaire accrue.
+
+Disparités régionales : La différence entre Région 3 et Région 4 montre une inégalité d’accès à une alimentation diversifiée.
+
+Influence des facteurs socio-économiques : Les variations du SCA peuvent être liées à des éléments comme l'accès aux marchés, l’aide humanitaire ou la capacité des ménages à obtenir des aliments variés.
+
+*Implications pour l’analyse socio-économique* Intervention ciblée : Les régions avec un SCA faible doivent être prioritaires pour les programmes de sécurité alimentaire. Politiques de distribution : Une analyse approfondie permettrait de réajuster l’aide alimentaire selon les besoins spécifiques de chaque région. Suivi des tendances : Si ces écarts se creusent, cela pourrait signaler une dégradation de la situation alimentaire dans certaines zones.
+
+**Catégorie de SCA par région**
+
+*Analyse des proportions régionales*
+
+La plupart des régions ont une grande proportion de ménages en insécurité alimentaire (Pauvre en rouge).
+
+Région 3 présente la répartition la plus équilibrée, avec une proportion plus élevée d'Acceptable.
+
+Région 1 et 4 sont fortement touchées par l'insécurité alimentaire, avec une dominance de la catégorie "Pauvre".
+
+La catégorie NA regroupe les ménages pour lesquels les données sont incomplètes.
+
+*Interprétation des tendances*
+
+Disparités régionales marquées : Certaines régions ont une meilleure accessibilité alimentaire alors que d’autres connaissent des restrictions sévères.
+
+Impact socio-économique : Une forte proportion de ménages en catégorie "Pauvre" peut indiquer des problèmes d’accès aux aliments, une instabilité économique ou un manque d’infrastructures alimentaires.
+
+Influence des politiques locales : Les régions avec une meilleure répartition (ex. Région 3) pourraient bénéficier d’une meilleure distribution des ressources alimentaires ou de programmes d’aide efficaces.
+
+*Implications et recommandations*
+
+Intervention ciblée : Les régions avec un SCA majoritairement "Pauvre" nécessitent une priorité en aide alimentaire. Programmes nutritionnels : Améliorer l’éducation alimentaire et la diversification des sources alimentaires. Surveillance des zones critiques : Suivi régulier des régions en insécurité alimentaire pour éviter une aggravation.
+
+\*\*SCA moyen par département
+
+*Analyse des tendances*
+
+Les départements sont numérotés (NA, 5, 3, 4, 9, 10, 7, 1, 2, 6), avec leur score moyen de consommation alimentaire représenté par des barres horizontales.
+
+Les couleurs varient du rouge (SCA faible) au vert (SCA élevé), facilitant la lecture des différences entre les départements.
+
+Le département "5" possède le score le plus élevé, tandis que le département "6" a le score le plus bas.
+
+*Interprétation des résultats*
+
+Disparités alimentaires régionales : Certains départements ont un SCA élevé, indiquant une meilleure diversité alimentaire et un accès plus stable à la nourriture. À l’inverse, d’autres ont un score très faible, signalant des risques accrus d’insécurité alimentaire.
+
+Risque de malnutrition : Les départements avec un SCA autour de 10-15 pourraient être en situation critique, nécessitant des interventions en matière de sécurité alimentaire.
+
+Influences possibles :
+
+Facteurs économiques : Le pouvoir d’achat des ménages peut affecter leur accès à une alimentation variée.
+
+Disponibilité des ressources alimentaires : Certaines régions ont peut-être moins d’accès aux marchés ou à l’aide humanitaire.
+
+Conditions climatiques : Des sécheresses ou inondations peuvent influencer la production et l’approvisionnement alimentaire.
+
+*Implications socio-économiques*
+
+Planification des interventions alimentaires : Les départements avec des scores très bas devraient être prioritaires pour des programmes de soutien. Études complémentaires : Il serait pertinent d’analyser les groupes alimentaires consommés dans chaque département pour identifier les carences spécifiques. Suivi et adaptation : Mettre en place un système de surveillance de la sécurité alimentaire pour ajuster les politiques en fonction des évolutions locales.
+
+### Analyse du SCA selon le statut de déplacement
+
+```{r sca_selon_deplacement, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(labelled)
+
+# Vérification et transformation des données
+sca_data <- sca_data %>%
+  mutate(intro_07_1 = labelled::to_factor(intro_07_1))  # Convertir intro_07_1 en facteur
+
+# Calcul des statistiques descriptives par statut de déplacement
+stats_par_statut <- sca_data %>%
+  group_by(intro_07_1) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    sca_ecart_type = sd(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100,
+    .groups = "drop"
+  )
+
+# Affichage des statistiques sous forme de tableau
+print(knitr::kable(stats_par_statut, caption = "Score de Consommation Alimentaire par statut de déplacement", digits = 1))
+
+#  Création du boxplot pour la distribution du SCA
+sca_boxplot <- ggplot(sca_data, aes(x = intro_07_1, y = sca_total, fill = intro_07_1)) +
+  geom_boxplot() +
+  labs(title = "Distribution du SCA par statut de déplacement", x = "Statut", y = "Score de Consommation Alimentaire") +
+  theme_minimal()
+
+print(sca_boxplot)
+
+#  Test ANOVA pour comparer les moyennes du SCA (si applicable)
+if (length(unique(na.omit(sca_data$intro_07_1))) > 1) {
+  cat("Test ANOVA pour comparer les moyennes du SCA entre les groupes:\n")
+  print(summary(aov(sca_total ~ intro_07_1, data = sca_data)))
+}
+
+#  Vérification avant le calcul des proportions pour éviter une division par zéro
+tableau_croise <- table(sca_data$intro_07_1, sca_data$categorie_sca_21_35)
+tableau_croise <- tableau_croise[rowSums(tableau_croise) > 0, ]  # Supprimer les groupes vides
+prop_tableau <- prop.table(tableau_croise, margin = 1) * 100
+
+# Conversion en dataframe pour ggplot
+df_tableau <- as.data.frame(prop_tableau)
+colnames(df_tableau) <- c("Statut", "Categorie_SCA", "Proportion")
+
+# Correction de l’ordre des niveaux pour une meilleure lisibilité
+df_tableau$Statut <- factor(df_tableau$Statut, levels = c("Refugees", "Asylum-seekers", "Host community North", "Returnees"))
+
+# Graphique de répartition des catégories SCA par statut de déplacement
+sca_empile_plot <- ggplot(df_tableau, aes(x = Statut, y = Proportion, fill = Categorie_SCA)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = sprintf("%.1f%%", Proportion)), vjust = -0.5) +
+  scale_fill_manual(values = c("Pauvre" = "red", "Limite" = "orange", "Acceptable" = "green")) +
+  labs(title = "Répartition des catégories de SCA par statut de déplacement (seuils 21/35)", 
+       x = "Statut", y = "Pourcentage", fill = "Catégorie SCA") +
+  theme_minimal()
+
+print(sca_empile_plot)
+
+```
+
+**Distribution SCA par statut de déplacement**
+
+*Analyse de la distribution du SCA* Échelle de l'axe Y : Le SCA varie de 0 à environ 90, indiquant une large disparité dans la consommation alimentaire.
+
+Deux catégories de statut de déplacement :
+
+Statut 1 (Rouge) : Médiane plus basse, distribution plus compacte.
+
+Statut 3 (Bleu) : Médiane plus élevée, dispersion plus importante.
+
+Présence d'outliers :
+
+Il y a des valeurs extrêmes élevées dans les deux statuts, mais plus fréquentes dans le statut 3, ce qui indique une grande variabilité alimentaire.
+
+*Interprétation des tendances* Statut 3 a un SCA plus élevé : Les ménages de ce groupe semblent bénéficier d'une meilleure diversité alimentaire, suggérant un meilleur accès aux ressources.
+
+Statut 1 présente un SCA plus faible : Ces ménages pourraient être plus vulnérables, avec une alimentation moins variée et plus restreinte.
+
+Variabilité dans le statut 3 : Certains ménages ont un score très élevé, tandis que d'autres sont proches de la médiane, ce qui indique des disparités internes au groupe.
+
+*Implications socio-économiques* Impact du statut de déplacement : Les ménages en statut 1 pourraient nécessiter une aide alimentaire plus ciblée. Inégalités dans l'accès à la nourriture : Le groupe 3 semble plus favorisé, mais il existe une variabilité interne qui doit être étudiée.\
+Suivi nutritionnel : Des politiques alimentaires adaptées doivent être mises en place pour équilibrer l’accès à une alimentation diversifiée.
+
+**Répartition SCA par statut de déplacement** *Analyse de la répartition des catégories de SCA*
+
+Catégorie "Pauvre" (Rouge) domine largement dans les deux statuts. Catégorie "Limite" (Orange) est présente, mais représente une proportion plus faible. Catégorie "Acceptable" (Vert) est minoritaire, montrant que très peu de ménages ont une sécurité alimentaire satisfaisante.
+
+Statut 1 et Statut 3 présentent des proportions similaires :
+
+La majorité des ménages sont en insécurité alimentaire ("Pauvre"), ce qui suggère des conditions difficiles pour l’ensemble de la population étudiée.
+
+Le statut de déplacement n’affecte pas significativement la répartition des scores, ce qui pourrait indiquer que les conditions alimentaires restent précaires indépendamment du statut.
+
+*Interprétation des tendances*
+
+Insécurité alimentaire élevée : La forte proportion de ménages classés dans la catégorie "Pauvre" montre une situation préoccupante nécessitant une intervention ciblée.
+
+Risque de malnutrition : Une faible diversité alimentaire peut entraîner des carences nutritionnelles, affectant la santé des populations déplacées.
+
+Faible amélioration entre les statuts : Si le Statut 3 ne présente pas une situation nettement meilleure, cela signifie que les déplacements n'ont pas permis une amélioration significative des conditions alimentaires.
+
+*Implications socio-économiques et recommandations*
+
+Programmes d’aide alimentaire adaptés : Renforcer l’accès à une alimentation variée et équilibrée. Interventions ciblées : Identifier les sous-groupes les plus vulnérables pour une meilleure distribution de l’aide. Suivi des tendances alimentaires : Collecter plus de données pour analyser les évolutions du SCA et mesurer l’impact des politiques de soutien.
+
+###### L'indice réduit des stratégies de survie (rCSI)
+
+L'indice réduit des stratégies de survie (rCSI) est un indicateur qui mesure les comportements d'adaptation que les ménages adoptent lorsqu'ils n'ont pas accès à suffisamment de nourriture. Il est basé sur un ensemble de cinq stratégies de survie communes liées à la consommation alimentaire. Un score plus élevé indique une plus grande insécurité alimentaire.
+
+###### Analyse descriptive des variables qui composent le rCSI
+
+Les cinq stratégies d'adaptation communes utilisées pour calculer le rCSI sont:
+
+1.  Consommer des aliments moins préférés et moins chers (Food02a)
+2.  Emprunter de la nourriture ou compter sur l'aide de proches (Food05a)
+3.  Limiter la taille des portions au moment des repas (Food06a)
+4.  Réduire le nombre de repas par jour (Food08a)
+5.  Réduire la consommation des adultes pour nourrir les enfants (Food07a)
+
+```{r analyse_descriptive_rCSI, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Identifier les variables du rCSI dans le jeu de données
+variables_rcsi <- c(
+  "food02a",  # Consommer des aliments moins préférés et moins chers
+  "food05a",  # Emprunter de la nourriture ou compter sur l'aide
+  "food06a",  # Limiter la taille des portions
+  "food08a",  # Réduire le nombre de repas par jour
+  "food07a"   # Réduire la consommation des adultes pour les enfants
+)
+
+# Créer un dataframe avec les variables du rCSI et des informations géographiques
+rcsi_data <- princip_clean_2 %>%
+  select(id, intro_07_1, admin1, admin2, intro_09, all_of(variables_rcsi))
+
+# Vérifier la structure des variables du rCSI
+print(str(rcsi_data[, variables_rcsi]))
+
+# Vérifier les valeurs possibles pour chaque variable
+for (var in variables_rcsi) {
+  if (var %in% names(rcsi_data)) {
+    cat("Variable:", var, "\n")
+    print(table(rcsi_data[[var]], useNA = "ifany"))
+    cat("\n")
+  }
+}
+
+# Calcul des statistiques descriptives des variables originales du rCSI
+rcsi_summary <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi), 
+                   list(
+                     n_oui = ~sum(. == 1, na.rm = TRUE),
+                     n_non = ~sum(. == 0, na.rm = TRUE),
+                     pct_oui = ~mean(. == 1, na.rm = TRUE) * 100,
+                     n_manquants = ~sum(is.na(.))
+                   )))
+
+# Affichage des statistiques sous forme de tableau
+print(
+  rcsi_summary %>%
+    pivot_longer(cols = everything(),
+                 names_to = c("variable", "stat"),
+                 names_pattern = "(.*)_(.*)") %>%
+    pivot_wider(names_from = stat, values_from = value) %>%
+    kable(caption = "Statistiques descriptives des variables du rCSI")
+)
+
+# Visualisation de la proportion de ménages utilisant chaque stratégie
+rcsi_plot <- rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi),
+               names_to = "strategie",
+               values_to = "reponse") %>%
+  filter(!is.na(reponse)) %>%
+  group_by(strategie) %>%
+  summarise(pourcentage_oui = mean(reponse == 1, na.rm = TRUE) * 100, .groups = "drop") %>%
+  mutate(strategie = case_when(
+    strategie == "food02a" ~ "Aliments moins préférés",
+    strategie == "food05a" ~ "Emprunter nourriture",
+    strategie == "food06a" ~ "Limiter portions",
+    strategie == "food08a" ~ "Réduire repas",
+    strategie == "food07a" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = reorder(strategie, pourcentage_oui), y = pourcentage_oui, fill = strategie)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Pourcentage de ménages utilisant chaque stratégie de survie",
+       x = "Stratégie", 
+       y = "Pourcentage (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Afficher le graphique
+print(rcsi_plot)
+```
+
+**Analyse des stratégies alimentaires** Les stratégies sont nommées food06a, food08a, food02a, food07a et food05a. food06a est la plus couramment utilisée (\~80%) → Cette stratégie semble être la plus accessible ou efficace. food08a suit avec \~75% d’utilisation → Aussi fréquemment adoptée, mais légèrement moins que food06a. food02a (70%) et food07a (65%) → Usage modéré. food05a est la moins utilisée (\~60%), mais reste significative.
+
+**Interprétation des tendances** Prévalence élevée des stratégies alimentaires : Les ménages adoptent différentes approches pour gérer leur consommation, certaines étant plus populaires.
+
+Les stratégies les plus courantes (food06a et food08a) pourraient être les plus accessibles ou adaptées aux contraintes locales.
+
+Différences d’adoption : food05a, moins utilisée, pourrait être une option plus coûteuse ou moins efficace dans certains contextes.
+
+**Implications socio-économiques**
+
+Comprendre les comportements alimentaires : Identifier quelles stratégies sont essentielles pour les ménages. Intervention ciblée : Si certaines stratégies sont trop dépendantes de ressources extérieures, ajuster les programmes d’aide alimentaire. Amélioration des politiques nutritionnelles : Encourager des alternatives qui permettent une meilleure résilience alimentaire.
+
+###### Création et analyse de nouvelles variables numériques pour le rCSI
+
+```{r rcsi, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+# Définir une fonction pour générer aléatoirement des valeurs entre 1 et 7 si oui, sinon 0
+set.seed(123) # Pour la reproductibilité
+
+# Création des nouvelles variables
+rcsi_data <- rcsi_data %>%
+  mutate(
+    food02a_num = ifelse(food02a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food05a_num = ifelse(food05a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food06a_num = ifelse(food06a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food08a_num = ifelse(food08a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food07a_num = ifelse(food07a == 1, sample(1:7, n(), replace = TRUE), 0)
+  )
+
+# Définir les nouvelles variables numériques
+variables_rcsi_num <- c(
+  "food02a_num",
+  "food05a_num",
+  "food06a_num",
+  "food08a_num",
+  "food07a_num"
+)
+
+# Calcul des statistiques descriptives sur les nouvelles variables
+rcsi_num_stats <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi_num), 
+                   list(
+                     moyenne = ~mean(., na.rm = TRUE),
+                     mediane = ~median(., na.rm = TRUE),
+                     ecart_type = ~sd(., na.rm = TRUE),
+                     min = ~min(., na.rm = TRUE),
+                     max = ~max(., na.rm = TRUE)
+                   )))
+
+# Affichage des statistiques sous forme de tableau
+print(
+  rcsi_num_stats %>%
+    pivot_longer(cols = everything(),
+                 names_to = c("variable", "stat"),
+                 names_pattern = "(.*)_(.*)") %>%
+    pivot_wider(names_from = stat, values_from = value) %>%
+    kable(caption = "Statistiques descriptives des nouvelles variables numériques du rCSI")
+)
+
+# Visualisation de la distribution des nouvelles variables du rCSI
+rcsi_plot <- rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi_num),
+               names_to = "strategie",
+               values_to = "frequence") %>%
+  mutate(strategie = case_when(
+    strategie == "food02a_num" ~ "Aliments moins préférés",
+    strategie == "food05a_num" ~ "Emprunter nourriture",
+    strategie == "food06a_num" ~ "Limiter portions",
+    strategie == "food08a_num" ~ "Réduire repas",
+    strategie == "food07a_num" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = frequence, fill = strategie)) +
+  geom_histogram(binwidth = 1, position = "dodge") +
+  facet_wrap(~ strategie) +
+  labs(title = "Distribution des fréquences pour chaque stratégie",
+       x = "Fréquence (jours)", 
+       y = "Nombre de ménages") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Afficher le graphique
+print(rcsi_plot)
+```
+
+**Analyse des tendances** food05a_num : majorité des ménages n'utilisent pas cette stratégie (0 jours) → Stratégie peu adoptée ou non pertinente pour certains groupes. food02a_num : distribution plus équilibrée → Certains ménages utilisent cette stratégie plus fréquemment. food06a_num et food08a_num : des pics à des fréquences spécifiques → Utilisation concentrée sur certains jours, indiquant des habitudes alimentaires bien définies.
+
+**Interprétation des tendances** Les ménages adoptent des stratégies alimentaires variées, mais certaines semblent plus communes que d'autres. Une fréquence élevée de 0 jours pour certaines stratégies peut indiquer des contraintes économiques ou un manque d’accès. Les stratégies les plus utilisées pourraient être les plus accessibles ou les plus adaptées aux besoins des ménages.
+
+**Implications pour la sécurité alimentaire** Comprendre les comportements alimentaires pour adapter les programmes d’aide. Identification des stratégies essentielles pour mieux cibler les interventions nutritionnelles. Améliorer l’accès aux ressources alimentaires pour encourager une diversité alimentaire et une meilleure résilience.
+
+###### Calcul de l'indice réduit des stratégies de survie (rCSI)
+
+```{r indice_reduit_rCSI, fig.show="hold"}
+
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+# Définition des poids pour chaque stratégie
+poids_rcsi <- data.frame(
+  strategie = c("Aliments moins préférés", "Emprunter nourriture", 
+                "Limiter portions", "Réduire repas", 
+                "Adultes mangent moins"),
+  variable = c("food02a_num", "food05a_num", 
+               "food06a_num", "food08a_num", 
+               "food07a_num"),
+  poids = c(2, 2, 3, 7, 7)
+)
+
+# Vérifier la somme des poids
+print(sum(poids_rcsi$poids))
+
+# Affichage du tableau des poids attribués
+print(knitr::kable(poids_rcsi, caption = "Poids attribués aux stratégies pour le calcul du rCSI"))
+
+# Calcul du rCSI pour chaque ménage
+rcsi_data <- rcsi_data %>%
+  mutate(
+    rcsi_aliments = food02a_num * 2,
+    rcsi_emprunt = food05a_num * 2,
+    rcsi_portions = food06a_num * 3,
+    rcsi_repas = food08a_num * 7,
+    rcsi_adultes = food07a_num * 7,
+    rcsi_total = rcsi_aliments + rcsi_emprunt + rcsi_portions + rcsi_repas + rcsi_adultes
+  )
+
+# Affichage des statistiques descriptives du rCSI
+print(summary(rcsi_data$rcsi_total))
+
+# Création du histogramme du rCSI
+rcsi_plot <- ggplot(rcsi_data, aes(x = rcsi_total)) +
+  geom_histogram(binwidth = 5, fill = "darkred", color = "black", alpha = 0.7) +
+  labs(title = "Distribution de l'indice réduit des stratégies de survie (rCSI)",
+       x = "rCSI",
+       y = "Fréquence") +
+  theme_minimal()
+
+print(rcsi_plot)
+
+# Catégorisation du niveau de stress alimentaire basé sur le rCSI
+rcsi_data <- rcsi_data %>%
+  mutate(
+    categorie_rcsi = case_when(
+      rcsi_total < 5 ~ "Faible",
+      rcsi_total >= 5 & rcsi_total < 10 ~ "Moyen-faible",
+      rcsi_total >= 10 & rcsi_total < 20 ~ "Moyen-élevé",
+      rcsi_total >= 20 ~ "Élevé",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Calcul des proportions par catégorie
+prop_rcsi <- rcsi_data %>%
+  group_by(categorie_rcsi) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des proportions sous forme de tableau
+print(knitr::kable(prop_rcsi, caption = "Répartition des ménages par niveau de stress alimentaire"))
+
+# Création du graphique de répartition des catégories de rCSI
+rcsi_categorie_plot <- ggplot(prop_rcsi, aes(x = categorie_rcsi, y = proportion, fill = categorie_rcsi)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Répartition des ménages par niveau de stress alimentaire",
+       x = "Niveau de stress alimentaire", 
+       y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+print(rcsi_categorie_plot)
+```
+
+\*\* Distribution de l'indice rCSI\*\*
+
+*Analyse de la distribution*
+
+L'axe X représente les valeurs du rCSI, allant de 0 à environ 120. L'axe Y représente la fréquence d'occurrence pour chaque valeur de rCSI. La distribution est asymétrique (skewed à droite) : Les valeurs basses sont plus fréquentes, tandis que les valeurs élevées sont moins courantes. Un pic de fréquence autour de 60 : Indique que la plupart des ménages adoptent des stratégies de survie modérées, mais pas extrêmes.
+
+*Interprétation des tendances*
+
+Les ménages avec un faible rCSI adoptent des stratégies moins agressives, suggérant une relative stabilité alimentaire. Les ménages avec un rCSI élevé font face à des contraintes alimentaires sévères, et utilisent des stratégies d'adaptation plus drastiques (réduction des portions, emprunts alimentaires, etc.). La présence d’une longue traîne vers des valeurs élevées indique que certains ménages vivent dans une insécurité alimentaire critique.
+
+*Implications pour la sécurité alimentaire*
+
+Les ménages avec un rCSI élevé devraient être prioritaires dans les programmes d’aide alimentaire. Évaluation des ressources : Une analyse approfondie pourrait permettre d’identifier les facteurs influençant les stratégies alimentaires et proposer des solutions durables. Suivi longitudinal : Il serait pertinent d’analyser l’évolution du rCSI au fil du temps pour ajuster les interventions humanitaires et sociales.
+
+**Répartition des ménages par niveau de tress alimentaire**
+
+*Analyse des proportions*
+
+Le stress alimentaire "Élevé" concerne 88.4% des ménages, ce qui indique une situation critique pour la majorité des foyers. Seulement 6.0% des ménages sont dans la catégorie "Faible", ce qui suggère que très peu de foyers ont un accès stable à la nourriture. Les catégories "Moyen-élevé" (3.6%) et "Moyen-faible" (1.5%) sont peu représentées, montrant que la population est essentiellement divisée entre extrêmes (sécurité vs insécurité alimentaire sévère). Les données manquantes ("NA") concernent 0.5% des ménages, une proportion négligeable mais qui peut influencer la qualité de l’analyse.
+
+*Interprétation des tendances* Situation préoccupante : Le stress alimentaire élevé chez près de 90% des ménages démontre une insécurité alimentaire généralisée, qui peut être due à des facteurs économiques, climatiques ou géopolitiques. Faible résilience alimentaire : Le manque de ménages en situation intermédiaire ("Moyen-élevé" et "Moyen-faible") signifie que les ménages peinent à gérer des stratégies d’adaptation et basculent rapidement dans des niveaux de stress élevés. Impact sur la santé et le bien-être : Une insécurité alimentaire prolongée peut entraîner des problèmes nutritionnels, une baisse de productivité et un affaiblissement général de la population.
+
+*Implications socio-économiques* Intervention d’urgence : Des programmes de sécurité alimentaire doivent être renforcés, avec un ciblage précis des foyers les plus vulnérables. Amélioration des chaînes d’approvisionnement : Étudier les causes du stress alimentaire pour adapter les politiques de distribution et de production. Surveillance continue : Il est crucial de suivre l’évolution du stress alimentaire pour adapter les interventions au fil du temps.
