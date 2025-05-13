@@ -1,14 +1,15 @@
 ---
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
+  officedown::rdocx_document:
+    reference_docx: ../Documents/Modele_officedown.docx
+    fig_caption: true
+   
   
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, 
-                      cache = TRUE,
+                    #  cache = TRUE,
                       warning = FALSE, 
                       message = FALSE,
                       comment = NA)
@@ -347,7 +348,7 @@ La base principale a `r nrow(doublon_prin)` doublons et la base individu en a `r
 
 ## Vérification des identifiants (cohérence relationnelle)
 
-```{r}
+```{r results='hide'}
 # Vérifier unicité des ID ménages
 any(duplicated(base_principale$id))  # Doit être FALSE
 
@@ -524,6 +525,7 @@ tab_carac_flex
 Les chefs de ménage réfugiés et ceux de la communauté hôte du Nord ont un âge médian similaire (environ 41,6 ans). Cependant, on observe des différences significatives selon le sexe : les femmes représentent 46 % chez les réfugiés contre 37 % dans la communauté hôte (p < 0,001). Concernant le statut matrimonial, les réfugiés sont moins souvent mariés de façon monogame (63 % vs 72 %) ou polygame (14 % vs 19 %). En revanche, ils sont plus souvent séparés, divorcés, veufs ou jamais mariés que les membres de la communauté hôte. Ces différences sont statistiquement significatives.
 
 
+
 ##Crowding Index ou l’indice d’affluence
 
 L'indice d'affluence est le nombre de membres du menage divise par le nombre de pièces (à l'exclusion de la cuisine et des couloirs).
@@ -562,7 +564,8 @@ stat_taille_menage <- base_principale %>%
 
 # Créer une flextable avec un titre pour Word
 flextable(stat_taille_menage) %>%
-  set_caption("Statistiques descriptives de la taille du ménage") %>%
+  set_caption("Statistiques descriptives de la taille du ménage",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_desc")) %>%
   autofit()
 
 
@@ -591,7 +594,8 @@ stat_taille_menage <- base_principale %>%
 
 # Créer une flextable avec un titre pour Word
 flextable(stat_taille_menage) %>%
-  set_caption("Statistiques descriptives du nombre de pièce") %>%
+  set_caption("Statistiques descriptives du nombre de pièce",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_desc2")) %>%
   autofit()
 
 
@@ -614,7 +618,8 @@ base_ind_affluence <- base_ind_affluence %>%
 
 ```
 
-```{r}
+```{r fig.cap="Distribution de l'indice d'affluence (Crowding Index)"}
+
 #Visualiser la distribution avec un histogramme
 ggplot(base_ind_affluence, aes(x = crowding_index)) +
   geom_histogram(binwidth = 0.5, fill = "#9ACD32", color = "black", boundary = 0) +
@@ -678,7 +683,7 @@ ft_crowding <- flextable(proportions_crowding_clean) %>%
 
 ```
 
-```{r}
+```{r fig.cap="Proportion des ménages par catégorie d'indice d'affluence" }
 # Visualisation par catégorie
 ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
   geom_bar(stat = "identity") +
@@ -691,9 +696,10 @@ ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = 
 
 La majorité des ménages (58,9 %) appartiennent à la catégorie d’affluence élevée (≥ 3), suivie de 23,8 % dans la catégorie 2–3 et de 15,3 % dans la catégorie 1–2. Seuls 2 % des ménages ont une affluence inférieure à 1, indiquant que très peu de ménages sont faiblement peuplés.
 
+
 ### Comparaison entre réfugiés et communautés d'accueil
 
-```{r}
+```{r results='hide'}
 # Analyse comparative entre réfugiés et communautés d'accueil
 comp_par_groupe <- base_ind_affluence %>%
   group_by(intro_07_1,categorie_crowding) %>%
@@ -718,7 +724,7 @@ base_ind_affluence %>%
 
 #### Boite à moustache
 
-```{r}
+```{r fig.cap="Distribution de l'indice d'affluence par groupe de population"}
 
 
 # Boîte à moustaches pour comparer les distributions
@@ -733,11 +739,17 @@ ggplot(aes(x = factor(intro_07_1), y = crowding_index, fill = factor(intro_07_1)
 
 ```
 
+Le graphique montre qu'en moyenne, **les membres de la communauté hôte du Nord présentent un indice légèrement plus élevé que les réfugiés**. La médiane est aussi un peu plus haute chez la communauté hôte. La variabilité des scores est plus grande dans ce groupe, avec quelques valeurs extrêmes dans les deux groupes. Cela suggère que les conditions d’affluence sont globalement plus favorables chez la communauté hôte, mais restent hétérogènes dans les deux cas.
+
 # Analyse de la securite alimentaire des deplaces internes
 
 ## Score de consommation alimentaire (SCA): 10 points
 
 ### Analyse descriptives des variables qui compose le SCA
+
+
+<!---BLOCK_LANDSCAPE_START--->
+
 
 ```{r }
 
@@ -777,13 +789,18 @@ style_flextable(sca_table)%>%
   autofit() %>% 
   set_caption(
     caption = "Effectifs et pourcentages des groupes alimentaires selon le nombre de jours (0–7)",
-    autonum = run_autonum(seq_id = "tab", bkm = "tab_manquant") # Pour la numérotation automatique et le signet
+    autonum = run_autonum(seq_id = "tab",pre_label = "Tableau ", bkm = "tab_manquant") # Pour la numérotation automatique et le signet
   )
 
 
 ```
 
+
+<br>
+
 Les résultats montrent que la consommation alimentaire varie largement selon les groupes. Les céréales et tubercules (food_div1) sont les plus fréquemment consommés, avec 22,1 % des ménages n’en consommant pas du tout, et 22,6 % les consommant quotidiennement. En revanche, les légumineuses/noix (food_div2), les légumes (food_div5) et les fruits (food_div6) sont moins présents, avec des proportions élevées de ménages ne les consommant pas du tout (respectivement 62,1 %, 81,1 %, et 90,7 %). La consommation de viande/poisson/œufs (food_div4) et de produits laitiers (food_div3) reste également faible, bien que plus fréquente que celle des légumes et fruits. Enfin, les matières grasses (food_div7) et le sucre (food_div8) sont peu consommés au quotidien, avec de faibles proportions de ménages les intégrant régulièrement dans leur alimentation.
+
+<!---BLOCK_LANDSCAPE_STOP--->
 
 ### Calculer le score de consommation alimentaire
 
@@ -842,7 +859,8 @@ table_poids <- tibble(
 # Flextable avec légende
 flextable(table_poids) %>%
   autofit() %>%
-  set_caption("Poids attribués aux groupes alimentaires pour le calcul du Food Consumption Score (FCS)") %>% 
+  set_caption("Poids attribués aux groupes alimentaires pour le calcul du Food Consumption Score (FCS)",
+      autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_sca")) %>% 
  theme_zebra()
 
 
@@ -888,12 +906,15 @@ table_sca <- base_principale %>%
 # Créer la flextable
 flextable(table_sca) %>%
   autofit() %>%
-  set_caption("Aperçu des 10 premières observations du score de consommation alimentaire (SCA)") %>%
+  set_caption("Aperçu des 10 premières observations du score de consommation alimentaire (SCA)",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_sca2")) %>%
   theme_vanilla()
 
 ```
 
 Le tableau ci-dessus, resume les différents score SCA mais pour quelques individus de la base.
+
+
 
 
 ### Faites une répresentation spatiale (région et département) du SCA et de ses différentes catégorisations.
@@ -922,6 +943,7 @@ tmap::tm_shape(shp_adm1_sdn) +
 
 # Nettoyage des noms dans base_principale
 base_principale_carte <- base_principale %>%
+  to_factor() %>% 
   mutate(admin1 = admin1 %>%
            str_to_upper() %>%                          # Convertit tous les caractères en majuscules
            stri_trans_general("Latin-ASCII") %>%       # Supprime les accents (ex : É → E)
@@ -964,7 +986,10 @@ sca_region <- base_principale_carte %>%
   ) %>% 
   ungroup()
 
-sca_region
+#sca_region
+style_flextable(sca_region,
+                "Score moyen (SCA) de chaque région")
+
 ```
 
 ```{r}
@@ -976,7 +1001,7 @@ shp_adm1_sdn <- shp_adm1_sdn %>%
 
 ```
 
-```{r}
+```{r fig.cap="Carte du Score de Consommation Alimentaire (SCA) par région"}
 
 ggplot(data = shp_adm1_sdn) +
   geom_sf(aes(fill = SCA_moyen), color = "white") +
@@ -985,11 +1010,9 @@ ggplot(data = shp_adm1_sdn) +
   labs(title = "Carte du Score de Consommation Alimentaire (SCA) par région") +
   theme_minimal()
 
-
-
 ```
 
-```{r}
+```{r fig.cap="Carte des catégories du SCA par région"}
 
 ggplot(data = shp_adm1_sdn) +
   geom_sf(aes(fill = SCA_moyen_cat2), color = "black") +   # Remplissage par catégorie
@@ -1008,10 +1031,6 @@ ggplot(data = shp_adm1_sdn) +
 
 Cette carte révèle que parmi les régions couvertes par l’enquête, aucune n’affiche un score moyen ou élevé. L’ensemble des régions présentent uniquement des scores faibles, traduisant une situation globalement préoccupante.
 
-# 
 
 
-```{r}
 
-
-```
