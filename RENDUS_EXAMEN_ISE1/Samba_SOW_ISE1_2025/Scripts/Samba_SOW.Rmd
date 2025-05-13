@@ -1,0 +1,703 @@
+---
+title: ''
+output:
+  html_document:
+    toc_depth: '3'
+    df_print: paged
+  officedown::rdocx_document:
+    toc_depth: 3
+    number_sections: true
+    reference_docx: ../Documents/Modele_officedown.docx
+    keep_md: true
+  pdf_document:
+    toc_depth: '3'
+  word_document: null
+---
+
+<!---BLOCK_SECTIONBREAK--->
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA
+                      )
+```
+
+```{r package}
+#Installation et importation des packages
+packages <- c("dplyr","flextable","officer","officedown", "janitor", "tidyr", "ggplot2", "scales")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                   |
+|:-------------------------------------------------:|
+| ![](../images/img3.jpg){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                        |
+|:--------------------------------------:|
+| ![](../images/img2.jpg){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../images/img1.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4, include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "Samba SOW", "Élève Ingénieur Statisticien Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+\newpage
+
+# Introduction
+
+Ce projet vise à analyser les caractéristiques démographiques et socio-économiques des populations déplacées internes au Soudan en 2023, à travers une approche statistique rigoureuse. En exploitant les données de l'Enquête sur les déplacements forcés, nous étudions notamment la pyramide des âges, la composition des ménages, les conditions de sécurité alimentaire (via le Score de Consommation Alimentaire) et les stratégies de survie (à l'aide de l'indice rCSI). L'analyse combine des méthodes descriptives (tableaux croisés, représentations graphiques) et des tests statistiques pour comparer les réfugiés et les communautés d'accueil, tout en garantissant la qualité des données via un traitement minutieux des valeurs manquantes et incohérentes. Les résultats visent à éclairer les politiques d'aide humanitaire en identifiant les vulnérabilités spécifiques de ces populations.\*\*
+
+\#[\^1]: Mettre note de bas de page \#[\^2]: Deuxieme note
+
+\newpage
+
+**Importation des bases de données**
+
+```{r Import_data, echo=TRUE}
+data_ind <- haven::read_dta("../data/Base_Individus.dta")
+data_prin <- haven::read_dta("../data/Base_Principale.dta")
+```
+
+```{r}
+dim(data_prin)
+dim(data_ind)
+```
+
+L’étude repose sur deux bases de données principales : une base ménages (data_prin) comprenant 3058 observations et 1312 variables, et une base individuelle (data_ind) contenant 22092 individus décrits à travers 144 variables. Ces données proviennent d’une enquête sur les déplacements forcés au Sud-Soudan en 2023. La base principale semble regrouper les informations socioéconomiques et les caractéristiques des ménages, tandis que individu détaille les profils individuels au sein de chaque ménage.
+
+# Analyse de consistence des bases de données
+
+L’analyse de consistance des bases de données consistera à vérifier la cohérence, la qualité et l’intégrité des données avant leur exploitation. Elle inclut la détection des valeurs manquantes, des doublons, des erreurs de saisie, des incohérences logiques et des valeurs aberrantes. Dans cette étape, il sera utilisé des méthodes comme les statistiques descriptives, des vérifications de plages (ex. âge entre 0 et 120 ans) ou des croisements entre variables. Globalement, l’objectif sera de s’assurer que les données reflètent fidèlement la réalité et sont exploitables pour les analyses statistiques ultérieures.
+
+# 1. Nettoyage des noms de colonnes
+
+Le package janitor propose plusieurs fonctions pour nettoyer les noms de colonnes:
+
+```{r clean_names 1}
+
+# Affichage des premiers noms de colonnes
+names_avant <- names(data_prin)[1:1312]
+base_clean <- data_prin %>% clean_names()
+names_apres <- names(base_clean)[1:1312]
+
+# Création du tableau comparatif
+changes <- data.frame(
+  nom_avant = names_avant,
+  nom_apres = names_apres,
+  modifie = names_avant != names_apres
+)
+
+# Affichage des 10 premières colonnes modifiées
+colonnes_modifiees <- changes %>% filter(modifie == TRUE)
+print(head(colonnes_modifiees, 10))
+
+```
+
+Ce script automatise le nettoyage des noms de colonnes (via janitor::clean_names()) et compare les versions avant/après pour identifier les modifications. La fonction clean_names() suit des conventions de nommage cohérentes (minuscules, suppression des caractères spéciaux, remplacement des espaces par des underscores), ce qui facilite l'utilisation ultérieure des variables dans des analyses. Le tableau comparatif changes met en évidence les colonnes renommées, avec un exemple des 10 premières modifications.
+
+```{r clean_names, include=FALSE}
+# Affichage des premiers noms de colonnes
+names_avant <- names(data_ind)[1:1312]
+base_clean <- data_ind %>% clean_names()
+names_apres <- names(base_clean)[1:1312]
+
+# Création du tableau comparatif
+changes <- data.frame(
+  nom_avant = names_avant,
+  nom_apres = names_apres,
+  modifie = names_avant != names_apres
+)
+
+# Affichage des 10 premières colonnes modifiées
+colonnes_modifiees <- changes %>% filter(modifie == TRUE)
+print(head(colonnes_modifiees, 10))
+
+```
+
+**Contrôle des doublons**
+
+*Traitement des doublons*
+
+On utilise ici la fonction get_dupes() du package janitor pour identifier efficacement les doublons dans le jeu de données data_prin, en se basant sur la combinaison des variables ID (identifiant unique) et admin1.
+
+```{r dbl1}
+# Détection des doublons basés sur (num_men, regions)
+data_prin %>% 
+  janitor::get_dupes(ID, admin1)
+#colnames(data_prin)
+```
+
+On va identifier les doublons potentiels dans le jeu de données data_prin en regroupant les observations par ID et admin1 (zone administrative), puis en comptant le nombre de lignes identiques (nb_line). Il filtre et trie ensuite les groupes ayant plus d'une occurrence (nb_line \> 1), et retourne le nombre total de lignes dupliquées (nrow()).
+
+```{r}
+# Compter le nombre total de doublons (nombre de lignes en double par groupe)
+data_prin %>% 
+  group_by(ID, admin1) %>% 
+  mutate(nb_line = n()) %>%
+  arrange(desc(nb_line)) %>%
+  filter(nb_line > 1) %>%
+  nrow()
+
+```
+
+```{r}
+# Comptage du nombre de duplications par groupe
+data_prin %>% 
+  group_by(ID, admin1) %>% 
+  mutate(nb_line = n()) %>%
+  ungroup() %>%
+  count(nb_line)
+
+```
+
+```{r}
+# Suppression des doublons (on conserve une seule ligne par combinaison unique)
+data_prin <- data_prin %>% 
+  distinct(ID, admin1, .keep_all = TRUE)
+
+```
+
+Afin de garantir la qualité et la fiabilité des analyses statistiques, une vérification des doublons a été effectuée dans la base de données des ménages (data_prin). Pour ce faire, nous avons utilisé une clé composite formée des variables identifiant le ménage et sa localisation (par exemple ID et admin1) afin de repérer les lignes qui apparaissent plusieurs fois. L’analyse a révélé l’existence de duplications : certaines combinaisons ménage–région étaient présentes deux fois ou plus. Une vérification approfondie aurait été nécessaire pour distinguer les vrais doublons des doublons dits « administratifs » (même identifiant mais données différentes), mais dans le cadre de cette évaluation, nous avons supposé que les doublons relevaient d’erreurs de saisie ou d’extraction. Nous avons donc supprimé les doublons en conservant une seule observation par identifiant unique à l’aide de la fonction distinct() de dplyr. Cette opération permet de nettoyer la base tout en évitant des biais liés à la redondance des données.
+
+```{r}
+### ------------------------------------------
+### TRAITEMENT DES VALEURS MANQUANTES
+### ------------------------------------------
+
+# 1. Analyse des valeurs manquantes
+resume_na <- data_prin %>% 
+  summarise(across(everything(), ~sum(is.na(.)))) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  arrange(desc(V1)) %>% 
+  filter(V1 > 0) %>% 
+  rename(Nombre_NA = V1)
+
+#print(resume_na)
+```
+
+On effectue ici un diagnostic rapide des données manquantes dans le jeu de données data_prin en calculant, pour chaque variable, le nombre de NA. Les résultats sont présentés sous forme de tableau trié par ordre décroissant, ne conservant que les variables comportant au moins une valeur manquante. Cette étape cruciale de data cleaning permet d'identifier les variables problématiques nécessitant un traitement particulier (imputation, suppression...) avant analyse. La sortie, renommée en Nombre_NA, offre une vision claire et hiérarchisée des lacunes dans les données.
+
+```{r}
+# Exemple avec trois variables
+vars <- c("HH_02", "HH_08")
+
+# Nombre de NA par variable
+colSums(is.na(data_ind[, vars]))
+
+# Ou pourcentage de NA
+sapply(data_ind[, vars], function(x) mean(is.na(x)) * 100)
+
+```
+
+```{r}
+# 2. Nettoyage des données
+data_prin_clean <- data_prin %>%
+  # Supprimer colonnes vides
+  remove_empty("cols") %>% 
+  # Imputation des NA
+  mutate(across(where(is.numeric), 
+                ~ifelse(is.na(.), median(., na.rm = TRUE), .)))
+```
+
+```{r}
+library(dplyr)
+library(haven) # Nécessaire pour as_factor()
+
+# Méthode robuste de conversion
+data_ind_filtered <- data_ind %>%
+  mutate(
+    HH_02 = case_when(
+      # Première méthode : conversion via haven
+      as.character(as_factor(HH_02)) == "1" ~ "Male",
+      as.character(as_factor(HH_02)) == "2" ~ "Female",
+      
+      # Deuxième méthode alternative
+      as.numeric(as.character(HH_02)) == 1 ~ "Male",
+      as.numeric(as.character(HH_02)) == 2 ~ "Female",
+      
+      TRUE ~ NA_character_
+    ) %>% factor(levels = c("Male", "Female"))
+  ) %>%
+  filter(!is.na(HH_02))
+```
+
+Cette visualisation présente la distribution par âge et sexe de la population sous forme de pyramide, après un nettoyage des données (suppression des NA) et un découpage en tranches d'âge de 5 ans. Les hommes (en vert) sont représentés à gauche (valeurs négatives) et les femmes (en rose) à droite, permettant une comparaison immédiate des structures démographiques.
+
+```{r PYRAMIDE}
+### ------------------------------------------
+### PYRAMIDE DES ÂGES
+### ------------------------------------------
+
+# Vérifier les valeurs manquantes et supprimer les NAs
+data_ind <- data_ind %>% filter(!is.na(ageYears))
+
+# Créer des groupes d'âge
+data_ind$group_age <- cut(data_ind$ageYears, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Comptage du nombre d'individus par groupe d'âge et sexe
+# Filtrer pour ne garder que les entrées valides (pas de NA)
+age_sex_distribution <- data_ind %>%
+  filter(!is.na(HH_02) & HH_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(group_age, HH_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      HH_02 == 1 ~ "Male",
+      HH_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+# Créer la pyramide des âges
+ggplot(age_sex_distribution, aes(x = group_age, y = count, fill = gender)) +
+  geom_col(width = 0.7) +  # Utilisation de geom_col() au lieu de geom_bar(stat = "identity")
+  coord_flip() +
+  scale_fill_manual(
+    values = c("Male" = "#2ecc71", "Female" = "#e84393"),  # Couleurs plus contrastées
+    labels = c("Male" = "Hommes", "Female" = "Femmes"),  # Libellés en français
+    name = "Sexe"  # Titre de la légende en français
+  ) +
+  scale_y_continuous(
+    labels = function(x) format(abs(x), big.mark = " "),  # Séparateur de milliers
+    name = "Nombre de cas"  # Label en français
+  ) +
+  labs(
+    title = "Pyramide des âges",
+    x = "Tranche d'âge (années)"  # Label plus précis
+  ) +
+  geom_hline(yintercept = 0, color = "black", linetype = "solid", linewidth = 0.5) +  # Ligne verticale devenue horizontale après coord_flip()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),  # Titre centré et en gras
+    axis.title = element_text(size = 12),  # Taille des labels d'axes
+    legend.position = "bottom"  # Position améliorée de la légende
+  )
+```
+
+##2) Caracteristiques du chef de menage
+
+Ce code transforme les données individuelles en un tableau structuré (tableau_data) en sélectionnant six variables clés (statut, âge, sexe, statut marital, lien avec le chef de ménage et éducation) et en les renommant en français pour plus de clarté.
+
+```{r TABLEAU}
+### ------------------------------------------
+### TABLEAU DES CARACTÉRISTIQUES
+### ------------------------------------------
+
+# 1. Préparation des données
+tableau_data <- data_ind %>%
+  select(
+    statut = Intro_07_1,
+    age = ageYears,
+    sexe = HH_02,
+    statut_marital = HH_08,
+    lien_chef = HH_03,
+    education = HH_Educ18
+  ) %>%
+  mutate(
+    statut = factor(statut, 
+                   levels = c("Refugee", "Host community"),
+                   labels = c("Réfugiés", "Communauté d'accueil")),
+    across(c(age, education), as.numeric),
+    sexe = factor(sexe, levels = c("Male", "Female"))
+  )
+```
+
+On va préparer un tableau statistique comparatif (tableau_final) des caractéristiques sociodémographiques (âge, sexe, statut marital) entre réfugiés et communauté d'accueil. Il standardise les variables (facteurs, libellés), applique des tests statistiques appropriés, et formate les résultats avec une présentation claire (moyennes/%, p-values). Les en-têtes et notes de bas de page sont ajustés pour guider l'interprétation, mettant en évidence les différences significatives entre les groupes.
+
+```{r tab}
+# Préparation des données
+tableau_final <- data_ind %>%
+  select(
+    statut = Intro_07_1,  # Variable de groupe (Refugee/Host community)
+    age = ageYears,       # Âge en années
+    sexe = HH_02,         # Sexe (Male/Female)
+    statut_marital = HH_08 # Statut marital
+  ) %>%
+  mutate(
+    # Standardisation des variables
+    statut = factor(statut, 
+                   levels = c("Refugee", "Host community"),
+                   labels = c("Refugees", "Host community North")),
+    sexe = factor(sexe, levels = c("Male", "Female")),
+    statut_marital = factor(statut_marital,
+                           levels = c("monogamous/married", "polygamous/married",
+                                      "non-formal union", "separated",
+                                      "divorced", "widow or widower",
+                                      "never married"))
+  ) %>%
+  # Création du tableau
+  tbl_summary(
+    by = statut,
+    statistic = list(
+      all_continuous() ~ "{mean}({min},{max})", # Format spécifique demandé
+      all_categorical() ~ "{p}%"
+    ),
+    digits = list(
+      all_continuous() ~ 1,
+      all_categorical() ~ 1
+    ),
+    label = list(
+      age ~ "ageYears",
+      sexe ~ "Sex",
+      statut_marital ~ "What is [your/name's] present marital status?"
+    ),
+    missing = "no"
+  ) %>%
+  add_p(
+    test = list(
+      all_continuous() ~ "t.test",
+      all_categorical() ~ "chisq.test"
+    ),
+    pvalue_fun = ~style_pvalue(.x, digits = 3)
+  ) %>%
+  modify_header(
+    label ~ "**Caracteristiques du chef de menage**",
+    stat_1 ~ "**{level}**, N = {n}",
+    stat_2 ~ "**{level}**, N = {n}",
+    p.value ~ "**p-value**"
+  ) %>%
+  modify_footnote(
+    all_stat_cols() ~ "Mean(Minimum,Maximum); %",
+    p.value ~ "Wilcoxon rank sum test; Pearson's Chi-squared test"
+  ) %>%
+  bold_labels() %>%
+  modify_spanning_header(all_stat_cols() ~ "**Statut de résidence**")
+
+# Affichage du tableau
+tableau_final
+```
+
+# 3) Crowding Index ou l’indice d’affluence
+
+L'indice d'affluence est le nombre de membres du menage divise par le nombre de pièces (à l'exclusion de la cuisine et des couloirs).
+
+```{r nb_ind}
+# Nombre d'individus par ménage
+nb_ind_par_menage <- data_ind %>%
+  group_by(ID) %>%
+  summarise(nb_individus = n())
+nb_ind_par_menage
+```
+
+b)  Statistiques descriptives sur cette variable
+
+```{r stat}
+
+summary(nb_ind_par_menage$nb_individus)
+
+```
+
+Cette visualisation permet d'identifier rapidement les tailles de ménage les plus courantes, la dispersion globale, et d'éventuelles particularités dans la distribution (comme des valeurs extrêmes ou des modes multiples).
+
+```{r}
+hist(nb_ind_par_menage$nb_individus, breaks = 20, main = "Distribution du nombre d'individus par ménage", xlab = "Nombre d'individus")
+
+```
+
+c)  Statistiques descriptives sur le nombre de pièces
+
+```{r}
+summary(data_prin$HH14)
+
+```
+
+```{r}
+hist(data_prin$HH14, breaks = 20, main = "Distribution du nombre de pieces par ménage", xlab = "Nombre de pieces")
+
+```
+
+d)  Calculer le Crowding Index
+
+```{r indice}
+# Fusion avec la base ménage
+data_prin <- data_prin %>%
+  left_join(nb_ind_par_menage, by = "ID")
+
+# Filtrer les lignes avec au moins 1 pièce (évite la division par 0)
+data_prin <- data_prin %>%
+  filter(!is.na(data_prin$HH14) & data_prin$HH14 > 0)
+
+# Calcul de l’indice d’affluence
+data_prin <- data_prin %>%
+  mutate(crowding_index = data_prin$nb_individus / data_prin$HH14)
+
+```
+
+```{r verif}
+summary(data_prin$crowding_index)
+```
+
+e)  Catégoriser l’indice d’affluence et calculer les proportions
+
+Nous allons catégoriser l’indice d’affluence en quatre groupes : inférieur à 1, entre 1 et 2, entre 2 et 3, et supérieur ou égal à 3.
+
+```{r catégorie}
+# Création de la variable catégorielle
+data_prin <- data_prin %>%
+  mutate(crowding_cat = case_when(
+    crowding_index < 1 ~ "<1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - <2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - <3",
+    crowding_index >= 3 ~ ">=3"
+  ))
+
+# Calcul des proportions globales
+prop.table(table(data_prin$crowding_cat)) * 100
+
+```
+
+f)  Proportions selon le statut : réfugié vs hôte
+
+Ici on analyse la répartition des ménages selon leur niveau de surpeuplement (crowding_cat) pour chaque type de ménage (HH08), en calculant à la fois les effectifs absolus (n) et les proportions relatives (prop) au sein de chaque catégorie HH08. Les proportions sont standardisées (en pourcentage arrondi à 0,1) pour permettre des comparaisons entre les différents types de ménage, tout en conservant l'information sur les effectifs bruts. Le résultat final, trié par type de ménage puis par catégorie de surpeuplement, permet d'identifier d'éventuelles disparités dans les conditions de logement selon les caractéristiques des ménages, offrant ainsi une vision claire des inégalités résidentielles entre les différents groupes.
+
+```{r proportions}
+# Calcul du nombre et de la proportion par statut et catégorie
+data_prin %>%
+  group_by(HH08, crowding_cat) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(HH08) %>%
+  mutate(prop = round(100 * n / sum(n), 1)) %>%
+  arrange(HH08, crowding_cat)
+
+```
+
+# III. Analyse de la securite alimentaire des deplaces internes
+
+*4) Score de consommation alimentaire (SCA)*
+
+*5) L’indice réduit des stratégies de survie (rCSI)*
+
+L'indice réduit des stratégies de survie, basé sur la consommation, est utilisé pour évaluer le niveau de stress d'un ménage dû à une pénurie alimentaire. Il mesure les stratégies comportementales que les gens appliquent lorsqu'ils n'ont pas accès à suffisamment de nourriture ou lorsqu'ils prévoient une diminution de la sécurité alimentaire.
+
+a)  Faites une analyse descriptive des variables qui composent le rCSI
+
+Ce tableau résume les cinq variables alimentaires (Food02a à Food08a) utilisées pour calculer l'indice rCSI, présentant pour chacune les effectifs (n) et pourcentages correspondants, tout en indiquant les valeurs manquantes le cas échéant. La mise en gras des libellés améliore la lisibilité de ce panorama initial qui permet de vérifier la distribution des composantes du score avant agrégation, d'identifier d'éventuelles anomalies dans les données, et d'évaluer leur contribution relative à la mesure globale de l'insécurité alimentaire.
+
+```{r rC}
+# Tableau des 5 variables rCSI d'origine
+data_prin %>%
+  select(Food02a, Food05a, Food06a, Food07a, Food08a) %>%
+  tbl_summary(
+    missing = "ifany",  # Affiche les NA si présents
+    statistic = list(all_categorical() ~ "{n} ({p}%)")
+  ) %>%
+  bold_labels()
+
+```
+
+On s’interesse maintenant aux valeurs numeriques comprisent entre 0 et 7. Pour chacune des variables qui composent le rCSI, creez des nouvelles variables pour chacune des variables du rCSI selon les conditions suivantes: Si la modalite de la variable est yes generez aleatoirement une valeur comprise entre 1 et 7 attribue a la variable, dans le cas contraire la nouvelle variable prend 0.
+
+```{r}
+set.seed(123)  # Pour des résultats reproductibles
+
+data_prin <- data_prin %>%
+  mutate(
+    freq_food02a = ifelse(Food02a == 1, sample(1:7, n(), replace = TRUE), 0),
+    freq_food05a = ifelse(Food05a == 1, sample(1:7, n(), replace = TRUE), 0),
+    freq_food06a = ifelse(Food06a == 1, sample(1:7, n(), replace = TRUE), 0),
+    freq_food07a = ifelse(Food07a == 1, sample(1:7, n(), replace = TRUE), 0),
+    freq_food08a = ifelse(Food08a == 1, sample(1:7, n(), replace = TRUE), 0)
+  )
+
+```
+
+## b) Statistiques descriptives sur les nouvelles variables numériques
+
+Ce tableau présente la répartition sur 7 jours de différentes habitudes alimentaires (freq_food02a à freq_food08a) pour 3 052 individus. Les chiffres indiquent le pourcentage de personnes consommant un aliment donné pendant 0 à 7 jours par semaine. Par exemple, freq_food05a montre que 40% des individus ne consomment jamais cet aliment (0 jour), tandis que seulement 8,5% le consomment 1 jour ou 5 jours par semaine, suggérant une consommation occasionnelle ou rare. À l’inverse, freq_food08a affiche une répartition plus uniforme (11–12% par jour), indiquant une consommation régulière tout au long de la semaine. Ces résultats pourraient refléter des différences culturelles, des restrictions alimentaires ou des préférences individuelles, mais une analyse plus poussée serait nécessaire pour identifier les facteurs explicatifs.
+
+```{r}
+library(gtsummary)
+
+data_prin %>%
+  select(freq_food02a, freq_food05a, freq_food06a, freq_food07a, freq_food08a) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ± {sd}"),
+    missing = "no"
+  ) %>%
+  bold_labels()
+
+```
+
+c)  Cacul de l indice
+
+Pour évaluer l'insécurité alimentaire des ménages, nous calculons ici l'indice rCSI (reduced Coping Strategies Index), un indicateur agrégé reflétant les stratégies d'adaptation face au manque de nourriture. Cet indice est obtenu en pondérant les fréquences hebdomadaires de différentes pratiques alimentaires (freq_food02a à freq_food08a), selon leur gravité perçue.
+
+```{r}
+data_prin <- data_prin %>%
+  mutate(rCSI = freq_food02a * 1 +
+                freq_food05a * 1 +
+                freq_food06a * 2 +
+                freq_food07a * 1 +
+                freq_food08a * 3)
+```
+
+Vérifions satistiquement les valeurs du score
+
+L'analyse statistique du score rCSI combine un résumé numérique (summary) et une visualisation par histogramme pour explorer sa distribution. Les statistiques descriptives (moyenne, médiane, étendue) révèlent la tendance centrale et la dispersion des scores, tandis que l'histogramme (30 classes, couleur skyblue) met en lumière la forme de la distribution : une asymétrie à droite suggérerait que la majorité des ménages ont des scores bas (insécurité modérée), avec quelques cas extrêmes (queue droite) potentiellement critiques. Cette approche permet d'identifier rapidement les profils de vulnérabilité alimentaire et de cibler les ménages à risque pour des analyses plus poussées.
+
+```{r}
+summary(data_prin$rCSI)
+
+hist(data_prin$rCSI, breaks = 30, main = "Distribution du score rCSI", xlab = "rCSI", col = "skyblue")
+
+```
+
+Le score rCSI a été calculé en appliquant des pondérations spécifiques aux fréquences d’utilisation des stratégies de survie alimentaire, selon leur impact nutritionnel. La formule utilisée prend en compte cinq comportements adoptés par les ménages en situation de stress alimentaire. Le score final est une somme pondérée allant de 0 à un maximum théorique de 63. Cette mesure permet d’évaluer la vulnérabilité des ménages face à l’insécurité alimentaire.
+
+```{r}
+data_prin <- data_prin %>%
+  mutate(rCSI = freq_food02a * 3 +
+                freq_food05a * 3 +
+                freq_food06a * 6 +
+                freq_food07a * 3 +
+                freq_food08a * 6)
+
+```
+
+Le tableau ci-dessous présente les pondérations appliquées à chaque variable pour le calcul du score rCSI. Les poids ont été ajustés afin que leur somme atteigne 21, conformément à l’exigence de l’indicateur. Ces pondérations reflètent l'impact relatif des différentes stratégies de survie sur la sécurité alimentaire des ménages.
+
+## e) Faites une representation spatiale selon le milieu de residence du rCSI
+
+Cette analyse explore les disparités géographiques de l'insécurité alimentaire en regroupant les données par milieu de résidence (Intro_08). Le calcul des statistiques agrégées (moyenne, médiane, écart-type) du score rCSI permet de comparer la sévérité et la variabilité de l'insécurité alimentaire entre zones urbaines, rurales et périurbaines.
+
+```{r}
+data_prin %>%
+  group_by(Intro_08) %>%
+  summarise(moyenne_rCSI = mean(rCSI, na.rm = TRUE),
+            mediane_rCSI = median(rCSI, na.rm = TRUE),
+            sd_rCSI = sd(rCSI, na.rm = TRUE),
+            n = n())
+
+```
+
+L' analyse visuelle suivante utilise un diagramme en boîte (boxplot) pour comparer la distribution du score rCSI (insécurité alimentaire) selon le milieu de résidence (Intro_08). Le graphique, réalisé avec ggplot2, montre la médiane, les quartiles et les valeurs extrêmes pour chaque catégorie (urbain, rural, périurbain), tout en supprimant la légende pour plus de clarté (theme(legend.position = "none")). Cette représentation permet d'identifier rapidement les disparités géographiques
+
+```{r}
+library(ggplot2)
+
+ggplot(data_prin, aes(x = Intro_08, y = rCSI, fill = Intro_08)) +
+  geom_boxplot() +
+  labs(title = "Score rCSI selon le milieu de résidence",
+       x = "Milieu de résidence",
+       y = "Score rCSI") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
