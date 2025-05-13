@@ -1,11 +1,16 @@
 ---
-title: ""
+title: ''
 output:
   word_document:
-    toc_depth: 3        # Profondeur (titres de niveau 1 et 2)
-    reference_docx: ../docs/word_template.docx #modele de référence
+    toc_depth: 3
+    reference_docx: ../docs/word_template.docx
     keep_md: true
-    #pandoc_args: ["--output=../Sorties/Maquette_evaluation_R_word.docx"] #définir le lieu de sortie
+  html_document:
+    toc_depth: '3'
+    df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -17,10 +22,6 @@ knitr::opts_chunk$set(
   comment = NA
 )
 ```
-
-
-
-
 
 ```{r page_garde_1}
 flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% # Créer un tableau flextable
@@ -36,10 +37,9 @@ flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% # Créer un tableau
   set_table_properties(layout = "autofit", width = 1) # Ajuste la largeur des colonnes automatiquements
 ```
 
-|                                                     |
-|:---------------------------------------------------:|
-| ![](../docs/Logo SEN.png){width="3cm" height="3cm"} |
-
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../docs/Logo%20SEN.png){width="3cm" height="3cm"} |
 
 ```{r page_garde_2}
 flextable(data.frame(Contenu = c(
@@ -60,8 +60,8 @@ flextable(data.frame(Contenu = c(
   set_table_properties(layout = "autofit", width = 1)
 ```
 
-|                                          |
-|:----------------------------------------:|
+|                                           |
+|:-----------------------------------------:|
 | ![](../docs/Logo-ANSD.png){width="3.5cm"} |
 
 ```{r page_garde_3}
@@ -80,8 +80,8 @@ flextable(data.frame(Contenu = c(
   set_table_properties(layout = "autofit", width = 1)
 ```
 
-|                                                       |
-|:-----------------------------------------------------:|
+|                                                               |
+|:-------------------------------------------------------------:|
 | ![](../docs/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
 
 ##### Projet statistique sur R : Evaluation
@@ -100,6 +100,7 @@ flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
 ```
 
 $$
+
 $$
 
 ```{r page_garde_5}
@@ -124,9 +125,7 @@ flextable(donnees) %>%
 |:------------------------------:|
 | **Année académique 2024-2025** |
 
-
 \newpage
-
 
 ###### Sommaire
 
@@ -153,13 +152,43 @@ N'est pas généré automatiquement donc le faire directement avec word.
 \newpage
 
 ###### Introduction
-Le Sud-Soudan, plus jeune nation du monde ayant accédé à l'indépendance en 2011, demeure confronté à une crise humanitaire parmi les plus graves à l'échelle mondiale. L'année 2023 marque une période particulièrement critique dans l'histoire des déplacements forcés de population dans ce pays, où les dynamiques complexes de violence, d'instabilité politique, de catastrophes naturelles et d'insécurité alimentaire continuent d'engendrer des mouvements massifs de populations.\
-Cette analyse se propose d'examiner en profondeur les données recueillies lors de l'Enquête sur les déplacements forcés au Sud-Soudan en 2023, afin de dresser un portrait précis de cette crise humanitaire. Notre étude vise à comprendre les causes profondes, l'ampleur et les caractéristiques des déplacements, ainsi que leurs conséquences sur les populations affectées.
-Le contexte sud-soudanais reste marqué par les séquelles d'une guerre civile dévastatrice (2013-2018) et par des épisodes récurrents de violence intercommunautaire. Ces facteurs, combinés à des inondations catastrophiques, à une sécheresse persistante dans certaines régions et à une inflation galopante, ont créé un environnement propice aux déplacements forcés à grande échelle. En 2023, cette situation s'est encore détériorée avec l'éclatement de nouveaux conflits dans certaines régions et l'aggravation des conditions climatiques extrêmes.\
-Notre analyse se fondera sur des données quantitatives et qualitatives collectées auprès des populations déplacées, des communautés d'accueil et des acteurs humanitaires intervenant dans les différents États du Sud-Soudan. Elle explorera les tendances géographiques des déplacements, les profils démographiques des personnes déplacées, les besoins prioritaires identifiés et les mécanismes d'adaptation développés par ces populations vulnérables.\
-À travers cette étude, nous espérons contribuer à une meilleure compréhension de la situation actuelle, afin d'informer les décisions politiques et les interventions humanitaires visant à protéger et assister les personnes déplacées au Sud-Soudan. L'analyse des données de 2023 révélera également l'évolution de cette crise par rapport aux années précédentes, permettant ainsi d'identifier les tendances émergentes et les défis à venir dans la gestion des déplacements forcés dans ce pays.
 
-
+Le Sud-Soudan, plus jeune nation du monde ayant accédé à l'indépendance
+en 2011, demeure confronté à une crise humanitaire parmi les plus graves
+à l'échelle mondiale. L'année 2023 marque une période particulièrement
+critique dans l'histoire des déplacements forcés de population dans ce
+pays, où les dynamiques complexes de violence, d'instabilité politique,
+de catastrophes naturelles et d'insécurité alimentaire continuent
+d'engendrer des mouvements massifs de populations.\
+Cette analyse se propose d'examiner en profondeur les données
+recueillies lors de l'Enquête sur les déplacements forcés au Sud-Soudan
+en 2023, afin de dresser un portrait précis de cette crise humanitaire.
+Notre étude vise à comprendre les causes profondes, l'ampleur et les
+caractéristiques des déplacements, ainsi que leurs conséquences sur les
+populations affectées. Le contexte sud-soudanais reste marqué par les
+séquelles d'une guerre civile dévastatrice (2013-2018) et par des
+épisodes récurrents de violence intercommunautaire. Ces facteurs,
+combinés à des inondations catastrophiques, à une sécheresse persistante
+dans certaines régions et à une inflation galopante, ont créé un
+environnement propice aux déplacements forcés à grande échelle. En 2023,
+cette situation s'est encore détériorée avec l'éclatement de nouveaux
+conflits dans certaines régions et l'aggravation des conditions
+climatiques extrêmes.\
+Notre analyse se fondera sur des données quantitatives et qualitatives
+collectées auprès des populations déplacées, des communautés d'accueil
+et des acteurs humanitaires intervenant dans les différents États du
+Sud-Soudan. Elle explorera les tendances géographiques des déplacements,
+les profils démographiques des personnes déplacées, les besoins
+prioritaires identifiés et les mécanismes d'adaptation développés par
+ces populations vulnérables.\
+À travers cette étude, nous espérons contribuer à une meilleure
+compréhension de la situation actuelle, afin d'informer les décisions
+politiques et les interventions humanitaires visant à protéger et
+assister les personnes déplacées au Sud-Soudan. L'analyse des données de
+2023 révélera également l'évolution de cette crise par rapport aux
+années précédentes, permettant ainsi d'identifier les tendances
+émergentes et les défis à venir dans la gestion des déplacements forcés
+dans ce pays.
 
 ```{r packages}
 # Installation et chargement des packages nécessaires
@@ -175,14 +204,13 @@ for (pkg in packages) {
 }
 ```
 
-
 ```{r importation des donnees}
 # Importation des données
 base_principale <- haven::read_dta("../data/Base_Principale.dta") %>% dplyr::mutate(dplyr::across(where(haven::is.labelled), ~ haven::as_factor(.)))
 
 base_individus <- haven::read_dta("../data/Base_Individus.dta") %>% dplyr::mutate(dplyr::across(where(haven::is.labelled), ~ haven::as_factor(.)))
-
 ```
+
 # I. Analyse de la consistance des bases de données
 
 Dans cette section, nous présentons successivement :
@@ -194,7 +222,6 @@ Dans cette section, nous présentons successivement :
 -   **L’analyse des valeurs manquantes**
 -   **La suppression des colonnes entièrement vides**
 
-
 ## Dimension des bases de données
 
 ```{r dimension}
@@ -202,10 +229,11 @@ Dans cette section, nous présentons successivement :
 cat("La base principale contient", nrow(base_principale), "observations et", ncol(base_principale), "variables.\n")
 
 # Affichage de la dimension de la base MAD
-cat("La base individus contient", nrow(base_individus), "observations et", ncol(base_individus), "variables.\n") 
-``` 
+cat("La base individus contient", nrow(base_individus), "observations et", ncol(base_individus), "variables.\n")
+```
 
 ## Vérification de la cohérence des liens entre bases
+
 ```{r coherence_bases}
 # Vérification de la cohérence entre base_principale et base_individus via la clé 'ID'
 ids_principale <- unique(base_principale$ID)
@@ -220,22 +248,25 @@ ids_sans_individus <- setdiff(ids_principale, ids_individus)
 cat("Nombre d'ID dans la base principale sans individu associé :", length(ids_sans_individus), "\n")
 ```
 
-Le d'individus sans correspondance dans la base principale est nul, cela signifie que tous les individus de la base individus appartiennent à un ID présent dans la base principale. Ce qui montre que les bases sont cohérentes.
+Le d'individus sans correspondance dans la base principale est nul, cela
+signifie que tous les individus de la base individus appartiennent à un
+ID présent dans la base principale. Ce qui montre que les bases sont
+cohérentes.
 
 ## Affichage des 8 premières lignes
 
-Nous allons visualiser les premières lignes de la base base_individus pour
-voir leur structure.
+Nous allons visualiser les premières lignes de la base base_individus
+pour voir leur structure.
 
 ```{r head1}
-first_rows_flextable <- base_individus %>% 
-  dplyr::select(1:8) %>% 
-  utils::head() %>% 
+first_rows_flextable <- base_individus %>%
+  dplyr::select(1:8) %>%
+  utils::head() %>%
   flextable::flextable() %>%
   flextable::set_caption("Premières observations de la base base_individus") %>%
   flextable::autofit() %>%
-  flextable::fontsize(size = 9, part = "all") %>%     
-  flextable::padding(padding = 2, part = "all") %>%   
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::padding(padding = 2, part = "all") %>%
   flextable::set_table_properties(width = 1, layout = "autofit") %>%
   flextable::align(align = "center", part = "all")
 
@@ -246,14 +277,14 @@ ous allons également visualiser les premières lignes de la base
 base_principale pour voir leur structure.
 
 ```{r head2}
-first_rows_flextable <- base_principale %>% 
-  dplyr::select(1:8) %>% 
-  utils::head() %>% 
+first_rows_flextable <- base_principale %>%
+  dplyr::select(1:8) %>%
+  utils::head() %>%
   flextable::flextable() %>%
   flextable::set_caption("Premières observations de la base base_individus") %>%
   flextable::autofit() %>%
-  flextable::fontsize(size = 9, part = "all") %>%     # Réduire la taille de la police
-  flextable::padding(padding = 2, part = "all") %>%   # Réduire l'espacement interne
+  flextable::fontsize(size = 9, part = "all") %>% # Réduire la taille de la police
+  flextable::padding(padding = 2, part = "all") %>% # Réduire l'espacement interne
   flextable::set_table_properties(width = 1, layout = "autofit") %>%
   flextable::align(align = "center", part = "all")
 
@@ -266,19 +297,19 @@ Commencons l'analyse des doublons par la base base_individus.
 
 ```{r nbre_doublons_individus}
 cat("La base base_individus contient", sum(duplicated(base_individus)), "doublons.")
-#la base individus ne contient pas de doublons
+# la base individus ne contient pas de doublons
 ```
 
 ```{r nbre_doublons_principale}
 cat("La base base_individus contient", sum(duplicated(base_principale)), "doublons.")
 ```
 
-La base principale et la base individus ne contiennet aucun doublon. 
-
+La base principale et la base individus ne contiennet aucun doublon.
 
 ## Présence de valeurs manquantes
 
-Pourcentage de valeurs manquantes par variable dans la base base_individus.
+Pourcentage de valeurs manquantes par variable dans la base
+base_individus.
 
 ```{r na_par_variable_Base_individus}
 # Calcul des valeurs manquantes pour base_individus
@@ -286,14 +317,15 @@ na_tab2 <- base_individus %>%
   summarise(across(everything(), ~ sum(is.na(.)))) %>%
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "NAs") %>%
   filter(NAs > 0) %>%
-  mutate(`% Missing` = scales::percent(NAs / nrow(base_individus), accuracy = 0.1)) %>% head(10)
+  mutate(`% Missing` = scales::percent(NAs / nrow(base_individus), accuracy = 0.1)) %>%
+  head(10)
 
 # Construction du flextable
 flextable(na_tab2) %>%
   set_caption("Table 2 – Variables avec valeurs manquantes dans base_individus") %>%
   set_header_labels(
     Variable = "**Variable**",
-    NAs      = "**N missings**",
+    NAs = "**N missings**",
     `% Missing` = "**% Missing**"
   ) %>%
   theme_booktabs() %>%
@@ -303,7 +335,9 @@ flextable(na_tab2) %>%
   autofit()
 ```
 
-A present Visualisonsles valeurs manquantes dans la base base_principale.
+A present Visualisonsles valeurs manquantes dans la base
+base_principale.
+
 ```{r na_par_variable_Base_principale}
 # Calcul des valeurs manquantes pour base_principale
 na_tab1 <- base_principale %>%
@@ -314,7 +348,8 @@ na_tab1 <- base_principale %>%
     values_to = "NAs"
   ) %>%
   filter(NAs > 0) %>%
-  mutate(`% missing` = scales::percent(NAs / nrow(base_principale), accuracy = 0.1)) %>% head(10)
+  mutate(`% missing` = scales::percent(NAs / nrow(base_principale), accuracy = 0.1)) %>%
+  head(10)
 
 # Construction du flextable compact
 flextable(na_tab1) %>%
@@ -324,35 +359,30 @@ flextable(na_tab1) %>%
     NAs         = "**N missing**",
     `% missing` = "**% missing**"
   ) %>%
-  theme_booktabs() %>%                        
-  colformat_int(j = "NAs") %>%                # entiers
-  flextable::align(align = "center", part = "all") %>%   # centrage
-  fontsize(size = 8, part = "all") %>%        # police plus petite
-  padding(padding = 1, part = "all") %>%      # espacement réduit
-  autofit() %>%                               # ajustement automatique
+  theme_booktabs() %>%
+  colformat_int(j = "NAs") %>% # entiers
+  flextable::align(align = "center", part = "all") %>% # centrage
+  fontsize(size = 8, part = "all") %>% # police plus petite
+  padding(padding = 1, part = "all") %>% # espacement réduit
+  autofit() %>% # ajustement automatique
   set_table_properties(
     layout = "autofit",
     width  = 1
   )
 ```
 
-
 ## Suppression des colonnes vides
 
 Grace à la fonction remove_empty de Janitor, nous allons supprimer les
 colonnes vides.
 
-
-$$
 $$
 
-
-
+$$
 
 ```{r}
 ancienne_dim <- dim(base_principale)
 ```
-
 
 ```{r suppression_colonnes_vides}
 base_principale <- janitor::remove_empty(base_principale, which = "cols")
@@ -365,7 +395,6 @@ de:
 nouvelle_dim <- dim(base_principale)
 ```
 
-
 ```{r}
 ancienne_dim - nouvelle_dim
 ```
@@ -373,12 +402,12 @@ ancienne_dim - nouvelle_dim
 Ainsi nous notons que 68 colonnes ont été supprimées dans la base
 principale.
 
-
-$$
 $$
 
+$$
 
 Faisons de meme pour la base_individus:
+
 ```{r}
 a_dim_individus <- dim(base_individus)
 ```
@@ -387,19 +416,24 @@ a_dim_individus <- dim(base_individus)
 base_individus <- janitor::remove_empty(base_individus, which = "cols")
 ```
 
-La nouvelle dimension de la base est de: 
+La nouvelle dimension de la base est de:
 
 ```{r}
 n_dim_individus <- dim(base_individus)
 ```
+
 $$
+
 $$
+
 ```{r}
 a_dim_individus - n_dim_individus
 ```
+
 Ici aussi, aucune colonne n'a été supprimée.
 
 ## nettoyage du nom des variables
+
 ```{r nettoyage}
 base_principale <- janitor::clean_names(base_principale)
 base_individus <- janitor::clean_names(base_individus)
@@ -407,20 +441,20 @@ base_individus <- janitor::clean_names(base_individus)
 
 \newpage
 
-# II.  Analyse des données et calcul d'indicateurs
-
+# II. Analyse des données et calcul d'indicateurs
 
 <!--commencer-->
 
 <!---BLOCK_MULTICOL_START--->
 
-
-Cette section couvre l'analyse socio-démographique des ménages ainsi que le calcul d'indicateurs.
-
+Cette section couvre l'analyse socio-démographique des ménages ainsi que
+le calcul d'indicateurs.
 
 ### Pyramide des âges
 
-Pour mieux visualiser la structure démographique de la population étudiée, nous allons créer une pyramide des âges en utilisant les variables `age_years` et `hh_02` de la base individus.
+Pour mieux visualiser la structure démographique de la population
+étudiée, nous allons créer une pyramide des âges en utilisant les
+variables `age_years` et `hh_02` de la base individus.
 
 ```{r pyramide_age_exacte, fig.cap="Pyramide des âges de la population étudiée"}
 # S'assurer que age_years est numérique
@@ -441,8 +475,10 @@ base_individus <- base_individus %>% mutate(
 pyramid_data <- base_individus %>%
   filter(!is.na(age_group), !is.na(hh_02)) %>%
   count(age_group, hh_02) %>%
-  mutate(n = ifelse(hh_02 == "Male" | hh_02 == 1, -n, n),
-         sexe = ifelse(hh_02 == "Male" | hh_02 == 1, "Male", "Female"))
+  mutate(
+    n = ifelse(hh_02 == "Male" | hh_02 == 1, -n, n),
+    sexe = ifelse(hh_02 == "Male" | hh_02 == 1, "Male", "Female")
+  )
 
 # Déterminer la valeur max pour l'axe
 max_n <- max(abs(pyramid_data$n))
@@ -472,21 +508,19 @@ ggplot(pyramid_data, aes(x = n, y = age_group, fill = sexe)) +
 ```
 
 $$
+
 $$
 
-
-
-
-La pyramide des âges ci-dessus permet d'observer la distribution par âge et par sexe de la population étudiée, avec les hommes à gauche (bleu clair) et les femmes à droite (bleu foncé), comme dans l'exemple fourni.
-
-
+La pyramide des âges ci-dessus permet d'observer la distribution par âge
+et par sexe de la population étudiée, avec les hommes à gauche (bleu
+clair) et les femmes à droite (bleu foncé), comme dans l'exemple fourni.
 
 <!--arreter et passer à la seconde partie-->
 
 ### Caracteristiques du chef de menage
 
 ```{r caracteristiques_chef_menage}
-#Calculez le nombre d’individu par menage
+# Calculez le nombre d’individu par menage
 base_individus_menage <- base_individus %>%
   group_by(id) %>%
   mutate(n_individu = n()) %>%
@@ -494,14 +528,10 @@ base_individus_menage <- base_individus %>%
 indiv_menages <- base_individus_menage %>% select(id, n_individu)
 ```
 
-
 ```{r}
 head(indiv_menages)
 tail(indiv_menages)
-
 ```
-
-
 
 #### statistiques descriptives sur la variable
 
@@ -520,22 +550,20 @@ flextable::flextable(summary_stats) %>%
   flextable::set_caption("Statistiques descriptives du nombre d'individus par ménage") %>%
   flextable::autofit()
 ```
-En moyenne, les menages sont constitués de 8 individus. On note egalement que la moitié des ménages compte plus de 8 individus, le menage le plus grand comporte 17 individus.
 
-
+En moyenne, un menage est constitués de 8 individus. On note également
+que plus de 50% des menages compte plus de 8 individus, le menage le
+plus grand comporte 17 individus. On note une variabilité de 3
+individues par rapport a la moyenne.
 
 \newpage
 
-
-Diviser la colonne en deux partie
-
- 
 <!---BLOCK_COLUMNBREAK--->
 
 # III Analyse de la securite alimentaire des deplaces internes
 
-Cette consiste en l'analyse de la securite alimentaire afin de mesurer l'impact du conflit sur la securite alimentaire des deplaces internes
-
+Cette consiste en l'analyse de la securite alimentaire afin de mesurer
+l'impact du conflit sur la securite alimentaire des deplaces internes
 
 #### Calcul du score de consommation alimentaire
 
@@ -549,12 +577,194 @@ leur domicile.
 
 #### analyse descriptives des variables du SCA
 
-
 ```{r}
-#calcul du score de consommation aliementaire
+#extraction des variables du score de consommation alimentaire dans la base base_principale
+#select variables starting with food
+base_principale_sca <- base_principale %>%
+  select(starts_with("food_div")) %>%
+  mutate(across(everything(), ~ as.numeric(as.character(.)))) # Convertir les colonnes en numérique
+
 ```
 
+```{r}
+# Analyse descriptive des variables du Food Consumption Score avec gtsummary
 
+vars_fcs <- c(
+  "food_div1", "food_div2", "food_div3",
+  "food_div4", "food_div41", "food_div42", "food_div43", "food_div44",
+  "food_div5", "food_div51", "food_div52",
+  "food_div6", "food_div61",
+  "food_div7", "food_div8", "food_div9"
+)
+
+# Sélection des variables pour l'analyse
+desc_data <- base_principale_sca %>% select(any_of(vars_fcs))
+
+# Transformation des NA en 0 pour les sous-groupes (optionnel selon votre méthodo)
+desc_data <- desc_data %>%
+  mutate(across(all_of(vars_fcs), ~replace_na(., 0)))
+
+# Renommage des variables pour le tableau (style Banque Mondiale)
+labels <- list(
+  food_div1  = "Céréales, racines, tubercules (jours/7)",
+  food_div2  = "Légumineuses/noix (jours/7)",
+  food_div3  = "Lait et produits laitiers (jours/7)",
+  food_div4  = "Viande/poisson/oeufs (jours/7)",
+  food_div41 = "Viande rouge (jours/7)",
+  food_div42 = "Abats (jours/7)",
+  food_div43 = "Oeufs (jours/7)",
+  food_div44 = "Poisson/crustacés (jours/7)",
+  food_div5  = "Légumes (jours/7)",
+  food_div51 = "Légumes orange (jours/7)",
+  food_div52 = "Légumes à feuilles vertes (jours/7)",
+  food_div6  = "Fruits (jours/7)",
+  food_div61 = "Fruits orange (jours/7)",
+  food_div7  = "Huiles/matières grasses (jours/7)",
+  food_div8  = "Sucre/sucreries (jours/7)",
+  food_div9  = "Condiments/thé/café/sel (jours/7)"
+)
+
+# Génération du tableau descriptif gtsummary
+table_fcs <- desc_data %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ c("{mean} ({sd})", "{min}, {p25}, {median}, {p75}, {max}", "{n_miss} manquants")),
+    digits = all_continuous() ~ 2,
+    label = labels
+  ) %>%
+  modify_header(label = "**Groupe alimentaire**") %>%
+  bold_labels()
+
+# Affichage du tableau
+table_fcs
+
+```
+
+#### Calcul du score de consommation alimentaire
+
+```{r}
+# Calcul du score de consommation alimentaire (food Consumption Score - FCS)
+
+# Pondérations FAO standards par groupe alimentaire :
+ponderations <- c(
+  food_div1 = 2,    # Céréales, racines, tubercules
+  food_div2 = 3,    # Légumineuses/noix
+  food_div3 = 4,    # Lait et produits laitiers
+  food_div4 = 4,    # Viande/poisson/œufs
+  food_div5 = 1,    # Légumes
+  food_div6 = 1,    # Fruits
+  food_div7 = 0.5,  # Huiles/matières grasses
+  food_div8 = 0.5,  # Sucre/sucreries
+  food_div9 = 0     # Condiments
+)
+
+# Pour des sous-catégories (food_div41, food_div42, ...), il faut sommer pour le groupe principal si nécessaire.
+
+# Fonction pour calculer le score FCS pour chaque ménage (chaque ligne = un ménage)
+calcul_fcs <- function(df) {
+  # Pour chaque groupe alimentaire principal, on prend le maximum sur les sous-groupes si besoin
+  
+  # Viande, poisson, œufs = max(food_div4, food_div41, food_div42, food_div43, food_div44)
+  viande_poisson_oeufs <- apply(df[, c("food_div4", "food_div41", "food_div42", "food_div43", "food_div44")], 1, max, na.rm = TRUE)
+  
+  # Légumes = max(food_div5, food_div51, food_div52)
+  legumes <- apply(df[, c("food_div5", "food_div51", "food_div52")], 1, max, na.rm = TRUE)
+  
+  # Fruits = max(food_div6, food_div61)
+  fruits <- apply(df[, c("food_div6", "food_div61")], 1, max, na.rm = TRUE)
+  
+  # Céréales : food_div1
+  cereales <- df$food_div1
+  
+  # Légumineuses/noix : food_div2
+  legumineuses <- df$food_div2
+  
+  # Lait et produits laitiers : food_div3
+  lait <- df$food_div3
+  
+  # Huiles : food_div7
+  huiles <- df$food_div7
+  
+  # Sucre : food_div8
+  sucre <- df$food_div8
+  
+  # Condiments : food_div9
+  condiments <- df$food_div9
+
+  # Score FCS = somme (jours par groupe limité à 7, multipliés par leur pondération)
+  fcs <- pmin(cereales, 7)    * 2 +
+         pmin(legumineuses, 7) * 3 +
+         pmin(lait, 7)         * 4 +
+         pmin(viande_poisson_oeufs, 7) * 4 +
+         pmin(legumes, 7)      * 1 +
+         pmin(fruits, 7)       * 1 +
+         pmin(huiles, 7)       * 0.5 +
+         pmin(sucre, 7)        * 0.5 +
+         pmin(condiments, 7)   * 0
+
+  # Retourne le score dans un vecteur
+  return(fcs)
+}
+
+#
+# Ajout de la colonne score FCS
+base_principale_sca$FCS <- calcul_fcs(base_principale_sca)
+```
+
+#### tableau des ponderations
+
+```{r}
+library(gt)
+library(tibble)
+
+# Création du tableau de pondérations
+ponderations_tbl <- tibble::tibble(
+  `Groupe alimentaire` = c(
+    "Céréales, racines, tubercules",
+    "Légumineuses/noix",
+    "Lait et produits laitiers",
+    "Viande/poisson/œufs",
+    "Légumes",
+    "Fruits",
+    "Huiles/matières grasses",
+    "Sucre/sucreries",
+    "Condiments"
+  ),
+  `Pondération` = c(2, 3, 4, 4, 1, 1, 0.5, 0.5, 0),
+  `Variables de la base` = c(
+    "food_div1",
+    "food_div2",
+    "food_div3",
+    "food_div4, food_div41, food_div42, food_div43, food_div44",
+    "food_div5, food_div51, food_div52",
+    "food_div6, food_div61",
+    "food_div7",
+    "food_div8",
+    "food_div9"
+  )
+)
+
+# Ajout d'une ligne "Total"
+ponderations_tbl <- ponderations_tbl %>%
+  add_row(
+    `Groupe alimentaire` = "Total",
+    `Pondération` = sum(ponderations_tbl$`Pondération`),
+    `Variables de la base` = ""
+  )
+
+# Création du tableau gt
+gt_ponderations <- ponderations_tbl %>%
+  gt() %>%
+  tab_header(
+    title = "Pondérations attribuées à chaque groupe alimentaire pour le calcul du SCA"
+  ) %>%
+  fmt_number(
+    columns = "Pondération",
+    decimals = 1
+  )
+  
+
+gt_ponderations
+```
 
 <!--Stopper-->
 
@@ -562,22 +772,10 @@ leur domicile.
 
 \newpage
 
-<!---BLOCK_LANDSCAPE_START--->
-
-Mettre la page en paysage
-
-suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte, note suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte suite texte 
-
-<!---BLOCK_LANDSCAPE_STOP--->
-
-
-\newpage
-
-
 # Table des matières
 
 <!---BLOCK_TOC--->
 
 \newpage
 
-######  Conclusion
+###### Conclusion
