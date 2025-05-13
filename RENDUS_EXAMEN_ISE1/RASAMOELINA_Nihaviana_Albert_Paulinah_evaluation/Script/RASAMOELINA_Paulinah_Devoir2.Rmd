@@ -1,0 +1,1494 @@
+---
+title: ''
+output:
+  pdf_document:
+    toc_depth: '3'
+  html_document:
+    toc_depth: '3'
+    df_print: paged
+  word_document:
+    toc_depth: 3
+    reference_docx: ../Documents/word_template.docx
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+
+```{r packages, include=FALSE}
+# Liste des packages nécessaires
+packages <- c(
+  "tidyverse",   # Manipulation & visualisation de données : inclut : ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats
+  "janitor",     # Nettoyage des données
+  "gtsummary",   # Tableaux statistiques formatés pour Word/HTML
+  "sf",          # Données spatiales (cartographie, shapefiles)
+  "haven",      # Lecture de fichiers stata(.dta)
+  "flextable",   # Mise en forme avancée de tableaux Word
+  "officer",     # Interaction avec Word (officedown)
+  "officedown",   # Intégration R Markdown → Word enrichi
+  "sf"    # 
+)
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+```
+
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                            |
+|:----------------------------------------------------------:|
+| ![](../Documents/Logo%20SEN.png){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                |
+|:----------------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4,include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+
+ 
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par :", "RASAMOELINA Nihaviana Albert Paulinah", "Élève ISE1 ECO"),
+  col2 = c("Sous la supervision de :", "M. Aboubacar HEMA", "Research analyst à IFPRI"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+
+#&nbsp;
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+\newpage
+
+# *Introduction*
+
+Ce rapport présente une analyse statistique complète réalisée dans le cadre de l'examen de projet statistique sur R pour ISE année 1. L'objectif est d'analyser un ensemble de données relatives liées aux déplacements forcés au Sud-Soudan en 2023. Ce rapport suit les instructions fournies dans le sujet d'examen et comprend une analyse de consistance des données, le calcul d'indicateurs clés, des analyses socio-démographiques et des visualisations spatiales.
+
+\newpage
+
+```{r }
+# Supprimer toutes les variables de l'environnement
+rm(list = ls())
+
+# Forcer un nettoyage de la mémoire
+gc()
+
+```
+
+<!--commencer-->
+
+<!---BLOCK_MULTICOL_START--->
+
+
+# I. Importation et Analyse de consistance des bases
+
+## 1. Importation des jeux de données
+La base Base_Individus.dta compte 144 variables pour nrow(base_individus) observations.
+Alors que la base Base_Principale.dta compte 1312 variables pour nrow(base_principale) observations.
+
+
+```{r importation des bases, results='hide'}
+#importations
+base_individus <- haven::read_dta("../Donnees/Base_Individus.dta")
+base_principale <- haven::read_dta("../Donnees/Base_Principale.dta")
+View(base_individus)
+View(base_principale)
+
+```
+
+```{r }
+base_individus <- labelled::to_factor(base_individus)
+base_principale <- labelled::to_factor(base_principale)
+
+```
+
+## 2. Analyse de consistance des bases de données
+
+Cette section vise à vérifier la qualité des données importées et à appliquer les transformations nécessaires pour assurer leur cohérence avant l'analyse. Nous utiliserons principalement les packages `janitor` et `tidyverse` pour cette tâche.
+
+### 2.1. Analyse préliminaire des bases de données
+
+Commençons par examiner les dimensions et les caractéristiques générales de nos bases de données.
+
+```{r}
+# Dimensions des bases de données
+cat("Dimensions de la base individus:", dim(base_individus), "\n")
+cat("Dimensions de la base principale:", dim(base_principale), "\n")
+
+# Vérification des valeurs manquantes par colonne
+cat("\nNombre de valeurs manquantes par colonne (top 10) - base individus:\n")
+na_count_ind <- sapply(base_individus, function(y) sum(length(which(is.na(y)))))
+head(sort(na_count_ind, decreasing = TRUE), 10)
+
+cat("\nNombre de valeurs manquantes par colonne (top 10) - base principale:\n")
+na_count_prin <- sapply(base_principale, function(y) sum(length(which(is.na(y)))))
+head(sort(na_count_prin, decreasing = TRUE), 10)
+
+# Pourcentage global de valeurs manquantes
+cat("\nPourcentage global de valeurs manquantes - Base Ind:",
+    round(sum(is.na(base_individus)) / (nrow(base_individus) * ncol(base_individus)) * 100, 2), "%\n")
+cat("Pourcentage global de valeurs manquantes - Base Prin:",
+    round(sum(is.na(base_principale)) / (nrow(base_principale) * ncol(base_principale)) * 100, 2), "%\n")
+```
+
+### 2.2 Nettoyage des bases de données avec janitor
+
+Le package `janitor` offre des fonctions utiles pour nettoyer les bases de données. Appliquons quelques-unes de ces fonctions à nos bases.
+
+```{r}
+# Vérification des colonnes vides ou presque vides dans chaque base
+empty_cols_ind <- colnames(base_individus)[colSums(is.na(base_individus)) > 0.9 * nrow(base_individus)]
+cat("Colonnes presque vides (>90% NA) dans la base Ind:", length(empty_cols_ind), "\n")
+if(length(empty_cols_ind) > 0) head(empty_cols_ind, 10)
+
+empty_cols_prin <- colnames(base_principale)[colSums(is.na(base_principale)) > 0.9 * nrow(base_principale)]
+cat("\nColonnes presque vides (>90% NA) dans la base Prin:", length(empty_cols_prin), "\n")
+if(length(empty_cols_prin) > 0) head(empty_cols_prin, 10)
+
+# Vérification des lignes vides ou presque vides
+empty_rows_ind <- which(rowSums(is.na(base_individus)) > 0.9 * ncol(base_individus))
+cat("\nLignes presque vides (>90% NA) dans la base Ind:", length(empty_rows_ind), "\n")
+
+empty_rows_prin <- which(rowSums(is.na(base_principale)) > 0.9 * ncol(base_principale))
+cat("Lignes presque vides (>90% NA) dans la base Prin:", length(empty_rows_prin), "\n")
+
+# Standardisation des noms de colonnes
+# Nous créons des copies pour ne pas modifier les bases originales
+base_individus_clean <- base_individus
+base_principale_clean <- base_principale
+
+# Vérification des noms de colonnes avant et après nettoyage (quelques exemples)
+cat("\nExemple de noms de colonnes avant/après nettoyage - Base Ind:\n")
+head(data.frame(original = names(base_individus), nettoyé = names(base_individus_clean)), 5)
+
+cat("\nExemple de noms de colonnes avant/après nettoyage - Base Prin:\n")
+head(data.frame(original = names(base_principale), nettoyé = names(base_principale_clean)), 5)
+```
+
+### 2.3 Suppression des colonnes et lignes inutiles
+
+Sur la base de l'analyse ci-dessus, nous pouvons décider de supprimer certaines colonnes ou lignes qui contiennent principalement des valeurs manquantes. Cependant, il est important de ne pas supprimer des données qui pourraient être pertinentes pour l'analyse.
+
+```{r}
+# Suppression des colonnes presque vides (seuil de 95%)
+base_individus_clean <- base_individus_clean %>%
+  select(where(~sum(is.na(.)) < 0.95 * nrow(base_individus_clean)))
+
+base_principale_clean <- base_principale_clean %>%
+  select(where(~sum(is.na(.)) < 0.95 * nrow(base_principale_clean)))
+
+# Comparaison des dimensions avant et après la suppression des colonnes
+cat("Dimensions de la base Ind avant:", dim(base_individus), "\n")
+cat("Dimensions de la base Ind après:", dim(base_individus_clean), "\n\n")
+cat("Dimensions de la base Prin avant:", dim(base_principale), "\n")
+cat("Dimensions de la base Prin après:", dim(base_principale_clean), "\n")
+
+# Suppression des lignes presque vides (seuil de 95%)
+base_individus_clean <- base_individus_clean %>%
+  filter(rowSums(is.na(.)) < 0.95 * ncol(.))
+
+Prin_clean <- base_principale_clean %>%
+  filter(rowSums(is.na(.)) < 0.95 * ncol(.))
+
+# Comparaison après la suppression des lignes
+cat("\nDimensions de la base Ind après suppression des lignes:", dim(base_individus_clean), "\n")
+cat("Dimensions de la base Prin après suppression des lignes:", dim(base_principale_clean), "\n")
+
+```
+
+### 2.4. Traitement des doublons
+
+Vérifions s'il existe des doublons dans les bases de données.
+
+```{r}
+# Vérification des doublons basés sur l'identifiant unique (ID)
+duplicated_id_ind <- base_individus_clean %>%
+  group_by(ID) %>%
+  filter(n() > 1) %>%
+  summarise(n = n())
+
+cat("Nombre de lignes avec des IDs dupliqués dans la base Ind:", nrow(duplicated_id_ind), "\n")
+
+# Pour la base Prin, chaque ligne devrait être unique
+duplicated_rows_prin <- base_principale_clean %>%
+  janitor::get_dupes()
+
+cat("Nombre de lignes dupliquées dans la base Prin:", nrow(duplicated_rows_prin), "\n")
+
+```
+
+### 2.5. Cohérence entre les bases de données
+
+Vérifions la cohérence entre les bases de données Ind et Prin, notamment la correspondance des identifiants.
+
+```{r}
+# Vérifier que chaque ID dans Ind existe dans Prin
+ids_in_ind_not_in_prin <- setdiff(unique(base_individus_clean$ID), unique(base_principale_clean$ID))
+cat("Nombre d'IDs dans Ind qui n'existent pas dans Prin:", length(ids_in_ind_not_in_prin), "\n")
+
+# Vérifier que chaque ID dans Prin existe dans Ind
+ids_in_prin_not_in_ind <- setdiff(unique(base_principale_clean$ID), unique(base_individus_clean$ID))
+cat("Nombre d'IDs dans Prin qui n'existent pas dans Ind:", length(ids_in_prin_not_in_ind), "\n")
+
+```
+
+### 2.6. Traitement des valeurs aberrantes
+
+Examinons certaines variables numériques clés pour détecter d'éventuelles valeurs aberrantes.
+
+```{r}
+if ("ageYears" %in% names(base_individus_clean)) {
+  # Nettoyage préliminaire : retirer ou convertir les valeurs non numériques
+  base_individus_clean <- base_individus_clean %>%
+    mutate(ageYears = ifelse(grepl("^[0-9]+$", ageYears), ageYears, NA)) %>%
+    mutate(ageYears = as.numeric(ageYears))
+
+  # Résumé
+  summary(base_individus_clean$ageYears)
+
+  # Identifier les valeurs aberrantes (âge > 120 ou < 0)
+  outliers_age <- base_individus_clean %>%
+    filter(ageYears > 120 | ageYears < 0)
+
+  cat("Nombre de valeurs aberrantes pour l'âge:", nrow(outliers_age), "\n")
+
+  # Corriger les valeurs aberrantes
+  base_individus_clean <- base_individus_clean %>%
+    mutate(ageYears = ifelse(ageYears > 120 | ageYears < 0, NA, ageYears))
+}
+
+
+```
+
+### 2.7. Standardisation des types de données
+
+S'assurer que les variables ont le type approprié.
+
+```{r}
+# Exemple de conversion de type pour certaines variables
+base_individus_clean <- base_individus_clean %>%
+  mutate(across(starts_with("HH") & where(is.double) & !where(is.labelled), as.integer))
+
+# Vérifier les types de données après conversion (quelques exemples)
+lapply(base_individus_clean %>% select(starts_with("HH") & where(is.integer)) %>% head(5), class)
+
+```
+
+### 2.8. Résumé du nettoyage
+
+```{r}
+# Résumé des modifications apportées
+cat("Résumé des modifications apportées:\n")
+cat("1. Colonnes supprimées (>95% NA) - base individus:", ncol(base_individus) - ncol(base_individus_clean), "\n")
+cat("2. Colonnes supprimées (>95% NA) - base principale:", ncol(base_principale) - ncol(base_principale_clean), "\n")
+cat("3. Lignes supprimées (>95% NA) - base individus:", nrow(base_individus) - nrow(base_individus_clean), "\n")
+cat("4. Lignes supprimées (>95% NA) - base principale:", nrow(base_principale) - nrow(base_principale_clean), "\n")
+
+# Pourcentage final de valeurs manquantes
+cat("\nPourcentage final de valeurs manquantes - base individus:",
+    round(sum(is.na(base_individus_clean)) / (nrow(base_individus_clean) * ncol(base_individus_clean)) * 100, 2), "%\n")
+cat("Pourcentage final de valeurs manquantes - base principale:",
+    round(sum(is.na(base_principale_clean)) / (nrow(base_principale_clean) * ncol(base_principale_clean)) * 100, 2), "%\n")
+
+```
+
+### 2.9. Finalisation des bases de données nettoyées
+
+Remplaçons les bases de données originales par les versions nettoyées pour la suite de l'analyse.
+
+```{r}
+# Remplacement des bases originales
+base_individus <- base_individus_clean
+base_principale <- base_principale_clean
+
+# Libération de la mémoire
+rm(base_individus_clean, base_principale_clean)
+gc()
+
+```
+
+## 3. Exploration des données
+
+### 3.1. Structure des bases de données
+
+Pour mieux comprendre les données, examinons la structure des deux bases et les principales variables disponibles.
+
+```{r }
+# Nombre d'observations et de variables
+dim(base_individus)
+dim(base_principale)
+
+# Résumé des variables de la base Individus
+#str(base_individus)
+
+# Aperçu des premières lignes
+#head(base_individus)
+
+
+# Structure de la base Principale
+#str(base_principale)
+
+# Aperçu des premières lignes
+#head(base_principale)
+
+```
+
+## 3.2. Variables catégorielles importantes
+
+Examinons les variables catégorielles importantes comme le sexe, le statut marital, etc.
+
+```{r }
+# Distribution des sexes avec labels si disponibles
+if (any(class(base_individus$HH_02) %in% c("haven_labelled", "labelled"))) {
+  # Afficher les labels si la variable est labellisée
+  cat("Labels pour la variable sexe:\n")
+  print(val_labels(base_individus$HH_02))
+}
+
+# Distribution des sexes (fréquence)
+sexe_table <- table(base_individus$HH_02, useNA = "always")
+sexe_table
+prop.table(sexe_table) * 100
+
+# Distribution des statuts matrimoniaux
+if (any(class(base_individus$HH_08) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable état matrimonial:\n")
+  print(val_labels(base_individus$HH_08))
+}
+
+etatmatri_table <- table(base_individus$HH_08, useNA = "always")
+etatmatri_table
+prop.table(etatmatri_table) * 100
+
+# Distribution des niveaux d'éducation
+# Plusieurs variables liées à l'éducation sont disponibles, nous allons sélectionner les plus pertinentes
+# HH_Educ02a - Actuellement à l'école
+# HH_Educ02b - A fréquenté l'école la majeure partie de l'année
+# HH_Educ03 - Quel niveau/année fréquente actuellement
+# HH_Educ04a - Type d'école fréquentée
+
+# Fréquentation scolaire actuelle
+if (any(class(base_individus$HH_Educ02a) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable fréquentation scolaire actuelle:\n")
+  print(val_labels(base_individus$HH_Educ02a))
+}
+
+educ_actuelle_table <- table(base_individus$HH_Educ02a, useNA = "always")
+educ_actuelle_table
+prop.table(educ_actuelle_table) * 100
+
+# Niveau d'éducation actuel
+if (any(class(base_individus$HH_Educ03) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable niveau d'éducation:\n")
+  print(val_labels(base_individus$HH_Educ03))
+}
+
+education_table <- table(base_individus$HH_Educ03, useNA = "always")
+education_table
+prop.table(education_table) * 100
+
+# Type d'école
+if (any(class(base_individus$HH_Educ04a) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable type d'école:\n")
+  print(val_labels(base_individus$HH_Educ04a))
+}
+
+type_ecole_table <- table(base_individus$HH_Educ04a, useNA = "always")
+type_ecole_table
+prop.table(type_ecole_table) * 100
+
+```
+
+## 3.3. Statistiques descriptives des variables numériques
+
+```{r }
+# Sélection de variables numériques intéressantes
+# Adaptez cette liste selon les variables disponibles
+vars_num <- c("ageYears")
+
+# Vérification des valeurs manquantes
+sapply(base_individus[vars_num], function(x) sum(is.na(x)))
+
+# Statistiques descriptives pour ces variables
+base_individus %>%
+  select(all_of(vars_num)) %>%
+  summary()
+
+```
+
+ <!--arreter et passer à la seconde partie-->
+ 
+<!---BLOCK_COLUMNBREAK--->
+
+# II. Analyse des données socio-démographiques
+
+## 1. Répartition par âge et sexe
+
+```{r }
+# Histogramme des âges par sexe avec gestion de valeurs manquantes
+base_individus %>%
+  filter(!is.na(ageYears), !is.na(HH_02)) %>%
+  ggplot(aes(x = ageYears, fill = factor(HH_02, 
+                                   labels = if(any(class(base_individus$HH_02) %in% c("haven_labelled", "labelled"))) 
+                                     names(val_labels(base_individus$HH_02)) 
+                                   else c("Homme", "Femme")))) +
+  geom_histogram(binwidth = 5, position = "dodge", alpha = 0.7) +
+  labs(title = "Distribution des âges par sexe",
+       x = "Âge", y = "Fréquence", fill = "Sexe") +
+  theme_minimal()
+
+# Pyramide des âges
+base_individus %>%
+  filter(!is.na(ageYears), !is.na(HH_02)) %>%
+  mutate(groupe_age = cut(ageYears, breaks = seq(0, 100, by = 10), 
+                         include.lowest = TRUE, 
+                         labels = c("0-9", "10-19", "20-29", "30-39", "40-49", 
+                                    "50-59", "60-69", "70-79", "80-89", "90-99"))) %>%
+  group_by(groupe_age, HH_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  ggplot(aes(x = groupe_age, y = ifelse(HH_02 == 1, -count, count), 
+             fill = factor(HH_02, 
+                          labels = if(any(class(base_individus$HH_02) %in% c("haven_labelled", "labelled")))
+                            names(val_labels(base_individus$HH_02))
+                          else c("Homme", "Femme")))) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(labels = function(x) abs(x)) +
+  coord_flip() +
+  labs(title = "Pyramide des âges",
+       x = "Groupe d'âge", y = "Population", fill = "Sexe") +
+  theme_minimal()
+
+```
+## 2. Analyse du niveau d'éducation
+
+```{r }
+# Obtention des labels d'éducation si disponibles
+edu_labels <- if(any(class(base_individus$HH_Educ03) %in% c("haven_labelled", "labelled")))
+  names(val_labels(base_individus$HH_Educ03)) else paste("Niveau", 1:length(unique(na.omit(base_individus$HH_Educ03))))
+
+# Distribution du niveau d'éducation
+base_individus %>%
+  filter(!is.na(HH_Educ03)) %>%
+  count(HH_Educ03) %>%
+  mutate(pourcentage = n / sum(n) * 100) %>%
+  ggplot(aes(x = reorder(factor(HH_Educ03, labels = edu_labels), n), 
+             y = pourcentage, fill = factor(HH_Educ03, labels = edu_labels))) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Distribution du niveau d'éducation",
+       x = "Niveau d'éducation", y = "Pourcentage (%)", fill = "Éducation") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Niveau d'éducation par sexe
+base_individus %>%
+  filter(!is.na(HH_Educ03), !is.na(HH_02)) %>%
+  group_by(HH_02, HH_Educ03) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(HH_02) %>%
+  mutate(pourcentage = count / sum(count) * 100) %>%
+  ggplot(aes(x = factor(HH_02, 
+                       labels = if(any(class(base_individus$HH_02) %in% c("haven_labelled", "labelled")))
+                         names(val_labels(base_individus$HH_02))
+                       else c("Homme", "Femme")), 
+            y = pourcentage, 
+            fill = factor(HH_Educ03, 
+                         labels = if(any(class(base_individus$HH_Educ03) %in% c("haven_labelled", "labelled")))
+                           names(val_labels(base_individus$HH_Educ03))
+                         else paste("Niveau", sort(unique(base_individus$HH_Educ03)))))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Niveau d'éducation par sexe",
+       x = "Sexe", y = "Pourcentage (%)", fill = "Niveau d'éducation") +
+  theme_minimal()
+
+# Si vous avez des variables géographiques (région, etc.), vous pourriez aussi 
+# analyser l'éducation par région
+# Par exemple:
+if("admin1" %in% names(base_individus) && "HH_Educ03" %in% names(base_individus)) {
+  base_individus %>%
+    filter(!is.na(HH_Educ03), !is.na(admin1)) %>%
+    group_by(admin1, HH_Educ03) %>%
+    summarise(count = n(), .groups = "drop") %>%
+    group_by(admin1) %>%
+    mutate(pourcentage = count / sum(count) * 100) %>%
+    ggplot(aes(x = factor(admin1), 
+               y = pourcentage, 
+               fill = factor(HH_Educ03))) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Niveau d'éducation par région",
+         x = "Région", y = "Pourcentage (%)", fill = "Niveau d'éducation") +
+    theme_minimal() +
+    coord_flip()
+}
+
+```
+
+<!--Stopper-->
+
+<!---BLOCK_MULTICOL_STOP{widths: [3,3], space: 0.2, sep: true}--->
+
+<!--commencer-->
+
+<!---BLOCK_MULTICOL_START--->
+
+# III Calcul et analyse du Crowding Index (Indice d'affluence)
+
+Le Crowding Index ou indice d'affluence est le rapport entre le nombre de personnes vivant dans un ménage et le nombre de pièces disponibles (à l'exclusion de la cuisine et des couloirs). Cet indice est un indicateur important des conditions de vie des ménages.
+
+## 1. Calcul du nombre d'individus par ménage
+
+```{r }
+# Compter le nombre d'individus par ménage
+nb_individus_par_menage <- base_individus %>%
+  group_by(ID) %>%
+  summarise(nb_individus = n())
+
+# Statistiques descriptives sur le nombre d'individus par ménage
+summary(nb_individus_par_menage$nb_individus)
+
+# Histogramme du nombre d'individus par ménage
+ggplot(nb_individus_par_menage, aes(x = nb_individus)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution du nombre d'individus par ménage",
+       x = "Nombre d'individus", y = "Fréquence") +
+  theme_minimal()
+
+```
+
+## 2. Statistiques descriptives sur le nombre de pièces
+
+```{r }
+# Statistiques descriptives et histogramme du nombre de pièces par ménage
+summary(base_principale$HH14)
+
+# Nombre de valeurs non finies
+nb_non_finis <- sum(!is.finite(base_principale$HH14))
+cat("Nombre de valeurs non finies exclues :", nb_non_finis, "\n")
+
+# Histogramme (avec filtrage des valeurs non finies)
+ggplot(base_principale %>% filter(is.finite(HH14)), aes(x = HH14)) +
+  geom_histogram(binwidth = 1, fill = "coral", color = "black") +
+  labs(title = "Distribution du nombre de pièces par ménage",
+       x = "Nombre de pièces", y = "Fréquence") +
+  theme_minimal()
+
+```
+
+## 3. Calcul de l'indice d'affluence (Crowding Index)
+
+```{r }
+# Joindre les données et calculer l'indice d'affluence proprement
+menages_avec_individus <- base_principale %>%
+  select(ID, HH14, Intro_07_1) %>%
+  left_join(nb_individus_par_menage, by = "ID") %>%
+  mutate(
+    HH14 = as.numeric(HH14),
+    crowding_index = ifelse(HH14 > 0 & !is.na(nb_individus), nb_individus / HH14, NA)
+  )
+
+# Statistiques descriptives de l'indice d'affluence
+summary(menages_avec_individus$crowding_index)
+
+# Histogramme sans les valeurs non finies ou aberrantes
+ggplot(menages_avec_individus %>% filter(is.finite(crowding_index), crowding_index <= 10), 
+       aes(x = crowding_index)) +
+  geom_histogram(binwidth = 0.5, fill = "lightgreen", color = "black") +
+  labs(title = "Distribution de l'indice d'affluence (Crowding Index)",
+       x = "Indice d'affluence", y = "Fréquence") +
+  theme_minimal()
+
+```
+## 4. Analyse de la distribution de l'indice d'affluence
+
+```{r }
+# Catégoriser l'indice d'affluence selon les seuils demandés
+menages_avec_individus <- menages_avec_individus %>%
+  mutate(categorie_crowding = case_when(
+    crowding_index < 1 ~ "< 1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - 2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - 3",
+    crowding_index >= 3 ~ ">= 3",
+    TRUE ~ NA_character_
+  ))
+
+# Calcul des proportions par catégorie
+proportions_crowding <- menages_avec_individus %>%
+  group_by(categorie_crowding) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des proportions
+proportions_crowding
+
+# Visualisation par catégorie
+ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
+       x = "Indice d'affluence", y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+## 5. Comparaison entre réfugiés et communautés d'accueil
+
+```{r }
+# Obtenir les labels pour le groupe de population
+if (any(class(menages_avec_individus$Intro_07_1) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable groupe de population:\n")
+  print(val_labels(menages_avec_individus$Intro_07_1))
+}
+
+# Analyse comparative entre réfugiés et communautés d'accueil
+comparaison_par_groupe <- menages_avec_individus %>%
+  group_by(Intro_07_1, categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Intro_07_1) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Statistiques descriptives par groupe de population
+menages_avec_individus %>%
+  group_by(Intro_07_1) %>%
+  summarise(
+    n = n(),
+    moyenne = mean(crowding_index, na.rm = TRUE),
+    mediane = median(crowding_index, na.rm = TRUE),
+    ecart_type = sd(crowding_index, na.rm = TRUE),
+    min = min(crowding_index, na.rm = TRUE),
+    max = max(crowding_index, na.rm = TRUE)
+  )
+
+# Visualisation de la comparaison
+ggplot(comparaison_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(Intro_07_1))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(title = "Indice d'affluence par groupe de population",
+       x = "Indice d'affluence", y = "Proportion (%)", fill = "Groupe de population") +
+  theme_minimal()
+
+# Boîte à moustaches pour comparer les distributions
+ggplot(menages_avec_individus, aes(x = factor(Intro_07_1), y = crowding_index, fill = factor(Intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution de l'indice d'affluence par groupe de population",
+       x = "Groupe de population", y = "Indice d'affluence") +
+  theme_minimal() +
+  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+
+```
+
+
+# IV Analyse de la sécurité alimentaire des déplacés internes
+
+## 1. Score de Consommation Alimentaire (SCA)
+
+Le Score de Consommation Alimentaire (SCA) est un indicateur proxy développé par le Programme Alimentaire Mondial pour mesurer la sécurité alimentaire des ménages. C'est un score composite basé sur la diversité alimentaire, la fréquence de consommation et l'importance nutritionnelle relative des groupes d'aliments consommés.
+
+### 1.1. Analyse descriptive des variables composant le SCA
+
+```{r }
+# Identifier les variables pertinentes pour le SCA
+variables_sca <- c(
+  "Food_div1",    # Céréales, grains, racines et tubercules
+  "Food_div2",    # Légumineuses/haricots
+  "Food_div3",    # Lait et produits laitiers
+  "Food_div4",    # Viande, poisson et œufs (composite)
+  "Food_div5",    # Légumes
+  "Food_div6",    # Fruits
+  "Food_div7",    # Huile/graisse
+  "Food_div8"     # Sucre
+)
+
+# Créer un dataframe contenant uniquement les variables du SCA
+sca_data <- base_principale %>%
+  select(ID, Intro_07_1, admin1, admin2, all_of(variables_sca))
+
+# Statistiques descriptives pour chaque variable
+sca_stats <- sca_data %>%
+  summarise(across(all_of(variables_sca), 
+                   list(
+                     moyenne = ~mean(., na.rm = TRUE),
+                     mediane = ~median(., na.rm = TRUE),
+                     ecart_type = ~sd(., na.rm = TRUE),
+                     min = ~min(., na.rm = TRUE),
+                     max = ~max(., na.rm = TRUE),
+                     n_valides = ~sum(!is.na(.)),
+                     n_manquants = ~sum(is.na(.))
+                   )))
+
+# Afficher les statistiques
+sca_stats %>%
+  pivot_longer(cols = everything(),
+               names_to = c("variable", "stat"),
+               names_pattern = "(.*)_(.*)") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  knitr::kable(caption = "Statistiques descriptives des variables du SCA")
+
+# Visualisation de la fréquence de consommation moyenne pour chaque groupe d'aliments
+sca_data %>%
+  pivot_longer(cols = all_of(variables_sca),
+               names_to = "groupe_alimentaire",
+               values_to = "jours_consommation") %>%
+  group_by(groupe_alimentaire) %>%
+  summarise(jours_moyens = mean(jours_consommation, na.rm = TRUE)) %>%
+  mutate(groupe_alimentaire = case_when(
+    groupe_alimentaire == "Food_div1" ~ "Céréales/Tubercules",
+    groupe_alimentaire == "Food_div2" ~ "Légumineuses",
+    groupe_alimentaire == "Food_div3" ~ "Produits laitiers",
+    groupe_alimentaire == "Food_div4" ~ "Viande/Poisson/Œufs",
+    groupe_alimentaire == "Food_div5" ~ "Légumes",
+    groupe_alimentaire == "Food_div6" ~ "Fruits",
+    groupe_alimentaire == "Food_div7" ~ "Huile/Graisse",
+    groupe_alimentaire == "Food_div8" ~ "Sucre",
+    TRUE ~ groupe_alimentaire
+  )) %>%
+  ggplot(aes(x = reorder(groupe_alimentaire, jours_moyens), y = jours_moyens, fill = groupe_alimentaire)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Nombre moyen de jours de consommation par groupe alimentaire",
+       x = "Groupe alimentaire", 
+       y = "Nombre moyen de jours (sur 7 derniers jours)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### 1.2. Calcul du Score de Consommation Alimentaire
+
+```{r }
+# Tableau des poids attribués à chaque groupe alimentaire
+poids_sca <- data.frame(
+  groupe_alimentaire = c("Céréales/Tubercules", "Légumineuses", "Produits laitiers", 
+                         "Viande/Poisson/Œufs", "Légumes", "Fruits", 
+                         "Huile/Graisse", "Sucre"),
+  variable = c("Food_div1", "Food_div2", "Food_div3", 
+               "Food_div4", "Food_div5", "Food_div6", 
+               "Food_div7", "Food_div8"),
+  poids = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Afficher le tableau des poids
+knitr::kable(poids_sca, caption = "Poids attribués aux groupes alimentaires pour le calcul du SCA")
+
+# Calculer le SCA pour chaque ménage
+sca_data <- sca_data %>%
+  mutate(
+    sca_cereales = Food_div1 * 2,
+    sca_legumineuses = Food_div2 * 3,
+    sca_lait = Food_div3 * 4,
+    sca_viande = Food_div4 * 4,
+    sca_legumes = Food_div5 * 1,
+    sca_fruits = Food_div6 * 1,
+    sca_huile = Food_div7 * 0.5,
+    sca_sucre = Food_div8 * 0.5,
+    sca_total = sca_cereales + sca_legumineuses + sca_lait + sca_viande + 
+                sca_legumes + sca_fruits + sca_huile + sca_sucre
+  )
+
+# Statistiques descriptives du SCA
+summary(sca_data$sca_total)
+
+# Histogramme du SCA
+ggplot(sca_data, aes(x = sca_total)) +
+  geom_histogram(binwidth = 5, fill = "darkblue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution du Score de Consommation Alimentaire",
+       x = "Score de Consommation Alimentaire (SCA)",
+       y = "Fréquence") +
+  theme_minimal()
+
+```
+
+### 1.3. Catégorisation du SCA selon différents seuils
+
+```{r }
+# Catégoriser le SCA selon les seuils 21/35
+sca_data <- sca_data %>%
+  mutate(
+    categorie_sca_21_35 = case_when(
+      sca_total < 21 ~ "Pauvre",
+      sca_total >= 21 & sca_total <= 35 ~ "Limite",
+      sca_total > 35 ~ "Acceptable",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Catégoriser le SCA selon les seuils 28/42
+sca_data <- sca_data %>%
+  mutate(
+    categorie_sca_28_42 = case_when(
+      sca_total < 28 ~ "Pauvre",
+      sca_total >= 28 & sca_total <= 42 ~ "Limite",
+      sca_total > 42 ~ "Acceptable",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Proportions selon les seuils 21/35
+prop_sca_21_35 <- sca_data %>%
+  group_by(categorie_sca_21_35) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Proportions selon les seuils 28/42
+prop_sca_28_42 <- sca_data %>%
+  group_by(categorie_sca_28_42) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Afficher les résultats
+knitr::kable(prop_sca_21_35, caption = "Répartition des ménages selon les seuils SCA 21/35")
+knitr::kable(prop_sca_28_42, caption = "Répartition des ménages selon les seuils SCA 28/42")
+
+# Visualisation des catégories selon les deux seuils
+par(mfrow=c(1,2))
+# Graphique pour les seuils 21/35
+p1 <- ggplot(prop_sca_21_35, aes(x = "", y = proportion, fill = categorie_sca_21_35)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Répartition selon seuils 21/35",
+       fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank())
+
+# Graphique pour les seuils 28/42
+p2 <- ggplot(prop_sca_28_42, aes(x = "", y = proportion, fill = categorie_sca_28_42)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Répartition selon seuils 28/42",
+       fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank())
+
+# Afficher les deux graphiques côte à côte
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+
+```
+
+### 1.4. Représentation spatiale du SCA par région et département
+
+```{r }
+# Vérifier les labels pour admin1 et admin2
+if (any(class(sca_data$admin1) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour admin1 (Région):\n")
+  print(val_labels(sca_data$admin1))
+}
+
+if (any(class(sca_data$admin2) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour admin2 (Département):\n")
+  print(val_labels(sca_data$admin2))
+}
+
+# Statistiques par région (admin1)
+stats_par_region <- sca_data %>%
+  group_by(admin1) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100
+  )
+
+# Statistiques par département (admin2)
+stats_par_departement <- sca_data %>%
+  group_by(admin1, admin2) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100,
+    .groups = "drop"
+  )
+
+# Afficher les résultats par région
+knitr::kable(stats_par_region, 
+             caption = "Score de Consommation Alimentaire par région", 
+             digits = 1)
+
+# Visualisation du SCA moyen par région
+ggplot(stats_par_region, aes(x = reorder(as.factor(admin1), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_gradient(low = "red", high = "green") +
+  labs(title = "Score de Consommation Alimentaire moyen par région",
+       x = "Région", 
+       y = "SCA moyen") +
+  theme_minimal()
+
+# Visualisation des catégories de SCA par région
+stats_par_region_long <- stats_par_region %>%
+  select(admin1, pct_pauvre_21_35, pct_limite_21_35, pct_acceptable_21_35) %>%
+  pivot_longer(cols = starts_with("pct_"),
+               names_to = "categorie",
+               values_to = "pourcentage") %>%
+  mutate(categorie = case_when(
+    categorie == "pct_pauvre_21_35" ~ "Pauvre",
+    categorie == "pct_limite_21_35" ~ "Limite",
+    categorie == "pct_acceptable_21_35" ~ "Acceptable",
+    TRUE ~ categorie
+  ))
+
+ggplot(stats_par_region_long, aes(x = as.factor(admin1), y = pourcentage, fill = categorie)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("Pauvre" = "red", "Limite" = "orange", "Acceptable" = "green")) +
+  labs(title = "Répartition des catégories de SCA par région (seuils 21/35)",
+       x = "Région", 
+       y = "Pourcentage", 
+       fill = "Catégorie SCA") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Si le nombre de départements est élevé, limiter l'affichage aux principaux départements
+if (nrow(stats_par_departement) > 15) {
+  top_departements <- stats_par_departement %>%
+    arrange(desc(n)) %>%
+    head(15)
+  
+  ggplot(top_departements, aes(x = reorder(as.factor(admin2), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient(low = "red", high = "green") +
+    labs(title = "Score de Consommation Alimentaire moyen par département (top 15)",
+         x = "Département", 
+         y = "SCA moyen") +
+    theme_minimal()
+} else {
+  ggplot(stats_par_departement, aes(x = reorder(as.factor(admin2), sca_moyen), y = sca_moyen, fill = sca_moyen)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_fill_gradient(low = "red", high = "green") +
+    labs(title = "Score de Consommation Alimentaire moyen par département",
+         x = "Département", 
+         y = "SCA moyen") +
+    theme_minimal()
+}
+```
+
+### 1.5. Analyse du SCA selon le statut de déplacement
+
+```{r }
+# Analyse du SCA selon le groupe de population (réfugiés vs. communautés d'accueil)
+stats_par_statut <- sca_data %>%
+  group_by(Intro_07_1) %>%
+  summarise(
+    sca_moyen = mean(sca_total, na.rm = TRUE),
+    sca_median = median(sca_total, na.rm = TRUE),
+    sca_ecart_type = sd(sca_total, na.rm = TRUE),
+    n = n(),
+    pct_pauvre_21_35 = mean(categorie_sca_21_35 == "Pauvre", na.rm = TRUE) * 100,
+    pct_limite_21_35 = mean(categorie_sca_21_35 == "Limite", na.rm = TRUE) * 100,
+    pct_acceptable_21_35 = mean(categorie_sca_21_35 == "Acceptable", na.rm = TRUE) * 100
+  )
+
+# Afficher les résultats par statut de déplacement
+knitr::kable(stats_par_statut, 
+             caption = "Score de Consommation Alimentaire par statut de déplacement", 
+             digits = 1)
+
+# Boîte à moustaches du SCA par statut de déplacement
+ggplot(sca_data, aes(x = factor(Intro_07_1), y = sca_total, fill = factor(Intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution du SCA par statut de déplacement",
+       x = "Statut", 
+       y = "Score de Consommation Alimentaire") +
+  theme_minimal()
+
+# Test statistique pour comparer les moyennes (si plus de 2 groupes)
+if (length(unique(na.omit(sca_data$Intro_07_1))) > 1) {
+  cat("Test ANOVA pour comparer les moyennes du SCA entre les groupes:\n")
+  print(summary(aov(sca_total ~ factor(Intro_07_1), data = sca_data)))
+}
+
+# Tableau croisé des catégories SCA par statut de déplacement
+tableau_croise <- table(sca_data$Intro_07_1, sca_data$categorie_sca_21_35)
+prop_tableau <- prop.table(tableau_croise, margin = 1) * 100
+
+# Convertir en dataframe pour ggplot
+df_tableau <- as.data.frame(prop_tableau)
+colnames(df_tableau) <- c("Statut", "Categorie_SCA", "Proportion")
+
+# Graphique à barres empilées
+ggplot(df_tableau, aes(x = Statut, y = Proportion, fill = Categorie_SCA)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("Pauvre" = "red", "Limite" = "orange", "Acceptable" = "green")) +
+  labs(title = "Répartition des catégories de SCA par statut de déplacement (seuils 21/35)",
+       x = "Statut", 
+       y = "Pourcentage", 
+       fill = "Catégorie SCA") +
+  theme_minimal()
+
+```
+
+
+# V L'indice réduit des stratégies de survie (rCSI)
+
+L'indice réduit des stratégies de survie (rCSI) est un indicateur qui mesure les comportements d'adaptation que les ménages adoptent lorsqu'ils n'ont pas accès à suffisamment de nourriture. Il est basé sur un ensemble de cinq stratégies de survie communes liées à la consommation alimentaire. Un score plus élevé indique une plus grande insécurité alimentaire.
+
+## 1. Analyse descriptive des variables qui composent le rCSI
+
+Les cinq stratégies d'adaptation communes utilisées pour calculer le rCSI sont:
+
+1. Consommer des aliments moins préférés et moins chers (Food02a)
+2. Emprunter de la nourriture ou compter sur l'aide de proches (Food05a)
+3. Limiter la taille des portions au moment des repas (Food06a)
+4. Réduire le nombre de repas par jour (Food08a)
+5. Réduire la consommation des adultes pour nourrir les enfants (Food07a)
+
+```{r }
+# Identifier les variables du rCSI dans le jeu de données
+variables_rcsi <- c(
+  "Food02a",  # Consommer des aliments moins préférés et moins chers
+  "Food05a",  # Emprunter de la nourriture ou compter sur l'aide
+  "Food06a",  # Limiter la taille des portions
+  "Food08a",  # Réduire le nombre de repas par jour
+  "Food07a"   # Réduire la consommation des adultes pour les enfants
+)
+
+# Créer un dataframe avec les variables du rCSI et des informations géographiques
+rcsi_data <- base_principale %>%
+  select(ID, Intro_07_1, admin1, admin2, Intro_09, all_of(variables_rcsi))
+
+# Afficher la structure des variables
+str(rcsi_data[, variables_rcsi])
+
+# Vérifier les valeurs possibles pour chaque variable
+for (var in variables_rcsi) {
+  if (var %in% names(rcsi_data)) {
+    cat("Variable:", var, "\n")
+    print(table(rcsi_data[[var]], useNA = "ifany"))
+    cat("\n")
+  }
+}
+
+# Statistiques descriptives des variables originales
+rcsi_summary <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi), 
+                   list(
+                     n_oui = ~sum(. == 1, na.rm = TRUE),
+                     n_non = ~sum(. == 0, na.rm = TRUE),
+                     pct_oui = ~mean(. == 1, na.rm = TRUE) * 100,
+                     n_manquants = ~sum(is.na(.))
+                   )))
+
+# Afficher les statistiques
+rcsi_summary %>%
+  pivot_longer(cols = everything(),
+               names_to = c("variable", "stat"),
+               names_pattern = "(.*)_(.*)") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  knitr::kable(caption = "Statistiques descriptives des variables du rCSI")
+
+# Visualisation de la proportion de ménages utilisant chaque stratégie
+rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi),
+               names_to = "strategie",
+               values_to = "reponse") %>%
+  filter(!is.na(reponse)) %>%
+  group_by(strategie) %>%
+  summarise(pourcentage_oui = mean(reponse == 1, na.rm = TRUE) * 100) %>%
+  mutate(strategie = case_when(
+    strategie == "Food02a" ~ "Aliments moins préférés",
+    strategie == "Food05a" ~ "Emprunter nourriture",
+    strategie == "Food06a" ~ "Limiter portions",
+    strategie == "Food08a" ~ "Réduire repas",
+    strategie == "Food07a" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = reorder(strategie, pourcentage_oui), y = pourcentage_oui, fill = strategie)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Pourcentage de ménages utilisant chaque stratégie de survie",
+       x = "Stratégie", 
+       y = "Pourcentage (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## 2. Création et analyse de nouvelles variables numériques pour le rCSI
+
+```{r}
+# Définir une fonction pour générer aléatoirement des valeurs entre 1 et 7 si oui, sinon 0
+set.seed(123) # Pour la reproductibilité
+
+# Création des nouvelles variables
+rcsi_data <- rcsi_data %>%
+  mutate(
+    Food02a_num = ifelse(Food02a == 1, sample(1:7, n(), replace = TRUE), 0),
+    Food05a_num = ifelse(Food05a == 1, sample(1:7, n(), replace = TRUE), 0),
+    Food06a_num = ifelse(Food06a == 1, sample(1:7, n(), replace = TRUE), 0),
+    Food08a_num = ifelse(Food08a == 1, sample(1:7, n(), replace = TRUE), 0),
+    Food07a_num = ifelse(Food07a == 1, sample(1:7, n(), replace = TRUE), 0)
+  )
+
+# Définir les nouvelles variables numériques
+variables_rcsi_num <- c(
+  "Food02a_num",
+  "Food05a_num",
+  "Food06a_num",
+  "Food08a_num",
+  "Food07a_num"
+)
+
+# Statistiques descriptives sur les nouvelles variables
+rcsi_num_stats <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi_num), 
+                   list(
+                     moyenne = ~mean(., na.rm = TRUE),
+                     mediane = ~median(., na.rm = TRUE),
+                     ecart_type = ~sd(., na.rm = TRUE),
+                     min = ~min(., na.rm = TRUE),
+                     max = ~max(., na.rm = TRUE)
+                   )))
+
+# Afficher les statistiques
+rcsi_num_stats %>%
+  pivot_longer(cols = everything(),
+               names_to = c("variable", "stat"),
+               names_pattern = "(.*)_(.*)") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  knitr::kable(caption = "Statistiques descriptives des nouvelles variables numériques du rCSI")
+
+# Visualisation de la distribution des nouvelles variables
+rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi_num),
+               names_to = "strategie",
+               values_to = "frequence") %>%
+  mutate(strategie = case_when(
+    strategie == "Food02a_num" ~ "Aliments moins préférés",
+    strategie == "Food05a_num" ~ "Emprunter nourriture",
+    strategie == "Food06a_num" ~ "Limiter portions",
+    strategie == "Food08a_num" ~ "Réduire repas",
+    strategie == "Food07a_num" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = frequence, fill = strategie)) +
+  geom_histogram(binwidth = 1, position = "dodge") +
+  facet_wrap(~ strategie) +
+  labs(title = "Distribution des fréquences pour chaque stratégie",
+       x = "Fréquence (jours)", 
+       y = "Nombre de ménages") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## 3. Calcul de l'indice réduit des stratégies de survie (rCSI)
+
+```{r}
+# Tableau des poids attribués à chaque stratégie (somme = 21)
+poids_rcsi <- data.frame(
+  strategie = c("Aliments moins préférés", "Emprunter nourriture", 
+                "Limiter portions", "Réduire repas", 
+                "Adultes mangent moins"),
+  variable = c("Food02a_num", "Food05a_num", 
+               "Food06a_num", "Food08a_num", 
+               "Food07a_num"),
+  poids = c(2, 2, 3, 7, 7)
+)
+
+# Vérifier que la somme des poids est égale à 21
+sum(poids_rcsi$poids)
+
+# Afficher le tableau des poids
+knitr::kable(poids_rcsi, caption = "Poids attribués aux stratégies pour le calcul du rCSI")
+
+# Calculer le rCSI pour chaque ménage
+rcsi_data <- rcsi_data %>%
+  mutate(
+    rcsi_aliments = Food02a_num * 2,
+    rcsi_emprunt = Food05a_num * 2,
+    rcsi_portions = Food06a_num * 3,
+    rcsi_repas = Food08a_num * 7,
+    rcsi_adultes = Food07a_num * 7,
+    rcsi_total = rcsi_aliments + rcsi_emprunt + rcsi_portions + rcsi_repas + rcsi_adultes
+  )
+
+# Statistiques descriptives du rCSI
+summary(rcsi_data$rcsi_total)
+
+# Histogramme du rCSI
+ggplot(rcsi_data, aes(x = rcsi_total)) +
+  geom_histogram(binwidth = 5, fill = "darkred", color = "black", alpha = 0.7) +
+  labs(title = "Distribution de l'indice réduit des stratégies de survie (rCSI)",
+       x = "rCSI",
+       y = "Fréquence") +
+  theme_minimal()
+
+# Catégorisation du niveau de stress alimentaire basé sur le rCSI
+rcsi_data <- rcsi_data %>%
+  mutate(
+    categorie_rcsi = case_when(
+      rcsi_total < 5 ~ "Faible",
+      rcsi_total >= 5 & rcsi_total < 10 ~ "Moyen-faible",
+      rcsi_total >= 10 & rcsi_total < 20 ~ "Moyen-élevé",
+      rcsi_total >= 20 ~ "Élevé",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Répartition des ménages par catégorie de rCSI
+prop_rcsi <- rcsi_data %>%
+  group_by(categorie_rcsi) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Afficher les résultats
+knitr::kable(prop_rcsi, caption = "Répartition des ménages par niveau de stress alimentaire")
+
+# Visualisation des catégories de rCSI
+ggplot(prop_rcsi, aes(x = categorie_rcsi, y = proportion, fill = categorie_rcsi)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Répartition des ménages par niveau de stress alimentaire",
+       x = "Niveau de stress alimentaire", 
+       y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## 4. Représentation spatiale du rCSI selon le milieu de résidence
+
+```{r représentation_spatiale_rCSI _milieu_résidence}
+# Vérifier les labels pour Intro_09 (type de milieu de résidence)
+if (any(class(rcsi_data$Intro_09) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour Intro_09 (milieu de résidence):\n")
+  print(val_labels(rcsi_data$Intro_09))
+}
+
+# Statistiques par milieu de résidence
+stats_par_milieu <- rcsi_data %>%
+  group_by(Intro_09) %>%
+  summarise(
+    rcsi_moyen = mean(rcsi_total, na.rm = TRUE),
+    rcsi_median = median(rcsi_total, na.rm = TRUE),
+    rcsi_ecart_type = sd(rcsi_total, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Afficher les résultats par milieu de résidence
+knitr::kable(stats_par_milieu, 
+             caption = "rCSI moyen par milieu de résidence", 
+             digits = 1)
+
+# Visualisation du rCSI moyen par milieu de résidence
+ggplot(stats_par_milieu, aes(x = reorder(as.factor(Intro_09), rcsi_moyen), y = rcsi_moyen, fill = rcsi_moyen)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "green", high = "red") +  # Inverser les couleurs car un rCSI élevé est mauvais
+  labs(title = "Indice réduit des stratégies de survie moyen par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "rCSI moyen") +
+  theme_minimal()
+
+# Boîte à moustaches du rCSI par milieu de résidence
+ggplot(rcsi_data, aes(x = factor(Intro_09), y = rcsi_total, fill = factor(Intro_09))) +
+  geom_boxplot() +
+  labs(title = "Distribution du rCSI par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "rCSI") +
+  theme_minimal()
+
+# Proportion des catégories de rCSI par milieu de résidence
+prop_rcsi_milieu <- rcsi_data %>%
+  group_by(Intro_09, categorie_rcsi) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(Intro_09) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Visualisation des catégories de rCSI par milieu de résidence
+ggplot(prop_rcsi_milieu, aes(x = factor(Intro_09), y = proportion, fill = categorie_rcsi)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("Faible" = "green", "Moyen-faible" = "yellowgreen", 
+                              "Moyen-élevé" = "orange", "Élevé" = "red")) +
+  labs(title = "Répartition des niveaux de stress alimentaire par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "Proportion (%)", 
+       fill = "Niveau de stress") +
+  theme_minimal()
+
+# Analyser simultanément le rCSI et le SCA par milieu de résidence (si disponible)
+if (exists("sca_data")) {
+  # Joindre les données rCSI et SCA
+  securite_alimentaire <- rcsi_data %>%
+    select(ID, Intro_09, rcsi_total, categorie_rcsi) %>%
+    left_join(sca_data %>% select(ID, sca_total, categorie_sca_21_35), by = "ID")
+  
+  # Calculer les moyennes par milieu de résidence
+  stats_securite_milieu <- securite_alimentaire %>%
+    group_by(Intro_09) %>%
+    summarise(
+      rcsi_moyen = mean(rcsi_total, na.rm = TRUE),
+      sca_moyen = mean(sca_total, na.rm = TRUE),
+      n = n(),
+      .groups = "drop"
+    )
+  
+  # Visualisation comparative
+  stats_securite_milieu_long <- stats_securite_milieu %>%
+    pivot_longer(cols = c(rcsi_moyen, sca_moyen),
+                 names_to = "indicateur",
+                 values_to = "valeur")
+  
+  ggplot(stats_securite_milieu_long, aes(x = factor(Intro_09), y = valeur, fill = indicateur)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    facet_wrap(~ indicateur, scales = "free_y") +
+    labs(title = "Comparaison des indicateurs de sécurité alimentaire par milieu de résidence",
+         x = "Milieu de résidence", 
+         y = "Valeur moyenne", 
+         fill = "Indicateur") +
+    theme_minimal()
+}
+```
+
+## 5. Analyse croisée du rCSI avec d'autres variables socio-démographiques
+
+```{r analyse_croisée_rCSI}
+# Analyser le rCSI selon le groupe de population (réfugiés vs. communautés d'accueil)
+stats_rcsi_par_groupe <- rcsi_data %>%
+  group_by(Intro_07_1) %>%
+  summarise(
+    rcsi_moyen = mean(rcsi_total, na.rm = TRUE),
+    rcsi_median = median(rcsi_total, na.rm = TRUE),
+    n = n(),
+    pct_eleve = mean(categorie_rcsi == "Élevé", na.rm = TRUE) * 100,
+    .groups = "drop"
+  )
+
+# Afficher les résultats par groupe de population
+knitr::kable(stats_rcsi_par_groupe, 
+             caption = "rCSI moyen par groupe de population", 
+             digits = 1)
+
+# Visualisation du rCSI moyen par groupe de population
+ggplot(stats_rcsi_par_groupe, aes(x = factor(Intro_07_1), y = rcsi_moyen, fill = factor(Intro_07_1))) +
+  geom_bar(stat = "identity") +
+  labs(title = "rCSI moyen par groupe de population",
+       x = "Groupe de population", 
+       y = "rCSI moyen") +
+  theme_minimal()
+
+# Test ANOVA pour comparer les moyennes du rCSI entre les groupes de population
+if (length(unique(na.omit(rcsi_data$Intro_07_1))) > 1) {
+  cat("Test ANOVA pour comparer les moyennes du rCSI entre les groupes:\n")
+  print(summary(aov(rcsi_total ~ factor(Intro_07_1), data = rcsi_data)))
+}
+
+```
