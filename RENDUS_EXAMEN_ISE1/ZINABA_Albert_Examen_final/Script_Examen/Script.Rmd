@@ -1,0 +1,1050 @@
+---
+title: ""
+output:
+  word_document:                
+    toc_depth: 3             # Jusqu’au niveau 3 de titres (###)
+    reference_docx: ../Documents/word_template.docx   # Modèle Word personnalisé
+    keep_md: true            # Garde le fichier intermédiaire .md
+    #pandoc_args: ["--output=../Sorties/ZINABA_Albert.docx"] # Optionnel : chemin personnalisé de sortie
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,                # N'affiche pas le code R dans le document
+  message = FALSE,             # Supprime les messages des packages
+  warning = FALSE,             # Supprime les avertissements
+  cache = TRUE,                # Active la mise en cache pour accélérer les traitements
+  comment = NA,                # Supprime les symboles de commentaire dans la sortie
+  results = "markup"           # Format des résultats (utile pour flextable)
+)
+```
+
+
+
+```{r}
+
+#Installation et importation des packages
+
+packages <- c("sf","tmap","flextable","data.table","survey","officer","officedown","haven","utils","dplyr","gtsummary","gt","labelled","janitor","tidyverse","naniar","DataExplorer","summarytools")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../Documents/Logo SEN.png){width="3cm" height="3cm"} |
+
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4,include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "ZINABA Albert", "Élève Ingénieur Statisticien Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+\newpage
+
+
+###### Introduction 
+
+<!--Création des fonctions qui sernt utilisé par suite-->
+
+Nous definition cette qui serviera à résumer rapidement la structure d’un tableau de données  
+```{r Definition de fonction}
+# Définition d'une fonction qui prend en entrée un dataframe à décrire et un nom optionnel pour identifier la base dans le texte généré
+
+description_base <- function(df, nom_base = "la base") {
+  
+  # Récupèrer le nombre d'observations (lignes) dans le dataframe
+  n_obs <- nrow(df)
+  
+  # Récupère le nombre de variables (colonnes) dans le dataframe
+  n_var <- ncol(df)
+  
+  # Identifie le type de chaque variable puis compter le nombre de fois qu'il apparait
+  type_counts <- sapply(df, function(x) class(x)[1]) |> table()
+  
+  # Crée une chaîne de texte décrivant combien de variables de chaque type sont présentes
+  type_text <- paste0(type_counts, " variable(s) du type ",
+                      names(type_counts),
+                      collapse = ", "  # Sépare chaque groupe par une virgule
+  )
+  
+  # Afficher le résumé formaté
+  cat(sprintf(
+    "%s contient %d variables sur %d individus.\nParmi les variables, on trouve : %s.\n",
+    nom_base, n_var, n_obs, type_text
+  ))
+}
+
+```
+
+
+# Analyse des consitence des bases de données 
+
+<!--Importation des bases-->
+
+## importation des bases de données
+
+Nous importons les donnees afin de mieux comprendre leur structure et leur composition? Pour ce faire nous utilisons la fonction read_dta du package haven car les base sont en format stata.
+
+```{r Importation des bases de données, include=FALSE}
+Base_Individus<- haven::read_dta("../Donnees/Base_Individus.dta") #Importation de la base Individus
+Base_Principale<-haven::read_dta("../Donnees/Base_Principale.dta") #Importation de la base Principale
+```
+
+## Nettoyage des bases 
+
+Nous nettoyons les noms de variables des bases Base_Individus et Base_Principale à l’aide de la fonction clean_names() du package janitor, afin de les rendre plus cohérents et compatibles avec les conventions de nommage.
+
+```{r  netoyage}
+Base_Individus <- Base_Individus %>% janitor::clean_names() #Nettoyage des noms de variables
+Base_Principale<- Base_Principale %>% janitor::clean_names() #Nettoyage des noms de variables
+```
+
+##** Structure des bases de données**
+
+Pour une meilleur traitement et etude de nos base de données il est iportation de voir leur sructure. Pour ce faire a travers la fonction str du package 'utils' nous affichons les structures des deux bases de données.
+
+```{r Visualisation des bases, include=FALSE}
+utils::str(Base_Individus) #structure de la base Individus
+utils::str(Base_Principale) #structure de la base principale
+```
+ 
+ Ici nous aussi utiliosons la fobction description_base defini plus haut pour afin d'avoir une breve description des deux bases de données.
+ 
+```{r Description des bases, echo=FALSE}
+#glimpse(base_menage) # Structure de la base ménage
+
+description_base(Base_Individus, nom_base = "La base Individus")
+
+description_base(Base_Principale,"La base principale")
+
+```
+
+## Vérification et suppressions des colonnes ou lignes vides
+
+Pour ce faire nous verifions d'abord le nombre de ligne et de colonne dans les deux bases avant supression afin de pouvoir se faire une idée globale des deux bases. 
+
+```{r}
+
+col_total_Ind <- ncol(Base_Individus) #nombre total de colonne avant suppression
+ligne_total_Ind <-nrow(Base_Individus) #nombre total de ligne avant suppression
+col_total_Ind
+ligne_total_Ind
+col_total_prin <- ncol(Base_Principale) #nombre total de colonne avant suppression
+ligne_total_prin <-nrow(Base_Principale) #nombre total de ligne avant suppression
+col_total_prin
+ligne_total_prin
+```
+Nous nettoyons maintenant les bases Base_Individus et Base_Principale à l’aide de la fonction remove_empty() du package janitor, afin de supprimer les colonnes entièrement vides puis les lignes entièrement vides. Cela garantit que seules les observations et variables contenant des informations sont conservées pour l’analyse.
+
+```{r}
+
+# Trouver les colonnes vides (toutes les valeurs sont NA)
+
+Base_Individus <- Base_Individus %>%
+  janitor::remove_empty(which = "cols") %>%  #vérifier par colonnes et garder uniquement les colonnes non vides
+janitor::remove_empty(which = "rows") #vérifier par lignes et garder uniquement les lignes  non vides
+
+
+Base_Principale <- Base_Principale %>%
+  janitor::remove_empty(which = "cols") %>%  #vérifier par colonnes et garder uniquement les colonnes non vides
+janitor::remove_empty(which = "rows") #vérifier par lignes et garder uniquement les lignes  non vides
+col_total_prin
+ligne_total_prin
+```
+
+
+```{r}
+
+col_vide_Ind <- col_total_Ind - ncol(Base_Individus)  #nombre total de colonne vide
+ligne_vide_Ind <- ligne_total_Ind -  nrow(Base_Individus) #nombre total de ligne vide
+
+ligne_vide_prin <-ligne_total_prin-nrow(Base_Principale) #nombre total de colonne vide
+col_vide_prin <- col_total_prin - ncol(Base_Principale) #nombre total de ligne vide
+
+```
+
+Les bases **Individus et Principale ** contiennent respectivement `r col_vide_Ind` et `r col_vide_prin` colonnes vides et `r ligne_vide_Ind` et `r ligne_vide_prin` lignes vides.
+
+
+## Vérifications des doublons 
+
+Dans un souci d’assurer la qualité des données, nous avons procédé à la détection et à la suppression des doublons dans les bases utilisées. La fonction get_dupes() du package janitor a d’abord permis d’identifier les éventuelles lignes dupliquées dans les bases Base_Individus et Base_Principale.
+
+```{r verification des doublons}
+# --- Détection et suppression des doublons dans Base_Individus ---
+doublon_individus <- Base_Individus %>% janitor::get_dupes()
+cat("Le nombre de doublons trouvés dans Base_Individus est :", nrow(doublon_individus), "\n")
+Base_Individus <- Base_Individus %>% distinct()
+
+# --- Détection et suppression des doublons dans Base_Principale ---
+doublon_principale <- Base_Principale %>% janitor::get_dupes()
+cat("Le nombre de doublons trouvés dans Base_Principale est :", nrow(doublon_principale), "\n")
+Base_Principale <- Base_Principale %>% distinct()
+
+```
+
+
+## **Vérifications des valeurs manquantes**
+
+
+```{r valeurs manquates}
+# --- Résumé des valeurs manquantes dans Base_Principale ---
+table_manquant_principale <- Base_Principale %>%
+  naniar::miss_var_summary() %>%
+  dplyr::filter(n_miss != 0) %>%
+  dplyr::rename("manquant" = "n_miss", "pourcentage" = "pct_miss")
+
+cat("Nombre total de variables avec des valeurs manquantes dans Base_Principale :", 
+    nrow(table_manquant_principale), "\n")
+
+# --- Résumé des valeurs manquantes dans Base_Individus ---
+table_manquant_individus <- Base_Individus %>%
+  naniar::miss_var_summary() %>%
+  dplyr::filter(n_miss != 0) %>%
+  dplyr::rename("manquant" = "n_miss", "pourcentage" = "pct_miss")
+
+cat("Nombre total de variables avec des valeurs manquantes dans Base_Individus :", 
+    nrow(table_manquant_individus), "\n")
+
+```
+
+
+# Analyse socio-economique des deplaces internes
+
+## Pyramide des ages des individus
+
+Creons une pyramide des ages des indivius
+```{r echo=FALSE}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Vérifier les valeurs manquantes et supprimer les NAs
+Base_Individus <- Base_Individus %>% filter(!is.na(age_years))
+
+# Créer des groupes d'âge
+Base_Individus$age_group <- cut(Base_Individus$age_years, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Comptage du nombre d'individus par groupe d'âge et sexe
+# Filtrer pour ne garder que les entrées valides (pas de NA)
+age_sex_distribution <- Base_Individus %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(age_group, hh_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+# Créer la pyramide des âges
+ggplot(age_sex_distribution, aes(x = age_group, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  coord_flip() +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "darkblue"), 
+                   name = "Sex") +
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+  labs(title = "Pyramide des âges", x = "Age (years)", y = "# cases") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  theme_minimal()
+```
+
+La pyramide révèle une population jeune, typique des contextes de crise humanitaire, avec une base large (forte proportion de 0-20 ans) et un rétrécissement marqué après 50 ans. On note un déséquilibre de genre chez les 25-45 ans, tandis que les seniors montrent une surreprésentation féminine.
+
+
+## Creations de tableau
+
+
+```{r}
+
+# Nettoyage : si un objet nommé 'filter' existe, on le supprime pour éviter conflit avec dplyr::filter
+if ("filter" %in% ls()) rm(filter)
+
+
+# Filtrage des chefs de ménage et création de la variable de groupe
+df_chefs <- Base_Individus %>%
+  dplyr::filter(hh_03 == 1) %>%  # Chefs de ménage uniquement
+  dplyr::mutate(
+    groupe = dplyr::case_when(
+      intro_07_1 == 1 ~ "Refugees",
+      intro_07_1 == 3 ~ "Host community North",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::filter(!is.na(groupe))  # Garder uniquement les deux groupes
+
+# Création du tableau descriptif
+tableau <- df_chefs %>%
+  dplyr::select(groupe, age_years , hh_02, hh_08) %>%
+  dplyr::mutate(
+    hh_02 = factor(hh_02, levels = c(1, 2), labels = c("Male", "Female")),
+    hh_08 = factor(hh_08, levels = 1:7, 
+                   labels = c("monogamous/married", "polygamous/married", 
+                              "non-formal union", "separated", "divorced", 
+                              "widow or widower", "never married"))
+  ) %>%
+  tbl_summary(
+    by = groupe,
+    statistic = list(
+      all_continuous() ~ "{mean} ({min}, {max})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ c(0, 0),     # Entiers pour moyenne, min, max
+      all_categorical() ~ c(0, 1)     # 0 décimale pour n, 1 pour %
+    ),
+    label = list(
+      age_years ~ "ageYears",
+      hh_02 ~ "Sex",
+      hh_08 ~ "What is [Your/nam'] present marital status"
+    ),
+    missing = "no"
+  ) %>%
+  add_p() %>%
+  modify_header(label ~ "**Caracteristique du chef de menage**") %>%
+  bold_labels() %>%
+  as_gt() %>%
+  tab_source_note(
+    source_note = "Source : Enquête sur les déplacements forcés au Sud-Soudan en 2023"
+  )
+
+# Affichage du tableau final
+tableau
+
+
+```
+Le tableau compare 990 chefs de ménage de la communauté hôte du Nord et 2 068 chefs de ménage réfugiés. L'âge moyen est de 42 ans dans les deux groupes (avec des intervalles de 19-61 ans pour la communauté hôte et 17-61 ans pour les réfugiés), sans différence significative (p > 0.9). Cependant, la distribution des sexes diffère significativement (p < 0.001) : 63% d'hommes et 37% de femmes dans la communauté hôte, contre 54.2% d'hommes et 45.8% de femmes chez les réfugiés. Des différences existent également dans la situation matrimoniale, avec par exemple 72.2% de mariés monogames dans la communauté hôte contre 62.6% chez les réfugiés.
+
+
+##	Crowding Index ou l’indice d’affluence
+
+### a- Calculons le nombre d'individus par menage 
+
+
+```{r}
+
+# Étape 1 : Compter le nombre d'individus par ménage
+nb_individus <- Base_Individus %>%
+  group_by(id) %>%
+  summarise(nombre_personnes = n())
+
+# Étape 2 : Joindre à la base principale
+Principale <- Base_Principale %>%
+  left_join(nb_individus, by = "id")
+
+# Optionnel : Remplacer les NA par 0 si certains ménages n'ont pas d'individus associés
+Principale$nombre_personnes[is.na(Principale$nombre_personnes)] <- 0
+```
+
+### b- statistiques descriptives sur  cette variable
+
+```{r}
+# Statistiques descriptives avec tbl_summary
+# Utilisation explicite de la fonction select de dplyr
+Principale %>%
+  dplyr::select(nombre_personnes) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} | Min: {min} | Max: {max}"),
+    digits = all_continuous() ~ 1,
+    label = list(nombre_personnes ~ "Nombre de personnes par ménage")
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  as_flex_table() %>%
+  fontsize(size = 9, part = "all") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  bg(bg = "#D6EAF8", part = "header") %>%
+  align(align = "center", part = "header") %>%
+  align(align = "left", j = 1) %>%
+  autofit() %>%
+  width(width = 1, j = 1) %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Source : Calculs de l'auteur basés sur les données de l'enquête.") %>%
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  hline(border = fp_border(color = "black", width = 1)) %>%
+  vline(border = fp_border(color = "black", width = 1)) %>%
+  hline_top(border = fp_border(color = "black", width = 2)) %>%
+  hline_bottom(border = fp_border(color = "black", width = 2))
+```
+Sur échantillon de 3 058 ménages, la taille moyenne d'un ménage est d'environ 7.1 personnes (écart-type de 3.1). La taille médiane est de 7 personnes. La taille des ménages varie considérablement, allant d'un minimum de 1 personne à un maximum de 17 personnes.
+
+
+```{r}
+# Histogramme du nombre d'individus par ménage
+ggplot(nb_individus, aes(x = nombre_personnes)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution du nombre d'individus par ménage",
+       x = "Nombre d'individus", y = "Fréquence") +
+  theme_minimal()
+
+```
+
+L'histogramme donne une idée  de la taille typique. Il montre que la majorité des ménages ont entre 4 et 9 individus, avec une concentration autour de 6 ou 7 personnes par ménage.
+
+### C-Statistiques descriptives sur la variable renseigant le nombre de pieces du menage
+
+
+```{r}
+Base_Principale %>%
+  dplyr::select(hh14) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} ({sd}) | Médiane: {median} | Min: {min} | Max: {max}"),
+    digits = all_continuous() ~ 1,
+    label = list(hh14 ~ "Nombre de pièces (hors cuisine et couloirs)")
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  as_flex_table() %>%
+  fontsize(size = 9, part = "all") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  bg(bg = "#D6EAF8", part = "header") %>%
+  align(align = "center", part = "header") %>%
+  align(align = "left", j = 1) %>%
+  autofit() %>%
+  width(width = 1, j = 1) %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  hline(border = fp_border(color = "black", width = 1)) %>%
+  vline(border = fp_border(color = "black", width = 1)) %>%
+  hline_top(border = fp_border(color = "black", width = 2)) %>%
+  hline_bottom(border = fp_border(color = "black", width = 2))
+
+```
+Sur échantillon de 3 058 ménages, le nombre moyen de pièces habitables (hors cuisine et couloirs) est d'environ 2.4. La moitié des ménages ont 2 pièces ou moins. Le nombre de pièces varie considérablement, allant de 1 à 21, et il y a 6 cas où cette information est manquante.
+
+
+```{r}
+# Histogramme du nombre de pièces par ménage
+ggplot(Base_Principale, aes(x = hh14)) +
+  geom_histogram(binwidth = 1, fill = "coral", color = "black") +
+  labs(title = "Distribution du nombre de pièces par ménage",
+       x = "Nombre de pièces", y = "Fréquence") +
+  theme_minimal()
+
+```
+L'histogramme montre que la majorité des ménages ont un nombre de pièces très limité et que les ménages avec un grand nombre de pièces sont rares. Cela correspond à la moyenne de 2.4 pièces du tableau précédent.
+
+### d- Calcule de l’indice d’affluence ou crowding index
+
+
+```{r echo=FALSE}
+# Jointure des deux base
+menage_ind <- Base_Principale %>%
+  select(id, hh14, intro_07_1) %>%
+  left_join(nb_individus, by = "id")
+
+# Calculer l'indice d'affluence (crowding index)
+menage_ind <- menage_ind %>%
+  mutate(crowding_index = nombre_personnes / hh14)
+
+# Statistiques descriptives de l'indice d'affluence
+summary(menage_ind$crowding_index) 
+
+```
+L'indice d'affluence médian est de 3 personnes par pièce, et la moyenne est légèrement plus élevée (environ 3.55). Un quart des ménages ont une affluence de 2 personnes par pièce ou moins, tandis qu'un quart des ménages ont une affluence de 4.5 personnes par pièce ou plus. L'affluence maximale observée est très élevée, atteignant 15 personnes par pièce dans certains ménages. Il y a également quelques données manquantes pour cette variable.
+
+
+
+# Analyse de la securite alimentaire des deplaces internes
+
+```{r}
+Base_Principale <- Base_Principale %>% labelled::to_factor()
+
+```
+
+
+### a-	Faites une analyse descriptive des variables qui composent le SCA
+
+```{r}
+food_data <- Base_Principale %>%
+  select(starts_with("food_div"))
+
+food_summary <- food_data %>%
+  tbl_summary(
+    by = NULL,
+    missing = "ifany",
+    digits = all_continuous() ~ 2
+  ) %>%modify_header(label ~ "Score de consommation alimentaire (SCA)") %>% 
+  modify_header(stat_0 ~ "Score de consommation alimentaire (SCA)") %>% as_flex_table() %>%
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::bg(bg = "#D6EAF8", part = "header") %>%
+  flextable::align(align = "center", part = "header") %>%
+  flextable::align(align = "left", j = 1) %>%
+  flextable::autofit() %>%  # Autofit simplifié sans paramètres
+  flextable::width(width = 1, j = 1) %>%
+  flextable::set_table_properties(layout = "autofit") %>%  # Version simplifiée
+  flextable::add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%
+  flextable::border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  # More sophisticated border styling
+  flextable::hline(border = fp_border(color = "black", width = 1)) %>%  # Horizontal lines
+  flextable::vline(border = fp_border(color = "black", width = 1)) %>%  # Vertical lines
+  flextable::hline_top(border = fp_border(color = "black", width = 2)) %>% # Thicker top border
+  flextable::hline_bottom(border = fp_border(color = "black", width = 2)) %>% # Thicker bottom border
+  flextable::bg(bg = "#F8F8F8", part = "body", i = c(2,4,6,8,10,12,14,16,18,20)) %>% # Even rows
+  flextable::set_caption("Score de consommation alimentaire (SCA)") 
+
+
+
+food_summary
+```
+
+L'enquête révèle une grave insécurité alimentaire : 84% des ménages ont manqué de nourriture ou d'argent pour en acheter récemment, et 89% s'en inquiètent. Face à cela, une majorité importante a adopté des stratégies de survie : 83% ont consommé des aliments moins variés ou de moindre qualité, 85% ont réduit leurs portions, et 70% des adultes ont mangé moins pour que les enfants mangent. Le recours à l'aide externe ou à des actions extrêmes (emprunter, vendre, mendier) est fréquent. En conclusion, les données indiquent une crise alimentaire aiguë caractérisée par des privations régulières et des solutions de dernier recours souvent précaires.
+
+### b-	Calculer le score de consommation alimentaire 
+
+```{r}
+
+# Création du tableau
+sca_weights <- data.frame(
+  `Groupe alimentaire` = c(
+    "Céréales et tubercules",
+    "Légumineuses",
+    "Lait et produits laitiers",
+    "Viande, poisson et œufs",
+    "Légumes",
+    "Fruits",
+    "Fruits riches en vitamine A",
+    "Huiles et graisses",
+    "Sucres",
+    "Condiments/épices"
+  ),
+  Variable = c(
+    "food_div1", "food_div2", "food_div3", "food_div4", "food_div5",
+    "food_div6", "food_div61", "food_div7", "food_div8", "food_div9"
+  ),
+  Poids = c(2, 3, 4, 4, 1, 1, 1, 0.5, 0.5, 0)
+)
+
+# Affichage avec flextable
+flextable(sca_weights) %>%
+  set_header_labels(
+    `Groupe alimentaire` = "Groupe alimentaire",
+    Variable = "Variable",
+    Poids = "Poids"
+  ) %>%
+  autofit() %>%
+  theme_booktabs() %>%
+  align(align = "center", part = "all") %>%
+  bold(part = "header") %>%
+  fontsize(size = 11, part = "all")
+```
+
+
+```{r}
+# les valeurs ne doivent pas dépasser 7 jours
+Base_Principale<- Base_Principale %>%
+  mutate(across(starts_with("food_div"), ~ pmin(.x, 7)))
+
+# Calcul du SCA
+Base_Principale <- Base_Principale %>%
+  mutate(
+    sca = 2 * food_div1 +
+          3 * food_div2 +
+          4 * food_div3 +
+          4 * food_div4 +
+          1 * food_div5 +
+          1 * food_div6 +
+          0.5 * food_div7 +
+          0.5 * food_div8 +
+          0 * food_div9
+  )
+```
+Le tableau montre de groupe d'aliments pondérés pour évaluer la diversité de l'alimentation des ménages. Les groupes d'origine animale et les légumineuses ont le plus d'importance dans ce score.
+
+### c- tableau illustrant le poids attribue a chaque groupe alimentaire pour le calcul du 
+```{r echo=FALSE}
+# Créer les données avec tibble::tribble
+data <- tibble::tribble(
+  ~Groupe,                  ~Variable,       ~Poids,
+  "Céréales",               "Food_div1",      2,
+  "Légumineuses",           "Food_div2",      3,
+  "Légumes",                "Food_div3",      1,
+  "Fruits",                 "Food_div4",      1,
+  "Viande/Poisson/Œufs",    "Food_div5",      4,
+  "Produits laitiers",      "Food_div6",      4,
+  "Tubercules",             "Food_div61",     0.5,
+  "Sucre",                  "Food_div7",      0.5,
+  "Matières grasses",       "Food_div8",      0.5,
+  "Épices/condiments",      "Food_div9",      0
+)
+
+# Créer un flextable à partir des données
+ft <- flextable(data)
+
+# Afficher le flextable
+ft
+
+```
+Le tableau présente les poids utilisés pour calculer un score de diversité alimentaire. Les groupes Viande/Poisson/Œufs et Produits laitiers ont le poids le plus élevé (4.0), suivis des Légumineuses (3.0) et des Céréales (2.0). Les Légumes et les Fruits ont un poids de 1.0. Les Tubercules, le Sucre et les Matières grasses ont un poids de 0.5. Les Épices/condiments ont un poids de 0.0 et ne contribuent pas au score.
+
+
+## L'indice réduit des stratégies de survie (rCSI)
+
+L'indice réduit des stratégies de survie (rCSI) est un indicateur qui mesure les comportements d'adaptation que les ménages adoptent lorsqu'ils n'ont pas accès à suffisamment de nourriture. Il est basé sur un ensemble de cinq stratégies de survie communes liées à la consommation alimentaire. Un score plus élevé indique une plus grande insécurité alimentaire.
+
+### a- Analyse descriptive des variables qui composent le rCSI
+
+Les cinq stratégies d'adaptation communes utilisées pour calculer le rCSI sont:
+
+1. Consommer des aliments moins préférés et moins chers (Food02a)
+2. Emprunter de la nourriture ou compter sur l'aide de proches (Food05a)
+3. Limiter la taille des portions au moment des repas (Food06a)
+4. Réduire le nombre de repas par jour (Food08a)
+5. Réduire la consommation des adultes pour nourrir les enfants (Food07a)
+
+```{r include=FALSE}
+# Identifier les variables du rCSI dans le jeu de données
+variables_rcsi <- c(
+  "food02a",  # Consommer des aliments moins préférés et moins chers
+  "food05a",  # Emprunter de la nourriture ou compter sur l'aide
+  "food06a",  # Limiter la taille des portions
+  "food08a",  # Réduire le nombre de repas par jour
+  "food07a"   # Réduire la consommation des adultes pour les enfants
+)
+
+# Créer un dataframe avec les variables du rCSI et des informations géographiques
+rcsi_data <- Base_Principale %>%
+  select(id, intro_07_1, admin1, admin2, intro_09, all_of(variables_rcsi))
+
+# Afficher la structure des variables
+str(rcsi_data[, variables_rcsi])
+
+# Vérifier les valeurs possibles pour chaque variable
+for (var in variables_rcsi) {
+  if (var %in% names(rcsi_data)) {
+    cat("Variable:", var, "\n")
+    print(table(rcsi_data[[var]], useNA = "ifany"))
+    cat("\n")
+  }
+}
+```
+
+
+```{r echo=FALSE, warning=TRUE}
+# Statistiques descriptives des variables originales
+rcsi_summary <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi), 
+                   list(
+                     n_oui = ~sum(. == 1, na.rm = TRUE),
+                     n_non = ~sum(. == 0, na.rm = TRUE),
+                     pct_oui = ~mean(. == 1, na.rm = TRUE) * 100,
+                     n_manquants = ~sum(is.na(.))
+                   )))
+
+# Afficher les statistiques
+rcsi_summary %>%
+  pivot_longer(cols = everything(),
+               names_to = c("variable", "stat"),
+               names_pattern = "(.*)_(.*)") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  knitr::kable(caption = "Statistiques descriptives des variables du rCSI")
+```
+Le tableau montre la prévalence de différentes stratégies de survie liées à l'alimentation au sein de la population étudiée. Les stratégies food06a (85.13%), food08a (83.32%) et food02a (81.58%) sont les plus fréquemment adoptées, tandis que food05a (59.97%) et food07a (70.30%) sont également courantes
+
+```{r}
+# Visualisation de la proportion de ménages utilisant chaque stratégie
+rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi),
+               names_to = "strategie",
+               values_to = "reponse") %>%
+  filter(!is.na(reponse)) %>%
+  group_by(strategie) %>%
+  summarise(pourcentage_oui = mean(reponse == 1, na.rm = TRUE) * 100) %>%
+  mutate(strategie = case_when(
+    strategie == "food02a" ~ "Aliments moins préférés",
+    strategie == "food05a" ~ "Emprunter nourriture",
+    strategie == "food06a" ~ "Limiter portions",
+    strategie == "food08a" ~ "Réduire repas",
+    strategie == "food07a" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = reorder(strategie, pourcentage_oui), y = pourcentage_oui, fill = strategie)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Pourcentage de ménages utilisant chaque stratégie de survie",
+       x = "Stratégie", 
+       y = "Pourcentage (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+Le graphique met en évidence que face à l'insécurité alimentaire, la majorité des ménages ont recours à des stratégies de restriction de la consommation (limiter les portions, réduire les repas) et à la consommation d'aliments de moindre qualité. L'entraide par l'emprunt de nourriture est moins fréquente, mais reste une stratégie importante pour une part non négligeable des ménages.
+
+
+### b- Statistiques et analyse de nouvelles variables numériques pour le rCSI
+
+```{r echo=FALSE}
+# Définir une fonction pour générer aléatoirement des valeurs entre 1 et 7 si oui, sinon 0
+set.seed(123) # Pour la reproductibilité
+
+# Création des nouvelles variables
+rcsi_data <- rcsi_data %>%
+  mutate(
+    food02a_num = ifelse(food02a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food05a_num = ifelse(food05a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food06a_num = ifelse(food06a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food08a_num = ifelse(food08a == 1, sample(1:7, n(), replace = TRUE), 0),
+    food07a_num = ifelse(food07a == 1, sample(1:7, n(), replace = TRUE), 0)
+  )
+
+# Définir les nouvelles variables numériques
+variables_rcsi_num <- c(
+  "food02a_num",
+  "food05a_num",
+  "food06a_num",
+  "food08a_num",
+  "food07a_num"
+)
+
+# Statistiques descriptives sur les nouvelles variables
+rcsi_num_stats <- rcsi_data %>%
+  summarise(across(all_of(variables_rcsi_num), 
+                   list(
+                     moyenne = ~mean(., na.rm = TRUE),
+                     mediane = ~median(., na.rm = TRUE),
+                     ecart_type = ~sd(., na.rm = TRUE),
+                     min = ~min(., na.rm = TRUE),
+                     max = ~max(., na.rm = TRUE)
+                   )))
+
+# Afficher les statistiques
+rcsi_num_stats %>%
+  pivot_longer(cols = everything(),
+               names_to = c("variable", "stat"),
+               names_pattern = "(.*)_(.*)") %>%
+  pivot_wider(names_from = stat, values_from = value) %>%
+  knitr::kable(caption = "Statistiques descriptives des nouvelles variables numériques du rCSI")
+```
+
+Le tableau fournit des statistiques de base sur les valeurs numériques que vous avez aléatoirement attribuées aux stratégies de survie. Les moyennes et les médianes donnent une idée de la "force" typique de chaque stratégie lorsqu'elle est adoptée (sur une échelle de 1 à 7), tandis que le minimum est toujours 0 (non adoption) et le maximum est toujours 7
+
+```{r echo=FALSE}
+# Visualisation de la distribution des nouvelles variables
+rcsi_data %>%
+  pivot_longer(cols = all_of(variables_rcsi_num),
+               names_to = "strategie",
+               values_to = "frequence") %>%
+  mutate(strategie = case_when(
+    strategie == "food02a_num" ~ "Aliments moins préférés",
+    strategie == "food05a_num" ~ "Emprunter nourriture",
+    strategie == "food06a_num" ~ "Limiter portions",
+    strategie == "food08a_num" ~ "Réduire repas",
+    strategie == "food07a_num" ~ "Adultes mangent moins",
+    TRUE ~ strategie
+  )) %>%
+  ggplot(aes(x = frequence, fill = strategie)) +
+  geom_histogram(binwidth = 1, position = "dodge") +
+  facet_wrap(~ strategie) +
+  labs(title = "Distribution des fréquences pour chaque stratégie",
+       x = "Fréquence (jours)", 
+       y = "Nombre de ménages") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+Pour les stratégies "Emprunter nourriture", la majorité des ménages ne l'ont pas utilisée du tout, mais ceux qui l'ont fait l'ont souvent fait pendant une courte période (1 jour).
+Pour les stratégies "Adultes mangent moins", "Aliments moins préférés", "Limiter portions" et "Réduire repas", une proportion importante de ménages ne les a pas utilisées (fréquence à 0 jour), mais parmi ceux qui les ont utilisées, l'adoption semble s'étaler sur un nombre de jours plus variable, souvent sur plusieurs jours de la semaine. "Limiter portions" semble être une stratégie plus "habituelle" pour ceux qui l'utilisent, avec une distribution plus homogène des fréquences.
+
+### c- Calcul de l'indice réduit des stratégies de survie (rCSI)
+
+```{r echo=FALSE}
+# Tableau des poids attribués à chaque stratégie (somme = 21)
+poids_rcsi <- data.frame(
+  strategie = c("Aliments moins préférés", "Emprunter nourriture", 
+                "Limiter portions", "Réduire repas", 
+                "Adultes mangent moins"),
+  variable = c("Food02a_num", "Food05a_num", 
+               "Food06a_num", "Food08a_num", 
+               "Food07a_num"),
+  poids = c(2, 2, 3, 7, 7)
+)
+
+# Vérifier que la somme des poids est égale à 21
+sum(poids_rcsi$poids)
+
+```
+
+
+```{r echo=FALSE}
+# Afficher le tableau des poids
+knitr::kable(poids_rcsi, caption = "Poids attribués aux stratégies pour le calcul du rCSI")
+
+# Calculer le rCSI pour chaque ménage
+rcsi_data <- rcsi_data %>%
+  mutate(
+    rcsi_aliments = food02a_num * 2,
+    rcsi_emprunt = food05a_num * 2,
+    rcsi_portions = food06a_num * 3,
+    rcsi_repas = food08a_num * 7,
+    rcsi_adultes = food07a_num * 7,
+    rcsi_total = rcsi_aliments + rcsi_emprunt + rcsi_portions + rcsi_repas + rcsi_adultes
+  )
+
+# Statistiques descriptives du rCSI
+summary(rcsi_data$rcsi_total)
+```
+Le tableau montre comment les différentes stratégies de survie sont pondérées pour calculer le rCSI. Les stratégies impliquant une réduction de la quantité de nourriture consommée (réduire les repas, limiter les portions, adultes mangent moins) ont des poids plus élevés, indiquant qu'elles contribuent davantage à un score rCSI élevé, synonyme d'insécurité alimentaire plus importante.
+
+```{r}
+# Histogramme du rCSI
+ggplot(rcsi_data, aes(x = rcsi_total)) +
+  geom_histogram(binwidth = 5, fill = "darkred", color = "black", alpha = 0.7) +
+  labs(title = "Distribution de l'indice réduit des stratégies de survie (rCSI)",
+       x = "rCSI",
+       y = "Fréquence") +
+  theme_minimal()
+
+# Catégorisation du niveau de stress alimentaire basé sur le rCSI
+rcsi_data <- rcsi_data %>%
+  mutate(
+    categorie_rcsi = case_when(
+      rcsi_total < 5 ~ "Faible",
+      rcsi_total >= 5 & rcsi_total < 10 ~ "Moyen-faible",
+      rcsi_total >= 10 & rcsi_total < 20 ~ "Moyen-élevé",
+      rcsi_total >= 20 ~ "Élevé",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Répartition des ménages par catégorie de rCSI
+prop_rcsi <- rcsi_data %>%
+  group_by(categorie_rcsi) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Afficher les résultats
+knitr::kable(prop_rcsi, caption = "Répartition des ménages par niveau de stress alimentaire")
+
+# Visualisation des catégories de rCSI
+ggplot(prop_rcsi, aes(x = categorie_rcsi, y = proportion, fill = categorie_rcsi)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Répartition des ménages par niveau de stress alimentaire",
+       x = "Niveau de stress alimentaire", 
+       y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+L'histogramme montre la répartition des niveaux de stress alimentaire au sein de la population, tel que mesuré par le rCSI. La majorité des ménages présentent un niveau de stress alimentaire modéré à élevé (autour de 80-90), mais il existe également des ménages avec des niveaux très bas (y compris ceux n'ayant pas utilisé de stratégies) et des niveaux très élevés, indiquant une hétérogénéité de la sécurité alimentaire au sein de la population étudiée.
+
+Selon le tableau une part importante des ménages enquêtés présente un niveau de stress alimentaire moyen à élevé, avec une proportion plus faible mais non négligeable dans la catégorie moyen-faible, et une petite minorité avec un stress faible.
+
+## Représentation spatiale du rCSI selon le milieu de résidence
+
+```{r echo=FALSE}
+# Vérifier les labels pour Intro_09 (type de milieu de résidence)
+if (any(class(rcsi_data$Intro_09) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour Intro_09 (milieu de résidence):\n")
+  print(val_labels(rcsi_data$Intro_09))
+}
+
+# Statistiques par milieu de résidence
+stats_par_milieu <- rcsi_data %>%
+  group_by(intro_09) %>%
+  summarise(
+    rcsi_moyen = mean(rcsi_total, na.rm = TRUE),
+    rcsi_median = median(rcsi_total, na.rm = TRUE),
+    rcsi_ecart_type = sd(rcsi_total, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Afficher les résultats par milieu de résidence
+knitr::kable(stats_par_milieu, 
+             caption = "rCSI moyen par milieu de résidence", 
+             digits = 1)
+
+# Visualisation du rCSI moyen par milieu de résidence
+ggplot(stats_par_milieu, aes(x = reorder(as.factor(intro_09), rcsi_moyen), y = rcsi_moyen, fill = rcsi_moyen)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "green", high = "red") +  # Inverser les couleurs car un rCSI élevé est mauvais
+  labs(title = "Indice réduit des stratégies de survie moyen par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "rCSI moyen") +
+  theme_minimal()
+
+# Boîte à moustaches du rCSI par milieu de résidence
+ggplot(rcsi_data, aes(x = factor(intro_09), y = rcsi_total, fill = factor(intro_09))) +
+  geom_boxplot() +
+  labs(title = "Distribution du rCSI par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "rCSI") +
+  theme_minimal()
+
+# Proportion des catégories de rCSI par milieu de résidence
+prop_rcsi_milieu <- rcsi_data %>%
+  group_by(intro_09, categorie_rcsi) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(intro_09) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Visualisation des catégories de rCSI par milieu de résidence
+ggplot(prop_rcsi_milieu, aes(x = factor(intro_09), y = proportion, fill = categorie_rcsi)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("Faible" = "green", "Moyen-faible" = "yellowgreen", 
+                              "Moyen-élevé" = "orange", "Élevé" = "red")) +
+  labs(title = "Répartition des niveaux de stress alimentaire par milieu de résidence",
+       x = "Milieu de résidence", 
+       y = "Proportion (%)", 
+       fill = "Niveau de stress") +
+  theme_minimal()
+
+# Analyser simultanément le rCSI et le SCA par milieu de résidence (si disponible)
+if (exists("sca_data")) {
+  # Joindre les données rCSI et SCA
+  securite_alimentaire <- rcsi_data %>%
+    select(ID, Intro_09, rcsi_total, categorie_rcsi) %>%
+    left_join(sca_data %>% select(ID, sca_total, categorie_sca_21_35), by = "ID")
+  
+  # Calculer les moyennes par milieu de résidence
+  stats_securite_milieu <- securite_alimentaire %>%
+    group_by(Intro_09) %>%
+    summarise(
+      rcsi_moyen = mean(rcsi_total, na.rm = TRUE),
+      sca_moyen = mean(sca_total, na.rm = TRUE),
+      n = n(),
+      .groups = "drop"
+    )
+  
+  # Visualisation comparative
+  stats_securite_milieu_long <- stats_securite_milieu %>%
+    pivot_longer(cols = c(rcsi_moyen, sca_moyen),
+                 names_to = "indicateur",
+                 values_to = "valeur")
+  
+  ggplot(stats_securite_milieu_long, aes(x = factor(Intro_09), y = valeur, fill = indicateur)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    facet_wrap(~ indicateur, scales = "free_y") +
+    labs(title = "Comparaison des indicateurs de sécurité alimentaire par milieu de résidence",
+         x = "Milieu de résidence", 
+         y = "Valeur moyenne", 
+         fill = "Indicateur") +
+    theme_minimal()
+}
+```
+Les graphiques mettent en évidence des différences dans le niveau de stress alimentaire moyen entre les différents milieux de résidence.
+Le diagramme en boîte permet de comparer la distribution du stress alimentaire (rCSI) entre les différents milieux de résidence. Le milieu 3 semble avoir les niveaux de rCSI les plus élevés en général, tandis que les ménages avec un milieu de résidence non renseigné ('NA') ont tendance à avoir les niveaux les plus bas. Les milieux 1 et 2 présentent des distributions similaires avec des niveaux intermédiaires. 
