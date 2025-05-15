@@ -1,15 +1,15 @@
 ---
 title: ''
 output:
-  pdf_document:
-    toc_depth: '3'
-  html_document:
-    toc_depth: '3'
-    df_print: paged
   word_document:
     toc_depth: 3
     reference_docx: ../Documents/word_template.docx
     keep_md: true
+  html_document:
+    toc_depth: '3'
+    df_print: paged
+  pdf_document:
+    toc_depth: '3'
 ---
 
 ```{r setup, include=FALSE}
@@ -179,19 +179,17 @@ Ce rapport présente une analyse statistique complète réalisée dans le cadre 
 # Supprimer toutes les variables de l'environnement
 rm(list = ls())
 
-# Forcer un nettoyage de la mémoire
-gc()
+# Forcer un nettoyage de la mémoire sans afficher
+invisible(gc())
 
 ```
 
 <!--commencer-->
 
 <!---BLOCK_MULTICOL_START--->
+# Importation et Analyse de consistance des bases
 
-
-# I. Importation et Analyse de consistance des bases
-
-## 1. Importation des jeux de données
+## Importation des jeux de données
 La base Base_Individus.dta compte 144 variables pour nrow(base_individus) observations.
 Alors que la base Base_Principale.dta compte 1312 variables pour nrow(base_principale) observations.
 
@@ -200,8 +198,6 @@ Alors que la base Base_Principale.dta compte 1312 variables pour nrow(base_princ
 #importations
 base_individus <- haven::read_dta("../Donnees/Base_Individus.dta")
 base_principale <- haven::read_dta("../Donnees/Base_Principale.dta")
-View(base_individus)
-View(base_principale)
 
 ```
 
@@ -211,101 +207,123 @@ base_principale <- labelled::to_factor(base_principale)
 
 ```
 
-## 2. Analyse de consistance des bases de données
+## Analyse de consistance des bases de données
 
 Cette section vise à vérifier la qualité des données importées et à appliquer les transformations nécessaires pour assurer leur cohérence avant l'analyse. Nous utiliserons principalement les packages `janitor` et `tidyverse` pour cette tâche.
 
-### 2.1. Analyse préliminaire des bases de données
+### Analyse préliminaire des bases de données
 
 Commençons par examiner les dimensions et les caractéristiques générales de nos bases de données.
 
 ```{r}
+library(knitr)
+
 # Dimensions des bases de données
-cat("Dimensions de la base individus:", dim(base_individus), "\n")
-cat("Dimensions de la base principale:", dim(base_principale), "\n")
+cat("Dimensions de la base individus:", paste(dim(base_individus), collapse = " x "), "\n")
+cat("Dimensions de la base principale:", paste(dim(base_principale), collapse = " x "), "\n")
 
 # Vérification des valeurs manquantes par colonne
 cat("\nNombre de valeurs manquantes par colonne (top 10) - base individus:\n")
-na_count_ind <- sapply(base_individus, function(y) sum(length(which(is.na(y)))))
-head(sort(na_count_ind, decreasing = TRUE), 10)
+na_count_ind <- sapply(base_individus, function(y) sum(is.na(y)))
+# Affichage compact et lisible en tableau
+print(kable(head(sort(na_count_ind, decreasing = TRUE), 10), col.names = c("Valeurs manquantes")))
 
 cat("\nNombre de valeurs manquantes par colonne (top 10) - base principale:\n")
-na_count_prin <- sapply(base_principale, function(y) sum(length(which(is.na(y)))))
-head(sort(na_count_prin, decreasing = TRUE), 10)
+na_count_prin <- sapply(base_principale, function(y) sum(is.na(y)))
+# Affichage compact et lisible en tableau
+print(kable(head(sort(na_count_prin, decreasing = TRUE), 10), col.names = c("Valeurs manquantes")))
 
 # Pourcentage global de valeurs manquantes
-cat("\nPourcentage global de valeurs manquantes - Base Ind:",
+cat("\nPourcentage global de valeurs manquantes - base individus:",
     round(sum(is.na(base_individus)) / (nrow(base_individus) * ncol(base_individus)) * 100, 2), "%\n")
-cat("Pourcentage global de valeurs manquantes - Base Prin:",
+cat("Pourcentage global de valeurs manquantes - base principale:",
     round(sum(is.na(base_principale)) / (nrow(base_principale) * ncol(base_principale)) * 100, 2), "%\n")
+
+
 ```
 
-### 2.2 Nettoyage des bases de données avec janitor
+### Nettoyage des bases de données avec janitor
 
 Le package `janitor` offre des fonctions utiles pour nettoyer les bases de données. Appliquons quelques-unes de ces fonctions à nos bases.
 
 ```{r}
-# Vérification des colonnes vides ou presque vides dans chaque base
+library(knitr)
+
+# Colonnes presque vides (>90% NA)
 empty_cols_ind <- colnames(base_individus)[colSums(is.na(base_individus)) > 0.9 * nrow(base_individus)]
-cat("Colonnes presque vides (>90% NA) dans la base Ind:", length(empty_cols_ind), "\n")
-if(length(empty_cols_ind) > 0) head(empty_cols_ind, 10)
+cat("## Colonnes presque vides (>90% NA) dans la base individus :\n")
+cat("- Nombre :", length(empty_cols_ind), "\n")
+if (length(empty_cols_ind) > 0) {
+  cat("- Exemples :\n")
+  cat(paste0("  - ", head(empty_cols_ind, 10)), sep = "\n")
+}
 
 empty_cols_prin <- colnames(base_principale)[colSums(is.na(base_principale)) > 0.9 * nrow(base_principale)]
-cat("\nColonnes presque vides (>90% NA) dans la base Prin:", length(empty_cols_prin), "\n")
-if(length(empty_cols_prin) > 0) head(empty_cols_prin, 10)
+cat("\n## Colonnes presque vides (>90% NA) dans la base principale :\n")
+cat("- Nombre :", length(empty_cols_prin), "\n")
+if (length(empty_cols_prin) > 0) {
+  cat("- Exemples :\n")
+  cat(paste0("  - ", head(empty_cols_prin, 10)), sep = "\n")
+}
 
-# Vérification des lignes vides ou presque vides
+# Lignes presque vides (>90% NA)
 empty_rows_ind <- which(rowSums(is.na(base_individus)) > 0.9 * ncol(base_individus))
-cat("\nLignes presque vides (>90% NA) dans la base Ind:", length(empty_rows_ind), "\n")
+cat("\n## Lignes presque vides (>90% NA) dans la base individus :\n")
+cat("- Nombre :", length(empty_rows_ind), "\n")
 
 empty_rows_prin <- which(rowSums(is.na(base_principale)) > 0.9 * ncol(base_principale))
-cat("Lignes presque vides (>90% NA) dans la base Prin:", length(empty_rows_prin), "\n")
+cat("## Lignes presque vides (>90% NA) dans la base principale :\n")
+cat("- Nombre :", length(empty_rows_prin), "\n")
 
-# Standardisation des noms de colonnes
-# Nous créons des copies pour ne pas modifier les bases originales
+# Standardisation des noms de colonnes (bases originales intactes)
 base_individus_clean <- base_individus
 base_principale_clean <- base_principale
 
-# Vérification des noms de colonnes avant et après nettoyage (quelques exemples)
-cat("\nExemple de noms de colonnes avant/après nettoyage - Base Ind:\n")
-head(data.frame(original = names(base_individus), nettoyé = names(base_individus_clean)), 5)
+# Exemples de noms de colonnes affichés sous forme de tableau pour meilleure lisibilité
+cat("\n## Exemple de noms de colonnes - base individus :\n")
+example_ind <- head(data.frame(original = names(base_individus), nettoyé = names(base_individus_clean)), 5)
+print(kable(example_ind, format = "markdown"))
 
-cat("\nExemple de noms de colonnes avant/après nettoyage - Base Prin:\n")
-head(data.frame(original = names(base_principale), nettoyé = names(base_principale_clean)), 5)
+cat("\n## Exemple de noms de colonnes - base principale :\n")
+example_prin <- head(data.frame(original = names(base_principale), nettoyé = names(base_principale_clean)), 5)
+print(kable(example_prin, format = "markdown"))
+
 ```
 
-### 2.3 Suppression des colonnes et lignes inutiles
+### Suppression des colonnes et lignes inutiles
 
 Sur la base de l'analyse ci-dessus, nous pouvons décider de supprimer certaines colonnes ou lignes qui contiennent principalement des valeurs manquantes. Cependant, il est important de ne pas supprimer des données qui pourraient être pertinentes pour l'analyse.
 
 ```{r}
-# Suppression des colonnes presque vides (seuil de 95%)
+# Suppression des colonnes presque vides (>95% NA)
 base_individus_clean <- base_individus_clean %>%
-  select(where(~sum(is.na(.)) < 0.95 * nrow(base_individus_clean)))
+  select(where(~ sum(is.na(.)) < 0.95 * nrow(base_individus_clean)))
 
 base_principale_clean <- base_principale_clean %>%
-  select(where(~sum(is.na(.)) < 0.95 * nrow(base_principale_clean)))
+  select(where(~ sum(is.na(.)) < 0.95 * nrow(base_principale_clean)))
 
-# Comparaison des dimensions avant et après la suppression des colonnes
-cat("Dimensions de la base Ind avant:", dim(base_individus), "\n")
-cat("Dimensions de la base Ind après:", dim(base_individus_clean), "\n\n")
-cat("Dimensions de la base Prin avant:", dim(base_principale), "\n")
-cat("Dimensions de la base Prin après:", dim(base_principale_clean), "\n")
+# Affichage des dimensions avant/après la suppression des colonnes
+cat("## Dimensions après suppression des colonnes presque vides (>95% NA)\n")
+cat("- Base individus : avant =", paste(dim(base_individus), collapse=" x "), 
+    ", après =", paste(dim(base_individus_clean), collapse=" x "), "\n")
+cat("- Base principale : avant =", paste(dim(base_principale), collapse=" x "), 
+    ", après =", paste(dim(base_principale_clean), collapse=" x "), "\n\n")
 
-# Suppression des lignes presque vides (seuil de 95%)
+# Suppression des lignes presque vides (>95% NA)
 base_individus_clean <- base_individus_clean %>%
   filter(rowSums(is.na(.)) < 0.95 * ncol(.))
 
-Prin_clean <- base_principale_clean %>%
+base_principale_clean <- base_principale_clean %>%
   filter(rowSums(is.na(.)) < 0.95 * ncol(.))
 
-# Comparaison après la suppression des lignes
-cat("\nDimensions de la base Ind après suppression des lignes:", dim(base_individus_clean), "\n")
-cat("Dimensions de la base Prin après suppression des lignes:", dim(base_principale_clean), "\n")
+# Affichage des dimensions après suppression des lignes
+cat("## Dimensions après suppression des lignes presque vides (>95% NA)\n")
+cat("- Base individus :", paste(dim(base_individus_clean), collapse=" x "), "\n")
+cat("- Base principale :", paste(dim(base_principale_clean), collapse=" x "), "\n")
 
 ```
 
-### 2.4. Traitement des doublons
+### Traitement des doublons
 
 Vérifions s'il existe des doublons dans les bases de données.
 
@@ -316,17 +334,17 @@ duplicated_id_ind <- base_individus_clean %>%
   filter(n() > 1) %>%
   summarise(n = n())
 
-cat("Nombre de lignes avec des IDs dupliqués dans la base Ind:", nrow(duplicated_id_ind), "\n")
+cat("Nombre de lignes avec des IDs dupliqués dans la base individus:", nrow(duplicated_id_ind), "\n")
 
 # Pour la base Prin, chaque ligne devrait être unique
 duplicated_rows_prin <- base_principale_clean %>%
   janitor::get_dupes()
 
-cat("Nombre de lignes dupliquées dans la base Prin:", nrow(duplicated_rows_prin), "\n")
+cat("Nombre de lignes dupliquées dans la base principale:", nrow(duplicated_rows_prin), "\n")
 
 ```
 
-### 2.5. Cohérence entre les bases de données
+### Cohérence entre les bases de données
 
 Vérifions la cohérence entre les bases de données Ind et Prin, notamment la correspondance des identifiants.
 
@@ -341,7 +359,7 @@ cat("Nombre d'IDs dans Prin qui n'existent pas dans Ind:", length(ids_in_prin_no
 
 ```
 
-### 2.6. Traitement des valeurs aberrantes
+### Traitement des valeurs aberrantes
 
 Examinons certaines variables numériques clés pour détecter d'éventuelles valeurs aberrantes.
 
@@ -369,21 +387,44 @@ if ("ageYears" %in% names(base_individus_clean)) {
 
 ```
 
-### 2.7. Standardisation des types de données
+### Standardisation des types de données
 
 S'assurer que les variables ont le type approprié.
 
 ```{r}
-# Exemple de conversion de type pour certaines variables
-base_individus_clean <- base_individus_clean %>%
-  mutate(across(starts_with("HH") & where(is.double) & !where(is.labelled), as.integer))
+library(dplyr)
+library(haven)
+library(knitr)
 
-# Vérifier les types de données après conversion (quelques exemples)
-lapply(base_individus_clean %>% select(starts_with("HH") & where(is.integer)) %>% head(5), class)
+# Sélectionner les colonnes commençant par "HH" qui sont de type double et non labelisées
+cols_to_convert <- base_individus_clean %>% 
+  select(starts_with("HH")) %>% 
+  select(where(~is.double(.) & !is.labelled(.))) %>% 
+  names()
+
+# Conversion des colonnes sélectionnées en integer
+base_individus_clean <- base_individus_clean %>%
+  mutate(across(all_of(cols_to_convert), as.integer))
+
+# Récupération des classes des colonnes HH*
+types <- lapply(
+  base_individus_clean %>% select(starts_with("HH")),
+  class
+)
+
+# Création d'un tableau récapitulatif
+types_df <- data.frame(
+  colonne = names(types),
+  classe = sapply(types, `[`, 1),
+  row.names = NULL
+)
+
+# Affichage avec kable
+knitr::kable(types_df, caption = "Classes des colonnes HH après conversion")
 
 ```
 
-### 2.8. Résumé du nettoyage
+### Résumé du nettoyage
 
 ```{r}
 # Résumé des modifications apportées
@@ -401,24 +442,24 @@ cat("Pourcentage final de valeurs manquantes - base principale:",
 
 ```
 
-### 2.9. Finalisation des bases de données nettoyées
+### Finalisation des bases de données nettoyées
 
 Remplaçons les bases de données originales par les versions nettoyées pour la suite de l'analyse.
 
 ```{r}
-# Remplacement des bases originales
+## Remplacement des bases originales
 base_individus <- base_individus_clean
 base_principale <- base_principale_clean
 
-# Libération de la mémoire
+# Libération de la mémoire sans affichage
 rm(base_individus_clean, base_principale_clean)
-gc()
+invisible(gc())
 
 ```
 
-## 3. Exploration des données
+## Exploration des données
 
-### 3.1. Structure des bases de données
+### Structure des bases de données
 
 Pour mieux comprendre les données, examinons la structure des deux bases et les principales variables disponibles.
 
@@ -442,96 +483,99 @@ dim(base_principale)
 
 ```
 
-## 3.2. Variables catégorielles importantes
+### Variables catégorielles importantes
 
 Examinons les variables catégorielles importantes comme le sexe, le statut marital, etc.
 
-```{r }
-# Distribution des sexes avec labels si disponibles
-if (any(class(base_individus$HH_02) %in% c("haven_labelled", "labelled"))) {
-  # Afficher les labels si la variable est labellisée
-  cat("Labels pour la variable sexe:\n")
-  print(val_labels(base_individus$HH_02))
+```{r}
+# Chargement des packages
+library(dplyr)
+library(haven)
+library(flextable)
+
+# Fonction utilitaire pour générer un tableau formaté pour une variable catégorielle
+generer_table_categorielle <- function(var, nom_var) {
+  # Récupération des labels s'ils existent
+  if (any(class(var) %in% c("haven_labelled", "labelled"))) {
+    var <- as_factor(var)
+  }
+  
+  tab <- table(var, useNA = "ifany")
+  pct <- round(prop.table(tab) * 100, 2)
+  
+  df <- data.frame(
+    Modalité = names(tab),
+    Effectif = as.vector(tab),
+    `Pourcentage (%)` = as.vector(pct)
+  )
+  
+  flextable(df) %>%
+    set_caption(paste("Tableau -", nom_var)) %>%
+    autofit()
 }
 
-# Distribution des sexes (fréquence)
-sexe_table <- table(base_individus$HH_02, useNA = "always")
-sexe_table
-prop.table(sexe_table) * 100
+# Génération des tableaux pour chaque variable
+table_sexe <- generer_table_categorielle(base_individus$HH_02, "Sexe (HH_02)")
+table_matrimonial <- generer_table_categorielle(base_individus$HH_08, "État matrimonial (HH_08)")
+table_scolarisation <- generer_table_categorielle(base_individus$HH_Educ02a, "Fréquentation scolaire actuelle (HH_Educ02a)")
+table_niveau <- generer_table_categorielle(base_individus$HH_Educ03, "Niveau d'éducation actuel (HH_Educ03)")
+table_type_ecole <- generer_table_categorielle(base_individus$HH_Educ04a, "Type d'école (HH_Educ04a)")
 
-# Distribution des statuts matrimoniaux
-if (any(class(base_individus$HH_08) %in% c("haven_labelled", "labelled"))) {
-  cat("Labels pour la variable état matrimonial:\n")
-  print(val_labels(base_individus$HH_08))
-}
-
-etatmatri_table <- table(base_individus$HH_08, useNA = "always")
-etatmatri_table
-prop.table(etatmatri_table) * 100
-
-# Distribution des niveaux d'éducation
-# Plusieurs variables liées à l'éducation sont disponibles, nous allons sélectionner les plus pertinentes
-# HH_Educ02a - Actuellement à l'école
-# HH_Educ02b - A fréquenté l'école la majeure partie de l'année
-# HH_Educ03 - Quel niveau/année fréquente actuellement
-# HH_Educ04a - Type d'école fréquentée
-
-# Fréquentation scolaire actuelle
-if (any(class(base_individus$HH_Educ02a) %in% c("haven_labelled", "labelled"))) {
-  cat("Labels pour la variable fréquentation scolaire actuelle:\n")
-  print(val_labels(base_individus$HH_Educ02a))
-}
-
-educ_actuelle_table <- table(base_individus$HH_Educ02a, useNA = "always")
-educ_actuelle_table
-prop.table(educ_actuelle_table) * 100
-
-# Niveau d'éducation actuel
-if (any(class(base_individus$HH_Educ03) %in% c("haven_labelled", "labelled"))) {
-  cat("Labels pour la variable niveau d'éducation:\n")
-  print(val_labels(base_individus$HH_Educ03))
-}
-
-education_table <- table(base_individus$HH_Educ03, useNA = "always")
-education_table
-prop.table(education_table) * 100
-
-# Type d'école
-if (any(class(base_individus$HH_Educ04a) %in% c("haven_labelled", "labelled"))) {
-  cat("Labels pour la variable type d'école:\n")
-  print(val_labels(base_individus$HH_Educ04a))
-}
-
-type_ecole_table <- table(base_individus$HH_Educ04a, useNA = "always")
-type_ecole_table
-prop.table(type_ecole_table) * 100
+# Affichage des tableaux
+table_sexe
+table_matrimonial
+table_scolarisation
+table_niveau
+table_type_ecole
 
 ```
 
-## 3.3. Statistiques descriptives des variables numériques
+## Statistiques descriptives des variables numériques
 
-```{r }
-# Sélection de variables numériques intéressantes
-# Adaptez cette liste selon les variables disponibles
-vars_num <- c("ageYears")
+```{r}
+# Packages nécessaires
+library(dplyr)
+library(flextable)
 
-# Vérification des valeurs manquantes
-sapply(base_individus[vars_num], function(x) sum(is.na(x)))
+# Calcul manuel des statistiques descriptives
+age_var <- base_individus$ageYears
 
-# Statistiques descriptives pour ces variables
-base_individus %>%
-  select(all_of(vars_num)) %>%
-  summary()
+df_age <- tibble::tibble(
+  Statistique = c(
+    "Min", 
+    "1er quartile (Q1)", 
+    "Médiane", 
+    "Moyenne", 
+    "3e quartile (Q3)", 
+    "Max", 
+    "Valeurs manquantes"
+  ),
+  Valeur = c(
+    min(age_var, na.rm = TRUE),
+    quantile(age_var, 0.25, na.rm = TRUE),
+    median(age_var, na.rm = TRUE),
+    mean(age_var, na.rm = TRUE),
+    quantile(age_var, 0.75, na.rm = TRUE),
+    max(age_var, na.rm = TRUE),
+    sum(is.na(age_var))
+  ) %>% round(2)
+)
+
+# Affichage formaté en tableau avec flextable
+flextable(df_age) %>%
+  set_caption("Tableau 1. Statistiques descriptives de l'âge (ageYears)") %>%
+  autofit()
 
 ```
+
 
  <!--arreter et passer à la seconde partie-->
  
 <!---BLOCK_COLUMNBREAK--->
 
-# II. Analyse des données socio-démographiques
+# Analyse des données socio-démographiques
 
-## 1. Répartition par âge et sexe
+## Répartition par âge et sexe
 
 ```{r }
 # Histogramme des âges par sexe avec gestion de valeurs manquantes
@@ -568,7 +612,8 @@ base_individus %>%
   theme_minimal()
 
 ```
-## 2. Analyse du niveau d'éducation
+
+## Analyse du niveau d'éducation
 
 ```{r }
 # Obtention des labels d'éducation si disponibles
@@ -640,11 +685,11 @@ if("admin1" %in% names(base_individus) && "HH_Educ03" %in% names(base_individus)
 
 <!---BLOCK_MULTICOL_START--->
 
-# III Calcul et analyse du Crowding Index (Indice d'affluence)
+# Calcul et analyse du Crowding Index (Indice d'affluence)
 
 Le Crowding Index ou indice d'affluence est le rapport entre le nombre de personnes vivant dans un ménage et le nombre de pièces disponibles (à l'exclusion de la cuisine et des couloirs). Cet indice est un indicateur important des conditions de vie des ménages.
 
-## 1. Calcul du nombre d'individus par ménage
+## Calcul du nombre d'individus par ménage
 
 ```{r }
 # Compter le nombre d'individus par ménage
@@ -663,8 +708,7 @@ ggplot(nb_individus_par_menage, aes(x = nb_individus)) +
   theme_minimal()
 
 ```
-
-## 2. Statistiques descriptives sur le nombre de pièces
+## Statistiques descriptives sur le nombre de pièces
 
 ```{r }
 # Statistiques descriptives et histogramme du nombre de pièces par ménage
@@ -683,7 +727,7 @@ ggplot(base_principale %>% filter(is.finite(HH14)), aes(x = HH14)) +
 
 ```
 
-## 3. Calcul de l'indice d'affluence (Crowding Index)
+## Calcul de l'indice d'affluence (Crowding Index)
 
 ```{r }
 # Joindre les données et calculer l'indice d'affluence proprement
@@ -707,9 +751,14 @@ ggplot(menages_avec_individus %>% filter(is.finite(crowding_index), crowding_ind
   theme_minimal()
 
 ```
-## 4. Analyse de la distribution de l'indice d'affluence
 
-```{r }
+## Analyse de la distribution de l'indice d'affluence
+
+```{r, message=FALSE, warning=FALSE, error=FALSE}
+# Chargement des packages nécessaires
+library(dplyr)
+library(ggplot2)
+
 # Catégoriser l'indice d'affluence selon les seuils demandés
 menages_avec_individus <- menages_avec_individus %>%
   mutate(categorie_crowding = case_when(
@@ -723,26 +772,36 @@ menages_avec_individus <- menages_avec_individus %>%
 # Calcul des proportions par catégorie
 proportions_crowding <- menages_avec_individus %>%
   group_by(categorie_crowding) %>%
-  summarise(n = n()) %>%
+  summarise(n = n(), .groups = "drop") %>%
   mutate(proportion = n / sum(n) * 100)
 
-# Affichage des proportions
-proportions_crowding
+# Affichage des proportions (en texte dans Word)
+print(proportions_crowding)
 
-# Visualisation par catégorie
-ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+# Création du graphique
+p <- ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5, size = 3) +
   labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
        x = "Indice d'affluence", y = "Proportion (%)") +
   theme_minimal() +
   theme(legend.position = "none")
 
+# Affichage du graphique
+print(p)
+
 ```
-## 5. Comparaison entre réfugiés et communautés d'accueil
+
+## Comparaison entre réfugiés et communautés d'accueil
 
 ```{r }
-# Obtenir les labels pour le groupe de population
+# Chargement des packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(labelled)
+
+# Affichage des labels si la variable est labellisée
 if (any(class(menages_avec_individus$Intro_07_1) %in% c("haven_labelled", "labelled"))) {
   cat("Labels pour la variable groupe de population:\n")
   print(val_labels(menages_avec_individus$Intro_07_1))
@@ -756,7 +815,7 @@ comparaison_par_groupe <- menages_avec_individus %>%
   mutate(proportion = n / sum(n) * 100)
 
 # Statistiques descriptives par groupe de population
-menages_avec_individus %>%
+stats_par_groupe <- menages_avec_individus %>%
   group_by(Intro_07_1) %>%
   summarise(
     n = n(),
@@ -764,36 +823,51 @@ menages_avec_individus %>%
     mediane = median(crowding_index, na.rm = TRUE),
     ecart_type = sd(crowding_index, na.rm = TRUE),
     min = min(crowding_index, na.rm = TRUE),
-    max = max(crowding_index, na.rm = TRUE)
+    max = max(crowding_index, na.rm = TRUE),
+    .groups = "drop"
   )
 
-# Visualisation de la comparaison
-ggplot(comparaison_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(Intro_07_1))) +
+# Affichage des statistiques
+print(stats_par_groupe)
+
+# Graphique : proportions par catégorie d'affluence et groupe de population
+p1 <- ggplot(comparaison_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(Intro_07_1))) +
   geom_bar(stat = "identity", position = "dodge") +
-  geom_text(aes(label = sprintf("%.1f%%", proportion)), 
+  geom_text(aes(label = sprintf("%.1f%%", proportion)),
             position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
   labs(title = "Indice d'affluence par groupe de population",
        x = "Indice d'affluence", y = "Proportion (%)", fill = "Groupe de population") +
   theme_minimal()
 
-# Boîte à moustaches pour comparer les distributions
-ggplot(menages_avec_individus, aes(x = factor(Intro_07_1), y = crowding_index, fill = factor(Intro_07_1))) +
+print(p1)
+
+# Graphique : boîte à moustaches des indices d'affluence
+p2 <- ggplot(menages_avec_individus, aes(x = factor(Intro_07_1), y = crowding_index, fill = factor(Intro_07_1))) +
   geom_boxplot() +
   labs(title = "Distribution de l'indice d'affluence par groupe de population",
        x = "Groupe de population", y = "Indice d'affluence") +
   theme_minimal() +
-  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+  ylim(0, 10)  # Ajustement visuel de l'axe des y
+
+print(p2)
 
 ```
 
+<!--Stopper-->
 
-# IV Analyse de la sécurité alimentaire des déplacés internes
+<!---BLOCK_MULTICOL_STOP{widths: [3,3], space: 0.2, sep: true}--->
 
-## 1. Score de Consommation Alimentaire (SCA)
+<!--commencer-->
+
+<!---BLOCK_MULTICOL_START--->
+
+# Analyse de la sécurité alimentaire des déplacés internes
+
+## Score de Consommation Alimentaire (SCA)
 
 Le Score de Consommation Alimentaire (SCA) est un indicateur proxy développé par le Programme Alimentaire Mondial pour mesurer la sécurité alimentaire des ménages. C'est un score composite basé sur la diversité alimentaire, la fréquence de consommation et l'importance nutritionnelle relative des groupes d'aliments consommés.
 
-### 1.1. Analyse descriptive des variables composant le SCA
+### Analyse descriptive des variables composant le SCA
 
 ```{r }
 # Identifier les variables pertinentes pour le SCA
@@ -862,7 +936,7 @@ sca_data %>%
 
 ```
 
-### 1.2. Calcul du Score de Consommation Alimentaire
+### Calcul du Score de Consommation Alimentaire
 
 ```{r }
 # Tableau des poids attribués à chaque groupe alimentaire
@@ -907,7 +981,7 @@ ggplot(sca_data, aes(x = sca_total)) +
 
 ```
 
-### 1.3. Catégorisation du SCA selon différents seuils
+### Catégorisation du SCA selon différents seuils
 
 ```{r }
 # Catégoriser le SCA selon les seuils 21/35
@@ -977,7 +1051,7 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 ```
 
-### 1.4. Représentation spatiale du SCA par région et département
+### Représentation spatiale du SCA par région et département
 
 ```{r }
 # Vérifier les labels pour admin1 et admin2
@@ -1080,7 +1154,7 @@ if (nrow(stats_par_departement) > 15) {
 }
 ```
 
-### 1.5. Analyse du SCA selon le statut de déplacement
+### Analyse du SCA selon le statut de déplacement
 
 ```{r }
 # Analyse du SCA selon le groupe de population (réfugiés vs. communautés d'accueil)
@@ -1134,13 +1208,19 @@ ggplot(df_tableau, aes(x = Statut, y = Proportion, fill = Categorie_SCA)) +
   theme_minimal()
 
 ```
+<!--Stopper-->
 
+<!---BLOCK_MULTICOL_STOP{widths: [3,3], space: 0.2, sep: true}--->
 
-# V L'indice réduit des stratégies de survie (rCSI)
+<!--commencer-->
+
+<!---BLOCK_MULTICOL_START--->
+
+## L'indice réduit des stratégies de survie (rCSI)
 
 L'indice réduit des stratégies de survie (rCSI) est un indicateur qui mesure les comportements d'adaptation que les ménages adoptent lorsqu'ils n'ont pas accès à suffisamment de nourriture. Il est basé sur un ensemble de cinq stratégies de survie communes liées à la consommation alimentaire. Un score plus élevé indique une plus grande insécurité alimentaire.
 
-## 1. Analyse descriptive des variables qui composent le rCSI
+### Analyse descriptive des variables qui composent le rCSI
 
 Les cinq stratégies d'adaptation communes utilisées pour calculer le rCSI sont:
 
@@ -1221,7 +1301,7 @@ rcsi_data %>%
 
 ```
 
-## 2. Création et analyse de nouvelles variables numériques pour le rCSI
+### Création et analyse de nouvelles variables numériques pour le rCSI
 
 ```{r}
 # Définir une fonction pour générer aléatoirement des valeurs entre 1 et 7 si oui, sinon 0
@@ -1289,7 +1369,7 @@ rcsi_data %>%
 
 ```
 
-## 3. Calcul de l'indice réduit des stratégies de survie (rCSI)
+### Calcul de l'indice réduit des stratégies de survie (rCSI)
 
 ```{r}
 # Tableau des poids attribués à chaque stratégie (somme = 21)
@@ -1364,7 +1444,7 @@ ggplot(prop_rcsi, aes(x = categorie_rcsi, y = proportion, fill = categorie_rcsi)
 
 ```
 
-## 4. Représentation spatiale du rCSI selon le milieu de résidence
+### Représentation spatiale du rCSI selon le milieu de résidence
 
 ```{r représentation_spatiale_rCSI _milieu_résidence}
 # Vérifier les labels pour Intro_09 (type de milieu de résidence)
@@ -1458,7 +1538,7 @@ if (exists("sca_data")) {
 }
 ```
 
-## 5. Analyse croisée du rCSI avec d'autres variables socio-démographiques
+### Analyse croisée du rCSI avec d'autres variables socio-démographiques
 
 ```{r analyse_croisée_rCSI}
 # Analyser le rCSI selon le groupe de population (réfugiés vs. communautés d'accueil)
