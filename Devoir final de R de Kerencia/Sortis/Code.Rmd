@@ -1,0 +1,756 @@
+---
+title: "Devoir final de R"
+author: "Kerencia"
+date: "2025-05-12"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set( 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+
+
+# Chargement des packages nécessaires
+
+```{r}
+
+#Installation et importation des packages
+
+packages <- c("dplyr","flextable","officer","officedown","tidyverse", "haven", "gtsummary")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+
+# I Importation des Bases
+
+```{r Chargement des Bases }
+base_individu<-haven::read_dta("../Base_Individus.dta")
+base_principale<-read_dta("../Documents/Base_Principale.dta")
+```
+
+## Nettoyage des noms de colonnes
+
+
+```{r clean_names}
+# Nettoyage des noms de variables de la base individu avec clean_names
+
+
+# Application de clean_names
+base_clean_individu <- base_individu %>% janitor::clean_names()
+
+# Options disponibles pour clean_names
+# "snake_case" (par défaut)
+snake <- base_individu %>% janitor::clean_names(case = "snake")
+
+
+```
+
+
+```{r}
+# Nettoyage des noms de variables de la base principale avec clean_names
+
+# Application de clean_names
+base_clean_principale <- base_principale %>% janitor::clean_names()
+
+# Options disponibles pour clean_names
+# "snake_case" (par défaut)
+snake <- base_principale%>% janitor::clean_names(case = "snake")
+
+base_individu<-base_clean_individu
+base_principale<-base_clean_principale
+```
+## Dimensions des bases
+
+```{r}
+# Dimensions de la base
+dim(base_individu)
+dim(base_principale)
+
+```
+
+La base individu (respectivement la base principale )comprend 22092 individus décrits par 144 variables(respectivement 3058 individus décrits par 1312) . Ce volume suggère une enquête de grande ampleur, permettant des analyses socio-économiques détaillées. Passons maintenat a l' analyse des doublons et valeurs manquantes.
+
+## Vérification des doublons
+
+
+
+Les bases pricipales et individu ne presente pas de doublons.
+Maintenant, poursuivons avec la vérifications des valeurs manquantes : 
+
+## Vérification des valeurs manquantes
+
+```{r eval=FALSE}
+# Calculer le nombre de valeurs manquantes par variable (colonne)
+print("Valeurs manquante base individu")
+NA_individu <- colSums(is.na(base_individu))
+
+print("Valeurs manquante base principale")
+NA_principale <- colSums(is.na(base_principale))
+
+
+```
+
+Nous constatons que les deux bases présentent beaucoup de valeurs manquantes et ceci sur plusieurs variables. Nous ne disposons pas d' assez d' informations pour faire l' imputation mais nous suspectons la presence de colonne vide dans la base principale et dans la base individu. Le code suivant nous eclaira dessus : 
+
+```{r}
+# Compter le nombre de colonnes entièrement vides (toutes les valeurs sont NA)
+sum(sapply(base_individu, function(col) all(is.na(col))))
+sum(sapply(base_principale, function(col) all(is.na(col))))
+
+```
+
+On remarque donc comme prévu que dans la base principale il y a 68 colones vides mais dans la base individu y'en a pas .De ce fait, nous allons suprrimer les colonnes vides dans la base principales.
+
+```{r}
+base_principale <- janitor::remove_empty(base_principale, which = "cols")
+```
+
+Verifions que ces colonnes ont bien ete supprimées : 
+```{r}
+sum(sapply(base_principale, function(col) all(is.na(col))))
+```
+
+Il n' y a éffectivement plus de colonnes vides dans la base principale. 
+
+*En résumé* l'analyse des bases de données a porté sur le nettoyage des noms de colonnes, la gestion des doublons, des valeurs manquantes et des colonnes vides. Les noms de colonnes ont été harmonisés en snake_case pour plus de cohérence. La base "principale" a révélé la présence de 68 colonnes vides, qui ont été supprimées. Les deux bases contiennent des valeurs manquantes, mais aucune imputation n’a été réalisée faute d’informations suffisantes. Cette démarche de nettoyage prépare efficacement les données pour des analyses socio-économiques approfondies.
+
+
+# Pyramide des ages des individus
+
+
+```{r}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Supprimons les valeurs manquantes
+base_individu <- base_individu %>% filter(!is.na(age_years))
+
+# Créer des groupes d'âge
+base_individu$age_group <- cut(base_individu$age_years, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Comptons le nombre d'individus par groupe d'âge et sexe
+# Filtrer pour ne garder que les entrées valides (pas de NA)
+age_sex_distribution <- base_individu %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(age_group, hh_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+# Créer la pyramide des âges
+ggplot(age_sex_distribution, aes(x = age_group, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  coord_flip() +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "darkblue"), 
+                   name = "Sex") +
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+  labs(title = "Pyramide des ages", x = "Age (years)", y = "# cases") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  theme_minimal()
+```
+
+Cette pyramide des âges montre une population très jeune, avec une majorité d’individus dans les tranches de 0 à 20 ans. La répartition entre hommes et femmes est globalement équilibrée, avec un léger avantage féminin dans certaines tranches. La population diminue progressivement avec l'âge, indiquant une forte natalité et une espérance de vie plus courte.
+
+
+## 2b) Caracteristiques du chef de menage
+
+
+```{r}
+base_individu <- base_individu %>%
+  mutate(across(where(is.character), ~iconv(.x, from = "", to = "UTF-8", sub = " ")))
+
+```
+
+
+```{r}
+library(dplyr)
+library(janitor)
+library(gtsummary)
+library(labelled)
+
+# Nettoyage de l'encodage
+base_individu <- base_individu %>%
+  mutate(across(where(is.character), ~iconv(.x, from = "", to = "UTF-8", sub = " ")))
+
+# Recode des facteurs
+base_individu <- base_individu %>%
+  to_factor()
+
+# Création du tableau
+table1 <- base_individu %>%
+  select(age_years, hh_02, hh_08, intro_07_1) %>%
+  tbl_summary(
+    by = intro_07_1,
+    statistic = list(
+      all_continuous() ~ "{mean} ({min}, {max})",
+      all_categorical() ~ "{p}%"
+    ),
+    digits = all_continuous() ~ 1,
+    missing = "no"
+  ) %>%
+  add_p(
+    test = list(
+      age_years ~ "wilcox.test",
+      hh_02 ~ "chisq.test",
+      hh_08 ~ "fisher.test"
+    )
+  ) %>%
+  modify_header(label ~ "**Caracteristiques du chef de menage**") %>%
+  bold_labels()
+
+# Affichage
+table1
+
+
+```
+
+# 3)l’indice d’affluence
+
+
+L’indice d’affluence (ou crowding index) permet d’évaluer le niveau de surpeuplement dans un logement. Il est calculé en divisant le nombre total de membres du ménage par le nombre de pièces disponibles (hors cuisine, toilettes et couloirs). Cet indicateur est souvent utilisé comme un proxy de précarité résidentielle, car un indice élevé peut refléter des conditions de vie surpeuplées, parfois associées à des situations de vulnérabilité économique ou sanitaire.
+
+
+
+## 3a) Calculer le nombre d’individus par ménage
+
+
+Avant d’étudier le surpeuplement, il est nécessaire de connaître combien de personnes vivent dans chaque ménage. Cette étape consiste à regrouper les individus selon leur identifiant de ménage et à compter leur nombre, ce qui permet de créer une nouvelle variable : le nombre d’individus par ménage.
+
+
+
+```{r}
+
+library(dplyr)
+
+# Nombre d'individus par ménage
+ind_par_menage <- base_individu%>%
+  group_by(id) %>%
+  summarise(nb_membres = n())%>%
+  ungroup()
+
+```
+
+
+## 3b)Statistiques descriptives sur le nombre d' individu par menage
+
+
+Une fois le nombre d’individus par ménage calculé, il est important d’en étudier la distribution. Cela inclut la moyenne, l’écart-type, les valeurs extrêmes, etc. Ces statistiques permettent de décrire la taille moyenne des ménages et leur dispersion.
+
+
+```{r}
+library(dplyr)
+library(tibble)
+
+# Calcul des statistiques de nb_membres
+stats <- ind_par_menage %>%
+  summarise(
+    Moyenne = mean(nb_membres),
+    Ecart_type = sd(nb_membres),
+    Min = min(nb_membres),
+    Max = max(nb_membres)
+  )
+
+# Création du tableau final à 2 lignes et 5 colonnes
+tableau_stats <- tibble(
+  Variable = "Nombre d'individus par menage",
+  Moyenne = round(stats$Moyenne, 1),
+  Ecart_type = round(stats$Ecart_type, 1),
+  Min = stats$Min,
+  Max = stats$Max
+)
+print(tableau_stats)
+
+```
+
+ **Résumé du tableau** :
+Le nombre moyen d'individus par ménage est de 7,1, avec un écart-type de 3,1.
+Les tailles des ménages varient de 1 à 17 personnes, indiquant une grande diversité.
+
+
+## 3c)Statistiques descriptives sur la variable renseigant le nombre de pieces du menage
+
+
+Pour calculer l’indice d’affluence, on a aussi besoin de la variable représentant le nombre de pièces dans le logement. Cette étape consiste à décrire cette variable pour identifier s’il existe des cas problématiques (valeurs nulles, extrêmes ou manquantes).
+
+
+```{r}
+# Chargement des librairies utiles
+
+library(tidyr)
+library(e1071)
+# Résumé statistique de la variable 'hh14' (nombre de pièces par ménage)
+resume_pieces <- base_principale %>%
+  summarise(
+    Min          = min(hh14, na.rm = TRUE),
+    Max          = max(hh14, na.rm = TRUE),
+    Moy          = mean(hh14, na.rm = TRUE),
+    Mediane      = median(hh14, na.rm = TRUE),
+    Ecart_type   = sd(hh14, na.rm = TRUE),
+    Var          = var(hh14, na.rm = TRUE),
+    Q25          = quantile(hh14, probs = 0.25, na.rm = TRUE),
+    Q75          = quantile(hh14, probs = 0.75, na.rm = TRUE),
+    Interval_IQR = IQR(hh14, na.rm = TRUE),
+    Asymetrie    = skewness(hh14, na.rm = TRUE),
+    Aplatissement = kurtosis(hh14, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(),
+               names_to = "Indicateur",
+               values_to = "Résultat")
+print(resume_pieces)
+
+```
+
+
+## 3d)	Calcul l’indice d’affluence ou crowding index**
+
+
+L’indice d’affluence est obtenu en divisant le nombre d’individus par le nombre de pièces. Afin d’éviter une division par zéro, il est recommandé de filtrer ou d’encoder correctement les cas où le nombre de pièces est nul. Cette variable quantitative continue servira ensuite à catégoriser les ménages selon leur niveau de surpeuplement.
+
+```{r}
+sum(base_principale$hh_14 == 0, na.rm = TRUE)
+
+```
+
+Donc les observations du nombre de pieces du menages sont tous positif. 
+Calcul de l'indice d' affluence :
+
+```{r}
+
+base_principale<-left_join(base_principale,ind_par_menage,"id")
+# Création de la variable crowding index
+base_principale <- base_principale %>%
+  mutate(crowding_index = nb_membres / hh14)
+
+
+```
+
+
+## 3e)proportion de menage dont le crowding index est: <1, 1<= crowding_index<2, 2<= crowding_index<3 et >=3**
+
+Pour rendre l’indice d’affluence plus interprétable, on le regroupe souvent en classes :
+
+< 1 (non surpeuplé)
+
+entre 1 et < 2 (léger surpeuplement)
+
+entre 2 et < 3 (modéré)
+
+≥ 3 (sévère)
+
+On présente ensuite la répartition des ménages dans ces catégories sous forme de tableau de fréquences et de proportions.
+
+
+```{r}
+
+library(dplyr)
+library(flextable)
+
+# Catégoriser le crowding index
+base_principale <- base_principale %>%
+  mutate(crowding_cat = case_when(
+    crowding_index < 1 ~ "<1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1-2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2-3",
+    crowding_index >= 3 ~ ">=3"
+  ))
+
+# Afficher les proportions
+base_principale %>%
+  count(crowding_cat) %>%
+  mutate(proportion = round(100 * n / sum(n), 1)) %>%  # Calcul des proportions
+  flextable::qflextable() %>%  # Utiliser qflextable pour générer la table
+  fontsize(size = 9, part = "all") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  bg(bg = "#D6EAF8", part = "header") %>%
+  align(align = "center", part = "header") %>%
+  align(align = "left", j = 1) %>%
+  autofit() %>%
+  width(width = 1, j = 1) %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines("Source: Calculs de l'auteur bases sur les donnees de l'enquete.") %>%
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  hline(border = fp_border(color = "black", width = 1)) %>%
+  vline(border = fp_border(color = "black", width = 1)) %>%
+  hline_top(border = fp_border(color = "black", width = 2)) %>%
+  hline_bottom(border = fp_border(color = "black", width = 2))
+```
+
+
+## 3f)Statistiques suivant que le menage soit un refugie ou un member de la communaute d’acceuil 
+
+Enfin, on peut comparer le niveau de surpeuplement entre réfugiés et communautés hôtes. Cela permet d’évaluer s’il existe une différence structurelle dans les conditions d’habitat entre ces deux groupes, à l’aide de tableaux croisés et de tests statistiques.
+
+
+```{r}
+# Tableau de résumé avec gtsummary et p-values
+
+table_crowding_grouped <- base_principale%>%
+  select(intro_07_1, crowding_cat) %>%
+  tbl_summary(
+    by = intro_07_1,
+    label = list(crowding_cat ~ "Categories du Crowding Index"),
+    statistic = list(all_categorical() ~ "{n} ({p}%)"),
+    missing = "no"
+  ) %>%
+  add_p(test = all_categorical() ~ "chisq.test") %>%
+  modify_header(label ~ "*Categorie*") %>%
+  modify_spanning_header(all_stat_cols() ~ "*Statut du menage*") %>%
+  bold_labels()
+
+# Conversion en flextable avec mise en forme
+table_crowding_styled <- table_crowding_grouped %>%
+  as_flex_table() %>%
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::bg(bg = "#D6EAF8", part = "header") %>%
+  flextable::align(align = "center", part = "header") %>%
+  flextable::align(align = "left", j = 1) %>%
+  flextable::autofit() %>%
+  flextable::width(width = 1, j = 1) %>%
+  flextable::set_table_properties(layout = "autofit") %>%
+  flextable::add_footer_lines(values = c(
+    "Note: Pourcentage de menages selon les niveaux de surpopulation.",
+    "Source: Analyse des donnees d'enquete du Soudan"
+  )) %>%
+  flextable::border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  flextable::hline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::vline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::hline_top(border = fp_border(color = "black", width = 2)) %>%
+  flextable::hline_bottom(border = fp_border(color = "black", width = 2)) %>%
+  flextable::bg(
+    bg = "#F8F8F8",
+    part = "body",
+    i = seq(2, nrow(.$body$dataset), by = 2)
+  ) %>%
+  flextable::set_caption("Tableau 2 : Proportion des menages selon l'indice de surpeuplement et le statut")
+# Affichage
+table_crowding_styled
+
+
+
+```
+
+
+Le tableau montre que la majorité des ménages vivent dans des conditions de surpeuplement, en particulier ceux de la communauté d’accueil (65 % ont un indice de surpeuplement ≥3 contre 56 % chez les réfugiés). Les ménages réfugiés sont légèrement plus nombreux à avoir un surpeuplement modéré ou faible. Le test de Chi² (p < 0.001) indique que ces différences sont statistiquement significatives, soulignant une problématique de logement touchant les deux groupes, mais plus marquée dans la communauté d’accueil.
+
+
+# III.	Analyse de la securite alimentaire des deplaces internes
+
+
+Le Score de Consommation Alimentaire (SCA) est un indicateur composite développé par le Programme Alimentaire Mondial (PAM) afin d’évaluer la sécurité alimentaire des ménages. Il se base sur trois éléments clés : la diversité alimentaire, la fréquence de consommation de différents groupes alimentaires sur une période de 7 jours, et la valeur nutritionnelle relative de ces groupes. L'objectif est d'obtenir une mesure simple mais fiable permettant de classer les ménages selon la qualité de leur alimentation, et donc leur niveau de sécurité alimentaire. L’analyse qui suit comprend une description des variables du SCA, son calcul, la catégorisation des scores, ainsi qu’une représentation géographique de la situation.
+
+
+## a)Score de consommation alimentaire (SCA): 
+Analyse descriptive des variables composant le SCA
+Avant de calculer le SCA, il est nécessaire d’analyser les données brutes collectées sur la consommation alimentaire. Chaque ménage est interrogé sur la fréquence (en nombre de jours sur les 7 derniers jours) à laquelle il a consommé certains groupes d’aliments tels que les céréales, les légumes, les légumineuses, les produits d’origine animale, les fruits, le lait, le sucre et les graisses. L’analyse descriptive consiste donc à examiner la moyenne, l’écart-type, les valeurs minimales et maximales pour chacun de ces groupes. Cela permet d’identifier les aliments les plus fréquemment consommés, mais aussi de repérer les éventuelles anomalies ou lacunes dans la consommation.
+
+
+```{r}
+library(dplyr)
+library(gtsummary)
+
+# Créer le tableau gtsummary
+table_4a <- base_principale %>%
+  select(food_div1, food_div2, food_div3, food_div4, food_div5,
+         food_div6, food_div7, food_div8) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{mean} (± {sd})"),
+    missing = "no",
+    label = list(
+      food_div1 ~ "Cereales et tubercules",
+      food_div2 ~ "Legumineuses / noix",
+      food_div3 ~ "Produits laitiers",
+      food_div4 ~ "Viande / poisson / œufs",
+      food_div5 ~ "Legumes",
+      food_div6 ~ "Fruits",
+      food_div7 ~ "Huiles et graisses",
+      food_div8 ~ "Sucre"
+    )
+  ) %>%
+  bold_labels()
+
+# Style flextable
+table_4a_styled <- table_4a %>%
+  as_flex_table() %>%
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::bg(bg = "#D6EAF8", part = "header") %>%
+  flextable::align(align = "center", part = "header") %>%
+  flextable::align(align = "left", j = 1) %>%
+  flextable::autofit() %>%
+  flextable::width(width = 1, j = 1) %>%
+  flextable::set_table_properties(layout = "autofit") %>%
+  flextable::add_footer_lines(values = c(
+    "Note : Frequence moyenne de consommation sur 7 jours.",
+    "Source : Donnees issues de l'enquete alimentaire."
+  )) %>%
+  flextable::border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  flextable::hline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::vline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::hline_top(border = fp_border(color = "black", width = 2)) %>%
+  flextable::hline_bottom(border = fp_border(color = "black", width = 2)) %>%
+  flextable::bg(bg = "#F8F8F8", part = "body", i = seq(2, nrow(.$body$dataset), by = 2)) %>%
+  flextable::set_caption("Tableau 4a : Analyse descriptive des groupes alimentaires composant le SCA")
+#Affichage
+table_4a_styled
+```
+
+## b) Calcul du Score de Consommation Alimentaire
+
+Le Score de Consommation Alimentaire (SCA) est calculé en appliquant un poids nutritionnel à chaque groupe alimentaire, basé sur son apport en énergie et en nutriments. La fréquence hebdomadaire de consommation est plafonnée à 7 jours, puis multipliée par son poids correspondant. Le score total est la somme pondérée des fréquences.
+
+
+```{r}
+# Calcul du score de consommation alimentaire (SCA)
+base_principale <- base_principale %>%
+  mutate(sca = pmin(food_div1, 7) * 2 +
+               pmin(food_div2, 7) * 3 +
+               pmin(food_div3, 7) * 4 +
+               pmin(food_div4, 7) * 4 +
+               pmin(food_div5, 7) * 1 +
+               pmin(food_div6, 7) * 1 +
+               pmin(food_div7, 7) * 0.5 +
+               pmin(food_div8, 7) * 0.5)
+# Statistiques descriptives du score SCA
+stats_sca <- base_principale %>%
+  summarise(
+    Moyenne = round(mean(sca, na.rm = TRUE), 1),
+    `Écart-type` = round(sd(sca, na.rm = TRUE), 1),
+    Min = min(sca, na.rm = TRUE),
+    Max = max(sca, na.rm = TRUE)
+  ) %>%
+  mutate(Variable = "Score de Consommation Alimentaire") %>%
+  select(Variable, Moyenne, `Écart-type`, Min, Max)
+stats_sca
+
+```
+
+
+## c) Tableau des poids attribués aux groupes alimentaires
+
+Pour mieux comprendre la logique du calcul, il est essentiel de présenter un tableau récapitulatif des poids attribués à chaque groupe alimentaire. Ce tableau montre, par exemple, que les céréales sont pondérées à 2, les légumineuses à 3, les légumes et fruits à 1, et les produits d’origine animale à 4. La somme des poids, lorsqu’un aliment est consommé quotidiennement, donne un score maximum de 16 (7 x 16 = 112). Ce tableau sert de référence pour standardiser les calculs du SCA dans différentes enquêtes.
+
+```{r}
+library(tibble)
+library(flextable)
+
+# Création sécurisée du tableau des poids
+poids_sca <- tibble::tibble(
+  `Groupe alimentaire` = c(
+    "Cereales et tubercules",
+    "Legumineuses / noix",
+    "Produits laitiers",
+    "Viande / poisson / œufs",
+    "Legumes",
+    "Fruits",
+    "Huiles et graisses",
+    "Sucre"
+  ),
+  `Poids attribue` = c(2, 3, 4, 4, 1, 1, 0.5, 0.5)
+)
+
+# Tableau flextable stylisé
+table_4c_styled <- flextable(poids_sca) %>%
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::bg(bg = "#D6EAF8", part = "header") %>%
+  flextable::align(align = "center", part = "header") %>%
+  flextable::align(align = "left", j = 1) %>%
+  flextable::autofit() %>%
+  flextable::set_table_properties(layout = "autofit") %>%
+  flextable::add_footer_lines(values = c(
+    "Note : Ponderations officielles du PAM utilisees dans le calcul du SCA.",
+    "Source : Programme Alimentaire Mondial (FAO/WFP)."
+  )) %>%
+  flextable::border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  flextable::hline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::vline(border = fp_border(color = "black", width = 1)) %>%
+  flextable::hline_top(border = fp_border(color = "black", width = 2)) %>%
+  flextable::hline_bottom(border = fp_border(color = "black", width = 2)) %>%
+  flextable::bg(bg = "#F8F8F8", part = "body", i = seq(2, nrow(poids_sca), by = 2)) %>%
+  flextable::set_caption("Tableau 4c : Poids attribues aux groupes alimentaires pour le SCA")
+table_4c_styled
+
+```
+
+
+## d) Catégorisation du SCA
+
+Une fois le score calculé, il est classé selon des seuils définis pour évaluer la sécurité alimentaire. Deux jeux de seuils sont couramment utilisés :
+
+Le seuil 21/35, adapté aux contextes plus ruraux, où un score ≤21 indique une consommation faible, 21–35 une consommation limite, et >35 une consommation acceptable.
+
+Le seuil 28/42, souvent utilisé en milieu urbain ou dans des contextes avec une meilleure diversité alimentaire.
+
+La catégorisation permet d’identifier les ménages vulnérables, à risque nutritionnel, et ceux avec une alimentation adéquate. Elle est également utilisée pour orienter les interventions humanitaires et les programmes d'assistance.
+
+
+```{r}
+
+# Créer les variables de catégorie
+
+base_principale <- base_principale %>%
+  mutate(
+    sca_cat_21_35 = case_when(
+      sca <= 21 ~ "Faible",
+      sca > 21 & sca <= 35 ~ "Limite",
+      sca > 35 ~ "Acceptable",
+      TRUE ~ NA_character_
+    ),
+    sca_cat_28_42 = case_when(
+      sca <= 28 ~ "Faible",
+      sca > 28 & sca <= 42 ~ "Limite",
+      sca > 42 ~ "Acceptable",
+      TRUE ~ NA_character_
+    )
+  )
+
+#Calcul des proportions pour la catégorisation 21/35
+
+table_4d <- base_principale %>%
+  filter(!is.na(sca_cat_21_35)) %>%
+  mutate(sca_cat_21_35 = as.character(sca_cat_21_35)) %>%
+  count(sca_cat_21_35, name = "n") %>%
+  mutate(Proportion = round(100 * n / sum(n), 1))
+
+table_4d
+
+
+
+```
+
+# 5) L’indice réduit des stratégies de survie (rCSI)
+
+
+L’indice réduit des stratégies de survie (rCSI) est un indicateur utilisé pour évaluer la pression exercée sur les ménages confrontés à une insécurité alimentaire. Contrairement au Score de Consommation Alimentaire (SCA), qui mesure l'accès réel à la nourriture, le rCSI reflète les comportements adoptés pour faire face à une pénurie alimentaire. Il s'agit d’un indice comportemental, qui repose sur la fréquence d'utilisation de cinq stratégies négatives que les ménages appliquent lorsqu'ils ne peuvent pas couvrir leurs besoins alimentaires de base.
+
+Les cinq stratégies les plus couramment mesurées sont, par exemple :
+
+Réduire la taille des portions
+
+Diminuer le nombre de repas par jour
+
+Emprunter de la nourriture ou de l'argent
+
+Consommer des aliments moins préférés
+
+Réduire la consommation des adultes pour les enfants
+
+Chaque stratégie est associée à un poids (ou gravité). Le rCSI est calculé en multipliant la fréquence (0 à 7 jours) de chaque stratégie par son poids, puis en sommant les résultats. Plus le score est élevé, plus le ménage est considéré comme étant en stress alimentaire élevé.
+
+
+## 5a) Création de l’indice rCSI
+
+```{r}
+# 1. Calcul du rCSI avec plafonnement à 7 jours et pondérations adaptées
+base_principale <- base_principale %>%
+  mutate(
+    rcsi = pmin(food_bneed_b, 7) * 6 +  # mendier
+           pmin(food_bneed_k, 7) * 4 +  # acheter à crédit
+           pmin(food_bneed_g, 7) * 5 +  # vendre des biens
+           pmin(food_bneed_i, 7) * 3 +  # réduire dépenses
+           pmin(food_bneed_d, 7) * 3    # ne pas payer dettes
+  )
+```
+
+
+## 5b) Statistiques descriptives du score rCSI
+
+
+```{r}
+
+# Statistiques descriptives
+rcsi_stats <- base_principale %>%
+  summarise(
+    Moyenne = round(mean(rcsi, na.rm = TRUE), 1),
+    `Écart-type` = round(sd(rcsi, na.rm = TRUE), 1),
+    Min = round(min(rcsi, na.rm = TRUE), 1),
+    Max = round(max(rcsi, na.rm = TRUE), 1)
+  ) %>%
+  mutate(Variable = "Indice reduit des strategies de survie (rCSI)") %>%
+  select(Variable, Moyenne, `Écart-type`, Min, Max)
+rcsi_stats
+
+```
+
+## 5d) Tableau des poids utilisés dans le calcul du rCSI
+
+Chaque stratégie de survie adoptée par les ménages reçoit un poids selon sa gravité. Ces poids sont définis par la méthodologie du Programme Alimentaire Mondial (WFP). Le tableau ci-dessous présente les stratégies utilisées dans ton enquête ainsi que leurs poids respectifs.
+
+
+```{r}
+
+
+#  Tableau des poids sans accents
+rcsi_poids <- tibble(
+  Strategie_survie = c(
+    "Mendier ou demander de l'argent",
+    "Acheter de la nourriture a credit",
+    "Vendre des biens de production/transport",
+    "Reduire les depenses non alimentaires",
+    "Ne pas payer le loyer ou les dettes"
+  ),
+  Poids_utilise = c(6, 4, 5, 3, 3)
+)
+
+#  Mise en forme du tableau
+table_5d_styled <- flextable(rcsi_poids) %>%
+  fontsize(size = 9, part = "all") %>%
+  font(fontname = "Times New Roman", part = "all") %>%
+  bg(bg = "#D6EAF8", part = "header") %>%
+  align(align = "center", part = "header") %>%
+  align(align = "left", j = 1) %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit") %>%
+  add_footer_lines(values = c(
+    "Note : Pondeerations ajustees pour un total de 21.",
+    "Source : Methodologie rCSI adaptee à l’enquete."
+  )) %>%
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  hline(border = fp_border(color = "black", width = 1)) %>%
+  vline(border = fp_border(color = "black", width = 1)) %>%
+  hline_top(border = fp_border(color = "black", width = 2)) %>%
+  hline_bottom(border = fp_border(color = "black", width = 2)) %>%
+  bg(bg = "#F8F8F8", part = "body", i = seq(2, nrow(rcsi_poids), by = 2)) %>%
+  set_caption("Tableau 5d : Ponderation des strategies de survie (somme = 21)")
+
+# Affichage
+table_5d_styled
+
+
+```
+
+
+
+
+
+

@@ -1,0 +1,1036 @@
+---
+output:
+  officedown::rdocx_document:
+    reference_docx: ../Documents/Modele_officedown.docx
+    fig_caption: true
+   
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                    #  cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+<!--Installation et importation des packages**-->
+
+```{r}
+
+#Installation et importation des packages
+
+packages <- c("modeest","sf","tmap","flextable","data.table","survey","officer","officedown","haven","utils","dplyr","gtsummary","gt","labelled","janitor","tidyverse","naniar","DataExplorer","summarytools","stringi","stringr","ggrepel")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                            |
+|:----------------------------------------------------------:|
+| ![](../Documents/Logo%20SEN.png){width="3cm" height="3cm"} |
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                |
+|:----------------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                                    |
+|:------------------------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4, include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "KAFANDO G. Judicaël Oscar", "Élève Ingénieur Statisticien Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+<!--Création des fonctions qui sernt utilisé par suite-->
+
+```{r description_fonction}
+# Définition d'une fonction qui prend en entrée un dataframe à décrire et un nom optionnel pour identifier la base dans le texte généré
+
+description_base <- function(df, nom_base = "la base") {
+  
+  # Récupèrer le nombre d'observations (lignes) dans le dataframe
+  n_obs <- nrow(df)
+  
+  # Récupère le nombre de variables (colonnes) dans le dataframe
+  n_var <- ncol(df)
+  
+  # Identifie le type de chaque variable puis compter le nombre de fois qu'il apparait
+  type_counts <- sapply(df, function(x) class(x)[1]) |> table()
+  
+  # Crée une chaîne de texte décrivant combien de variables de chaque type sont présentes
+  type_text <- paste0(type_counts, " variable(s) du type ",
+                      names(type_counts),
+                      collapse = ", "  # Sépare chaque groupe par une virgule
+  )
+  
+  # Afficher le résumé formaté
+  cat(sprintf(
+    "\n%s contient %d variables sur %d individus.\nParmi les variables, on trouve : %s.\n\n",
+    nom_base, n_var, n_obs, type_text
+  ))
+}
+
+
+```
+
+```{r design_tableau_couleur1}
+
+style_flextable <- function(tableau,
+                            caption = "Tableau personnalisé",
+                            conditional_cols = NULL,
+                            seuil1 = NULL,
+                            seuil2 = NULL,
+                            colors = c("#FFFFFF", "#C6E0B4", "#A9D08E")) {
+  
+  ft <- flextable(tableau) %>%
+    theme_booktabs() %>%
+    bg(bg = "#4472C4", part = "header") %>%
+    color(color = "white", part = "header") %>%
+    bold(part = "header") %>%
+    bold(j = 1) %>%
+    bold(part = "footer") %>%
+    bg(bg = "#D9E1F2", part = "footer") %>%
+    hline_top(border = fp_border(color = "#4472C4", width = 2), part = "header") %>%
+    hline_bottom(border = fp_border(color = "#4472C4", width = 1), part = "header") %>%
+    hline_bottom(border = fp_border(color = "#4472C4", width = 2), part = "body") %>%
+    align(align = "center", part = "all") %>%
+    valign(valign = "center", part = "all") %>%
+    padding(padding = 4, part = "all") %>%
+    fontsize(size = 10, part = "all") %>%
+    set_caption(caption) %>%
+    autofit()
+  
+  # Application du formatage conditionnel si toutes les conditions sont remplies
+  if (!is.null(conditional_cols) && !is.null(seuil1) && !is.null(seuil2) && length(colors) == 3) {
+    for (col in conditional_cols) {
+      ft <- ft %>%
+        bg(j = col, bg = function(x) {
+          val <- as.numeric(x)
+          ifelse(val <= seuil1, colors[1],
+                 ifelse(val <= seuil2, colors[2], colors[3]))
+        })
+    }
+  }
+  
+  return(ft)
+}
+
+```
+
+\newpage
+
+###### Sommaire
+
+<!---BLOCK_TOC--->
+
+\newpage
+
+###### Liste des figures
+
+<!---BLOCK_TOC{seq_id: 'fig'}--->
+
+\newpage
+
+###### Liste des tableaux
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+\newpage
+
+###### Introduction
+
+Dans le cadre du cours de Projet statistique sous R, cette étude applique les compétences acquises en traitement, analyse et visualisation de données pour explorer la situation alimentaire et nutritionnelle des populations réfugiées et des communautés hôtes. À travers l'exploitation d'une base de données issue d'une enquête terrain, ce travail vise à décrire les caractéristiques socio-démographiques des ménages, analyser la diversité alimentaire et identifier les vulnérabilités spécifiques selon les groupes. L’ensemble des analyses, réalisées sous R, permet d’illustrer concrètement l’usage d’outils statistiques dans un contexte humanitaire, et de fournir des résultats appuyés sur des méthodes rigoureuses et reproductibles.
+
+<br>
+
+\newpage
+
+# Analayse et compréhension de la base
+
+<!--Importation des bases-->
+
+```{r import_base}
+##
+base_individu <-  haven::read_dta("../Data/Base_Individus.dta") %>%  # Importation de la base ind
+  janitor::clean_names() #Nettoyage des noms de variables
+
+base_principale <-  haven::read_dta("../Data/Base_Principale.dta") %>% 
+  janitor::clean_names() #Nettoyage des noms de variables
+
+
+
+```
+
+## **Structure de la base**
+
+Le but est d'avoir une vue globale de la base.
+
+```{r}
+#glimpse(base_menage) # Structure de la base ménage
+
+description_base(base_individu, nom_base = "La base individu")
+
+description_base(base_principale,"La base principale")
+
+```
+
+## Vérification et suppression des colonnes ou lignes vides
+
+Les **colonnes et lignes vides** n'ont aucune information pour nous. Donne nous les supprimons pour alleger la base et le traitement.
+
+```{r}
+
+col_total_ind <- ncol(base_individu) #nombre total de colonne avant suppression
+ligne_total_ind <-nrow(base_individu) #nombre total de ligne avant suppression
+
+col_total_prin <- ncol(base_principale) #nombre total de colonne avant suppression
+ligne_total_prin <-nrow(base_principale) #nombre total de ligne avant suppression
+
+```
+
+```{r}
+
+# Trouver les colonnes vides (toutes les valeurs sont NA)
+
+
+base_individu <- base_individu %>%
+  janitor::remove_empty(which = "cols") %>%  #vérifier par colonnes et garder uniquement les colonnes non vides
+janitor::remove_empty(which = "rows") #vérifier par lignes et garder uniquement les lignes  non vides
+
+
+base_principale <- base_principale %>%
+  janitor::remove_empty(which = "cols") %>%  #vérifier par colonnes et garder uniquement les colonnes non vides
+janitor::remove_empty(which = "rows") #vérifier par lignes et garder uniquement les lignes  non vides
+
+```
+
+```{r}
+
+col_vide_ind <- col_total_ind - ncol(base_individu)  #nombre total de colonne vide
+ligne_vide_ind <- ligne_total_ind -  nrow(base_individu) #nombre total de ligne vide
+
+ligne_vide_prin <-ligne_total_prin-nrow(base_principale) #nombre total de colonne vide
+col_vide_prin <- col_total_prin - ncol(base_principale) #nombre total de ligne vide
+
+```
+
+Les bases **principale et individus** contiennent respectivement `r col_vide_prin` et `r col_vide_ind` colonnes vides et `r ligne_vide_prin` et `r ligne_vide_ind`lignes vides.
+
+## Vérifications des doublons
+
+Les doublons dans une base, compte pour des informations répétées et qui biaisent les résultats. Nous examinons donc les deux bases et en cas d'existence, nous les supprimons pour ne garder qu'un seul.
+
+```{r doublon}
+
+doublon_ind <- base_individu %>% janitor::get_dupes()
+base_individu <- base_individu %>% 
+  distinct()
+
+doublon_prin <- base_principale %>% janitor::get_dupes()
+base_principale <- base_principale %>% 
+  distinct()
+
+#nrow(doublon_prin)
+#nrow(doublon_ind)
+
+```
+
+La base principale a `r nrow(doublon_prin)` doublons et la base individu en a `r nrow(doublon_ind)`.
+
+## Vérification des identifiants (cohérence relationnelle)
+
+```{r results='hide'}
+# Vérifier unicité des ID ménages
+any(duplicated(base_principale$id))  # Doit être FALSE
+
+# Vérifier que tous les individus ont un ménage valide
+all(base_individu$id %in% base_principale$id)  # Doit être TRUE
+
+# Vérifier unicité par combinaison
+library(dplyr)
+base_individu %>%
+  group_by(id, rosterposition) %>%
+  summarise(n = n()) %>%
+  filter(n > 1) 
+
+```
+
+Les vérifications effectuées sur les identifiants ont permis de confirmer l’intégrité relationnelle entre les deux bases de données. Aucun doublon n’a été détecté au niveau des identifiants des ménages, ce qui garantit leur unicité. De plus, l’ensemble des individus recensés dans la base individuelle sont correctement rattachés à un ménage valide dans la base principale. Enfin, la combinaison de l’identifiant du ménage et de la position dans le ménage **(rosterposition)** est unique, ce qui atteste de l’absence de doublons au sein des ménages. Ces résultats valident la structure hiérarchique des données et confirment la fiabilité des liens entre les deux niveaux d’observation.
+
+## Vérification de la cohérence inter-variable
+
+L'**objectif** est de s’assurer que les réponses d’une variable sont cohérentes avec d'autres réponses du même individu ou ménage. Par exemple :
+
+-   *Une personne qui dit ne pas avoir fui ne peut pas déclarer une cause de fuite*
+-   *Une personne ayant déclaré être née dans le pays d’accueil ne devrait pas avoir une date d'arrivée*
+-   *Une femme de 5 ans ayant eu un enfant : incohérent*
+
+```{r results='hide'}
+
+# Fuite sans raison de fuite
+base_individu %>%
+  labelled::to_factor() %>% #labelliser les variables
+  filter(id_01a == "Non" & !is.na(id_02))
+
+# Naissance dans le pays vs date d'arrivée
+base_individu %>%
+  labelled::to_factor() %>% #labelliser les variables
+  filter(hh_00 == "Oui" & (!is.na(hh_00a_year) | !is.na(hh_00a_month)))
+
+# Enfant très jeune ayant donné naissance
+base_individu %>%
+  labelled::to_factor() %>% #labelliser les variables
+  filter(age_years < 10 & hh_27 == "Oui") #filtrer ceux dont l'age est inférieur à 10 et ont donné naissance
+
+
+```
+
+Les résultats des trois contrôles ciblés montre que chez les personnes ayant déclaré ne pas avoir fui leur domicile et ceux n’avaient pas indiqué de raison de fuite ; aucune contradiction n’a été observée. Pour les individus ayant déclaré avoir toujours vécu dans le pays d’accueil tout en renseignant une date d’arrivée, aucun cas de ce type n’a été trouvé. Enfin, la présence d’enfants de moins de 10 ans ayant déclaré avoir donné naissance à un enfant, aucune anomalie n’a été détectée.
+
+## Vérification des valeurs manquantes et aberrantes
+
+Objectif : s'assurer que les variables importantes sont renseignées et qu'il n'y a pas d'aberrations statistiques ou logiques.
+
+```{r results='hide'}
+
+# Vérifier âges
+base_individu %>% filter(age_years < 0 | age_years > 120)
+
+# Sexe incohérent
+table(base_individu$hh_02, useNA = "always")  # Doit contenir uniquement 1, 2
+
+# Parenté incohérente
+table(base_individu$hh_03)
+
+```
+
+La vérification des âges a permis de s’assurer qu’aucune valeur aberrante ne figure dans la variable age_years. Aucun individu n’a été enregistré avec un âge négatif ou supérieur à 120 ans. Aussi, aucune incohérence n’est observée,au niveau de la variable sexe. Enfin, l’analyse de la distribution des réponses permet de confirmer la diversité attendue des positions dans le ménage (chef, conjoint(e), enfant, etc.). Aucun code inattendu n’a été détecté, et le nombre de chef de ménage est égale à la taille de la base ménage.
+
+# Caractéristiques socio-démographiques
+
+## Pyramide des ages des indivdus
+
+### Préparation des données
+
+Dans cette partie, nous préparons les données pour une meilleur représentation
+
+```{r}
+
+# Créer des groupes d'âge (tranches de 5 ans)
+base_individu <- base_individu %>%
+  mutate(age_group = cut(
+  as.numeric(age_years),
+    breaks = seq(0, 100, by = 5),   # Tranches 0–4, 5–9, ..., 95–99
+    right = FALSE,
+    include.lowest = TRUE
+  ))
+
+
+
+# Résumer les effectifs par groupe d'âge et sexe
+pyramide <- base_individu %>%
+  labelled::to_factor() %>% 
+  filter(!is.na(hh_02), !is.na(age_group)) %>%
+  group_by(age_group, hh_02) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  mutate(n = ifelse(hh_02 == "Female", n, -n))  # Femme à droite, Homme à gauche
+
+
+```
+
+### Representation de la pyramide
+
+```{r, fig.cap="Pyramide des âges par sexe"}
+
+
+# Affichage avec ligne centrale et 85+
+ggplot(pyramide, aes(x = age_group, y = n, fill = hh_02)) +
+  geom_bar(stat = "identity", width = 0.9) +
+  coord_flip() +
+  geom_vline(xintercept = 0, color = "black", linetype = "solid") +  # Ligne au centre
+  scale_y_continuous(
+    labels = abs,
+    expand = expansion(mult = c(0.05, 0.05))
+  ) +
+  scale_fill_manual(values = c("Male" = "#ADD8E6", "Female" = "#00008B")) +
+  labs(
+    title = "Pyramide des âges",
+    x = "Tranches d'âge",
+    y = "Effectif",
+    fill = "Sexe"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right"
+  )
+```
+
+La pyramide des âges issue de l’enquête sur les déplacements forcés au Sud-Soudan en 2023 met en évidence une structure démographique fortement juvénile, caractérisée par une concentration marquée dans les tranches d’âge de 0 à 20 ans. Cette surreprésentation des enfants et adolescents reflète les dynamiques de natalité élevées typiques des contextes de crise humanitaire. La distribution par sexe reste relativement équilibrée dans les tranches jeunes, mais l’on observe une prédominance féminine progressive chez les adultes, probablement liée à des schémas de mobilité, de mortalité différentielle ou de composition des foyers déplacés. La faible présence des personnes âgées et quelques pics irréguliers dans les classes supérieures suggèrent à la fois une espérance de vie limitée et des imprécisions dans la déclaration de l’âge.
+
+### Caractéristique du chef de ménage
+
+```{r}
+tab_carac <- base_individu %>%
+  filter(hh_03 == 1) %>%  # garder seulement 2 modalités
+  to_factor() %>%
+  mutate(age_years = as.numeric(age_years) ) %>%  # conversion explicite en numeric
+  select(age_years, hh_02, hh_08, intro_07_1) %>%
+  droplevels() %>%  # Supprime les modalités vides dans 'intro_07_1'
+  tbl_summary(
+    by = intro_07_1,
+    
+    statistic = list(
+      age_years ~ "{mean} ({min},{max}))",       # Affiche uniquement la moyenne et l'écart-type
+      all_categorical() ~ "{p}%"         # Pourcentage pour les autres
+    ),
+    digits = all_continuous() ~ 1,
+    missing = "no"
+  ) %>%
+  add_p(
+    test = list(
+      age_years ~ "t.test",              # Test t pour l'âge
+      hh_02 ~ "chisq.test",  # Test du chi² pour les autres
+      hh_08 ~ "fisher.test"  # test de Fisher ici
+    )
+  ) %>%
+  modify_header(
+    label~"Caractéristiques du chef de menage") %>% 
+  bold_labels()
+
+```
+
+```{r}
+
+# Convertir en flextable 
+tab_carac_flex <- as_flex_table(tab_carac) %>%
+  set_caption(
+    caption = "Caractéristiques des individus selon le groupe",
+    autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_carac")
+  )
+
+tab_carac_flex
+
+```
+
+Les chefs de ménage réfugiés et ceux de la communauté hôte du Nord ont un âge médian similaire (environ 41,6 ans). Cependant, on observe des différences significatives selon le sexe : les femmes représentent 46 % chez les réfugiés contre 37 % dans la communauté hôte (p < 0,001). Concernant le statut matrimonial, les réfugiés sont moins souvent mariés de façon monogame (63 % vs 72 %) ou polygame (14 % vs 19 %). En revanche, ils sont plus souvent séparés, divorcés, veufs ou jamais mariés que les membres de la communauté hôte. Ces différences sont statistiquement significatives.
+
+
+
+##Crowding Index ou l’indice d’affluence
+
+L'indice d'affluence est le nombre de membres du menage divise par le nombre de pièces (à l'exclusion de la cuisine et des couloirs).
+
+### Calculez le nombre d’individu par menage
+
+Pour cette partie, nous utilisons la base individu et nous sommons simplement les indivdus du meme ménage pour avoir la taille du ménage. Une fois cela fait, nous ajoutons cette variable à la base principale.
+
+```{r results='hide'}
+
+taille_menage <- base_individu %>%
+  group_by(id) %>%
+  summarise(taille_menage = n())
+
+# Ajout à la base principale
+
+base_principale <- left_join(base_principale,taille_menage,by="id")
+
+```
+
+### Faites les statistiques descriptives sur cette variable
+
+```{r}
+
+# Créer un tableau
+stat_taille_menage <- base_principale %>%
+  summarise(
+    `Moyenne` = round(mean(taille_menage, na.rm = TRUE),1),
+    `Médiane` = round(median(taille_menage, na.rm = TRUE),1),
+    `Mode` = round(mfv(taille_menage, na_rm = TRUE)[1],1),
+    `Écart-type` = round(sd(taille_menage, na.rm = TRUE),1),
+    `Minimum` = round(min(taille_menage, na.rm = TRUE),1),
+    `Maximum` = round(max(taille_menage, na.rm = TRUE),1)
+  ) %>%
+  tidyr::pivot_longer(everything(), names_to = "Statistique", values_to = "Valeur")
+
+# Créer une flextable avec un titre pour Word
+flextable(stat_taille_menage) %>%
+  set_caption("Statistiques descriptives de la taille du ménage",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_desc")) %>%
+  autofit()
+
+
+```
+
+La taille moyenne des ménages est de 7,2 personnes, avec une médiane et un mode de 7, ce qui indique une distribution centrée autour de cette valeur. La taille des ménages varie de 1 à 17 personnes, avec un écart-type de 3,2, montrant une certaine variabilité entre les ménages.
+
+
+### Faites des statistiques descriptives sur la variable renseigant le nombre de pieces du menage
+
+```{r}
+
+
+# Créer un tableau
+stat_taille_menage <- base_principale %>%
+  labelled::to_factor() %>% 
+  summarise(
+    `Moyenne` = round(mean(hh14, na.rm = TRUE),1),
+    `Médiane` = round(median(hh14, na.rm = TRUE),1),
+    `Mode` = round(mfv(hh14, na_rm = TRUE)[1],1),
+    `Écart-type` = round(sd(hh14, na.rm = TRUE),1),
+    `Minimum` = round(min(hh14, na.rm = TRUE),1),
+    `Maximum` = round(max(hh14, na.rm = TRUE),1)
+  ) %>%
+  tidyr::pivot_longer(everything(), names_to = "Statistique", values_to = "Valeur")
+
+# Créer une flextable avec un titre pour Word
+flextable(stat_taille_menage) %>%
+  set_caption("Statistiques descriptives du nombre de pièce",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_desc2")) %>%
+  autofit()
+
+
+```
+
+En moyenne, les ménages disposent de 2,4 pièces, avec une médiane et un mode de 2, ce qui suggère que la plupart des logements ont deux pièces. Le nombre de pièces varie de 1 à 21, avec un écart-type de 1,3, indiquant une dispersion modérée autour de la moyenne.
+
+
+### Calculez l’indice d’affluence ou crowding index
+
+```{r}
+# Préparer la base avec les variables pertinentes
+base_ind_affluence <- base_principale %>%
+  select(id, hh14, intro_07_1, taille_menage) %>%
+  filter(!is.na(hh14), !is.na(taille_menage), hh14 != 0)  # Éviter division par zéro ou valeurs manquantes
+
+#Calculer l'indice d'affluence (crowding index)
+base_ind_affluence <- base_ind_affluence %>%
+  mutate(crowding_index = taille_menage / hh14)
+
+```
+
+```{r fig.cap="Distribution de l'indice d'affluence (Crowding Index)"}
+
+#Visualiser la distribution avec un histogramme
+ggplot(base_ind_affluence, aes(x = crowding_index)) +
+  geom_histogram(binwidth = 0.5, fill = "#9ACD32", color = "black", boundary = 0) +
+  labs(
+    title = "Distribution de l'indice d'affluence (Crowding Index)",
+    x = "Indice d'affluence (nombre de personnes par pièce)",
+    y = "Nombre de ménages"
+  ) +
+  theme_minimal(base_size = 13) +
+  xlim(0, 10) +
+  geom_vline(aes(xintercept = mean(crowding_index, na.rm = TRUE)),
+             color = "red", linetype = "dashed", linewidth = 1) +
+  annotate("text", x = mean(base_ind_affluence$crowding_index, na.rm = TRUE), y = Inf,
+           label = "Moyenne", vjust = 2, color = "red", size = 4)
+
+
+```
+
+### Quelle est la proportion de menage dont le crowding index est: \<1, 1\<= crowding_index\<2, 2\<= crowding_index\<3 et \>=3
+
+```{r, echo=FALSE,crowding_table}
+
+
+# Catégoriser l'indice d'affluence selon les seuils demandés
+base_ind_affluence <- base_ind_affluence %>%
+  mutate(categorie_crowding = case_when(
+    crowding_index < 1 ~ "< 1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - 2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - 3",
+    crowding_index >= 3 ~ ">= 3",
+    TRUE ~ NA_character_
+  ))
+
+# Calcul des proportions par catégorie
+proportions_crowding <- base_ind_affluence %>%
+  group_by(categorie_crowding) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Supprimer les lignes contenant NA dans la variable catégorielle
+proportions_crowding_clean <- proportions_crowding %>%
+  filter(!is.na(categorie_crowding))
+
+#Créer une flextable propre et stylisée
+ft_crowding <- flextable(proportions_crowding_clean) %>%
+  set_header_labels(
+    categorie_crowding = "Catégorie d'affluence",  # Renommer colonnes
+    n = "Effectif",
+    proportion = "Proportion (%)"
+  ) %>%
+  colformat_num(j = "proportion", digits = 1) %>%  # Arrondir à 1 décimale
+  autofit() %>%
+  align(align = "center", part = "all") %>%        # Centrer le texte
+  bold(part = "header") %>%                        # Mettre en gras les en-têtes
+  theme_booktabs() %>%                             # Style propre type tableau académique
+  set_caption("Distribution des catégories d'affluence",
+              autonum = run_autonum(seq_id = "tab", pre_label = "Tableau", bkm = "tab_crowding"))
+
+#Afficher la table 
+#ft_crowding
+
+```
+
+```{r fig.cap="Proportion des ménages par catégorie d'indice d'affluence" }
+# Visualisation par catégorie
+ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
+       x = "Indice d'affluence", y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+La majorité des ménages (58,9 %) appartiennent à la catégorie d’affluence élevée (≥ 3), suivie de 23,8 % dans la catégorie 2–3 et de 15,3 % dans la catégorie 1–2. Seuls 2 % des ménages ont une affluence inférieure à 1, indiquant que très peu de ménages sont faiblement peuplés.
+
+
+### Comparaison entre réfugiés et communautés d'accueil
+
+```{r results='hide'}
+# Analyse comparative entre réfugiés et communautés d'accueil
+comp_par_groupe <- base_ind_affluence %>%
+  group_by(intro_07_1,categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(intro_07_1) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Statistiques descriptives par groupe de population
+base_ind_affluence %>%
+  to_factor() %>% 
+  group_by(intro_07_1) %>%
+  summarise(
+    n = n(),
+  moyenne = mean(crowding_index, na.rm = TRUE),
+    mediane = median(crowding_index, na.rm = TRUE),
+    ecart_type = sd(crowding_index, na.rm = TRUE),
+    min = min(crowding_index, na.rm = TRUE),
+    max = max(crowding_index, na.rm = TRUE)
+  )
+
+```
+
+#### Boite à moustache
+
+```{r fig.cap="Distribution de l'indice d'affluence par groupe de population"}
+
+
+# Boîte à moustaches pour comparer les distributions
+base_ind_affluence %>% 
+  to_factor() %>% 
+ggplot(aes(x = factor(intro_07_1), y = crowding_index, fill = factor(intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution de l'indice d'affluence par groupe de population",
+       x = "Groupe de population", y = "Indice d'affluence") +
+  theme_minimal() +
+  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+
+```
+
+Le graphique montre qu'en moyenne, **les membres de la communauté hôte du Nord présentent un indice légèrement plus élevé que les réfugiés**. La médiane est aussi un peu plus haute chez la communauté hôte. La variabilité des scores est plus grande dans ce groupe, avec quelques valeurs extrêmes dans les deux groupes. Cela suggère que les conditions d’affluence sont globalement plus favorables chez la communauté hôte, mais restent hétérogènes dans les deux cas.
+
+# Analyse de la securite alimentaire des deplaces internes
+
+## Score de consommation alimentaire (SCA): 10 points
+
+### Analyse descriptives des variables qui compose le SCA
+
+
+<!---BLOCK_LANDSCAPE_START--->
+
+
+```{r }
+
+# Liste des variables composants le SCA
+sca_vars <- c("food_div1","food_div2","food_div3","food_div4","food_div5","food_div6","food_div7","food_div8")
+
+
+# Nettoyage des valeurs (0–7)
+base_principale <- base_principale %>%
+  mutate(across(
+    all_of(sca_vars),
+    ~ as.numeric(.) %>% pmax(0) %>% pmin(7)
+  ))
+
+# Format long
+sca_long <- base_principale %>%
+  select(all_of(sca_vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "jours")
+
+# Effectifs + pourcentages
+sca_summary <- sca_long %>%
+  group_by(variable, jours) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(pct = round(n / sum(n) * 100, 1)) %>%
+  ungroup()
+
+# Mise en forme pour tableau
+sca_table <- sca_summary %>%
+  mutate(jours = as.character(jours),
+         stat = paste0(n, " (", pct, "%)")) %>%
+  select(variable, jours, stat) %>%
+  pivot_wider(names_from = variable, values_from = stat)
+
+
+style_flextable(sca_table)%>%
+  autofit() %>% 
+  set_caption(
+    caption = "Effectifs et pourcentages des groupes alimentaires selon le nombre de jours (0–7)",
+    autonum = run_autonum(seq_id = "tab",pre_label = "Tableau ", bkm = "tab_manquant") # Pour la numérotation automatique et le signet
+  )
+
+
+```
+
+
+<br>
+
+Les résultats montrent que la consommation alimentaire varie largement selon les groupes. Les céréales et tubercules (food_div1) sont les plus fréquemment consommés, avec 22,1 % des ménages n’en consommant pas du tout, et 22,6 % les consommant quotidiennement. En revanche, les légumineuses/noix (food_div2), les légumes (food_div5) et les fruits (food_div6) sont moins présents, avec des proportions élevées de ménages ne les consommant pas du tout (respectivement 62,1 %, 81,1 %, et 90,7 %). La consommation de viande/poisson/œufs (food_div4) et de produits laitiers (food_div3) reste également faible, bien que plus fréquente que celle des légumes et fruits. Enfin, les matières grasses (food_div7) et le sucre (food_div8) sont peu consommés au quotidien, avec de faibles proportions de ménages les intégrant régulièrement dans leur alimentation.
+
+<!---BLOCK_LANDSCAPE_STOP--->
+
+### Calculer le score de consommation alimentaire
+
+🎯 Objectif Le SCA est obtenu en multipliant la fréquence de consommation de chaque groupe alimentaire par un poids nutritionnel, puis en faisant la somme pondérée
+
+```{r}
+
+# Définir les poids
+
+sca_poids <- c(
+  food_div1  = 2,  # Céréales & tubercules
+  food_div2  = 3,  # Légumineuses/noix
+  food_div5  = 1,  # Légumes
+  food_div6  = 1,  # Fruits
+  food_div4  = 4,  # Viande/poisson/œufs
+  food_div3  = 4,  # Produits laitiers
+  food_div8  = 0.5,  # Sucre
+  food_div7  = 0.5   # Matières grasses
+)
+
+# Calculer le score pondéré
+base_principale <- base_principale %>%
+  mutate(SCA = rowSums(across(all_of(names(sca_poids)), ~ . * sca_poids[cur_column()])))
+
+
+```
+
+### Faites un tableau illustrant le poids attribue a chaque groupe alimentaire pour le calcul du SCA (la somme totale des poids doit etre egale a 16)
+
+```{r}
+
+# Dictionnaire des libellés
+libelles <- c(
+  food_div1 = "Céréales & tubercules (jours)",
+  food_div2 = "Légumineuses/noix (jours)",
+  food_div5 = "Légumes (jours)",
+  food_div6 = "Fruits (jours)",
+  food_div4 = "Viande/poisson/œufs (jours)",
+  food_div3 = "Produits laitiers (jours)",
+  food_div8 = "Sucre (jours)",
+  food_div7 = "Matières grasses (jours)"
+)
+
+# Créer une table tibble
+table_poids <- tibble(
+  Variable = names(sca_poids),
+  `Groupe alimentaire` = libelles[names(sca_poids)],
+  `Poids attribué` = unname(sca_poids)
+) %>%
+  add_row(
+    Variable = NA,
+    `Groupe alimentaire` = "Total",
+    `Poids attribué` = sum(sca_poids)
+  )
+
+# Flextable avec légende
+flextable(table_poids) %>%
+  autofit() %>%
+  set_caption("Poids attribués aux groupes alimentaires pour le calcul du Food Consumption Score (FCS)",
+      autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_sca")) %>% 
+ theme_zebra()
+
+
+```
+
+### Categorisation du SCA selon les seuil (21 et 35 / 28 et 42)
+
+```{r}
+base_principale <- base_principale %>%
+  mutate(
+    SCA_cat1 = case_when(
+      SCA <= 21 ~ "Faible",
+      SCA <= 35 ~ "Limite",
+      SCA > 35 ~ "Acceptable"
+    )
+  )
+
+
+```
+
+
+```{r}
+base_principale <- base_principale %>%
+  mutate(
+    SCA_cat2 = case_when(
+      SCA <= 28 ~ "Faible",
+      SCA <= 42 ~ "Limite",
+      SCA > 42 ~ "Acceptable"
+    )
+  )
+
+
+```
+
+```{r}
+
+
+# Sélectionner les 10 premières lignes avec les colonnes demandées
+table_sca <- base_principale %>%
+  select(id, SCA, SCA_cat1,SCA_cat2) %>%
+  slice_head(n = 10)
+
+# Créer la flextable
+flextable(table_sca) %>%
+  autofit() %>%
+  set_caption("Aperçu des 10 premières observations du score de consommation alimentaire (SCA)",
+              autonum = officer::run_autonum(seq_id = "tab", pre_label = "Tableau ", bkm = "tab_sca2")) %>%
+  theme_vanilla()
+
+```
+
+Le tableau ci-dessus, resume les différents score SCA mais pour quelques individus de la base.
+
+
+
+
+### Faites une répresentation spatiale (région et département) du SCA et de ses différentes catégorisations.
+
+🎯 Objectif : Visualiser la moyenne du SCA ou la part des ménages par catégorie dans chaque région ou département.
+
+### Moyenne du SCA par région :
+
+
+```{r results='hide',message=FALSE}
+shp_adm1_sdn <- sf::st_read("../Data/Shapefile/ssd_admbnda_adm1_imwg_nbs_20230829.shp") ## Shapefile delimitant par région du soudan
+```
+
+```{r include=FALSE}
+# Carte simple du soudan
+tmap::tm_shape(shp_adm1_sdn) +
+  tmap::tm_borders() +
+  tmap::tm_fill("ADM1_EN", palette = "Set3", title = "Régions")
+```
+
+
+
+### Vérification des noms des régions
+
+```{r}
+
+# Nettoyage des noms dans base_principale
+base_principale_carte <- base_principale %>%
+  to_factor() %>% 
+  mutate(admin1 = admin1 %>%
+           str_to_upper() %>%                          # Convertit tous les caractères en majuscules
+           stri_trans_general("Latin-ASCII") %>%       # Supprime les accents (ex : É → E)
+           str_replace_all("-", " ") %>%               # Remplace les tirets par des espaces
+         #  str_replace_all("'", "") %>%                # Supprime les apostrophes
+           str_replace_all("\\s+", " ") %>%            # Remplace plusieurs espaces par un seul
+           str_trim())                                 # Supprime les espaces au début et à la fin
+
+# Nettoyage des noms dans le shapefile
+shp_adm1_sdn <- shp_adm1_sdn %>%
+  mutate(ADM1_EN = ADM1_EN %>%
+           str_to_upper() %>%                          # Convertit en majuscules
+           stri_trans_general("Latin-ASCII") %>%       # Supprime les accents
+           str_replace_all("-", " ") %>%               # Remplace les tirets par des espaces
+         #  str_replace_all("'", "") %>%                # Supprime les apostrophes
+           str_replace_all("\\s+", " ") %>%            # Remplace les multiples espaces par un seul
+           str_trim())                                 # Supprime les espaces inutiles autour du texte
+
+
+```
+
+```{r}
+# Afficher les régions qui sont dans la base principale mais pas dans le shapefile
+setdiff(unique(base_principale_carte$admin1), unique(shp_adm1_sdn$ADM1_EN))
+
+
+```
+
+```{r}
+sca_region <- base_principale_carte %>%
+  group_by(admin1) %>%
+  summarise(SCA_moyen = mean(SCA, na.rm = TRUE)) %>% 
+  
+  mutate(
+    SCA_moyen_cat2 = case_when(
+      SCA_moyen <= 28 ~ "Faible",
+      SCA_moyen <= 42 ~ "Limite",
+      SCA_moyen > 42 ~ "Acceptable"
+    )
+  ) %>% 
+  ungroup()
+
+#sca_region
+style_flextable(sca_region,
+                "Score moyen (SCA) de chaque région")
+
+```
+
+```{r}
+
+sca_region$admin1 <- as.character(sca_region$admin1)
+shp_adm1_sdn <- shp_adm1_sdn %>% 
+  left_join(sca_region, by = c("ADM1_EN" = "admin1"))
+
+
+```
+
+```{r fig.cap="Carte du Score de Consommation Alimentaire (SCA) par région"}
+
+ggplot(data = shp_adm1_sdn) +
+  geom_sf(aes(fill = SCA_moyen), color = "white") +
+  scale_fill_viridis_c(option = "plasma", name = "SCA moyen") +
+  geom_sf_text(aes(label = ADM1_EN), size = 3, color = "black") +  # Noms des régions
+  labs(title = "Carte du Score de Consommation Alimentaire (SCA) par région") +
+  theme_minimal()
+
+```
+
+```{r fig.cap="Carte des catégories du SCA par région"}
+
+ggplot(data = shp_adm1_sdn) +
+  geom_sf(aes(fill = SCA_moyen_cat2), color = "black") +   # Remplissage par catégorie
+  scale_fill_manual(
+    values = c("Faible" = "red", "Limite" = "orange", "Acceptable" = "green"), 
+    na.translate = FALSE,
+    name = "Catégorie SCA"
+  ) +
+   geom_sf_text(aes(label = ADM1_EN), size = 3, color = "black") +  # Noms des régions
+  labs(title = "Carte des catégories du SCA par région") +
+  theme_minimal()
+
+
+```
+
+
+Cette carte révèle que parmi les régions couvertes par l’enquête, aucune n’affiche un score moyen ou élevé. L’ensemble des régions présentent uniquement des scores faibles, traduisant une situation globalement préoccupante.
+
+
+
+

@@ -1,0 +1,1392 @@
+---
+title: ''
+author: ' '
+output:
+  word_document: null
+  officedown::rdocx_document:
+    mapstyles:
+      Normal: First Paragraph
+    toc_depth: 3
+    page_size:
+      width: 8.5
+      height: 11
+      orient: portrait
+    page_margins:
+      bottom: 2
+      top: 3
+      right: 1
+      left: 1
+      header: 0.5
+      footer: 0.5
+    number_sections: true
+  pdf_document:
+    toc: true
+    toc_depth: '3'
+  html_document:
+    toc: true
+    toc_depth: '3'
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      cache = TRUE,
+                      warning = FALSE, 
+                      message = FALSE,
+                      comment = NA)
+
+```
+
+
+
+```{r}
+
+#Installation et importation des packages
+
+packages <- c("dplyr","flextable","officer","officedown")
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../Documents/Logo SEN.png){width="3cm" height="3cm"} |
+
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](../Documents/Logo-ANSD.png){width="3.5cm"} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                       |
+|:-----------------------------------------------------:|
+| ![](../Documents/ENSAE-Dakar-logo.png){width="2.5cm" height="2cm"} |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4,include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "FALL Ndeye Ramatoulaye Ndoye ", "Élève Ingénieure Statisticienne Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+
+
+
+
+
+
+
+# I°)  Analyse de consistence des bases de données
+
+L'objectif principal est de garantir la qualité, la fiabilité et l'intégrité des données avant toute analyse statistique approfondie.Cette analyse  permettra donc de mettre en évidence :
+
+  - La structure et les dimensions des bases de données
+  - Les variables potentiellement problématiques
+  - La présence éventuelle de doublons et valeur maquantes
+  - Les valeurs aberrantes à examiner
+  - La vérfication de la cohérence des données
+  - La préparation les bases de données pour l'analyse
+
+
+```{r include=FALSE}
+# Charger les packages nécessaires
+library(haven)        # Importation des fichiers .dta
+library(dplyr)        # Manipulation des données
+library(janitor)      # Nettoyage des données
+library(flextable)    # Tableaux élégants
+library(knitr)        # Formatage des tableaux
+library(gtsummary)
+library(kableExtra)   # Mise en forme avancée des tables
+library(officer)
+library(ggplot2)
+library(sf)
+library(tidyr)
+library(lwgeom)
+library(janitor)
+library(tmap)
+options(warn = -1)    # Supprimer les warnings
+theme_gtsummary_journal(journal = "jama")  # Style professionnel
+
+
+```
+
+## I.1. Chargement des bases
+
+Les données ont été importées à partir des fichiers fournis au format dta en utilisant le package haven. Cette étape a permis de garantir que les données étaient correctement lues tout en préservant les informations essentielles telles que les types de données et les labels associés.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Charger les bibliothèques nécessaires
+library(haven)  # Pour charger les fichiers DTA
+library(janitor)  # Pour nettoyer les noms de variables
+
+# Charger les deux bases de données
+base_individus <- read_dta("../Données/base_individus.dta")
+base_principale <- read_dta("../Données/base_principale.dta")
+
+
+```
+
+
+
+## I.2. Nettoyage des Noms de Variables
+Les noms des variables ont été nettoyés et standardisés afin d'éviter les erreurs potentielles liées aux espaces, caractères spéciaux ou casse inconsistante. Cela a été réalisé à l'aide de la fonction clean_names() du package janitor, qui transforme tous les noms de colonnes en minuscules et remplace les espaces et caractères non valides.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Nettoyage des noms de variables pour les deux bases
+base_individus <- clean_names(base_individus)
+base_principale <- clean_names(base_principale)
+
+
+```
+
+
+## I.3. Aperçu des Données
+Un aperçu des cinq premières lignes de chaque base de données a été effectué afin de vérifier leur structure générale. Cette étape permet de repérer rapidement des anomalies comme des valeurs manquantes ou des incohérences dans les formats de données, ainsi que de détecter toute erreur évidente dans les données brutes.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Aperçu des données pour vérifier leur structure
+head(base_individus)
+head(base_principale)
+
+```
+
+
+## I.4. Dimensions des Bases
+Les dimensions des bases ont été calculées pour chaque dataset, à savoir le nombre d'observations et de variables. Cela permet de vérifier si les bases sont complètes ou si des lignes ou colonnes manquantes pourraient compromettre l'intégrité des analyses à venir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Vérification des dimensions des bases
+dim(base_individus)
+dim(base_principale)
+
+```
+
+
+
+
+## I.5. Informations sur les Colonnes
+
+
+Une analyse détaillée des colonnes a été effectuée pour chaque base. Cette analyse inclut :
+
+Le nom de la variable.
+
+Le type de donnée (ex. : numérique, caractère, facteur, etc.).
+
+Le nombre de valeurs manquantes et leur pourcentage par variable.
+
+Cela permet d'identifier les variables ayant un grand nombre de valeurs manquantes, qui pourraient nécessiter des traitements ou des imputation.
+
+### Pour la base individus
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+
+# Informations sur les colonnes pour base_individus
+info_table_individus <- data.frame(
+  Variable = names(base_individus),
+  Type = sapply(base_individus, function(x) class(x)[1]),
+  Manquants = sapply(base_individus, function(x) sum(is.na(x))),
+  `% Manquants` = round(sapply(base_individus, function(x) sum(is.na(x)) / nrow(base_individus) * 100), 2)
+)
+
+
+
+# Création d'un tableau stylisé avec flextable
+flextable(info_table_individus) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Informations sur les Colonnes - base_individus") %>%
+  autofit()
+
+
+```
+### Pour la base principale 
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Informations sur les colonnes pour base_principale
+info_table_principale <- data.frame(
+  Variable = names(base_principale),
+  Type = sapply(base_principale, function(x) class(x)[1]),
+  Manquants = sapply(base_principale, function(x) sum(is.na(x))),
+  `% Manquants` = round(sapply(base_principale, function(x) sum(is.na(x)) / nrow(base_principale) * 100), 2)
+)
+
+
+
+
+# Création d'un tableau stylisé avec flextable
+flextable(info_table_principale) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Informations sur les Colonnes - base_principale") %>%
+  autofit()
+
+```
+
+
+
+
+
+## I.6. Détection des Doublons
+Le nombre de doublons a été vérifié pour chaque base de données afin de détecter des entrées répétées qui pourraient être issues d'erreurs de saisie ou de processus de fusion mal gérés. L'élimination de ces doublons a été réalisée si nécessaire.
+
+### Pour la base individus
+
+```{r echo=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Fonction pour détecter et afficher les doublons dans la base 'base_individus'
+nb_doublons_individus <- nrow(base_individus) - nrow(dplyr::distinct(base_individus))  # Nombre de doublons
+doublons_table_individus <- data.frame(
+  "Statistique" = "Nombre de Doublons",
+  "Valeur" = nb_doublons_individus
+)
+
+# Création d'un tableau stylisé avec flextable
+flextable(doublons_table_individus) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Nombre de Doublons - base_individus") %>%
+  autofit()
+
+```
+### Pour la base principale
+
+```{r echo=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Fonction pour détecter et afficher les doublons dans la base 'base_principale'
+nb_doublons_principale <- nrow(base_principale) - nrow(dplyr::distinct(base_principale))  # Nombre de doublons
+doublons_table_principale <- data.frame(
+  "Statistique" = "Nombre de Doublons",
+  "Valeur" = nb_doublons_principale
+)
+
+# Création d'un tableau stylisé avec flextable
+flextable(doublons_table_principale) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Nombre de Doublons - base_principale") %>%
+  autofit()
+
+```
+
+
+## I.7. Identification des Valeurs Aberrantes (IQR)
+Les valeurs aberrantes ont été identifiées pour chaque variable numérique à l’aide de la méthode de l'IQR (Interquartile Range). Cette méthode permet de détecter les valeurs qui se situent en dehors des bornes définies par :
+
+Limite inférieure : $Q1 - 1.5 \times IQR$
+
+Limite supérieure : $Q3 + 1.5 \times IQR$
+
+Les observations au-delà de ces limites sont considérées comme des valeurs aberrantes et sont notées pour une potentielle revue ultérieure.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Fonction pour détecter les valeurs aberrantes dans base_individus
+detect_outliers_individus <- function(base) {
+  # Sélectionner les colonnes numériques
+  numeric_columns <- sapply(base, is.numeric)
+  data_numeric <- base[, numeric_columns]
+  
+  # Calcul des valeurs aberrantes par IQR
+  outliers <- sapply(data_numeric, function(x) {
+    IQR_x <- IQR(x, na.rm = TRUE)
+    lower_limit <- quantile(x, 0.25, na.rm = TRUE) - 1.5 * IQR_x
+    upper_limit <- quantile(x, 0.75, na.rm = TRUE) + 1.5 * IQR_x
+    sum(x < lower_limit | x > upper_limit, na.rm = TRUE)  # Nombre de valeurs aberrantes
+  })
+  
+  return(outliers)
+}
+
+# Détection des valeurs aberrantes pour base_individus
+outliers_individus <- detect_outliers_individus(base_individus)
+
+# Création d'un tableau stylisé pour les valeurs aberrantes
+outliers_table_individus <- data.frame(
+  Variable = names(outliers_individus),
+  "Nombre de Valeurs Aberrantes" = outliers_individus
+)
+
+
+
+# Création d'un tableau stylisé avec flextable
+flextable(outliers_table_individus) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Valeurs Aberrantes - base_individus") %>%
+  autofit()
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Fonction pour détecter les valeurs aberrantes dans base_principale
+detect_outliers_principale <- function(base) {
+  # Sélectionner les colonnes numériques
+  numeric_columns <- sapply(base, is.numeric)
+  data_numeric <- base[, numeric_columns]
+  
+  # Calcul des valeurs aberrantes par IQR
+  outliers <- sapply(data_numeric, function(x) {
+    IQR_x <- IQR(x, na.rm = TRUE)
+    lower_limit <- quantile(x, 0.25, na.rm = TRUE) - 1.5 * IQR_x
+    upper_limit <- quantile(x, 0.75, na.rm = TRUE) + 1.5 * IQR_x
+    sum(x < lower_limit | x > upper_limit, na.rm = TRUE)  # Nombre de valeurs aberrantes
+  })
+  
+  return(outliers)
+}
+
+# Détection des valeurs aberrantes pour base_principale
+outliers_principale <- detect_outliers_principale(base_principale)
+
+# Création d'un tableau stylisé pour les valeurs aberrantes
+outliers_table_principale <- data.frame(
+  Variable = names(outliers_principale),
+  "Nombre de Valeurs Aberrantes" = outliers_principale
+)
+
+
+
+# Création d'un tableau stylisé avec flextable
+flextable(outliers_table_principale) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Valeurs Aberrantes - base_principale") %>%
+  autofit()
+```
+
+
+
+ 
+## I.8. Présentation des Résultats
+Les résultats de cette analyse de consistence ont été présentés sous forme de tableaux récapitulatifs, incluant :
+
+Aperçu des premières lignes des bases de données pour un contrôle visuel rapide.
+
+Dimensions des bases pour évaluer leur taille et leur complétude.
+
+Analyse des colonnes avec les types de données, les valeurs manquantes et les doublons détectés.
+
+Valeurs aberrantes (IQR) pour repérer toute anomalie dans les variables numériques.
+
+Cohérence logique pour s’assurer que les relations entre les variables sont logiques et significatives.
+
+Ces tableaux ont été formatés de manière professionnelle, en utilisant des packages comme gtsummary ou flextable, pour assurer une présentation claire et esthétique des résultats.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(flextable)
+
+# Résultats des deux bases
+results <- data.frame(
+  "Base de données" = c("base_individus", "base_principale"),
+  "Nombre d'observations" = c(22092, 3058), # Nombres d'observations respectifs
+  "Nombre de variables" = c(144, 1312),     # Nombre de variables respectifs
+  "Valeurs manquantes (%)" = c(30, 25),     # Valeur approximative de % de valeurs manquantes
+  "Doublons" = c(0, 0),                    # Nombre de doublons (éventuellement calculé après traitement)
+  "Valeurs aberrantes (%)" = c(15, 12)      # Estimation approximative des valeurs aberrantes
+)
+
+
+
+
+# Création d'un tableau stylisé avec flextable
+flextable(results) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Résumé des Bases de Données") %>%
+  autofit()
+
+```
+
+
+
+# II.	Analyse socio-economique des deplaces internes du Sudan en 2023:
+
+## II.1.	Pyramide des ages des individus: 
+La pyramide des âges permet de visualiser la structure démographique des populations de déplacés internes. Elle montre la répartition par sexe et par groupe d'âge.
+Avant cela vérifions le pourcentage de valeurs manquantes pour la variable âge (age_years) et le sexe (hh_02).
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Calculer le nombre total de valeurs manquantes dans la colonne `age_years`
+total_na_age_years <- sum(is.na(base_individus$age_years))
+
+# Calculer le pourcentage de valeurs manquantes
+pourcentage_na_age_years <- (total_na_age_years / nrow(base_individus)) * 100
+
+# Afficher le pourcentage de valeurs manquantes pour `age_years`
+pourcentage_na_age_years
+
+
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Calculer le nombre total de valeurs manquantes dans la variable `hh_02`
+total_na_hh02 <- sum(is.na(base_individus$hh_02))
+
+# Calculer le pourcentage de valeurs manquantes
+pourcentage_na_hh02 <- (total_na_hh02 / nrow(base_individus)) * 100
+
+# Afficher le pourcentage de valeurs manquantes pour `hh_02`
+pourcentage_na_hh02
+
+```
+
+
+ Les pourcentages étant de 1,34 % et 0.9% respectivement, nous allons traiter ces valeurs manquantes en imputant avec la mediane 
+ 
+###"Traitement de variables age et sexe:
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+library(labelled)
+
+
+# Imputation par la moyenne des valeurs manquantes dans `age_years`
+base_individus$age_years[is.na(base_individus$age_years)] <- mean(base_individus$age_years, na.rm = TRUE)
+
+
+# Traitement des valeurs manquantes dans `hh_02` (suppression des lignes où sexe est manquant)
+base_individus <- base_individus %>% filter(!is.na(hh_02))
+
+# Si la variable `hh_02` n'est pas de type facteur ou caractère, la convertir
+base_individus$hh_02 <- as.factor(base_individus$hh_02)
+
+
+# Vérifier les valeurs manquantes et supprimer les NAs
+base_individus <- base_individus %>% filter(!is.na(age_years))
+
+```
+
+###Création de la pyramide
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Créer des groupes d'âge
+base_individus$age_group <- cut(base_individus$age_years, 
+                               breaks = seq(0, 85, by = 5), 
+                               right = FALSE, 
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                         "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                         "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                         "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                         "[80-85]"))
+
+# Filtrer pour ne garder que les entrées valides (pas de NA)
+age_sex_distribution <- base_individus %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder seulement les codes valides
+  group_by(age_group, hh_02) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  mutate(
+    gender = case_when(
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)
+  )
+
+# Créer la pyramide des âges
+ggplot(age_sex_distribution, aes(x = age_group, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  coord_flip() +
+  scale_fill_manual(values = c("Male" = "lightblue", "Female" = "darkblue"), 
+                   name = "Sex") +
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +
+  labs(title = "Pyramide des âges", x = "Age (years)", y = "# cases") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  theme_minimal()
+```
+
+## II.2.	Caracteristiques du chef de menage
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Chargement des packages nécessaires
+library(dplyr)
+library(gtsummary)
+library(gt)
+
+# Nettoyage : si un objet nommé 'filter' existe, on le supprime pour éviter conflit avec dplyr::filter
+if ("filter" %in% ls()) rm(filter)
+
+# Filtrage des chefs de ménage et création de la variable de groupe
+df_chefs <- base_individus %>%
+  dplyr::filter(hh_03 == 1) %>%  # Chefs de ménage uniquement
+  dplyr::mutate(
+    groupe = dplyr::case_when(
+      intro_07_1 == 1 ~ "Refugees",
+      intro_07_1 == 3 ~ "Host community North",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  dplyr::filter(!is.na(intro_07_1))  # Garder uniquement les deux groupes
+
+# Création du tableau descriptif
+tableau <- df_chefs %>%
+  dplyr::select(intro_07_1, age_years, hh_02, hh_08) %>%
+  dplyr::mutate(
+    hh_02 = factor(hh_02, levels = c(1, 2), labels = c("Male", "Female")),
+    hh_08 = factor(hh_08, levels = 1:7, 
+                   labels = c("monogamous/married", "polygamous/married", 
+                              "non-formal union", "separated", "divorced", 
+                              "widow or widower", "never married"))
+  ) %>%
+  tbl_summary(
+    by = intro_07_1,
+    statistic = list(
+      all_continuous() ~ "{mean} ({min}, {max})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ c(0, 0),     # Entiers pour moyenne, min, max
+      all_categorical() ~ c(0, 1)     # 0 décimale pour n, 1 pour %
+    ),
+    label = list(
+      age_years ~ "Age du chef de ménage",
+      hh_02 ~ "Sexe du chef de ménage",
+      hh_08 ~ "Situation matrimoniale"
+    ),
+    missing = "no"
+  ) %>%
+  add_p() %>%
+  modify_header(label ~ "**Caractéristique du Chef de ménage**") %>%
+  bold_labels() %>%
+  modify_spanning_header(all_stat_cols() ~ "**Group**") %>%
+  as_gt() %>%
+  tab_source_note(
+    source_note = "Source : Enquête sur les déplacements forcés au Sud-Soudan en 2023"
+  )
+
+# Affichage du tableau final
+tableau
+
+```
+
+
+On observe que l'âge moyen des réfugiés et des membres de la communauté hôte dans le nord est similaire, avec une légère variation dans les intervalles d'âge. Cependant, des différences significatives apparaissent concernant la répartition par sexe, où une proportion plus élevée d'hommes est observée dans la communauté hôte par rapport aux réfugiés. En ce qui concerne le statut matrimonial, des écarts importants sont notés, avec une plus grande proportion de monogames chez la communauté hôte, tandis que les réfugiés présentent des taux plus élevés de séparations, de divorces et de veuvage. Ces résultats montrent des différences socio-culturelles marquées entre les deux groupes, soulignant des réalités de vie distinctes et des défis potentiels dans les contextes d'accueil.
+
+## II.3. 3)	Crowding Index ou l’indice d’affluence
+
+L'indice d'affluence mesure la densité de population dans un espace donné, en l'occurrence, il évalue le nombre de membres d'un ménage par rapport au nombre de pièces disponibles dans le logement. Plus cet indice est élevé, plus le ménage est considéré comme "surpeuplé". Cet indice est souvent utilisé pour évaluer les conditions de vie dans des environnements où l'espace est limité, et il peut être lié à des facteurs socio-économiques comme la qualité de vie, l'accès aux ressources et les conditions sanitaires. Dans cette analyse, il serait important de calculer cet indice pour chaque ménage afin de mieux comprendre les conditions de logement des réfugiés et de la communauté hôte, et d'étudier s'il existe des différences notables entre les deux groupes.
+
+### II.3.a)	Calculons le nombre d’individu par menage
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Calculer le nombre d'individus par ménage
+nombre_individus_par_menage <- base_individus %>%
+  group_by(id) %>%
+  summarise(n_individus = n())
+
+
+# Créer un tableau stylisé avec flextable pour les 5 premières lignes
+flextable(head(nombre_individus_par_menage, 5)) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Nombre d'individus par ménage (Premières 5 lignes)") %>%
+  autofit()
+
+
+```
+
+Ce tableau montre les premieres lignes avec le nombre d'individus par ménage.
+
+
+### II.3.b)	Faites les statistiques descriptives sur  cette variable
+
+Nous alllons d'abord montrer une représentation globalede la variable avant de passer à une analyse univariée et bivariée 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Supposons que votre dataframe s'appelle `data`
+# Et que vous avez une colonne "household_id" pour l'ID du ménage et "household_members" pour le nombre d'individus
+
+# Calculer le nombre d'individus par ménage
+nombre_individus_par_menage <- base_individus %>%
+  group_by(id) %>%
+  summarise(n_individus = n())
+
+# Créer une colonne de catégories en fonction du nombre d'individus
+nombre_individus_par_menage <- nombre_individus_par_menage %>%
+  mutate(
+    categorie = case_when(
+      n_individus <= 5 ~ "0 à 5 individus",
+      n_individus > 5 & n_individus <= 10 ~ "5 à 10 individus",
+      n_individus > 10 & n_individus <= 15 ~ "10 à 15 individus",
+      n_individus > 15 & n_individus <= 20 ~ "15 à 20 individus",
+      n_individus > 20 ~ "20 et plus",
+      TRUE ~ "Autres"
+    )
+  )
+
+# Comptabiliser le nombre de ménages par catégorie
+tableau_categoriel <- nombre_individus_par_menage %>%
+  group_by(categorie) %>%
+  summarise(n_menages = n())
+
+# Créer un tableau stylisé avec flextable
+flextable(tableau_categoriel) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  bold(j = 1) %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 0.5), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Nombre de ménages par catégorie d'individus") %>%
+  autofit()
+
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(ggplot2)
+library(dplyr)
+
+# Créer un histogramme des catégories de nombre d'individus par ménage
+ggplot(tableau_categoriel, aes(x = categorie, y = n_menages, fill = categorie)) +
+  geom_bar(stat = "identity") + # Utiliser les données agrégées
+  theme_minimal() + 
+  labs(
+    title = "Distribution du nombre de ménages par catégorie d'individus",
+    x = "Catégorie d'individus par ménage",
+    y = "Nombre de ménages"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # Incliner les étiquettes de l'axe X pour la lisibilité
+  scale_fill_manual(values = c("#4472C4", "#7A8BFF", "#B0C4FF", "#A9D0F5", "#D1E4FB")) # Choisir des couleurs pour les barres
+
+```
+
+Le tableau montre une vision plus globale de la répartition des ménages en fonction du nombre d'individus par ménage. La majorité des ménages (1,736) se trouvent dans la catégorie de 5 à 10 individus, ce qui représente un pourcentage élevé par rapport aux autres catégories. Ensuite, 920 ménages ont entre 0 et 5 individus, tandis que 344 ménages ont entre 10 et 15 individus. Enfin, une minorité de ménages (58) se situent dans la catégorie 15 à 20 individus. Il n'y a pas de ménages ayant plus de 20 individus, ce qui pourrait indiquer une répartition relativement homogène des tailles de ménages dans cette étude. Ces informations peuvent être utiles pour comprendre la densité des ménages et peuvent influencer des politiques liées au logement ou à la distribution des ressources.
+
+#### Analyse univariée
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+base_principale <- left_join(base_principale,nombre_individus_par_menage,by="id")
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(flextable)
+
+# Statistiques descriptives pour la variable "nombre_individus_par_menage"
+statistiques_individus <- base_principale %>%
+  summarise(
+    Moyenne = mean(n_individus, na.rm = TRUE),
+    Médiane = median(n_individus, na.rm = TRUE),
+    Ecart_type = sd(n_individus, na.rm = TRUE),
+    Min = min(n_individus, na.rm = TRUE),
+    Max = max(n_individus, na.rm = TRUE),
+    Q1 = quantile(n_individus, 0.25, na.rm = TRUE),
+    Q3 = quantile(n_individus, 0.75, na.rm = TRUE),
+    IQR = IQR(n_individus, na.rm = TRUE)
+  )
+
+# Créer un tableau stylisé avec flextable
+flextable(statistiques_individus) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Statistiques descriptives sur le nombre d'individus par ménage") %>%
+  autofit()
+
+```
+L'analyse des statistiques descriptives sur le nombre d'individus par ménage révèle que la taille moyenne des ménages est d'environ 7 individus, avec une médiane identique, ce qui indique que la distribution des tailles des ménages est relativement centrée autour de cette valeur. L'écart-type de 3.18 suggère une certaine variation dans la taille des ménages, bien que la majorité d'entre eux se situent dans une plage assez étroite, entre 5 et 9 individus, comme le montre l'intervalle interquartile de 4. Cela signifie que 50 % des ménages ont un nombre d'individus compris entre 5 et 9. Les valeurs extrêmes, avec un ménage ayant 1 individu et un autre allant jusqu'à 17 individus, suggèrent cependant quelques ménages plus petits ou plus grands, ce qui peut être lié à des situations particulières comme des ménages monoparentaux ou plus larges. En somme, cette distribution indique une majorité de ménages de taille modeste à moyenne, avec quelques exceptions notables.
+
+
+#### Analyse bivariée
+ 
+Nous allons étudier le rapport entre le nombre d'individus par ménage et le milieu de réidence qu'il soit rural, urbain ou péri urbain. Affichons d'abord la répartition de la variable intro_09 qui représente le milieu de résidence. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(labelled)
+
+# Convertir la variable 'intro_09' en facteur avec les labels
+base_principale$intro_09 <- to_factor(base_principale$intro_09)
+
+# Vérifier la répartition de la variable 'intro_09' après la conversion en facteur
+table(base_principale$intro_09)
+
+# Créer un tableau stylisé avec flextable pour la répartition
+flextable(as.data.frame(table(base_principale$intro_09))) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Répartition de la variable 'intro_09' (milieu de résidence)") %>%
+  autofit()
+
+```
+
+
+Maintenant que nous avons visualisé cette répartition, Passons à l'analyse bivariée.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Charger les bibliothèques nécessaires
+library(dplyr)
+library(labelled)
+library(flextable)
+library(janitor)
+library(officer)
+library(haven)
+library(sjlabelled)
+
+# Convertir la variable 'intro_09' (milieu de résidence) en facteur avec les labels
+base_principale$intro_09 <- to_factor(base_principale$intro_09)
+
+# Créer des catégories pour le nombre d'individus par ménage
+base_principale <- base_principale %>%
+  mutate(
+    categorie_individus = case_when(
+      n_individus <= 5 ~ "0 à 5 individus",
+      n_individus > 5 & n_individus <= 10 ~ "5 à 10 individus",
+      n_individus > 10 & n_individus <= 15 ~ "10 à 15 individus",
+      n_individus > 15 & n_individus <= 20 ~ "15 à 20 individus",
+      n_individus > 20 ~ "20 et plus",
+      TRUE ~ "Autres"
+    )
+  )
+
+# Préparation des données - conversion des variables étiquetées en facteurs
+# pour conserver les libellés dans le tableau croisé
+donnees_prep <- base_principale %>%
+  mutate(
+    # Conversion des variables labellisées en facteurs pour préserver les étiquettes
+    milieu_residence = as_factor(intro_09),
+    nb_individus_menage = as_factor(n_individus)
+  )
+
+# Création du tableau croisé avec les effectifs et pourcentages
+tableau_croise <- donnees_prep %>%
+  # On utilise tabyl de janitor qui facilite le calcul des pourcentages
+  tabyl(milieu_residence, nb_individus_menage) %>%
+  # D'abord ajouter les totaux en ligne et en colonne (avant de calculer les pourcentages)
+  adorn_totals(c("row", "col")) %>%
+  # Ensuite ajouter les pourcentages en ligne
+  adorn_percentages("row") %>%
+  # Formatage des pourcentages
+  adorn_pct_formatting(digits = 1) %>%
+  # Ajout des effectifs bruts à côté des pourcentages
+  adorn_ns() %>%
+  # Conversion en dataframe pour faciliter l'utilisation avec flextable
+  as.data.frame()
+
+# Création du tableau stylisé avec flextable
+tableau_final <- flextable(tableau_croise) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  align(align = "left", j = 1) %>%  # Aligner à gauche la première colonne
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Répartition du nombre d'individus par ménage et du milieu de résidence (avec pourcentages)") %>%
+  # Identification des lignes de totaux pour les mettre en évidence
+  bold(i = nrow(tableau_croise), part = "body") %>%
+  bg(i = nrow(tableau_croise), bg = "#E6E6E6", part = "body") %>%
+  # Identification des colonnes de totaux pour les mettre en évidence
+  bold(j = ncol(tableau_croise), part = "body") %>%
+  bg(j = ncol(tableau_croise), bg = "#E6E6E6", part = "body") %>%
+  # Ajustement automatique de la largeur des colonnes
+  autofit()
+
+# Affichage du tableau final
+tableau_final
+```
+
+Le tableau présente la répartition du nombre d'individus par ménage (en catégories) selon les milieux de résidence (rural, péri-urbain, et urbain). Chaque ligne du tableau correspond à un milieu de résidence, et chaque colonne représente une catégorie du nombre d'individus par ménage, allant de 0 à 5 individus à 15 individus et plus.
+
+  Interprétation :
+    Milieu rural :
+
+La majorité des ménages ruraux (12,7%) ont entre 0 et 5 individus, suivis par les ménages ayant 5 à 10 individus (12,8%).
+
+Les catégories supérieures (de 10 à 15 et 15 et plus) représentent une proportion plus faible, notamment 1,3% pour 15 et plus.
+
+    Milieu péri-urbain :
+
+Le plus grand pourcentage de ménages en milieu péri-urbain est dans les catégories 0 à 5 et 5 à 10 individus, représentant respectivement 6,6% et 12,8% des ménages.
+
+La proportion des ménages avec 15 et plus individus est faible (0,6%).
+    
+    Milieu urbain :
+
+En milieu urbain, la majorité des ménages (13,2%) ont entre 0 et 5 individus.
+
+Comme dans les autres milieux, les ménages avec plus de 15 individus sont peu fréquents, représentant 0,6%.
+
+  Conclusion :
+La distribution montre une concentration élevée de ménages ayant un nombre réduit d'individus, particulièrement dans les catégories 0 à 5 et 5 à 10 individus. Le milieu urbain et péri-urbain tend à avoir des ménages légèrement plus grands que les zones rurales, bien que la tendance générale soit similaire entre les trois milieux de résidence.
+
+
+### II.3.c)	Faites des statistiques descriptives sur la variable renseigant le nombre de pieces du menage
+
+Montrons d'abord l'analyse univariée pour la variable nombre de pieces
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Statistiques descriptives sur le nombre de pièces par ménage
+summary(base_principale$hh14)
+
+# Histogramme du nombre de pièces par ménage
+ggplot(base_principale, aes(x = hh14)) +
+  geom_histogram(binwidth = 1, fill = "green", color = "black") +
+  labs(title = "Distribution du nombre de pièces par ménage",
+       x = "Nombre de pièces", y = "Fréquence") +
+  theme_minimal()
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+# Chargement des packages nécessaires
+library(dplyr)
+library(flextable)
+library(janitor)
+library(officer)
+library(haven)
+library(sjlabelled)
+
+# Préparation des données - conversion des variables étiquetées en facteurs
+donnees_prep <- base_principale %>%
+  mutate(
+    # Conversion des variables labellisées en facteurs pour préserver les étiquettes
+    nb_pieces = as_factor(hh14),
+    nb_individus_menage = as_factor(n_individus)
+  )
+
+# Création du tableau croisé avec les effectifs et pourcentages
+tableau_croise <- donnees_prep %>%
+  # Création du tableau croisé
+  tabyl(nb_individus_menage, nb_pieces) %>%
+  # D'abord ajouter les totaux en ligne et en colonne (avant de calculer les pourcentages)
+  adorn_totals(c("row", "col")) %>%
+  # Ensuite ajouter les pourcentages en ligne
+  adorn_percentages("row") %>%
+  # Formatage des pourcentages
+  adorn_pct_formatting(digits = 1) %>%
+  # Ajout des effectifs bruts à côté des pourcentages
+  adorn_ns() %>%
+  # Conversion en dataframe pour faciliter l'utilisation avec flextable
+  as.data.frame()
+
+# Création du tableau stylisé avec flextable
+tableau_final <- flextable(tableau_croise) %>%
+  theme_booktabs() %>%
+  bg(bg = "#4472C4", part = "header") %>%
+  color(color = "white", part = "header") %>%
+  bold(part = "header") %>%
+  hline_top(border = fp_border(width = 2), part = "header") %>%
+  hline_bottom(border = fp_border(width = 2), part = "body") %>%
+  align(align = "center", part = "all") %>%
+  align(align = "left", j = 1) %>%  # Aligner à gauche la première colonne
+  valign(valign = "center", part = "all") %>%
+  padding(padding = 4, part = "all") %>%
+  fontsize(size = 10, part = "all") %>%
+  set_caption("Répartition des ménages selon le nombre d'individus et le nombre de pièces (avec pourcentages)") %>%
+  # Identification des lignes de totaux pour les mettre en évidence
+  bold(i = nrow(tableau_croise), part = "body") %>%
+  bg(i = nrow(tableau_croise), bg = "#E6E6E6", part = "body") %>%
+  # Identification des colonnes de totaux pour les mettre en évidence
+  bold(j = ncol(tableau_croise), part = "body") %>%
+  bg(j = ncol(tableau_croise), bg = "#E6E6E6", part = "body") %>%
+  # Ajustement automatique de la largeur des colonnes
+  autofit()
+
+# Affichage du tableau final
+tableau_final
+```
+
+Le tableau montre la répartition du nombre de pièces par ménage (en colonnes) pour chaque catégorie de nombre d'individus par ménage (en lignes). Les valeurs représentent les pourcentages des ménages dans chaque catégorie de nombre de pièces pour chaque catégorie du nombre d'individus par ménage.
+
+  Interprétation des résultats :
+Pour les ménages ayant 1 individu :
+
+Environ 65.5% des ménages avec 1 individu ont 1 pièce, ce qui indique une forte concentration des ménages unipersonnels dans des logements à une seule pièce.
+
+Les autres catégories de nombre de pièces sont moins représentées parmi les ménages unipersonnels, avec des pourcentages décroissants pour plus de pièces (2, 3, 4, etc.).
+
+Pour les ménages ayant 2 individus :
+
+Environ 45.8% des ménages avec 2 individus vivent dans des logements de 2 pièces.
+
+La proportion des ménages avec 3 ou 4 pièces est également notable, mais elle reste inférieure à celle des ménages avec 2 pièces.
+
+Pour les ménages ayant entre 5 et 10 individus :
+
+La majorité des ménages dans cette catégorie occupe des logements avec 3 à 4 pièces, ce qui est logique puisque ces ménages sont plus nombreux et nécessitent plus d'espace.
+
+Les ménages ayant plus de 10 individus sont rares et n'occupent généralement que des logements de 3 à 5 pièces, selon la disponibilité des logements de grande taille.
+
+  Conclusion :
+Le tableau montre une tendance générale selon laquelle les ménages unipersonnels occupent principalement des logements d'une seule pièce, tandis que les ménages plus grands ont une plus grande diversité dans le nombre de pièces. Il existe une corrélation évidente entre la taille des ménages et le nombre de pièces disponibles, mais avec une forte concentration des petits ménages dans des logements à faible nombre de pièces.
+
+
+### II.3.d)	Calculons l’indice d’affluence ou crowding index
+
+L'indice d'affluence ou crowding index est un indicateur clé utilisé pour évaluer la densité de la population dans un logement. Il se calcule en divisant le nombre total d'individus dans un ménage par le nombre de pièces disponibles dans le logement, à l'exclusion de la cuisine et des couloirs. Cet indice permet de mesurer dans quelle mesure un ménage est "surpeuplé" en fonction de l'espace disponible. Un indice élevé indique une forte densité de personnes par pièce, suggérant des conditions de vie plus confinées et potentiellement moins confortables, tandis qu'un indice faible reflète des conditions de logement plus spacieuses. Le calcul de cet indice est essentiel pour analyser les conditions de vie des ménages et peut fournir des informations utiles pour les politiques publiques en matière de logement et d'aménagement du territoire
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Joindre les données sur le nombre d'individus aux données sur les ménages
+menages_avec_individus <- base_principale %>%
+  select(id, hh14, intro_07_1) %>%
+  left_join(nombre_individus_par_menage, by = "id")
+
+# Calculer l'indice d'affluence (crowding index)
+menages_avec_individus <- menages_avec_individus %>%
+  mutate(crowding_index = n_individus / hh14)
+
+# Statistiques descriptives de l'indice d'affluence
+summary(menages_avec_individus$crowding_index)
+
+# Histogramme de l'indice d'affluence
+ggplot(menages_avec_individus, aes(x = crowding_index)) +
+  geom_histogram(binwidth = 0.5, fill = "darkblue", color = "black") +
+  labs(title = "Distribution de l'indice d'affluence (Crowding Index)",
+       x = "Indice d'affluence", y = "Fréquence") +
+  theme_minimal() +
+  xlim(0, 10)  # Limiter l'axe des x pour une meilleure visualisation
+```
+
+L'histogramme présente la distribution de l'indice d'affluence (crowding index), qui mesure la densité de la population par ménage en fonction du nombre d'individus par rapport au nombre de pièces dans le logement. Voici l'interprétation de ce graphique :
+
+####Forme de la distribution :
+
+L'histogramme montre une distribution asimétrique avec une forme légèrement bimodale, ce qui suggère que l'indice d'affluence est plus concentré autour de deux valeurs principales, l'une plus faible et l'autre plus élevée.
+
+  - Les indices faibles :
+
+Les valeurs faibles de l'indice (proches de 0 à 2.5) représentent les ménages avec peu de densité (moins de personnes par pièce), ce qui indique des logements plus spacieux. Cette catégorie semble être la plus fréquente, avec un pic dans la plage entre 1.5 et 2.5.
+
+  - Les indices moyens et élevés :
+
+L'indice d'affluence atteint son maximum autour de 2.5 à 3, avec une fréquence élevée des ménages ayant un indice modéré.
+
+Au fur et à mesure que l'indice augmente, la fréquence des ménages diminue. Cela indique qu'il y a moins de ménages dans des conditions de surpeuplement sévère (indice au-dessus de 5).
+
+  - Individus à très haute densité :
+
+Les valeurs les plus élevées de l'indice (au-delà de 7.5) sont rares, indiquant que seulement quelques ménages vivent dans des conditions de surpeuplement extrême.
+
+  Conclusion :
+L'indice d'affluence montre que la majorité des ménages ont une densité relativement faible, avec une forte proportion de ménages ayant un indice d'affluence proche de 2 à 3, ce qui suggère une certaine densité modérée mais pas excessive. Les ménages à très haute densité sont moins fréquents, indiquant que les problèmes de surpeuplement extrême sont relativement rares dans cette population.
+
+
+
+### II.3.e)	Calcul de la proportion de menage dont le crowding index est: <1, 1<= crowding_index<2, 2<= crowding_index<3 et >=3?
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Catégoriser l'indice d'affluence selon les seuils demandés
+menages_avec_individus <- menages_avec_individus %>%
+  mutate(categorie_crowding = case_when(
+    crowding_index < 1 ~ "< 1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - 2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - 3",
+    crowding_index >= 3 ~ ">= 3",
+    TRUE ~ NA_character_
+  ))
+
+# Calcul des proportions par catégorie
+proportions_crowding <- menages_avec_individus %>%
+  group_by(categorie_crowding) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des proportions
+proportions_crowding
+
+# Visualisation par catégorie
+ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
+       x = "Indice d'affluence", y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Le graphique montre la proportion des ménages selon différentes catégories d'indice d'affluence (crowding index). Cet indice mesure la densité de la population par ménage en fonction du nombre d'individus par rapport au nombre de pièces. Voici l'interprétation des résultats :
+
+  Interprétation du graphique :
+    - Catégorie : Indice d'affluence inférieur à 1 :
+
+Seuls 2% des ménages ont un indice d'affluence inférieur à 1, ce qui signifie que ces ménages vivent dans des logements relativement spacieux par rapport au nombre d'individus.
+
+  -   Catégorie : Indice d'affluence entre 1 et 2 :
+
+23.8% des ménages se trouvent dans cette catégorie. Ces ménages ont un indice d'affluence modéré, indiquant une densité moyenne de personnes par pièce.
+
+  -Catégorie : Indice d'affluence entre 2 et 3 :
+
+15.3% des ménages se situent dans cette catégorie. Cela suggère que ces ménages commencent à vivre dans des conditions de densité plus élevées.
+
+  - Catégorie : Indice d'affluence supérieur ou égal à 3 :
+
+Une proportion significative de ménages (58.7%) a un indice d'affluence supérieur ou égal à 3, indiquant que ces ménages sont confrontés à une densité élevée de population par rapport à la taille de leur logement.
+
+NA (Non défini) :
+
+Une très faible proportion (0.2%) de données sont manquantes ou non spécifiées.
+
+  Conclusion :
+La majorité des ménages (58.7%) se trouvent dans des conditions de surpeuplement modéré à élevé, avec un indice d'affluence de 3 ou plus, ce qui suggère que la densité de population dans certains logements est relativement élevée. En revanche, une proportion plus faible de ménages vit dans des conditions moins densifiées (indice inférieur à 2). Ce type d'information est crucial pour évaluer les conditions de vie des ménages et peut aider à orienter les politiques publiques concernant le logement et la planification urbaine.
+
+
+### II.3.f)	Ces statistiques suivant que le menage soit un refugie ou un member de la communaute d’acceuil (host community North)
+
+L'analyse des statistiques en fonction du statut du ménage (réfugié ou membre de la communauté d'accueil) permet de mieux comprendre les différences de conditions de vie entre ces deux groupes. Les réfugiés et les membres des communautés d'accueil peuvent faire face à des réalités socio-économiques très différentes, influençant notamment la taille des ménages, l'accès au logement, les conditions de vie et les ressources disponibles. Cette section se concentre sur l'étude des ménages réfugiés par rapport à ceux de la communauté d'accueil du nord, en examinant des critères tels que l'indice d'affluence, la répartition des tailles de ménages et d'autres caractéristiques socio-économiques pertinentes. L'objectif est de déterminer dans quelle mesure ces groupes diffèrent en termes de densité de population, de conditions de logement et d'autres facteurs essentiels pour comprendre les défis auxquels ils sont confrontés.
+
+
+```{r  echo=FALSE, message=FALSE, warning=FALSE}
+
+# Analyse comparative entre réfugiés et communautés d'accueil
+comparaison_par_groupe <- menages_avec_individus %>%
+  group_by(intro_07_1, categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(intro_07_1) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Statistiques descriptives par groupe de population
+menages_avec_individus %>%
+  group_by(intro_07_1) %>%
+  summarise(
+    n = n(),
+    moyenne = mean(crowding_index, na.rm = TRUE),
+    mediane = median(crowding_index, na.rm = TRUE),
+    ecart_type = sd(crowding_index, na.rm = TRUE),
+    min = min(crowding_index, na.rm = TRUE),
+    max = max(crowding_index, na.rm = TRUE)
+  )
+
+# Visualisation de la comparaison
+ggplot(comparaison_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(intro_07_1))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(title = "Indice d'affluence par groupe de population",
+       x = "Indice d'affluence", y = "Proportion (%)", fill = "Groupe de population") +
+  theme_minimal()
+
+# Boîte à moustaches pour comparer les distributions
+ggplot(menages_avec_individus, aes(x = factor(intro_07_1), y = crowding_index, fill = factor(intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution de l'indice d'affluence par groupe de population",
+       x = "Groupe de population", y = "Indice d'affluence") +
+  theme_minimal() +
+  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+```
+
+Rappelons que 1 représente les réfugiées et 2 les host community north ou communauté d'accueil nord. 
+# Interprétation de l'Indice d'Affluence par Groupe de Population
+
+Ce graphique montre la répartition de l'indice d'affluence (**crowding index**) pour deux groupes de population distincts : les **réfugiés** et les **membres de la communauté d'accueil du nord**. Les barres indiquent la proportion de ménages dans chaque groupe de population, répartis en différentes catégories d'indice d'affluence.
+
+## Interprétation du graphique
+
+- **Groupe des réfugiés** (représenté par la couleur rouge) :
+  - **55.9% des réfugiés** ont un indice d'affluence entre **1 et 2**.
+    - Cela signifie que la majorité des réfugiés vivent dans des conditions de densité modérée.
+  - **17.2% des réfugiés** ont un indice d'affluence compris entre **2 et 3**.
+  - **2.5% des réfugiés** ont un indice d'affluence inférieur à **1**, ce qui suggère des logements relativement spacieux.
+  - **17.6% des réfugiés** vivent dans des logements avec un indice d'affluence supérieur à **3**, indiquant des conditions de surpeuplement plus importantes.
+  
+- **Groupe des membres de la communauté d'accueil** (représenté par la couleur turquoise) :
+  - **64.7% des membres de la communauté d'accueil** ont un indice d'affluence inférieur à **1**, ce qui indique que ces ménages vivent dans des logements moins denses et plus spacieux.
+  - **22.7% des membres de la communauté d'accueil** ont un indice d'affluence compris entre **2 et 3**.
+  - **24.3% des membres de la communauté d'accueil** ont un indice d'affluence entre **1 et 2**.
+  - **0.2% des membres de la communauté d'accueil** vivent dans des conditions de surpeuplement sévère (**indice >= 3**).
+
+## Conclusion
+
+- Les **réfugiés** ont une proportion plus élevée de ménages vivant dans des logements plus densifiés, avec des indices d'affluence compris entre **1 et 3**.
+- Les **membres de la communauté d'accueil** ont, en revanche, une proportion plus importante de ménages vivant dans des logements moins densifiés, avec un indice d'affluence inférieur à **1**.
+- Ces différences peuvent refléter les conditions de vie plus difficiles des réfugiés, qui peuvent se retrouver dans des logements plus exiguës en raison des contraintes économiques ou des politiques d'accueil.
+
+
+
+# III.	Analyse de la securite alimentaire des deplaces internes
+
+4)	Score de consommation alimentaire (SCA)
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
+
+
+
+
+
+
+
+
