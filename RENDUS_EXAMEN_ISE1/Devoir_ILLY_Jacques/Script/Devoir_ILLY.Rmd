@@ -1,0 +1,695 @@
+
+---
+output: word_document
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  cache = TRUE,
+  echo = FALSE,      # Ne pas afficher le code
+  warning = FALSE,   # Masquer les warnings
+  message = FALSE,   # Masquer les messages (ex: chargement de packages)
+  comment = NA,      # Supprimer les "##" dans la sortie
+  dpi = 300          # Haute qualité pour les images
+)
+```
+
+
+```{r}
+knitr::opts_chunk$set(dev = "png", dpi = 300)
+```
+
+
+```{r packages1, echo=FALSE}
+
+#Installation et importation des packages nedessaires pour la page de garde
+
+packages <- c("officer","officedown","lubridate","tidyverse" ,"flextable","forcats" , "rvg", "knitr", "officer")# un vecteur contenant les noms des packages à installer
+
+
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {   # Vérifie si le package n'est pas encore installé
+    install.packages(package)
+  }
+  library(package, character.only = TRUE) # nom du package en nom ou chaine de caractère ()
+}
+
+```
+
+```{r page_garde_1}
+
+flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>% #Créer un tableau flextable
+  delete_part(part = "header") %>% #supprimer l'en-tête
+  border_remove() %>% #Supprimer les bordures
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1, j = 1) %>% 
+  align(align = "center") %>% set_table_properties(layout = "autofit", width = 1) #Ajuste la largeur des colonnes automatiquements
+
+```
+
+|                                                     |
+|:---------------------------------------------------:|
+| ![](../Logos/SEN.png){width="2.5cm" height="2.5cm"} |
+
+
+```{r page_garde_2}
+
+flextable(data.frame(Contenu = c( "**********",
+                                  "Un Peuple - Un But - Une Foi",
+                                  "**********",
+                                  "Agence nationale de la Statistique et de la démographie"))) %>% 
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>%
+  
+  # Mise en forme du texte
+  bold(i = 1:4, j = 1) %>% 
+  italic(i = 2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                          |
+|:----------------------------------------:|
+| ![](../Logos/Ansd.png){width="2.5cm" height="2.5cm} |
+
+```{r page_garde_3}
+
+flextable(data.frame(Contenu = c("**********",
+                                  "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  
+  # Mise en forme du texte
+  bold(i = 1:2, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+|                                                      |
+|:----------------------------------------------------:|
+| ![](../Logos/ensae.png){width="2.5cm" height="2.5cm}          |
+
+##### Projet statistique sur R : Evaluation
+
+```{r page garde_4, include=FALSE}
+
+flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
+  delete_part(part = "header") %>% 
+  border_remove() %>% 
+  
+  # Application de la police
+  font(fontname = "Times New Roman", part = "all") %>% 
+  fontsize(size = 15, part = "all") %>% 
+  
+  # Mise en forme du texte
+  italic(i = 1, j = 1) %>% 
+  align(align = "center") %>% 
+  
+  set_table_properties(layout = "autofit", width = 1)
+
+```
+
+$$
+$$
+
+```{r page_garde_5}
+donnees <- data.frame(
+  col1 = c("Rédigé par", "ILLY Jacques", "Élève Ingénieur Statisticien Économiste"),
+  col2 = c("Sous la supervision de", "M. Aboubacar HEMA", "Data-scientist"),
+  stringsAsFactors = FALSE
+)
+flextable(donnees) %>% 
+  delete_part(part = "header") %>% 
+  width(j = 1:2, width = 0.5) %>%  # Répartition égale de la largeur
+  align(j = 1, align = "left") %>% 
+  align(j = 2, align = "right") %>% 
+  border_remove() %>% 
+  bold(i = 1, j = 1:2) %>% 
+  italic(i = 3, j = 1:2) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>%  # Force la largeur totale
+  fontsize(size = 11)  # Ajuste la taille de police si nécessaire
+```
+|                                |
+|:------------------------------:|
+| **Année académique 2024-2025** |
+
+
+
+\newpage
+
+# Sommaire
+
+<!---BLOCK_TOC--->
+
+\newpage
+
+# Liste des figures
+
+<!---BLOCK_TOC{seq_id: 'fig'}--->
+
+# Liste des tableaux
+
+<!---BLOCK_TOC{seq_id: 'tab'}--->
+
+\newpage
+
+# **Introduction**
+
+<!---BLOCK_MULTICOL_START--->
+
+## **.Objectif de l'étude**
+L’objectif de cette étude est d’analyser les dynamiques de déplacement forcé au Sud-Soudan en 2023, à partir des données collectées lors de l’Enquête sur les déplacements forcés. Elle vise à mieux comprendre les profils des populations déplacées, les causes et modalités de déplacement, ainsi que les conditions de vie dans les zones d’accueil. Les résultats permettront d’éclairer les actions humanitaires et les politiques de réponse aux crises de déplacement dans le pays.
+
+## **Installation des packages**
+
+Dans cette section, nous allons installer les packages nécessaires à l'analyse. Nous allons utiliser les packages suivants : `dplyr`, `janitor`, `readr`, `tidyverse`, `cardx`, `flextable`, `utils`, `haven`, `survey`, `gtsummary`, `labelled` et `gt`. Ces packages nous permettront de manipuler les données, de créer des tableaux et de réaliser des analyses statistiques. Nous allons d'abord vérifier si ces packages sont déjà installés. Si ce n'est pas le cas, nous allons les installer. Ensuite, nous allons charger ces packages pour pouvoir les utiliser dans notre analyse. 
+
+
+
+```{r packages, echo=FALSE}
+#listes des packages à installer 
+packages<-c("dplyr","janitor", "readr","tidyverse", "cardx" ,"utils","ggplot2" ,"haven", "survey", "gtsummary", "labelled","gt")
+#installation des package
+for (pack in packages)
+  {if (!requireNamespace(pack, quietly=TRUE))
+  {install.packages(pack) # intalle si pas installé
+  }
+  
+  #chargement des packages
+  library(pack, character.only=TRUE)
+}
+
+```
+
+<!---BLOCK_COLUMNBREAK--->
+
+
+## **.Importation des données**
+
+Nous allons importer les données à partir du fichier `Donnée`. Ce fichier contient des informations sur les individus de l'enquête. Nous allons utiliser la fonction `read_dta` du package `haven` pour importer ces données. Ensuite, nous allons explorer les données pour comprendre leur structure et leur contenu. Nous allons utiliser la fonction `View` pour afficher les données dans un tableau interactif.
+
+```{r importation des bases, echo=FALSE}
+#Importation des données
+#installation de welfare 2018
+Base_Individu <- read_dta("../Donnée/Base_Individus.dta")
+#installation de welfare 2021
+Base_Principale <- read_dta("../Donnée/Base_Principale.dta")
+
+
+```
+
+<!---BLOCK_MULTICOL_STOP{widths: [3,3], space: 0.2, sep: true}--->
+\newpage
+
+# **I. Analyse de consistence des bases de données**
+
+Nous allons explorer les données pour comprendre leur structure et leur contenu.Chaques base de donnée contient des informations sur la sécurité alimentaire.
+
+### **2.1.Aperçu des premières et dernières lignes**
+ 
+ Ces deux tableaux represente les données des six prémière observation et les 8 prémières variables.
+ 
+```{r les premières observations de la base principale}
+# Premières observations de la base
+Base_Principale %>%
+  select(1:8) %>% #Affiche les 8 premières variables
+  head() %>%
+  flextable() %>%
+  color(part = "header", color = "black") %>% # Texte noir dans l'en-tête
+  bg(part = "header", bg = "#5DADE2") %>% # Fond orange
+  set_caption("Premières observations de la base principale") %>%
+  autofit() %>%  
+  set_table_properties(
+    layout     = "autofit",    # utilisation du mode autofit
+    width      = 1
+  )
+
+```
+
+```{r les premières observations de la base individu}
+# Premières observations de la base
+Base_Individu %>%
+  select(1:8) %>% #Affiche les 8 premières variables
+  head() %>%
+  flextable() %>%
+  color(part = "header", color = "black") %>% # Texte noir dans l'en-tête
+  bg(part = "header", bg = "#5DADE2") %>% # Fond orange
+  set_caption("Premières observations de la base MAD") %>%
+  autofit() %>%  
+  set_table_properties(
+    layout     = "autofit",    # utilisation du mode autofit
+    width      = 1
+  )
+
+```
+
+### **2.2.Les dimensions et les types de variables**
+
+
+```{r dimensions et types de variables}
+#glimpse(Base_Principale )
+type_counts <- table(sapply(Base_Principale , \(x) class(x)[1]))
+type_summary <- paste(names(type_counts), "(", type_counts, ")", collapse = ", ")
+
+type_count <- table(sapply(Base_Individu , \(x) class(x)[1]))
+type_summ <- paste(names(type_count), "(", type_count, ")", collapse = ", ")
+
+
+
+```
+
+La base principale de données contient **`r nrow(Base_Principale )`** observations et **`r  ncol(Base_Principale )`** variables.Elle  contient **`r length(type_counts)`** types de variables : `r type_summary`. Quant à la base individu, elle contient **`r nrow(Base_Individu)`** observations et **`r  ncol(Base_Individu)`** variables. Elle contient **`r length(type_count)`** types de variables : `r type_summ`.
+
+
+### **2.3. Verification de la présence des valeurs manquantes et doublons**
+
+**Nettoyages des noms de variables**
+Nous allons d'abord nettoyer les noms des variables
+
+```{r nettoyage des noms, }
+# Nettoyage des noms de variables
+Base_Principale <-Base_Principale %>% clean_names() #Nettoyage des noms de variables pour le base principale
+Base_Individu <- Base_Individu %>% clean_names() #Nettoyage des noms de variables pour le base individu
+
+```
+
+
+**Les doublons**
+
+un doublon est une observation qui apparaît plusieurs fois dans la base de données. Alors, la base principale a **`r sum(duplicated(Base_Principale))`** doublons.La base individu a **`r sum(duplicated(Base_Individu))`** doublons.
+
+
+**Les valeurs manquantes**
+
+Une valeur manquante est une valeur qui n'est pas renseignée dans la base de données. Nous allons utiliser la fonction. Alors nous avons au total **`r sum(is.na(Base_Principale))`** valeurs manquantes pour la base principale et **`r sum(is.na(Base_Individu))`** valeurs manquante pour la base individu.
+
+**Suppression des colonne quasi-vide**
+
+```{r suppression des colonne vide}
+
+seuil <- 0.9 # Définir le seuil maximum de valeurs manquantes autorisé (ici : 90%)
+
+Base_Principale <- Base_Principale[, colMeans(is.na(Base_Principale)) <= seuil]# Supprimer les colonnes dont plus de 90% des va
+
+Base_Individu <- Base_Individu[, colMeans(is.na(Base_Individu)) <= seuil]# Supprimer les colonnes dont plus de 90% des va
+
+```
+
+Nous avons les colonnes dont plus de 90% des valeurs sont manquantes. Donc, la base principale a désormais **`r  ncol(Base_Principale )`** variables et la base individu a **`r ncol(Base_Individu)`** variables. Noous avons decider de nous limité à 90% de peur de perdre des informations importantes.
+
+### **2.4. Vérification d'existance d'une relation entre ces bases**
+
+
+```{r variables communes}
+variables_communes <- intersect(names(Base_Principale), names(Base_Individu))
+texte_communes <- paste(variables_communes, collapse = ", ")
+```
+Les deux bases de données partagent la(les) variable(s) suivante(s): **`r texte_communes`**. Cettes(s) variable(s) est(sont) commune(s) aux deux bases de données. elles nous permettent d'établir une relation entre ces deux bases de données. 
+
+
+# **II.	Analyse socio-economique des deplaces internes du Sudan en 2023**
+
+## **1)	Pyramide des ages des individus**
+
+Nous presentons ici les phyramides des ages, des individus de l'enquete. Nous allons d'abord créer une nouvelle variable `age_group` qui regroupe les âges en tranches de 5 ans.
+
+```{r message=FALSE, warning=FALSE}
+
+# Vérifier les valeurs manquantes et supprimer les NAs
+Base_Individu <- Base_Individu %>% filter(!is.na(age_years))
+
+# Créer des tranches d'âge de 5 ans (0–5, 5–10, ..., 80–85)
+Base_Individu$age_group <- cut(Base_Individu$age_years, 
+                               breaks = seq(0, 85, by = 5),  # bornes des groupes
+                               right = FALSE,  # l'intervalle inclut la borne inférieure mais pas la supérieure
+                               labels = c("[0-5]", "[5-10]", "[10-15]", "[15-20]", 
+                                          "[20-25]", "[25-30]", "[30-35]", "[35-40]", 
+                                          "[40-45]", "[45-50]", "[50-55]", "[55-60]", 
+                                          "[60-65]", "[65-70]", "[70-75]", "[75-80]", 
+                                          "[80-85]"))
+
+# Compter le nombre de personnes par groupe d'âge et par sexe
+age_sex_distribution <- Base_Individu %>%
+  filter(!is.na(hh_02) & hh_02 %in% c(1, 2)) %>%  # Garder uniquement les sexes valides : 1 (homme), 2 (femme)
+  group_by(age_group, hh_02) %>%                 # Regrouper par tranche d’âge et sexe codé
+  summarise(count = n(), .groups = "drop") %>%   # Compter les individus dans chaque groupe
+  mutate(
+    gender = case_when(                         # Créer une variable texte pour le sexe
+      hh_02 == 1 ~ "Male",
+      hh_02 == 2 ~ "Female"
+    ),
+    count = ifelse(gender == "Male", -count, count)  # Inverser les valeurs des hommes pour affichage en pyramide
+  )
+# Créer la pyramide des âges
+ggplot(age_sex_distribution, aes(x = age_group, y = count, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.7) +                   # Barres pleines pour chaque groupe
+  coord_flip() +                                               # Inverser les axes pour un affichage horizontal
+  scale_fill_manual(values = c("Male" = "lightblue", 
+                               "Female" = "darkblue"), 
+                    name = "Sex") +                            # Couleurs personnalisées pour chaque sexe
+  scale_y_continuous(labels = function(x) format(abs(x), big.mark = ",")) +  # Afficher l’axe des Y sans signe "-"
+  labs(title = "Pyramide des âges", x = "Age (years)", y = "# cases") +      # Titres des axes et du graphique
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +         # Ligne verticale au centre
+  theme_minimal() 
+# Thème graphique épuré
+
+
+```
+Cette pyramide révèle une population jeune, typique des contextes de crise humanitaire, avec une base large (forte proportion de 0-20 ans) et un rétrécissement marqué après 50 ans. On note un déséquilibre de genre chez les 25-45 ans (déficit masculin probablement lié à la migration ou à la mortalité différentielle), tandis que les seniors montrent une surreprésentation féminine. La structure par vagues suggère des variations historiques dans la fécondité ou la mortalité. Cette configuration indique une charge démographique juvenile importante, mais aussi une future fenêtre d’opportunité économique si les conditions socio-sanitaires s’améliorent. L’analyse appelle des politiques ciblées sur la santé reproductive, l’emploi des jeunes et la protection des personnes âgées.
+
+
+## **2)	Constuction du tableau**
+
+Ici nous allons construire un tableau de synthèse des caractéristiques sociodémographiques des individus de l'enquête. 
+
+```{r tabeau de synthese, message=FALSE, results='asis'}
+
+tbl_summary_example <- Base_Individu %>% to_factor() %>% droplevels()%>%
+  tbl_summary(
+    by =intro_07_1 ,  
+    include = c(age_years, hh_02, hh_08),  # Toutes ces variables seront incluses dans le tableau
+    label = list(
+      age_years ~ "AgeYears",  
+      hh_02 ~ "sex",  
+      hh_08 ~ "What is [your/name's] present marital status" 
+     
+    ),  
+    statistic = all_continuous() ~ "{mean} ({sd})",  
+    digits = all_continuous() ~ 2,  
+    missing = "ifany"  
+  )%>% 
+  modify_header(label ~ "Caracteristique du chef de ménage") %>%
+  as_flex_table() %>% add_footer_lines("2Wilcoxon rank sum test; Pearson's Chi-squared test; Fisher's exact test ") %>%
+  autofit()   # Ajuster automatiquement la largeur des colonnes
+
+# Affichage du tableau
+print(tbl_summary_example)
+
+```
+L’analyse des caractéristiques des chefs de ménage révèle des différences notables entre les réfugiés et les membres des communautés hôtes du Nord. Les réfugiés comptent une proportion anormalement élevée de très jeunes chefs de ménage : plus de la moitié ont moins de 20 ans, contre environ 51% chez les hôtes, suggérant des situations familiales précaires ou des ménages dirigés par des enfants. La répartition par sexe est équilibrée dans les deux groupes (environ 50% hommes, 50% femmes). Sur le plan matrimonial, les réfugiés sont majoritairement célibataires (54%) alors que les hôtes sont plus souvent mariés monogames (44%). Le mariage polygame reste marginal mais présent dans les deux groupes. Les chefs de ménage âgés de 60 ans ou plus sont plus représentés dans les communautés hôtes (4.7%) que chez les réfugiés (3.2%). Ces données traduisent une plus grande stabilité sociale chez les hôtes, alors que les réfugiés présentent des signes clairs de fragilité socio-économique. Une attention particulière devrait être portée aux jeunes chefs de ménage réfugiés dans les interventions humanitaires. Souhaitez-vous une visualisation graphique de ces écarts?
+
+## **3)	Crowding Index ou l’indice d’affluence**
+
+
+### **a)	Calculez le nombre d’individu par menage**
+ 
+ Cette, nous allons calculer le nombre d'individu par ménage. Nous allons utiliser la fonction `group_by` pour regrouper les données par identifiant de ménage (`id`) et la fonction `summarise` pour compter le nombre d'individus dans chaque ménage. Ensuite, nous allons afficher le résultat sous forme de tableau. Ensuite nous allons faire une jointure entre la base principale et la base individu par melange sur l'identifiant du ménage (`id`). Cela nous permettra d'ajouter le nombre d'individus par ménage à la base principale.
+ 
+```{r nombre individu par menage}
+nb_ind_men <- Base_Individu %>%
+  group_by(id) %>%
+  summarise(nb_individus = n())
+
+
+
+
+```
+
+
+```{r , jointure des bases}
+
+# Fusion des données sur l'identifiant du ménage
+Base_Affluence <- Base_Principale %>%
+  left_join(nb_ind_men, by = "id")
+
+
+```
+ 
+### **b)les statistiques descriptives sur  cette variable**
+
+```{r stastistiques descriptives}
+Base_Affluence %>% 
+  dplyr::select(nb_individus) %>%  # Sélection de la variable nb_individus uniquement
+  tbl_summary(
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd}) | Médiane: {median} | Min: {min} | Max: {max}"  # Statistiques descriptives détaillées
+    ),
+    digits = all_continuous() ~ 1  # Arrondir à 1 chiffre après la virgule
+  ) %>%
+  as_flex_table() %>%  # Conversion du tableau gtsummary en tableau flextable pour personnalisation
+  fontsize(size = 9, part = "all") %>%  # Définir la taille de police à 9 partout
+  font(fontname = "Times New Roman", part = "all") %>%  # Police uniforme Times New Roman
+  bg(bg = "#D6EAF8", part = "header") %>%  # Couleur de fond bleu clair pour l'en-tête
+  align(align = "center", part = "header") %>%  # Centrer le texte de l'en-tête
+  align(align = "left", j = 1) %>%  # Aligner à gauche le texte de la première colonne
+  autofit() %>%  # Ajustement automatique des largeurs de colonnes
+  width(width = 1, j = 1) %>%  # Définir une largeur fixe de 1 pouce pour la première colonne
+  set_table_properties(layout = "autofit") %>%  # S'assurer que le tableau s'ajuste bien à la page Word
+  add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%  # Ajouter une ligne de source en bas du tableau
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%  # Ajouter des bordures noires fines autour de toutes les cellules
+  hline(border = fp_border(color = "black", width = 1)) %>%  # Lignes horizontales internes
+  vline(border = fp_border(color = "black", width = 1)) %>%  # Lignes verticales internes
+  hline_top(border = fp_border(color = "black", width = 2)) %>%  # Ligne du haut plus épaisse
+  hline_bottom(border = fp_border(color = "black", width = 2))  # Ligne du bas plus épaisse
+
+```
+
+
+```{r histo}  
+# Statistiques descriptives sur le nombre d'individus par ménage
+summary(nb_ind_men$nb_individus)
+
+# Histogramme du nombre d'individus par ménage
+ggplot(nb_ind_men, aes(x = nb_individus)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution du nombre d'individus par ménage",
+       x = "Nombre d'individus", y = "Fréquence") +
+  theme_minimal()
+
+
+```
+
+
+
+### **c Faites des statistiques descriptives sur la variable renseigant le nombre de pieces du menage**
+```{r stastistiques descripti}
+Base_Affluence %>% 
+  dplyr::select(hh14) %>%  # Sélection de la variable nb_individus uniquement
+  tbl_summary(
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd}) | Médiane: {median} | Min: {min} | Max: {max}"  # Statistiques descriptives détaillées
+    ),
+    digits = all_continuous() ~ 1  # Arrondir à 1 chiffre après la virgule
+  ) %>%
+  as_flex_table() %>%  # Conversion du tableau gtsummary en tableau flextable pour personnalisation
+  fontsize(size = 9, part = "all") %>%  # Définir la taille de police à 9 partout
+  font(fontname = "Times New Roman", part = "all") %>%  # Police uniforme Times New Roman
+  bg(bg = "#D6EAF8", part = "header") %>%  # Couleur de fond bleu clair pour l'en-tête
+  align(align = "center", part = "header") %>%  # Centrer le texte de l'en-tête
+  align(align = "left", j = 1) %>%  # Aligner à gauche le texte de la première colonne
+  autofit() %>%  # Ajustement automatique des largeurs de colonnes
+  width(width = 1, j = 1) %>%  # Définir une largeur fixe de 1 pouce pour la première colonne
+  set_table_properties(layout = "autofit") %>%  # S'assurer que le tableau s'ajuste bien à la page Word
+  add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%  # Ajouter une ligne de source en bas du tableau
+  border(border = fp_border(color = "black", width = 1), part = "all") %>%  # Ajouter des bordures noires fines autour de toutes les cellules
+  hline(border = fp_border(color = "black", width = 1)) %>%  # Lignes horizontales internes
+  vline(border = fp_border(color = "black", width = 1)) %>%  # Lignes verticales internes
+  hline_top(border = fp_border(color = "black", width = 2)) %>%  # Ligne du haut plus épaisse
+  hline_bottom(border = fp_border(color = "black", width = 2))  # Ligne du bas plus épaisse
+
+```
+
+L'étude porte sur 3 058 ménages, avec une moyenne de 2,4 pièces occupées (écart-type de 1,3), indiquant une dispersion modérée autour de cette valeur. La médiane (2,0) est légèrement inférieure à la moyenne, suggérant une distribution légèrement asymétrique vers la droite, avec quelques ménages occupant un nombre élevé de pièces (jusqu’à 21). La majorité des ménages se concentre autour de 1 à 2 pièces (valeur minimale : 1,0), ce qui pourrait refléter des logements modestes ou des foyers de petite taille. Seuls 6 cas sont inconnus, confirmant la quasi-exhaustivité des données. Ces résultats, basés sur une enquête robuste, mettent en évidence une tendance générale vers des habitats restreints, avec des exceptions ponctuelles de ménages plus spacieux.
+
+```{r histogramme}
+summary(Base_Principale$hh14)
+
+# Histogramme du nombre de pièces par ménage
+ggplot(Base_Principale, aes(x = hh14)) +
+  geom_histogram(binwidth = 1, fill = "coral", color = "black") +
+  labs(title = "Distribution du nombre de pièces par ménage",
+       x = "Nombre de pièces", y = "Fréquence") +
+  theme_minimal()
+
+```
+
+L'histogramme montre une progression ascendante des fréquences, culminant à 1250 pour la catégorie la plus représentée, probablement associée à un nombre de pièces moyen ou élevé (ex. 4-5 pièces). Les fréquences intermédiaires (750, 1000) suggèrent une répartition croissante, tandis que les valeurs inférieures (250, 500) indiquent une minorité de ménages avec peu de pièces. L’absence d’étiquettes précises pour les intervalles de pièces limite l’interprétation détaillée, mais la tendance générale reflète une concentration vers des logements plus spacieux, typique des zones urbaines ou résidentielles. La cohérence des données (somme logique des fréquences) renforce la fiabilité de cette distribution.
+
+### **d)	Calculez l’indice d’affluence ou crowding index**
+
+```{r}
+# Jointure des deux base
+aff_ind <- Base_Principale %>%
+  select(id, hh14, intro_07_1) %>%
+  left_join(nb_ind_men, by = "id")
+
+# Calculer l'indice d'affluence (crowding index)
+aff_ind <- aff_ind %>%
+  mutate(crowding_index = nb_individus / hh14)
+
+# Statistiques descriptives de l'indice d'affluence
+summary(aff_ind$crowding_index)
+
+
+```
+
+```{r}
+summary(aff_ind$crowding_index)
+
+# Histogramme de l'indice d'affluence
+ggplot(aff_ind, aes(x = crowding_index)) +
+  geom_histogram(binwidth = 0.5, fill = "lightgreen", color = "black") +
+  labs(title = "Distribution de l'indice d'affluence (Crowding Index)",
+       x = "Indice d'affluence", y = "Fréquence") +
+  theme_minimal() +
+  xlim(0, 10)  # Limiter l'axe
+
+```
+
+
+### **e) Quelle est la proportion de menage dont le crowding index est: \<1, 1\<= crowding_index\<2, 2\<= crowding_index\<3 et \>=3**
+
+```{r, results='hide'}
+# Catégoriser l'indice d'affluence selon les seuils demandés
+aff_ind <- aff_ind %>%
+  mutate(categorie_crowding = case_when(
+    crowding_index < 1 ~ "< 1",
+    crowding_index >= 1 & crowding_index < 2 ~ "1 - 2",
+    crowding_index >= 2 & crowding_index < 3 ~ "2 - 3",
+    crowding_index >= 3 ~ ">= 3",
+    TRUE ~ NA_character_
+  ))
+
+# Calcul des proportions par catégorie
+proportions_crowding <- aff_ind %>%
+  group_by(categorie_crowding) %>%
+  summarise(n = n()) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Affichage des proportions
+proportions_crowding
+```
+
+
+```{r statistique,}
+# Visualisation par catégorie
+ggplot(proportions_crowding, aes(x = categorie_crowding, y = proportion, fill = categorie_crowding)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), vjust = -0.5) +
+  labs(title = "Proportion des ménages par catégorie d'indice d'affluence",
+       x = "Indice d'affluence", y = "Proportion (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+La répartition de l’indice d’affluence révèle une dominance marquée des valeurs élevées (≥ 3), représentant 57,9 % des données, tandis que les catégories intermédiaires (1-2 et 2-3) affichent des proportions décroissantes (24,1 % et 15,6 %). Les valeurs extrêmes (< 1) et manquantes (NA) sont marginales (2,2 % et 0,2 %), soulignant une asymétrie prononcée vers les indices supérieurs. La somme cohérente (≈ 99,9 %) confirme l’exactitude globale, reflétant un contexte où l’affluence élevée prédomine, ce qui oriente les analyses vers cette majorité significative.
+
+## Comparaison entre réfugiés et communautés d'accueil
+
+```{r}
+# Obtenir les labels pour le groupe de population
+if (any(class(aff_ind$intro_07_1) %in% c("haven_labelled", "labelled"))) {
+  cat("Labels pour la variable groupe de population:\n")
+  print(val_labels(aff_ind$intro_07_1))
+}
+
+# Analyse comparative entre réfugiés et communautés d'accueil
+comp_par_groupe <- aff_ind %>%
+  group_by(intro_07_1, categorie_crowding) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(intro_07_1) %>%
+  mutate(proportion = n / sum(n) * 100)
+
+# Statistiques descriptives par groupe de population
+aff_ind %>%
+  group_by(intro_07_1) %>%
+  summarise(
+    n = n(),
+    moyenne = mean(crowding_index, na.rm = TRUE),
+    mediane = median(crowding_index, na.rm = TRUE),
+    ecart_type = sd(crowding_index, na.rm = TRUE),
+    min = min(crowding_index, na.rm = TRUE),
+    max = max(crowding_index, na.rm = TRUE)
+  )
+
+# Visualisation de la comparaison
+ggplot(comp_par_groupe, aes(x = categorie_crowding, y = proportion, fill = factor(intro_07_1))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("%.1f%%", proportion)), 
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(title = "Indice d'affluence par groupe de population",
+       x = "Indice d'affluence", y = "Proportion (%)", fill = "Groupe de population") +
+  theme_minimal()
+
+# Boîte à moustaches pour comparer les distributions
+ggplot(aff_ind, aes(x = factor(intro_07_1), y = crowding_index, fill = factor(intro_07_1))) +
+  geom_boxplot() +
+  labs(title = "Distribution de l'indice d'affluence par groupe de population",
+       x = "Groupe de population", y = "Indice d'affluence") +
+  theme_minimal() +
+  ylim(0, 10)  # Limiter l'axe des y pour une meilleure visualisation
+
+```
+
+
+# **III.	Analyse de la securite alimentaire des deplaces internes**
+
+## **4)	Score de consommation alimentaire (SCA)**
+
+### **a)	Faites une analyse descriptive des variables qui composent le SCA**
+
+```{r,echo=FALSE, quiet = TRUE}
+
+# Création du tableau avec formatage style Banque mondiale - Version simplifiée
+table_wb_simple <-Base_Principale %>%to_factor() %>% 
+  select(starts_with("food_div"))%>%tbl_summary(
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(all_continuous() ~ 1),
+    missing = "no"
+  ) %>%
+  modify_header(
+    label ~ "**Aliments**"
+  ) %>%
+  modify_spanning_header(all_stat_cols() ~ "**Statistiques descriptive des variables SCA**") %>%
+  bold_labels() %>%
+  add_n() %>%
+  as_flex_table() %>%
+  flextable::fontsize(size = 9, part = "all") %>%
+  flextable::font(fontname = "Times New Roman", part = "all") %>%
+  flextable::bg(bg = "#D6EAF8", part = "header") %>%
+  flextable::align(align = "center", part = "header") %>%
+  flextable::align(align = "left", j = 1) %>%
+  flextable::autofit() %>%  # Autofit simplifié sans paramètres
+  flextable::width(width = 1, j = 1) %>%
+  flextable::set_table_properties(layout = "autofit") %>%  # Version simplifiée
+  flextable::add_footer_lines("Source: Calculs de l'auteur basés sur les données de l'enquête.") %>%
+  flextable::border(border = fp_border(color = "black", width = 1), part = "all") %>%
+  # More sophisticated border styling
+  flextable::hline(border = fp_border(color = "black", width = 1)) %>%  # Horizontal lines
+  flextable::vline(border = fp_border(color = "black", width = 1)) %>%  # Vertical lines
+  flextable::hline_top(border = fp_border(color = "black", width = 2)) %>% # Thicker top border
+  flextable::hline_bottom(border = fp_border(color = "black", width = 2)) %>% # Thicker bottom border
+  flextable::set_caption("Tableau 1: Caractéristiques socio-démographiques l'alimentation") %>%
+  flextable::add_footer_lines(values = c(
+    "Note: Les écarts-types sont entre parenthèses."
+  
+  )) 
+  
+# Pour l'affichage dans le document R Markdown
+table_wb_simple
+
+```
+Les données révèlent une consommation alimentaire très limitée dans les ménages. Par exemple, 62% des ménages n’ont pas consommé de légumineuses durant les 7 derniers jours, 81% n’ont pas consommé de produits laitiers, 71% n’ont pas mangé de viande ou poisson, et 91% n’ont pas mangé de fruits. Les produits les plus consommés sont les céréales (23% les consomment quotidiennement). L’achat sur le marché est la principale source d’approvisionnement (ex. : 95% pour le sucre, 81% pour la viande, 79% pour l’huile). Toutefois, certains produits comme les légumes verts sont en partie autoproduits (46%). La majorité des ménages déclarent des quantités insuffisantes pour couvrir leurs besoins : 79% pour les céréales, 72% pour les légumineuses, 64% pour les produits laitiers, 71% pour la viande, et 77% pour l’huile. Cela reflète une forte insécurité alimentaire et une faible diversité nutritionnelle.
+
+
