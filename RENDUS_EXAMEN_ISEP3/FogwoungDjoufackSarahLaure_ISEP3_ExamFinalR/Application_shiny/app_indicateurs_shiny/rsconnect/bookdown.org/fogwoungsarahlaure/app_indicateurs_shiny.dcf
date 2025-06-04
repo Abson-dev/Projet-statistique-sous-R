@@ -1,0 +1,13 @@
+name: app_indicateurs_shiny
+title: app_indicateurs_shiny
+username: fogwoungsarahlaure
+account: fogwoungsarahlaure
+server: bookdown.org
+hostUrl: https://bookdown.org/__api__
+appId: 15362
+bundleId: 106567
+url: https://bookdown.org/fogwoungsarahlaure/app_indicateurs_shiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData

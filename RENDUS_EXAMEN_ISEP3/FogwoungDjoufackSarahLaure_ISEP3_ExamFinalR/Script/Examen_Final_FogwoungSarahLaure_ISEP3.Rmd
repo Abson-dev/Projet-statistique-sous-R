@@ -20,10 +20,10 @@ library(tidyverse)
 flextable(data.frame(Contenu = "REPUBLIQUE DU SENEGAL")) %>%
   delete_part(part = "header") %>% 
   border_remove() %>% 
-  # Application de la police
+
   font(fontname = "Times New Roman", part = "all") %>% 
   fontsize(size = 14, part = "all") %>% 
-  # Mise en forme du texte
+ 
   bold(i = 1, j = 1) %>% 
   align(align = "center") %>% 
   set_table_properties(layout = "autofit", width = 1)
@@ -40,7 +40,6 @@ flextable(data.frame(Contenu = c( "**********",
                                   "Agence nationale de la Statistique et de la démographie"))) %>% 
   delete_part(part = "header") %>% 
   border_remove() %>% 
-  # Application de la police
   font(fontname = "Times New Roman", part = "all") %>% 
   fontsize(size = 14, part = "all") %>% 
   # Mise en forme du texte
@@ -59,7 +58,6 @@ flextable(data.frame(Contenu = c("**********",
                                   "Ecole nationale de la Statistique et de l'Analyse économique Pierre Ndiaye"))) %>%
   delete_part(part = "header") %>% 
   border_remove() %>% 
-  # Application de la police
   font(fontname = "Times New Roman", part = "all") %>% 
   fontsize(size = 14, part = "all") %>% 
   # Mise en forme du texte
@@ -76,10 +74,8 @@ flextable(data.frame(Contenu = c("**********",
 flextable(data.frame(Contenu = "Projet statistique avec R")) %>%
   delete_part(part = "header") %>% 
   border_remove() %>% 
-  # Application de la police
   font(fontname = "Times New Roman", part = "all") %>% 
   fontsize(size = 15, part = "all") %>% 
-  # Mise en forme du texte
   italic(i = 1, j = 1) %>% 
   align(align = "center") %>% 
   set_table_properties(layout = "autofit", width = 1)
@@ -224,11 +220,11 @@ gt_compact_theme <- function(gt_table) {
   gt_table %>%
     opt_table_font(font = "Arial") %>%
     opt_row_striping() %>%
-    opt_table_lines(extent = "none") %>%  # Supprime la plupart des lignes de séparation
+    opt_table_lines(extent = "none") %>%  
     opt_align_table_header(align = "left") %>%
     tab_options(
-      table.font.size = 10,                       # Réduit la taille de la police
-      data_row.padding = px(2),                   # Réduit l'espacement vertical des lignes
+      table.font.size = 10,                       
+      data_row.padding = px(2),                   
       heading.padding = px(2),
       column_labels.padding = px(2),
       table.border.top.width = px(0),
@@ -394,6 +390,8 @@ first_rows_flextable <- base_mad %>%
   flextable::fontsize(size = 9, part = "all") %>%     
   flextable::padding(padding = 2, part = "all") %>%   
   flextable::set_table_properties(width = 1, layout = "autofit") %>%
+  bg(part = "header", bg = "#0073C2") %>%     
+  bold(part = "header") %>%
   flextable::align(align = "center", part = "all")
 
 first_rows_flextable
@@ -414,9 +412,11 @@ first_rows_flextable <- base_principale %>%
   flextable::flextable() %>%
   flextable::set_caption("Premières observations de la base base_mad") %>%
   flextable::autofit() %>%
-  flextable::fontsize(size = 9, part = "all") %>%     # Réduire la taille de la police
-  flextable::padding(padding = 2, part = "all") %>%   # Réduire l'espacement interne
+  flextable::fontsize(size = 9, part = "all") %>% 
+  flextable::padding(padding = 2, part = "all") %>%   
   flextable::set_table_properties(width = 1, layout = "autofit") %>%
+  bg(part = "header", bg = "#0073C2") %>%      
+  bold(part = "header") %>%
   flextable::align(align = "center", part = "all")
 
 first_rows_flextable
@@ -501,6 +501,8 @@ flextable(na_tab2) %>%
   theme_booktabs() %>%
   colformat_int(j = "NAs") %>%
   flextable::align(j = c("NAs", "% Missing"), align = "center", part = "all") %>%
+  bg(part = "header", bg = "#0073C2") %>%  
+  bold(part = "header") %>%
   fontsize(size = 9, part = "all") %>%
   autofit()
 ```
@@ -546,10 +548,12 @@ flextable(na_tab1) %>%
   ) %>%
   theme_booktabs() %>%                        
   colformat_int(j = "NAs") %>%                # entiers
-  flextable::align(align = "center", part = "all") %>%   # centrage
-  fontsize(size = 8, part = "all") %>%        # police plus petite
-  padding(padding = 1, part = "all") %>%      # espacement réduit
-  autofit() %>%                               # ajustement automatique
+  flextable::align(align = "center", part = "all") %>%   
+  fontsize(size = 8, part = "all") %>%       
+  padding(padding = 1, part = "all") %>%   
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
+  autofit() %>%                               
   set_table_properties(
     layout = "autofit",
     width  = 1
@@ -701,6 +705,8 @@ tbl_taille_comp_fr <- base_principale %>%
 taille_composition_ft_fr <- gtsummary::as_flex_table(tbl_taille_comp_fr) %>%
   flextable::autofit() %>%
   flextable::fontsize(size = 10, part = "all") %>%
+  bg(part = "header", bg = "#0073C2") %>%
+  bold(part = "header") %>%
   flextable::padding(padding = 1, part = "all")
 
 # 5. Affichage du tableau
@@ -772,8 +778,10 @@ tbl_chef_fr <- base_principale %>%
 # 3. Conversion en flextable et mise en forme compacte
 chef_menage_ft_fr <- as_flex_table(tbl_chef_fr) %>%
   autofit() %>%
-  fontsize(size = 10, part = "all") %>%      # police plus petite
-  padding(padding = 1, part = "all")        # espacement réduit
+  fontsize(size = 10, part = "all") %>% 
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
+  padding(padding = 1, part = "all")        
 
 # 4. Affichage
 chef_menage_ft_fr
@@ -874,6 +882,8 @@ tbl_desc_sca <- base_principale %>%
 tbl_desc_sca %>%
   as_flex_table() %>%
   autofit() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   fontsize(size = 10, part = "all") %>%
   padding(padding = 1, part = "all")
 
@@ -993,6 +1003,8 @@ base_principale %>%
   ) %>%
   as_flex_table() %>%
   set_caption("Statistiques descriptives du SCA") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit() %>%
   fontsize(size = 10)
 ```
@@ -1057,6 +1069,8 @@ tableau_flextable <- flextable(tableau_poids)
 tableau_flextable <- tableau_flextable %>%
   set_header_labels(`Groupe Alimentaire` = "Groupe Alimentaire", 
                     `Poids Attribué` = "Poids Attribué") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit()
 
 # Afficher le tableau
@@ -1144,6 +1158,8 @@ tableau_comparaison <- bind_rows(
 tableau_comparaison %>%
   flextable() %>%
   set_caption("Comparaison entre SCA et SCA_Categorie_28_42") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit() %>%
   fontsize(size = 10)
 ```
@@ -1190,6 +1206,8 @@ tableau_comparaison <- bind_rows(
 # Afficher les résultats sous forme de flextable
 tableau_comparaison %>%
   flextable() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   set_caption("Comparaison entre SCA et SCA_Categorie_21_35") %>%
   autofit() %>%
   fontsize(size = 10)
@@ -1471,6 +1489,8 @@ tbl_desc_rCSI <- base_principale %>%
 # Conversion en flextable pour une mise en forme compacte
 tbl_desc_rCSI %>%
   as_flex_table() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit() %>%
   fontsize(size = 10, part = "all") %>%
   padding(padding = 1, part = "all")
@@ -1549,6 +1569,8 @@ base_principale %>%
     all_stat_cols() ~ "**Valeurs**"  
   ) %>%
   as_flex_table() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   set_caption("Statistiques descriptives du RsCi") %>%
   autofit() %>%
   fontsize(size = 10)
@@ -1605,6 +1627,8 @@ tableau_flextable <- flextable(tableau_poids)
 tableau_flextable <- tableau_flextable %>%
   set_header_labels(`Strategies_Survie` = "Strategies_Survie", 
                     `Poids Attribué` = "Poids Attribué") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit()
 
 # Afficher le tableau
@@ -1806,6 +1830,8 @@ tbl_desc_hdds <- base_principale %>%
 # Conversion en flextable pour une mise en forme compacte
 tbl_desc_hdds %>%
   as_flex_table() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit() %>%
   fontsize(size = 10, part = "all") %>%
   padding(padding = 1, part = "all")
@@ -2065,7 +2091,9 @@ tbl_desc_lhcsi <- base_principale %>%
 # 3. Conversion en flextable compacte
 tbl_desc_lhcsi %>%
   as_flex_table() %>%
-  theme_vanilla() %>%          # un style épuré
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
+  theme_vanilla() %>%          
   fontsize(size = 10, part = "all") %>%
   padding(padding = 1, part = "all") %>%
   autofit()
@@ -2341,6 +2369,8 @@ tbl_desc_sers <- base_principale %>%
 # 3. Conversion en flextable compacte
 tbl_desc_sers %>%
   as_flex_table() %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   autofit() %>%
   fontsize(size = 10, part = "all") %>%
   padding(padding = 1, part = "all")
@@ -2765,8 +2795,12 @@ table_ddm <- base_mad %>%
   mutate(Pourcentage = round(100 * n / sum(n), 1)) %>%
   rename("Diversité Diététique Minimale" = DDM, "Effectif" = n)
 
-# Création du tableau avec flextable sans erreur
+# Création du tableau avec flextable 
 flextable::flextable(table_ddm) %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   flextable::set_caption("Tableau 1. Distribution de la diversité diététique minimale (DDM)") %>%
   flextable::align(align = "center", part = "all") %>%
   flextable::autofit()
@@ -2861,6 +2895,8 @@ table_mad <- base_mad %>%
 
 flextable(table_mad) %>%
   flextable::set_caption("Proportion d’enfants 6–23 mois avec un MAD acceptable") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   flextable::align(align = "center", part = "all") %>%
   flextable::autofit()
 
@@ -2922,7 +2958,8 @@ table_MAD_sex2 <- bind_rows(table_MAD_sex2, total_ligne)
 # Affichage flextable avec ligne Total
 table_MAD_sex2 %>%
   flextable() %>%
-  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   set_caption("MAD selon le sexe du chef de ménage") %>%
   autofit() %>%
   set_table_properties(layout = "autofit", width = 1)
@@ -2967,7 +3004,8 @@ table_MAD_year2 <- bind_rows(table_MAD_year2, total_ligne)
 # Affichage flextable avec ligne Total
 table_MAD_year2 %>%
   flextable() %>%
-  color(part = "header", color = "black") %>%
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   set_caption(" MAD selon l'année") %>%
   autofit() %>%
   set_table_properties(layout = "autofit", width = 1)
@@ -3048,12 +3086,11 @@ region_summary %>%
     layout = "autofit",
     width = 1
   ) %>%
-  # Police plus petite pour tenir sur la page
   flextable::fontsize(size = 8, part = "all") %>%
   flextable::padding(padding = 1, part = "all") %>%
-  # Thème sobre
+  bg(part = "header", bg = "#0073C2") %>% 
+  bold(part = "header") %>%
   flextable::theme_vanilla() %>%
-  # Pied de table
   flextable::add_footer_lines("Source : Calcul de l’auteur")
 ```
 
@@ -3061,6 +3098,87 @@ $$
 $$
 
 L’analyse des indicateurs par région révèle que: Lac se distingue par les valeurs les plus élevées de SCA (57,8) et de HDDS (7,3), témoignant d’une consommation alimentaire à la fois fréquente et diversifiée, tout en affichant un rCSI modéré (5,5) et un SERS moyen (33,9). À l’opposé, Wadi Fira présente les scores les plus faibles pour la plupart des indicateurs nutritionnels (SCA = 39,0, HDDS = 4,8) mais compense par un SERS élevé (40,2), suggérant une résilience perçue forte malgré une situation alimentaire plus précaire. Ennedi Est affiche le rCSI moyen le plus élevé (14,2), signe d’un recours fréquent à des stratégies d’adaptation en cas de pénurie, associé cependant à un SERS relativement bas (25,3). Les régions de Salamat et Ouaddaï montrent des combinaisons intéressantes : Salamat a un SCA élevé (52,2) et un HDDS correct (6,0) mais un rCSI très bas (4,0), tandis qu’Ouaddaï allie SERS élevé (40,4) et rCSI modéré (5,4), reflétant des dynamiques de résilience différentes. Enfin, Batha, Guéra, Kanem et Sila se situent près de la moyenne nationale pour tous les indicateurs, sans excès ni déficit prononcé, illustrant des situations alimentaires et de résilience intermédiaires.
+
+\newpage
+## Tableau récapitulatif des moyennes suivant le sexe du chef de ménage
+
+```{r summary_indicateurs_par_sexe_CM}
+# 1. Moyennes des indicateurs par sexe du chef de ménage
+sexe_summary <- base_principale %>%
+  group_by(HHHSex) %>%
+  summarise(
+    mean_SCA         = mean(SCA, na.rm = TRUE),
+    mean_rSCI        = mean(rSCI, na.rm = TRUE),
+    mean_HDDS_score  = mean(HDDS_score, na.rm = TRUE),
+    mean_LhCSI_score = mean(LhCSI_score, na.rm = TRUE),
+    mean_SERS_score  = mean(SERS_score, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  rename(`Sexe du chef de ménage` = HHHSex)
+
+# 2. Flextable de présentation
+sexe_summary %>%
+  flextable() %>%
+  set_header_labels(
+    `Sexe du chef de ménage` = "**Sexe**",
+    mean_SCA                 = "**SCA moyen**",
+    mean_rSCI                = "**rCSI moyen**",
+    mean_HDDS_score          = "**HDDS moyen**",
+    mean_LhCSI_score         = "**LhCSI moyen**",
+    mean_SERS_score          = "**SERS moyen**"
+  ) %>%
+  colformat_double(j = 2:6, digits = 1) %>%
+  autofit() %>%
+  set_table_properties(layout = "autofit", width = 1) %>%
+  fontsize(size = 9, part = "all") %>%
+  padding(padding = 2, part = "all") %>%
+  bg(part = "header", bg = "#0073C2") %>%
+  color(part = "header", color = "white") %>%
+  bold(part = "header") %>%
+  theme_vanilla() %>%
+  add_footer_lines("Source : Calcul de l’auteur")
+```
+L’analyse comparative des indicateurs de sécurité alimentaire et de résilience selon le sexe du chef de ménage révèle que: 
+- Les ménages dirigés par des femmes affichent un SCA moyen de 49,2, légèrement inférieur à celui des hommes (50,8), mais avec un rSCI plus élevé (7,4 contre 6,9), indiquant un recours plus fréquent à des stratégies de survie.
+- Les ménages dirigés par des femmes ont un HDDS moyen plus bas (5.7) que ceux dirigés par des hommes (6.1).
+- Les scores moyens de LhCSI et de SERS sont identiques, ce qui pourrait suggérer une exposition équivalente aux situations de stress, crise ou urgence, quel que soit le sexe du chef et une perception similaire de leur capacité à faire face aux chocs. 
+
+$$
+$$
+
+Nous allons maintenant faire un t-test (au seuil de 5%) pour chaque indicateur afin de voir s'il y a une différence significative entre hommes et femmes. 
+
+```{r t_test_sexe_CM}
+indicateurs<- c("SCA", "rSCI", "HDDS_score", "LhCSI_score", "SERS_score")
+
+tests <- map_df(indicateurs, function(var) {
+  t <- t.test(as.formula(paste0(var, " ~ HHHSex")), data = base_principale)
+  tibble(
+    Indicateur = var,
+    p_value = round(t$p.value, 3)
+  )
+})
+
+tests %>% flextable()%>% 
+bg(part = "header", bg = "#0073C2") %>% 
+bold(part = "header") 
+```
+
+$$
+$$
+
+Les t-test confirme que le sexe du chef de ménage influence certains de ces indicateurs.
+Pour le SCA, le rSCI et le HDDS_score, les 3 p-values sont < 0.05, donc il y a une différence significative entre les femmes et les hommes pour ces 3 indicateurs. En revanche , pour le LhCSI_score et le SERS_score, les p-values sont > 0.05, donc il n'y a pas de différence significative entre les femmes et les hommes pour ces deux indicateurs.
+
+$$
+$$
+
+- Puisque pour SCA, on avait Moyenne femme : 46.9, Moyenne homme : 50.8, on peut dire que ménages dirigés par des femmes consomment une alimentation légèrement moins diversifiée et moins fréquente que ceux dirigés par des hommes.
+
+- Pour le rSCI, on avait Moyenne femme : 6.4, Moyenne homme : 6.9, on peut dire que les ménages dirigés par des femmes ont recours à des stratégies de survie plus fréquentes que ceux dirigés par des hommes.
+
+- Pour le HDDS, on avait Moyenne femme : 5.7, Moyenne homme : 6.1, on peut dire que les ménages dirigés par des femmes ont une diversité alimentaire légèrement inférieure à ceux dirigés par des hommes.
+
 
 \newpage
 
@@ -3092,11 +3210,10 @@ $$
 $$
 
 Ces constats appellent plusieurs recommandations :
+
 $$
 $$
 1. **Renforcer l’accès à une diversité alimentaire** — particulièrement pour les fruits et protéines animales dans les régions à HDDS faible. 
 2. **Mettre en place des filets de sécurité ciblés** pour alléger le recours aux stratégies de survie sévères (haut rCSI).  
 3. **Accroître la sensibilisation et l’appui à l’alimentation infantile** (MAD) via des programmes de distribution de denrées complémentaires.  
 4. **Adapter les interventions au contexte régional**, en tenant compte du SERS pour cibler les ménages les plus vulnérables.
-$$
-$$
